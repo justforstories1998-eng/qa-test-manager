@@ -43,15 +43,13 @@ export async function parseCSVFile(filePath) {
 }
 
 /**
- * Get column value with flexible matching
+ * Helper to get column value with case-insensitive matching
  */
 function getColumnValue(row, ...possibleNames) {
   for (const name of possibleNames) {
-    // Exact match first
     if (row[name] !== undefined && row[name] !== null && row[name].toString().trim() !== '') {
       return row[name].toString().trim();
     }
-    // Case-insensitive match
     for (const key of Object.keys(row)) {
       if (key.toLowerCase().trim() === name.toLowerCase().trim()) {
         const val = row[key];
@@ -65,22 +63,7 @@ function getColumnValue(row, ...possibleNames) {
 }
 
 /**
- * Normalize priority value
- */
-function normalizePriority(priority) {
-  if (!priority) return 'Medium';
-  const normalized = priority.toString().toLowerCase().trim();
-  
-  if (normalized === '1' || normalized.includes('critical') || normalized.includes('p1')) return 'Critical';
-  if (normalized === '2' || normalized.includes('high') || normalized.includes('p2')) return 'High';
-  if (normalized === '3' || normalized.includes('medium') || normalized.includes('p3')) return 'Medium';
-  if (normalized === '4' || normalized.includes('low') || normalized.includes('p4')) return 'Low';
-  
-  return 'Medium';
-}
-
-/**
- * Strip HTML tags from string
+ * Clean HTML and whitespace
  */
 function stripHTML(html) {
   if (!html) return '';
@@ -100,23 +83,12 @@ function stripHTML(html) {
 
 /**
  * Parse ADO format CSV
- * 
- * Format:
- * - Title row: Has "Title" but no "Test Step" number
- * - Step rows: Have "Test Step" number but no "Title"
- * 
- * Example:
- * Row 1: Title="Verify Dashboard", Test Step="", Step Action=""
- * Row 2: Title="", Test Step="1", Step Action="Click login", Step Expected="Page loads"
- * Row 3: Title="", Test Step="2", Step Action="Enter credentials", Step Expected="Fields accept input"
+ * Supports the format: ID, Work Item Type, Title, Test Step, Step Action, Step Expected
  */
 export function parseADOFormat(rawData) {
   if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
     throw new Error('Invalid or empty CSV data');
   }
-
-  console.log('📋 CSV Columns detected:', Object.keys(rawData[0]));
-  console.log('📋 Total rows:', rawData.length);
 
   const testCases = [];
   let currentTestCase = null;
@@ -124,204 +96,69 @@ export function parseADOFormat(rawData) {
   for (let i = 0; i < rawData.length; i++) {
     const row = rawData[i];
     
-    // Skip completely empty rows
     const hasAnyValue = Object.values(row).some(val => val && val.toString().trim());
-    if (!hasAnyValue) {
-      continue;
-    }
+    if (!hasAnyValue) continue;
 
-    // Extract values
-    const id = getColumnValue(row, 'ID', 'Id', 'id', 'Test Case ID', 'Work Item ID');
-    const workItemType = getColumnValue(row, 'Work Item Type', 'Type');
-    const title = stripHTML(getColumnValue(row, 'Title', 'Title 1', 'Test Case Title', 'Name'));
-    const testStep = getColumnValue(row, 'Test Step', 'Step', 'Step Number', 'Step #');
-    const stepAction = stripHTML(getColumnValue(row, 'Step Action', 'Action', 'Test Action'));
-    const stepExpected = stripHTML(getColumnValue(row, 'Step Expected', 'Expected', 'Expected Result', 'Expected Results'));
-    const areaPath = getColumnValue(row, 'Area Path', 'Area', 'Path');
-    const assignedTo = getColumnValue(row, 'Assigned To', 'Assigned', 'Owner');
-    const state = getColumnValue(row, 'State', 'Status');
-    const scenarioType = getColumnValue(row, 'Scenario Type', 'Scenario', 'Type');
-    const priority = getColumnValue(row, 'Priority');
-    const description = stripHTML(getColumnValue(row, 'Description'));
+    // Extract raw values
+    const id = getColumnValue(row, 'ID', 'Id', 'Test Case ID');
+    const title = stripHTML(getColumnValue(row, 'Title', 'Name'));
+    const testStep = getColumnValue(row, 'Test Step', 'Step');
+    const stepAction = stripHTML(getColumnValue(row, 'Step Action', 'Action'));
+    const stepExpected = stripHTML(getColumnValue(row, 'Step Expected', 'Expected'));
+    const assignedTo = getColumnValue(row, 'Assigned To');
+    const areaPath = getColumnValue(row, 'Area Path');
+    const scenarioType = getColumnValue(row, 'Scenario Type');
+    const priority = getColumnValue(row, 'Priority') || 'Medium';
 
-    console.log(`Row ${i + 1}: Title="${title}", TestStep="${testStep}", Action="${stepAction.substring(0, 30)}..."`);
-
-    // Determine if this is a title row or a step row
     const hasTitle = title && title.trim().length > 0;
     const hasStepNumber = testStep && testStep.trim().length > 0;
-    const hasStepAction = stepAction && stepAction.trim().length > 0;
-    const hasStepExpected = stepExpected && stepExpected.trim().length > 0;
 
+    // LOGIC: If a row has a Title but no Step Number, it's a NEW Test Case header
     if (hasTitle && !hasStepNumber) {
-      // This is a TITLE ROW - create new test case
-      // Save previous test case if exists
-      if (currentTestCase) {
-        testCases.push(currentTestCase);
-      }
+      if (currentTestCase) testCases.push(currentTestCase);
 
       currentTestCase = {
         adoId: id || null,
         title: title,
-        description: description,
+        description: stripHTML(getColumnValue(row, 'Description')),
         steps: [],
-        expectedResult: '',
-        priority: normalizePriority(priority),
-        status: 'Not Run',
+        priority: priority,
         assignedTo: assignedTo,
-        tags: [],
-        automationStatus: 'Manual',
         areaPath: areaPath,
-        state: state,
         scenarioType: scenarioType,
-        workItemType: workItemType || 'Test Case'
+        state: getColumnValue(row, 'State') || 'Active'
       };
-
-      console.log(`  → New test case: "${title}"`);
-
-    } else if (hasStepNumber || hasStepAction || hasStepExpected) {
-      // This is a STEP ROW - add to current test case
+    } 
+    // LOGIC: If a row has a Step Number (or Action), add it to the current Test Case
+    else if (hasStepNumber || stepAction || stepExpected) {
       if (currentTestCase) {
-        const stepNum = parseInt(testStep, 10) || (currentTestCase.steps.length + 1);
-        
         currentTestCase.steps.push({
-          stepNumber: stepNum,
-          action: stepAction || '',
-          expectedResult: stepExpected || ''
+          stepNumber: parseInt(testStep, 10) || (currentTestCase.steps.length + 1),
+          action: stepAction,
+          expectedResult: stepExpected
         });
-
-        // Update test case metadata from step rows (they often repeat)
-        if (areaPath && !currentTestCase.areaPath) currentTestCase.areaPath = areaPath;
-        if (assignedTo && !currentTestCase.assignedTo) currentTestCase.assignedTo = assignedTo;
-        if (state && !currentTestCase.state) currentTestCase.state = state;
-        if (scenarioType && !currentTestCase.scenarioType) currentTestCase.scenarioType = scenarioType;
-
-        console.log(`  → Added step ${stepNum}: "${stepAction.substring(0, 40)}..."`);
       } else {
-        // Step row without a title row before it - create test case from step
-        console.log(`  ⚠️ Step row without title, creating test case from action`);
-        
+        // Fallback: Create a test case if the CSV starts with a step row
         currentTestCase = {
-          adoId: id || null,
-          title: stepAction || `Test Case ${testCases.length + 1}`,
-          description: '',
-          steps: [{
-            stepNumber: parseInt(testStep, 10) || 1,
-            action: stepAction || '',
-            expectedResult: stepExpected || ''
-          }],
-          expectedResult: '',
-          priority: normalizePriority(priority),
-          status: 'Not Run',
-          assignedTo: assignedTo,
-          tags: [],
-          automationStatus: 'Manual',
-          areaPath: areaPath,
-          state: state,
-          scenarioType: scenarioType,
-          workItemType: workItemType || 'Test Case'
+          title: title || stepAction || 'Untitled Test Case',
+          steps: [{ stepNumber: 1, action: stepAction, expectedResult: stepExpected }],
+          priority: 'Medium'
         };
       }
-    } else if (hasTitle && hasStepNumber) {
-      // Row has both title and step - it's a single-row test case with first step
-      if (currentTestCase) {
-        testCases.push(currentTestCase);
-      }
-
-      currentTestCase = {
-        adoId: id || null,
-        title: title,
-        description: description,
-        steps: [{
-          stepNumber: parseInt(testStep, 10) || 1,
-          action: stepAction || '',
-          expectedResult: stepExpected || ''
-        }],
-        expectedResult: '',
-        priority: normalizePriority(priority),
-        status: 'Not Run',
-        assignedTo: assignedTo,
-        tags: [],
-        automationStatus: 'Manual',
-        areaPath: areaPath,
-        state: state,
-        scenarioType: scenarioType,
-        workItemType: workItemType || 'Test Case'
-      };
-
-      console.log(`  → New test case with step: "${title}"`);
     }
   }
 
-  // Don't forget the last test case
-  if (currentTestCase) {
-    testCases.push(currentTestCase);
-  }
+  // Add the last test case
+  if (currentTestCase) testCases.push(currentTestCase);
 
-  // Sort steps within each test case
-  testCases.forEach(tc => {
-    if (tc.steps && tc.steps.length > 0) {
-      tc.steps.sort((a, b) => a.stepNumber - b.stepNumber);
-    }
+  // Clean up: Sort steps and ensure no 'id' fields exist (MongoDB creates them)
+  return testCases.map(tc => {
+    tc.steps.sort((a, b) => a.stepNumber - b.stepNumber);
+    return tc;
   });
-
-  console.log('');
-  console.log('═══════════════════════════════════════════');
-  console.log(`✅ Parsed ${testCases.length} test cases:`);
-  testCases.forEach((tc, idx) => {
-    console.log(`   ${idx + 1}. "${tc.title}" - ${tc.steps.length} steps`);
-    tc.steps.forEach(step => {
-      console.log(`      Step ${step.stepNumber}: ${step.action.substring(0, 50)}...`);
-    });
-  });
-  console.log('═══════════════════════════════════════════');
-
-  return testCases;
-}
-
-/**
- * Validate CSV format
- */
-export function validateADOFormat(rawData) {
-  const result = {
-    isValid: true,
-    issues: [],
-    warnings: [],
-    detectedColumns: []
-  };
-
-  if (!rawData || rawData.length === 0) {
-    result.isValid = false;
-    result.issues.push('CSV file is empty');
-    return result;
-  }
-
-  result.detectedColumns = Object.keys(rawData[0]);
-  
-  const hasTitle = result.detectedColumns.some(c => 
-    ['title', 'title 1', 'test case title', 'name'].includes(c.toLowerCase().trim())
-  );
-  
-  if (!hasTitle) {
-    result.isValid = false;
-    result.issues.push('No "Title" column found');
-  }
-
-  const hasStepAction = result.detectedColumns.some(c => 
-    c.toLowerCase().trim().includes('step action') || c.toLowerCase().trim() === 'action'
-  );
-  
-  const hasStepExpected = result.detectedColumns.some(c => 
-    c.toLowerCase().trim().includes('step expected') || c.toLowerCase().trim().includes('expected')
-  );
-
-  if (hasStepAction) result.warnings.push('✓ Found "Step Action" column');
-  if (hasStepExpected) result.warnings.push('✓ Found "Step Expected" column');
-
-  return result;
 }
 
 export default {
   parseCSVFile,
-  parseADOFormat,
-  validateADOFormat
+  parseADOFormat
 };
