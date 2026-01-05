@@ -15,6 +15,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'build',
+    outDir: 'build', // This is why we need to set 'build' in Render
+    chunkSizeWarningLimit: 1600, // This silences the warning you saw
   }
 });
