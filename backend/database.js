@@ -11,7 +11,6 @@ mongoose.set('toJSON', {
   versionKey: false,
   transform: (doc, ret) => {
     ret.id = ret._id.toString();
-    // Keep _id as well just in case, but frontend will see 'id' now
   }
 });
 
@@ -106,7 +105,7 @@ const Setting = mongoose.model('Setting', settingsSchema);
 export async function initializeDatabase() {
   try {
     if (!process.env.MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined in .env file');
+      throw new Error('MONGODB_URI is not defined');
     }
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB Atlas');
@@ -124,8 +123,6 @@ export const getAllTestSuites = () => TestSuite.find().sort({ createdAt: -1 });
 export const getTestSuiteById = (id) => TestSuite.findById(id);
 export const createTestSuite = (data) => new TestSuite(data).save();
 export const updateTestSuite = (id, data) => TestSuite.findByIdAndUpdate(id, data, { new: true });
-
-// SAFE DELETE: Checks if ID is valid before querying
 export const deleteTestSuite = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   await TestCase.deleteMany({ suiteId: id });
@@ -137,11 +134,10 @@ export const getTestCasesBySuiteId = (suiteId) => {
   if (!mongoose.Types.ObjectId.isValid(suiteId)) return [];
   return TestCase.find({ suiteId });
 };
-export const getTestCaseById = (id) => TestSuite.findById(id);
+export const getTestCaseById = (id) => TestCase.findById(id);
 export const createTestCase = (data) => new TestCase(data).save();
 export const createTestCases = (dataArray) => TestCase.insertMany(dataArray);
 export const updateTestCase = (id, data) => TestCase.findByIdAndUpdate(id, data, { new: true });
-
 export const deleteTestCase = (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   return TestCase.findByIdAndDelete(id);
@@ -151,7 +147,6 @@ export const getAllTestRuns = () => TestRun.find().sort({ createdAt: -1 });
 export const getTestRunById = (id) => TestRun.findById(id);
 export const createTestRun = (data) => new TestRun(data).save();
 export const updateTestRun = (id, data) => TestRun.findByIdAndUpdate(id, data, { new: true });
-
 export const deleteTestRun = async (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   await ExecutionResult.deleteMany({ runId: id });
@@ -168,7 +163,6 @@ export const updateExecutionResult = (id, data) => ExecutionResult.findByIdAndUp
 export const getAllReports = () => Report.find().sort({ generatedAt: -1 });
 export const getReportById = (id) => Report.findById(id);
 export const createReport = (data) => new Report(data).save();
-
 export const deleteReport = (id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
   return Report.findByIdAndDelete(id);
@@ -180,8 +174,18 @@ export const getSettings = async () => {
   sets.forEach(s => result[s.category] = s.data);
   return result;
 };
+
 export const updateSettings = async (category, data) => {
   return Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true });
+};
+
+// FIX: Added missing updateAllSettings export
+export const updateAllSettings = async (settingsObj) => {
+  const promises = Object.entries(settingsObj).map(([category, data]) => 
+    Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true })
+  );
+  await Promise.all(promises);
+  return getSettings();
 };
 
 export const getStatistics = async () => {
