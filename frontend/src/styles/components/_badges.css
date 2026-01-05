@@ -1,0 +1,379 @@
+/* ============================================
+   BADGES COMPONENT
+   ============================================ */
+
+/* Base Badge */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  transition: all var(--transition);
+}
+
+.status-badge.passed,
+.status-badge.completed,
+.status-badge.success {
+  background: var(--success-100);
+  color: var(--success-700);
+  border: 1px solid var(--success-200);
+}
+
+.status-badge.failed,
+.status-badge.error {
+  background: var(--danger-100);
+  color: var(--danger-700);
+  border: 1px solid var(--danger-200);
+}
+
+.status-badge.blocked,
+.status-badge.warning {
+  background: var(--warning-100);
+  color: var(--warning-700);
+  border: 1px solid var(--warning-200);
+}
+
+.status-badge.not-run,
+.status-badge.pending,
+.status-badge.draft {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+
+.status-badge.in-progress,
+.status-badge.running,
+.status-badge.active {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+}
+
+.status-badge.skipped {
+  background: var(--info-100);
+  color: var(--info-700);
+  border: 1px solid var(--info-200);
+}
+
+/* Priority Badges */
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.priority-badge.priority-critical {
+  background: var(--danger-100);
+  color: var(--danger-700);
+  border: 1px solid var(--danger-300);
+  animation: criticalGlow 2s ease-in-out infinite;
+}
+
+.priority-badge.priority-high {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.priority-badge.priority-medium {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+}
+
+.priority-badge.priority-low {
+  background: var(--success-100);
+  color: var(--success-700);
+  border: 1px solid var(--success-200);
+}
+
+/* Automation Badge */
+.automation-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+
+.automation-badge.automated {
+  background: var(--success-100);
+  color: var(--success-700);
+  border: 1px solid var(--success-200);
+}
+
+.automation-badge.manual {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+
+.automation-badge.planned {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+}
+
+/* Environment Badge */
+.environment-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+
+.environment-badge.production {
+  background: var(--danger-100);
+  color: var(--danger-700);
+  border: 1px solid var(--danger-200);
+}
+
+.environment-badge.staging {
+  background: var(--warning-100);
+  color: var(--warning-700);
+  border: 1px solid var(--warning-200);
+}
+
+.environment-badge.development {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+}
+
+/* Format Badge */
+.format-badge {
+  display: inline-flex;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.format-badge.pdf {
+  background: var(--danger-100);
+  color: var(--danger-700);
+  border: 1px solid var(--danger-200);
+}
+
+.format-badge.word,
+.format-badge.docx {
+  background: var(--primary-100);
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+}
+
+.format-badge.excel,
+.format-badge.xlsx {
+  background: var(--success-100);
+  color: var(--success-700);
+  border: 1px solid var(--success-200);
+}
+
+.format-badge.csv {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border: 1px solid var(--gray-200);
+}
+
+.format-badge.json {
+  background: var(--warning-100);
+  color: var(--warning-700);
+  border: 1px solid var(--warning-200);
+}
+
+/* Count Badge */
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.count-badge.primary {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.count-badge.success {
+  background: var(--success-100);
+  color: var(--success-700);
+}
+
+.count-badge.danger {
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+
+/* AI Badge */
+.ai-badge {
+  display: inline-flex;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Tag Badges */
+.tag-mini {
+  display: inline-flex;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--primary-100);
+  color: var(--primary-700);
+  border: 1px solid var(--primary-200);
+}
+
+.tag-more {
+  font-size: 10px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+/* Scenario Tag */
+.scenario-tag {
+  display: inline-block;
+  padding: 3px 8px;
+  background: var(--info-100);
+  color: var(--info-700);
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--info-200);
+}
+
+/* Suite Count */
+.suite-count {
+  background: var(--primary-100);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  color: var(--primary-700);
+  font-weight: 700;
+  border: 1px solid var(--primary-200);
+}
+
+/* Suite Test Count */
+.suite-test-count {
+  font-size: 11px;
+  background: var(--gray-200);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  color: var(--text-tertiary);
+  font-weight: 700;
+}
+
+/* Steps Badge */
+.steps-badge {
+  display: inline-flex;
+  padding: 5px 12px;
+  background: var(--primary-100);
+  color: var(--primary-700);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--primary-200);
+}
+
+/* ID Badge */
+.id-badge,
+.view-id-badge,
+.test-id-badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  background: var(--gradient-primary);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  font-family: 'SF Mono', 'Consolas', monospace;
+  box-shadow: var(--shadow-primary);
+}
+
+/* Scenario Badge */
+.scenario-badge,
+.scenario-type-badge {
+  display: inline-flex;
+  padding: 5px 12px;
+  background: var(--info-100);
+  color: var(--info-700);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--info-200);
+}
+
+/* New Badge */
+.new-badge {
+  display: inline-flex;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  background: var(--danger-500);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Beta Badge */
+.beta-badge {
+  display: inline-flex;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  background: var(--warning-500);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

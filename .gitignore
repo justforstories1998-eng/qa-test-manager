@@ -1,0 +1,19 @@
+# Node dependencies
+node_modules/
+npm-debug.log
+
+# Environment variables (Sensitive Data)
+.env
+backend/.env
+
+# Local Database files
+backend/data/db.json
+
+# Build and Dist folders
+frontend/dist/
+frontend/build/
+
+# IDE files
+.vscode/
+.idea/
+.DS_Store

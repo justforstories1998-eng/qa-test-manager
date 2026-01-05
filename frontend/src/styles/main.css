@@ -1,0 +1,35 @@
+/* ============================================
+   QA TEST MANAGER - MAIN CSS
+   Master Import File
+   ============================================ */
+
+/* Base Styles */
+@import './base/_variables.css';
+@import './base/_reset.css';
+@import './base/_typography.css';
+@import './base/_animations.css';
+
+/* Layout */
+@import './layout/_sidebar.css';
+@import './layout/_header.css';
+@import './layout/_main.css';
+
+/* Components */
+@import './components/_buttons.css';
+@import './components/_cards.css';
+@import './components/_badges.css';
+@import './components/_forms.css';
+@import './components/_tables.css';
+@import './components/_modals.css';
+@import './components/_loading.css';
+
+/* Pages */
+@import './pages/_dashboard.css';
+@import './pages/_test-cases.css';
+@import './pages/_execution.css';
+@import './pages/_reports.css';
+@import './pages/_settings.css';
+
+/* Utilities */
+@import './utilities/_helpers.css';
+@import './utilities/_responsive.css';

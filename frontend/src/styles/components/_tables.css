@@ -1,0 +1,469 @@
+/* ============================================
+   TABLES COMPONENT
+   ============================================ */
+
+/* Table Container */
+.table-container,
+.runs-table-container,
+.reports-table-container {
+  background: var(--glass-light);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--glass-light-border);
+  box-shadow: var(--glass-light-shadow);
+  overflow: hidden;
+  animation: slideUp 0.4s var(--ease-out);
+}
+
+@supports not (backdrop-filter: blur(16px)) {
+  .table-container,
+  .runs-table-container,
+  .reports-table-container {
+    background: rgba(255, 255, 255, 0.98);
+  }
+}
+
+/* Scrollable Table */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Base Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* Table Header */
+.data-table th {
+  text-align: left;
+  padding: 16px 20px;
+  background: rgba(248, 250, 252, 0.9);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.9);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.data-table th:first-child {
+  padding-left: 24px;
+}
+
+.data-table th:last-child {
+  padding-right: 24px;
+}
+
+/* Sortable Header */
+.data-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition);
+}
+
+.data-table th.sortable:hover {
+  background: rgba(241, 245, 249, 1);
+}
+
+.data-table th.sortable .sort-icon {
+  margin-left: 6px;
+  opacity: 0.4;
+  transition: opacity var(--transition);
+}
+
+.data-table th.sortable:hover .sort-icon,
+.data-table th.sortable.sorted .sort-icon {
+  opacity: 1;
+}
+
+/* Table Body */
+.data-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(241, 245, 249, 0.9);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.data-table td:first-child {
+  padding-left: 24px;
+}
+
+.data-table td:last-child {
+  padding-right: 24px;
+}
+
+.data-table tbody tr {
+  transition: all var(--transition);
+  background: transparent;
+}
+
+.data-table tbody tr:hover {
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Row Animation */
+.data-table tbody tr {
+  animation: tableRowFadeIn 0.3s var(--ease-out) backwards;
+}
+
+.data-table tbody tr:nth-child(1) { animation-delay: 0.02s; }
+.data-table tbody tr:nth-child(2) { animation-delay: 0.04s; }
+.data-table tbody tr:nth-child(3) { animation-delay: 0.06s; }
+.data-table tbody tr:nth-child(4) { animation-delay: 0.08s; }
+.data-table tbody tr:nth-child(5) { animation-delay: 0.1s; }
+.data-table tbody tr:nth-child(6) { animation-delay: 0.12s; }
+.data-table tbody tr:nth-child(7) { animation-delay: 0.14s; }
+.data-table tbody tr:nth-child(8) { animation-delay: 0.16s; }
+.data-table tbody tr:nth-child(9) { animation-delay: 0.18s; }
+.data-table tbody tr:nth-child(10) { animation-delay: 0.2s; }
+
+@keyframes tableRowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Clickable Row */
+.data-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.data-table tbody tr.clickable:hover {
+  background: var(--primary-50);
+}
+
+/* Selected Row */
+.data-table tbody tr.selected {
+  background: var(--primary-50);
+  border-left: 3px solid var(--primary-500);
+}
+
+/* Run Name Cell */
+.data-table .run-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Status Icon */
+.status-icon {
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.data-table tbody tr:hover .status-icon {
+  transform: scale(1.15);
+}
+
+.status-icon.completed { color: var(--success-500); }
+.status-icon.in-progress { color: var(--primary-500); }
+.status-icon.failed { color: var(--danger-500); }
+.status-icon.pending { color: var(--gray-400); }
+.status-icon.blocked { color: var(--warning-500); }
+
+/* Title Cell */
+.title-cell {
+  max-width: 420px;
+}
+
+.title-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title-text {
+  font-weight: 600;
+  color: var(--text-primary);
+  transition: color var(--transition);
+}
+
+.data-table tbody tr:hover .title-text {
+  color: var(--primary-600);
+}
+
+.tags-mini {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ID Cell */
+.id-cell {
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: var(--gray-100);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Date Cell */
+.date-cell {
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* Assignee Cell */
+.assignee-cell {
+  max-width: 160px;
+}
+
+.assignee {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.assignee-cell .assignee {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.unassigned {
+  font-size: 13px;
+  color: var(--text-light);
+  font-style: italic;
+}
+
+/* Actions Cell */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+}
+
+/* Steps Count Cell */
+.steps-count-cell .steps-badge {
+  display: inline-flex;
+  padding: 5px 12px;
+  background: var(--primary-100);
+  color: var(--primary-700);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--primary-200);
+}
+
+/* Area Cell */
+.area-cell .area-path {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  background: var(--gray-100);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+/* Progress Cell */
+.progress-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.progress-bar-mini {
+  width: 100px;
+  height: 8px;
+  background: var(--gray-200);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+  transition: width 0.6s var(--ease-out);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: progressShine 2s ease-in-out infinite;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.pass-rate {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.pass-rate.good { color: var(--success-600); }
+.pass-rate.warning { color: var(--warning-600); }
+.pass-rate.bad { color: var(--danger-600); }
+
+/* Report Name Cell */
+.report-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.format-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition);
+}
+
+.data-table tbody tr:hover .format-icon {
+  transform: scale(1.1) rotate(3deg);
+}
+
+.format-icon.pdf {
+  background: var(--danger-100);
+  color: var(--danger-600);
+}
+
+.format-icon.word {
+  background: var(--primary-100);
+  color: var(--primary-600);
+}
+
+.format-icon.excel {
+  background: var(--success-100);
+  color: var(--success-600);
+}
+
+.report-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.report-run {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Empty Table */
+.table-empty {
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.table-empty svg {
+  color: var(--gray-300);
+  margin-bottom: 16px;
+}
+
+.table-empty h4 {
+  color: var(--text-primary);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.table-empty p {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Table Pagination */
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid var(--gray-200);
+  background: rgba(248, 250, 252, 0.5);
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  background: white;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--gray-50);
+  border-color: var(--primary-300);
+  color: var(--primary-600);
+}
+
+.pagination-btn.active {
+  background: var(--primary-600);
+  border-color: var(--primary-600);
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

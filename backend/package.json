@@ -1,0 +1,31 @@
+{
+  "name": "qa-test-manager-backend",
+  "version": "1.0.0",
+  "description": "Backend API for QA Test Management Application",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "qa",
+    "testing",
+    "test-management",
+    "mongodb",
+    "azure-devops"
+  ],
+  "author": "QA Team",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "docx": "^8.5.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "mongoose": "^8.7.1",
+    "multer": "^1.4.5-lts.1",
+    "pdfkit": "^0.15.0",
+    "uuid": "^10.0.0"
+  }
+}

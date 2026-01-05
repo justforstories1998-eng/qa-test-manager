@@ -1,0 +1,153 @@
+/* ============================================
+   BUTTONS (Strict Center Alignment)
+   ============================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;       /* Centers children vertically */
+  justify-content: center;   /* Centers children horizontally */
+  gap: 8px;                  /* Space between items */
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  text-decoration: none;
+  
+  /* Reset line-height to ensure text doesn't have extra top/bottom space */
+  line-height: 1.5; 
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* TARGET THE ICON */
+.btn svg {
+  width: 18px;               /* Fixed width */
+  height: 18px;              /* Fixed height */
+  flex-shrink: 0;            /* Prevent squishing */
+  
+  /* Reset any previous display/margin hacks */
+  display: inline-block;
+  margin: 0; 
+  padding: 0;
+  
+  /* OPTIONAL: If it STILL looks too high, uncomment the line below to push it down 1px */
+  /* transform: translateY(1px); */
+}
+
+/* Disabled State */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Primary Button */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background: white;
+  border: 1px solid #cbd5e1;
+  color: var(--text-main);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #4f46e5;
+}
+
+/* Danger Button */
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Success Button */
+.btn-success {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #059669;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+  transform: translateY(-1px);
+}
+
+/* AI Button */
+.btn-ai {
+  background: linear-gradient(135deg, #2563eb 0%, #9333ea 50%, #db2777 100%);
+  color: white;
+  background-size: 200% 200%;
+  animation: gradientMove 5s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Sizes */
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  gap: 6px;
+}
+.btn-sm svg { width: 14px; height: 14px; }
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 16px;
+  gap: 10px;
+}
+.btn-lg svg { width: 20px; height: 20px; }
+
+.btn-block {
+  width: 100%;
+  display: flex;
+}
+
+/* Icon-only Button */
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+}
+
+.btn-icon:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
