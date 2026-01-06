@@ -1,12 +1,12 @@
 /* ============================================
-   MAIN LAYOUT - SCROLL FIX
+   MAIN LAYOUT - FIXED FRAME
    ============================================ */
 
 .app {
   display: flex;
-  height: 100vh;       /* Force app to fill screen exactly */
+  height: 100vh;
   width: 100vw;
-  overflow: hidden;    /* PREVENT body scroll. Only inner containers scroll. */
+  overflow: hidden;
 }
 
 .main-content {
@@ -15,9 +15,16 @@
   flex-direction: column;
   margin-left: var(--sidebar-width);
   margin-top: var(--header-height);
-  height: calc(100vh - var(--header-height)); /* Exact remaining height */
-  padding: 24px;
-  overflow: hidden;    /* Stop main content from scrolling itself */
+  
+  /* Calculate exact available height */
+  height: calc(100vh - var(--header-height)); 
+  
+  /* Remove padding from parent to allow children full control */
+  padding: 0; 
+  
+  /* Prevent scroll here */
+  overflow: hidden; 
+  
   background-color: var(--bg-app);
   transition: margin-left 0.3s ease;
 }

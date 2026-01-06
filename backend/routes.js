@@ -2,18 +2,16 @@ import express from 'express';
 import multer from 'multer';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import {
   getAllTestSuites,
-  getTestSuiteById,
   createTestSuite,
-  updateTestSuite,
   deleteTestSuite,
   getAllTestCases,
-  getTestCaseById,
   getTestCasesBySuiteId,
   createTestCase,
-  createTestCases,
+  createTestCases, // <--- THIS WAS MISSING
   updateTestCase,
   deleteTestCase,
   getAllTestRuns,
@@ -25,7 +23,6 @@ import {
   createExecutionResult,
   updateExecutionResult,
   getAllReports,
-  getReportById,
   createReport,
   deleteReport,
   getSettings,
@@ -37,7 +34,14 @@ import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
-const upload = multer({ dest: join(__dirname, 'uploads') });
+
+// Ensure uploads directory exists
+const uploadDir = join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({ dest: uploadDir });
 
 // --- TEST SUITES ---
 router.get('/test-suites', async (req, res, next) => {
@@ -72,15 +76,16 @@ router.delete('/test-cases/:id', async (req, res, next) => {
   try { await deleteTestCase(req.params.id); res.json({ success: true }); } catch (e) { next(e); }
 });
 
-// --- CSV UPLOAD (CRITICAL FIX) ---
+// --- CSV UPLOAD ---
 router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
     
+    // Parse
     const parsedData = await parseCSVFile(req.file.path);
     const testCases = parseADOFormat(parsedData);
     
-    // Create suite with MongoDB ID
+    // Create Suite
     const suite = await createTestSuite({
       name: req.body.suiteName,
       description: req.body.suiteDescription,
@@ -88,16 +93,22 @@ router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
       testCaseCount: testCases.length
     });
     
-    // Explicitly link cases to the suite._id
+    // Map IDs
     const testCasesWithSuite = testCases.map(tc => {
-      const { id, ...rest } = tc; // Ensure no old string IDs are passed
+      const { id, ...rest } = tc; 
       return { ...rest, suiteId: suite._id }; 
     });
     
+    // Save Bulk
     await createTestCases(testCasesWithSuite);
+    
+    // Cleanup file
+    fs.unlink(req.file.path, (err) => { if (err) console.error('Failed to delete temp file:', err); });
+
     res.status(201).json({ success: true, message: `Imported ${testCases.length} test cases` });
-  } catch (error) {
-    next(error);
+  } catch (error) { 
+    console.error("CSV Import Error:", error);
+    next(error); 
   }
 });
 
@@ -110,11 +121,25 @@ router.post('/test-runs', async (req, res, next) => {
   try {
     const run = await createTestRun(req.body);
     if (req.body.testCaseIds) {
-      for (const tcId of req.body.testCaseIds) {
-        await createExecutionResult({ runId: run._id, testCaseId: tcId, status: 'Not Run' });
+      const resultsToCreate = req.body.testCaseIds.map(tcId => ({
+        runId: run._id,
+        testCaseId: tcId,
+        status: 'Not Run'
+      }));
+      // Simple loop to ensure creation
+      for (const result of resultsToCreate) {
+        await createExecutionResult(result);
       }
     }
     res.status(201).json({ success: true, data: run });
+  } catch (e) { next(e); }
+});
+
+router.delete('/test-runs/:id', async (req, res, next) => {
+  try { 
+    const deleted = await deleteTestRun(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, error: 'Run not found' });
+    res.json({ success: true, message: 'Deleted successfully' }); 
   } catch (e) { next(e); }
 });
 
@@ -125,6 +150,7 @@ router.get('/test-runs/:runId/results', async (req, res, next) => {
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
+    // Update stats
     const results = await getExecutionResultsByRunId(updated.runId);
     const stats = {
       passed: results.filter(r => r.status === 'Passed').length,

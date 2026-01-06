@@ -1,13 +1,15 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   FiPlay, FiChevronLeft, FiChevronRight, FiCheckCircle, FiXCircle, 
-  FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiCheckSquare, FiSquare, FiFilter
+  FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiCheckSquare, FiSquare, 
+  FiFolder, FiHash, FiUser, FiTarget, FiTrash2
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
 
 function Execution({
-  testSuites, testCases, testRuns, onCreateTestRun, onUpdateExecutionResult
+  testSuites, testCases, testRuns, onCreateTestRun, 
+  onUpdateTestRun, onDeleteTestRun, onUpdateExecutionResult
 }) {
   const [activeRunId, setActiveRunId] = useState(null);
   const [executionResults, setExecutionResults] = useState([]);
@@ -15,14 +17,24 @@ function Execution({
   const [viewMode, setViewMode] = useState('list');
   const [isSaving, setIsSaving] = useState(false);
   const [showNewRunModal, setShowNewRunModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   
   // New Run Form State
   const [newRunData, setNewRunData] = useState({ name: '', environment: 'QA', tester: '', description: '' });
-  const [selectedCaseIds, setSelectedCaseIds] = useState([]);
-  const [caseSearch, setCaseSearch] = useState('');
+  const [selectedSuiteId, setSelectedSuiteId] = useState(null);
 
   const activeRun = useMemo(() => testRuns.find(r => (r._id === activeRunId || r.id === activeRunId)), [activeRunId, testRuns]);
   const currentTest = useMemo(() => executionResults[currentTestIndex], [executionResults, currentTestIndex]);
+
+  // Calculate Case Counts per Suite for the UI
+  const suiteCounts = useMemo(() => {
+    const counts = {};
+    testCases.forEach(tc => {
+      const sId = String(tc.suiteId);
+      counts[sId] = (counts[sId] || 0) + 1;
+    });
+    return counts;
+  }, [testCases]);
 
   useEffect(() => { if (activeRunId) loadResults(activeRunId); }, [activeRunId]);
 
@@ -53,27 +65,21 @@ function Execution({
 
   const handleCreateRunSubmit = async () => {
     if (!newRunData.name) return toast.error("Run Name is required");
-    if (selectedCaseIds.length === 0) return toast.error("Select at least one test case");
+    if (!selectedSuiteId) return toast.error("Please select a Test Suite");
+
+    // Filter all cases belonging to this suite
+    const casesToRun = testCases.filter(tc => String(tc.suiteId) === String(selectedSuiteId));
+    const caseIds = casesToRun.map(tc => tc._id || tc.id);
+
+    if (caseIds.length === 0) return toast.error("Selected suite has no test cases!");
+
     try {
-      await onCreateTestRun({ ...newRunData, testCaseIds: selectedCaseIds, totalTests: selectedCaseIds.length });
+      await onCreateTestRun({ ...newRunData, testCaseIds: caseIds, totalTests: caseIds.length });
       setShowNewRunModal(false);
       setNewRunData({ name: '', environment: 'QA', tester: '', description: '' });
-      setSelectedCaseIds([]);
-      toast.success("Test Run Created!");
+      setSelectedSuiteId(null);
+      toast.success(`Run created with ${caseIds.length} tests!`);
     } catch (e) { toast.error("Failed to create run"); }
-  };
-
-  const toggleSelection = (id) => {
-    setSelectedCaseIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-  };
-
-  const toggleAll = () => {
-    const visibleIds = testCases.filter(tc => tc.title.toLowerCase().includes(caseSearch.toLowerCase())).map(tc => tc._id || tc.id);
-    if (visibleIds.every(id => selectedCaseIds.includes(id))) {
-      setSelectedCaseIds(prev => prev.filter(id => !visibleIds.includes(id)));
-    } else {
-      setSelectedCaseIds(prev => [...new Set([...prev, ...visibleIds])]);
-    }
   };
 
   // Execution View
@@ -153,6 +159,13 @@ function Execution({
               <div className="run-icon"><FiPlay /></div>
               <div className="run-meta"><h3>{run.name}</h3><span>{run.environment}</span></div>
               <span className="status-pill">{run.status}</span>
+              <button 
+                className="btn-icon-sm danger" 
+                onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
+                title="Delete Run"
+              >
+                <FiTrash2 />
+              </button>
             </div>
             <div className="card-stats">
               <div className="mini-stat"><span>Pass</span><strong>{run.passed}</strong></div>
@@ -162,6 +175,7 @@ function Execution({
             <button className="btn btn-secondary btn-block" onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}>Continue</button>
           </div>
         ))}
+        {testRuns.length === 0 && <div className="empty-state">No test runs found.</div>}
       </div>
 
       {showNewRunModal && (
@@ -170,20 +184,22 @@ function Execution({
             <div className="modal-header"><h3>New Test Run</h3><button onClick={() => setShowNewRunModal(false)}><FiX /></button></div>
             <div className="modal-body-split">
               <div className="modal-sidebar">
-                <div className="form-group"><label>Name</label><input type="text" value={newRunData.name} onChange={e => setNewRunData({...newRunData, name: e.target.value})} /></div>
+                <div className="form-group"><label>Name</label><input type="text" value={newRunData.name} onChange={e => setNewRunData({...newRunData, name: e.target.value})} placeholder="Run Name" /></div>
                 <div className="form-group"><label>Env</label><select value={newRunData.environment} onChange={e => setNewRunData({...newRunData, environment: e.target.value})}><option>QA</option><option>Staging</option></select></div>
-                <div className="form-group"><label>Tester</label><input type="text" value={newRunData.tester} onChange={e => setNewRunData({...newRunData, tester: e.target.value})} /></div>
+                <div className="form-group"><label>Tester</label><input type="text" value={newRunData.tester} onChange={e => setNewRunData({...newRunData, tester: e.target.value})} placeholder="Name" /></div>
               </div>
               <div className="modal-content-area">
-                <div className="selection-header">
-                  <input type="text" className="search-input" placeholder="Search..." value={caseSearch} onChange={e => setCaseSearch(e.target.value)} />
-                  <button className="btn-text" onClick={toggleAll}>Select All Visible</button>
-                </div>
+                <div className="selection-header"><strong>Select Test Suite</strong></div>
                 <div className="case-selection-list">
-                  {testCases.filter(tc => tc.title.toLowerCase().includes(caseSearch.toLowerCase())).map(tc => (
-                    <div key={tc._id || tc.id} className={`select-item ${selectedCaseIds.includes(tc._id || tc.id) ? 'selected' : ''}`} onClick={() => toggleSelection(tc._id || tc.id)}>
-                      {selectedCaseIds.includes(tc._id || tc.id) ? <FiCheckSquare className="icon-checked" /> : <FiSquare className="icon-unchecked" />}
-                      <span className="case-title">{tc.title}</span>
+                  {testSuites.map(suite => (
+                    <div 
+                      key={suite._id || suite.id} 
+                      className={`select-item ${String(selectedSuiteId) === String(suite._id || suite.id) ? 'selected' : ''}`} 
+                      onClick={() => setSelectedSuiteId(suite._id || suite.id)}
+                    >
+                      {String(selectedSuiteId) === String(suite._id || suite.id) ? <FiCheckCircle className="icon-checked" /> : <FiFolder className="icon-unchecked" />}
+                      <span className="case-title">{suite.name}</span>
+                      <span className="badge">{suiteCounts[String(suite._id || suite.id)] || 0} cases</span>
                     </div>
                   ))}
                 </div>
@@ -191,7 +207,24 @@ function Execution({
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowNewRunModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleCreateRunSubmit}>Create Run ({selectedCaseIds.length})</button>
+              <button className="btn btn-primary" onClick={handleCreateRunSubmit}>Create Run</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteConfirm && (
+        <div className="modal-overlay">
+          <div className="modal modal-small">
+            <div className="modal-header"><h3>Delete Run?</h3><button onClick={() => setShowDeleteConfirm(null)}><FiX /></button></div>
+            <div className="modal-body"><p>Delete <strong>{showDeleteConfirm.name}</strong>?</p></div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={async () => {
+                await onDeleteTestRun(showDeleteConfirm._id || showDeleteConfirm.id);
+                setShowDeleteConfirm(null);
+                toast.success("Deleted");
+              }}>Delete</button>
             </div>
           </div>
         </div>
