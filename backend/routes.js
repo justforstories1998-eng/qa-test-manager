@@ -3,7 +3,6 @@ import multer from 'multer';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
-// Database operations
 import {
   getAllTestSuites,
   getTestSuiteById,
@@ -31,23 +30,14 @@ import {
   deleteReport,
   getSettings,
   updateSettings,
-  updateAllSettings,
   getStatistics
 } from './database.js';
 
-// Services
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
-import { generatePDFReport, generateWordReport } from './services/reportService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
-
-// MULTER CONFIG
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => { cb(null, join(__dirname, 'uploads')); },
-  filename: (req, file, cb) => { cb(null, `${Date.now()}-${file.originalname}`); }
-});
-const upload = multer({ storage });
+const upload = multer({ dest: join(__dirname, 'uploads') });
 
 // --- TEST SUITES ---
 router.get('/test-suites', async (req, res, next) => {
@@ -82,7 +72,7 @@ router.delete('/test-cases/:id', async (req, res, next) => {
   try { await deleteTestCase(req.params.id); res.json({ success: true }); } catch (e) { next(e); }
 });
 
-// --- CSV UPLOAD (THE FIX) ---
+// --- CSV UPLOAD (CRITICAL FIX) ---
 router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
@@ -90,7 +80,7 @@ router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
     const parsedData = await parseCSVFile(req.file.path);
     const testCases = parseADOFormat(parsedData);
     
-    // 1. Create the suite
+    // Create suite with MongoDB ID
     const suite = await createTestSuite({
       name: req.body.suiteName,
       description: req.body.suiteDescription,
@@ -98,18 +88,17 @@ router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
       testCaseCount: testCases.length
     });
     
-    // 2. Map test cases to the NEW MongoDB Suite ID
+    // Explicitly link cases to the suite._id
     const testCasesWithSuite = testCases.map(tc => {
-      const { id, ...rest } = tc; // REMOVE the string ID if it exists
-      return {
-        ...rest,
-        suiteId: suite._id, // Use the MongoDB generated ID
-      };
+      const { id, ...rest } = tc; // Ensure no old string IDs are passed
+      return { ...rest, suiteId: suite._id }; 
     });
     
     await createTestCases(testCasesWithSuite);
-    res.status(201).json({ success: true, message: `Imported ${testCases.length} cases` });
-  } catch (e) { next(e); }
+    res.status(201).json({ success: true, message: `Imported ${testCases.length} test cases` });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // --- TEST RUNS ---
@@ -136,7 +125,6 @@ router.get('/test-runs/:runId/results', async (req, res, next) => {
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
-    // Update parent run stats
     const results = await getExecutionResultsByRunId(updated.runId);
     const stats = {
       passed: results.filter(r => r.status === 'Passed').length,
@@ -158,8 +146,6 @@ router.post('/reports/generate', async (req, res, next) => {
   try {
     const { runId, format } = req.body;
     const testRun = await getTestRunById(runId);
-    const results = await getExecutionResultsByRunId(runId);
-    // Add logic for file generation here if needed
     const report = await createReport({
       name: `${testRun.name} Report`,
       runId: testRun._id,

@@ -1,5 +1,5 @@
 /* ============================================
-   MODALS (Fixed Scroll & Form Layout)
+   MODALS (Fixed Scroll & Layout)
    ============================================ */
 
 .modal-overlay {
@@ -24,30 +24,22 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   width: 100%;
   max-width: 500px;
-  max-height: 85vh; /* Keep some buffer from screen edges */
+  /* CRITICAL FIX: Limit height and use flex column */
+  max-height: 90vh; 
   display: flex;
   flex-direction: column;
   position: relative;
   border: 1px solid #e2e8f0;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
-}
-
-/* IMPORTANT FIX: Handle Form Wrapper */
-.modal > form {
-  display: flex;
-  flex-direction: column;
-  flex: 1;           /* Take all remaining height */
-  min-height: 0;     /* Required for nested flex scrolling */
-  overflow: hidden;  /* Contain children */
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Modal Sizes */
 .modal.modal-large { max-width: 800px; }
-.modal.modal-xlarge { max-width: 950px; }
+.modal.modal-xlarge { max-width: 950px; } /* Edit Modal uses this */
 .modal.modal-small { max-width: 400px; }
 
-/* Modal Header */
+/* Modal Header - Fixed at Top */
 .modal-header {
   padding: 16px 24px;
   border-bottom: 1px solid #f1f5f9;
@@ -55,7 +47,8 @@
   align-items: center;
   justify-content: space-between;
   background: #ffffff;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Prevents header shrinking */
+  z-index: 10;
 }
 
 .modal-header h3 {
@@ -65,7 +58,6 @@
   color: #1e293b;
 }
 
-/* Close Button */
 .close-btn {
   background: #f1f5f9;
   border: none;
@@ -85,11 +77,22 @@
   color: #ef4444;
 }
 
-/* Modal Body - Scrollable */
+/* IMPORTANT FIX: Handle Form Wrapper */
+/* If the modal content is wrapped in a form tag, ensure it flexes */
+.modal > form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;           /* Take all remaining height */
+  min-height: 0;     /* Required for nested flex scrolling */
+  overflow: hidden;  /* Contain children */
+}
+
+/* Modal Body - Scrollable Area */
 .modal-body {
   padding: 24px;
-  overflow-y: auto; /* Scroll happens HERE */
-  flex: 1;
+  overflow-y: auto; /* Enable vertical scroll */
+  flex: 1;          /* Grow to fill space between header and footer */
+  width: 100%;
 }
 
 /* Modal Footer - Fixed at Bottom */
@@ -100,7 +103,36 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  flex-shrink: 0; /* Prevents squishing */
+  flex-shrink: 0; /* Prevents footer shrinking */
+  z-index: 10;
+}
+
+/* Split Layout (for Execution Modal) */
+.modal-body-split {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Prevent body scroll, inner panes will scroll */
+  height: 100%;
+}
+
+.modal-sidebar {
+  width: 250px;
+  background: #f8fafc;
+  padding: 20px;
+  border-right: 1px solid #e2e8f0;
+  overflow-y: auto;
+}
+
+.modal-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.case-selection-list {
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* Animations */

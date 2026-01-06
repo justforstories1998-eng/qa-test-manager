@@ -1,26 +1,27 @@
 /* ============================================
-   MAIN CONTENT LAYOUT
+   MAIN LAYOUT - SCROLL FIX
    ============================================ */
 
 .app {
   display: flex;
-  min-height: 100vh;
-  position: relative;
-}
-
-.app.sidebar-collapsed .sidebar {
-  width: var(--sidebar-collapsed-width);
-}
-
-.app.sidebar-collapsed .main-content {
-  margin-left: var(--sidebar-collapsed-width);
+  height: 100vh;       /* Force app to fill screen exactly */
+  width: 100vw;
+  overflow: hidden;    /* PREVENT body scroll. Only inner containers scroll. */
 }
 
 .main-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   margin-left: var(--sidebar-width);
   margin-top: var(--header-height);
-  padding: 28px;
-  min-height: calc(100vh - var(--header-height));
-  transition: margin-left var(--transition-slow);
+  height: calc(100vh - var(--header-height)); /* Exact remaining height */
+  padding: 24px;
+  overflow: hidden;    /* Stop main content from scrolling itself */
+  background-color: var(--bg-app);
+  transition: margin-left 0.3s ease;
+}
+
+.app.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-collapsed-width);
 }
