@@ -19,14 +19,12 @@ function Execution({
   const [showNewRunModal, setShowNewRunModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   
-  // New Run Form State
   const [newRunData, setNewRunData] = useState({ name: '', environment: 'QA', tester: '', description: '' });
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
 
   const activeRun = useMemo(() => testRuns.find(r => (r._id === activeRunId || r.id === activeRunId)), [activeRunId, testRuns]);
   const currentTest = useMemo(() => executionResults[currentTestIndex], [executionResults, currentTestIndex]);
 
-  // Calculate Case Counts per Suite for the UI
   const suiteCounts = useMemo(() => {
     const counts = {};
     testCases.forEach(tc => {
@@ -55,10 +53,19 @@ function Execution({
     if (!currentTest) return;
     setIsSaving(true);
     try {
-      await onUpdateExecutionResult(currentTest._id || currentTest.id, { status, executedBy: 'QA Tester' });
+      const resultId = currentTest._id || currentTest.id;
+      // Update DB and Trigger parent refresh
+      await onUpdateExecutionResult(resultId, { status, executedBy: 'QA Tester' });
+      
+      // Update Local State for UI
       setExecutionResults(prev => prev.map((r, i) => i === currentTestIndex ? { ...r, status } : r));
-      if (currentTestIndex < executionResults.length - 1) setCurrentTestIndex(p => p + 1);
-      toast.success(`Marked as ${status}`);
+      
+      // Auto-advance
+      if (currentTestIndex < executionResults.length - 1) {
+        setCurrentTestIndex(p => p + 1);
+      } else {
+        toast.success("Run Completed!");
+      }
     } catch (e) { toast.error("Failed to update status"); }
     finally { setIsSaving(false); }
   };
@@ -67,7 +74,6 @@ function Execution({
     if (!newRunData.name) return toast.error("Run Name is required");
     if (!selectedSuiteId) return toast.error("Please select a Test Suite");
 
-    // Filter all cases belonging to this suite
     const casesToRun = testCases.filter(tc => String(tc.suiteId) === String(selectedSuiteId));
     const caseIds = casesToRun.map(tc => tc._id || tc.id);
 
@@ -82,7 +88,7 @@ function Execution({
     } catch (e) { toast.error("Failed to create run"); }
   };
 
-  // Execution View
+  // EXECUTION VIEW
   if (viewMode === 'execution' && activeRun) {
     const tc = currentTest?.testCase;
     return (
@@ -144,7 +150,7 @@ function Execution({
     );
   }
 
-  // Dashboard View
+  // DASHBOARD VIEW
   return (
     <div className="execution-page">
       <div className="page-header responsive">
@@ -158,14 +164,8 @@ function Execution({
             <div className="card-top">
               <div className="run-icon"><FiPlay /></div>
               <div className="run-meta"><h3>{run.name}</h3><span>{run.environment}</span></div>
-              <span className="status-pill">{run.status}</span>
-              <button 
-                className="btn-icon-sm danger" 
-                onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
-                title="Delete Run"
-              >
-                <FiTrash2 />
-              </button>
+              <span className={`status-pill ${run.status === 'Completed' ? 'passed' : 'in-progress'}`}>{run.status}</span>
+              <button className="btn-icon-sm danger" onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}><FiTrash2 /></button>
             </div>
             <div className="card-stats">
               <div className="mini-stat"><span>Pass</span><strong>{run.passed}</strong></div>
@@ -184,19 +184,24 @@ function Execution({
             <div className="modal-header"><h3>New Test Run</h3><button onClick={() => setShowNewRunModal(false)}><FiX /></button></div>
             <div className="modal-body-split">
               <div className="modal-sidebar">
-                <div className="form-group"><label>Name</label><input type="text" value={newRunData.name} onChange={e => setNewRunData({...newRunData, name: e.target.value})} placeholder="Run Name" /></div>
-                <div className="form-group"><label>Env</label><select value={newRunData.environment} onChange={e => setNewRunData({...newRunData, environment: e.target.value})}><option>QA</option><option>Staging</option></select></div>
-                <div className="form-group"><label>Tester</label><input type="text" value={newRunData.tester} onChange={e => setNewRunData({...newRunData, tester: e.target.value})} placeholder="Name" /></div>
+                <div className="form-group">
+                  <label>Run Name</label>
+                  <input type="text" value={newRunData.name} onChange={e => setNewRunData({...newRunData, name: e.target.value})} placeholder="Run Name" />
+                </div>
+                <div className="form-group">
+                  <label>Environment</label>
+                  <select value={newRunData.environment} onChange={e => setNewRunData({...newRunData, environment: e.target.value})}><option>QA</option><option>Staging</option></select>
+                </div>
+                <div className="form-group">
+                  <label>Tester</label>
+                  <input type="text" value={newRunData.tester} onChange={e => setNewRunData({...newRunData, tester: e.target.value})} placeholder="Name" />
+                </div>
               </div>
               <div className="modal-content-area">
                 <div className="selection-header"><strong>Select Test Suite</strong></div>
                 <div className="case-selection-list">
                   {testSuites.map(suite => (
-                    <div 
-                      key={suite._id || suite.id} 
-                      className={`select-item ${String(selectedSuiteId) === String(suite._id || suite.id) ? 'selected' : ''}`} 
-                      onClick={() => setSelectedSuiteId(suite._id || suite.id)}
-                    >
+                    <div key={suite._id || suite.id} className={`select-item ${String(selectedSuiteId) === String(suite._id || suite.id) ? 'selected' : ''}`} onClick={() => setSelectedSuiteId(suite._id || suite.id)}>
                       {String(selectedSuiteId) === String(suite._id || suite.id) ? <FiCheckCircle className="icon-checked" /> : <FiFolder className="icon-unchecked" />}
                       <span className="case-title">{suite.name}</span>
                       <span className="badge">{suiteCounts[String(suite._id || suite.id)] || 0} cases</span>
