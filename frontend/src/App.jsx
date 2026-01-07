@@ -24,48 +24,48 @@ function App() {
   const [settings, setSettings] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Initial Load
   useEffect(() => {
     api.getProjects().then(res => {
       if (res.success && res.data.length > 0) {
         setProjects(res.data);
         setActiveProjectId(res.data[0].id || res.data[0]._id);
       }
-    });
-    api.getSettings().then(res => res.success && setSettings(res.data));
+    }).catch(console.error);
+    api.getSettings().then(res => res.success && setSettings(res.data)).catch(console.error);
   }, []);
 
-  // Fetch Data on Project Change
   const refreshData = useCallback(async () => {
     if (!activeProjectId) return;
-    const [suites, cases, runs, stats] = await Promise.all([
-      api.getTestSuites(activeProjectId),
-      api.getTestCases(activeProjectId),
-      api.getTestRuns(activeProjectId),
-      api.getStatistics(activeProjectId)
-    ]);
-    if (suites.success) setTestSuites(suites.data);
-    if (cases.success) setTestCases(cases.data);
-    if (runs.success) setTestRuns(runs.data);
-    if (stats.success) setStatistics(stats.data);
+    try {
+      const [suites, cases, runs, stats] = await Promise.all([
+        api.getTestSuites(activeProjectId),
+        api.getTestCases(activeProjectId),
+        api.getTestRuns(activeProjectId),
+        api.getStatistics(activeProjectId)
+      ]);
+      if (suites.success) setTestSuites(suites.data);
+      if (cases.success) setTestCases(cases.data);
+      if (runs.success) setTestRuns(runs.data);
+      if (stats.success) setStatistics(stats.data);
+    } catch (e) { console.error("Data refresh failed", e); }
   }, [activeProjectId]);
 
   useEffect(() => { refreshData(); }, [refreshData]);
 
-  // Project Handler
   const handleCreateProject = async (e) => {
     e.preventDefault();
-    const res = await api.createProject({ name: newProjectName });
-    if (res.success) {
-      setProjects([...projects, res.data]);
-      setActiveProjectId(res.data.id || res.data._id);
-      setShowProjectModal(false);
-      setNewProjectName('');
-      toast.success("Project Created!");
-    }
+    try {
+      const res = await api.createProject({ name: newProjectName });
+      if (res.success) {
+        setProjects([...projects, res.data]);
+        setActiveProjectId(res.data.id || res.data._id);
+        setShowProjectModal(false);
+        setNewProjectName('');
+        toast.success("Project Created!");
+      }
+    } catch { toast.error("Failed to create project"); }
   };
 
-  // Wrapped Handlers
   const handleUploadCSV = (file, name) => api.uploadCSV(file, name, activeProjectId).then(refreshData);
   const handleCreateSuite = (data) => api.createTestSuite({...data, projectId: activeProjectId}).then(refreshData);
   const handleCreateCase = (data) => api.createTestCase({...data, projectId: activeProjectId}).then(refreshData);

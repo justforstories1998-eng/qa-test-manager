@@ -60,7 +60,7 @@ const testRunSchema = new mongoose.Schema({
   passed: { type: Number, default: 0 },
   failed: { type: Number, default: 0 },
   blocked: { type: Number, default: 0 },
-  na: { type: Number, default: 0 }, // ADDED N/A FIELD
+  na: { type: Number, default: 0 },
   notRun: { type: Number, default: 0 }
 }, { timestamps: true });
 
@@ -121,6 +121,7 @@ export async function initializeDatabase() {
 
 // Projects
 export const getAllProjects = () => Project.find().sort({ name: 1 });
+export const getProjectById = (id) => Project.findById(id);
 export const createProject = (data) => new Project(data).save();
 
 // Suites
@@ -199,7 +200,7 @@ export const getStatistics = async (projectId) => {
     passed += r.passed || 0;
     failed += r.failed || 0;
     blocked += r.blocked || 0;
-    na += r.na || 0; // COUNT N/A
+    na += r.na || 0;
   });
   const totalExecutions = passed + failed + blocked + na;
 
@@ -208,7 +209,7 @@ export const getStatistics = async (projectId) => {
     totalTestRuns,
     totalExecutions,
     statusCounts: { passed, failed, blocked, na, notRun: Math.max(0, totalTestCases - totalExecutions) },
-    passRate: (passed + failed + blocked) > 0 ? ((passed / (passed + failed + blocked)) * 100).toFixed(1) : 0,
+    passRate: totalExecutions > 0 ? ((passed / totalExecutions) * 100).toFixed(1) : 0,
     priorityCounts: { critical: 0, high: 0, medium: 0, low: 0 } 
   };
 };

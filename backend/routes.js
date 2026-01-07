@@ -4,7 +4,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import {
-  getAllProjects, createProject,
+  getAllProjects, getProjectById, createProject,
   getAllTestSuites, createTestSuite, deleteTestSuite,
   getAllTestCases, getTestCasesBySuiteId, createTestCase, createTestCases, updateTestCase, deleteTestCase,
   getAllTestRuns, getTestRunById, createTestRun, updateTestRun, deleteTestRun,
@@ -13,6 +13,8 @@ import {
   getSettings, updateSettings, updateAllSettings, getStatistics
 } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
+import { generatePDFReport, generateWordReport } from './services/reportService.js';
+import { analyzeTestResults } from './services/grokService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
@@ -66,7 +68,7 @@ router.post('/test-runs', async (req, res, next) => {
 router.delete('/test-runs/:id', async (req, res, next) => { try { await deleteTestRun(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 router.get('/test-runs/:runId/results', async (req, res, next) => { try { res.json({ success: true, data: await getExecutionResultsByRunId(req.params.runId) }); } catch (e) { next(e); } });
 
-// EXECUTION RESULT UPDATE (WITH N/A & AUTO-COMPLETE)
+// EXECUTION RESULT UPDATE
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
@@ -76,7 +78,7 @@ router.put('/execution-results/:id', async (req, res, next) => {
       passed: results.filter(r => r.status === 'Passed').length,
       failed: results.filter(r => r.status === 'Failed').length,
       blocked: results.filter(r => r.status === 'Blocked').length,
-      na: results.filter(r => r.status === 'N/A').length, // Count N/A
+      na: results.filter(r => r.status === 'N/A').length,
       notRun: results.filter(r => r.status === 'Not Run').length
     };
 
@@ -97,26 +99,69 @@ router.get('/reports', async (req, res, next) => { try { res.json({ success: tru
 router.post('/reports/generate', async (req, res, next) => {
   try {
     const { runId, format, projectId } = req.body;
-    const testRun = await getTestRunById(runId);
+    const settings = await getSettings();
+    let reportData = {};
+    let reportName = "";
+
+    if (runId === 'ALL_PROJECT_RUNS') {
+      const project = await getProjectById(projectId);
+      const runs = await getAllTestRuns(projectId);
+      let allResults = [];
+      for (const r of runs) {
+        const results = await getExecutionResultsByRunId(r._id);
+        allResults = [...allResults, ...results.map(res => ({ ...res._doc, runName: r.name }))];
+      }
+      reportName = `${project.name} Project Report`;
+      reportData = { type: 'project', project, runs, results: allResults };
+    } else {
+      const testRun = await getTestRunById(runId);
+      const results = await getExecutionResultsByRunId(runId);
+      reportName = `${testRun.name} Report`;
+      reportData = { type: 'run', testRun, results };
+    }
+
+    console.log("🤖 Asking AI...");
+    const aiAnalysis = await analyzeTestResults(reportData, settings);
+    reportData.aiAnalysis = aiAnalysis;
+
+    let fileResult;
+    if (format === 'pdf') fileResult = await generatePDFReport(reportData);
+    else fileResult = await generateWordReport(reportData);
+
     const report = await createReport({
-      projectId, name: `${testRun.name} Report`, runId: testRun._id, format, generatedAt: new Date()
+      projectId, name: reportName, runId: runId === 'ALL_PROJECT_RUNS' ? null : runId,
+      format, filePath: fileResult.filePath, fileName: fileResult.fileName, generatedAt: new Date()
     });
     res.json({ success: true, data: report });
   } catch (e) { next(e); }
 });
+
 router.get('/reports/:id/download', async (req, res, next) => {
   try {
     const report = await getReportById(req.params.id);
-    if (!report) return res.status(404).json({ error: 'Not found' });
-    res.download(report.filePath);
+    if (!report) return res.status(404).json({ error: 'Report not found' });
+    if (fs.existsSync(report.filePath)) {
+      res.download(report.filePath, report.fileName);
+    } else {
+      console.log("File missing, regenerating...");
+      // Simple regen for single runs
+      if (report.runId) {
+        const testRun = await getTestRunById(report.runId);
+        const results = await getExecutionResultsByRunId(report.runId);
+        const fileResult = await generatePDFReport({ type: 'run', testRun, results, aiAnalysis: { isSimulation: true } });
+        res.download(fileResult.filePath, report.fileName);
+      } else {
+        res.status(404).json({ error: 'File expired.' });
+      }
+    }
   } catch (e) { next(e); }
 });
 router.delete('/reports/:id', async (req, res, next) => { try { await deleteReport(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
-// STATS & SETTINGS
+// SETTINGS & STATS
 router.get('/statistics', async (req, res, next) => { try { res.json({ success: true, data: await getStatistics(req.query.projectId) }); } catch (e) { next(e); } });
 router.get('/settings', async (req, res, next) => { try { res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
-router.put('/settings/:category', async (req, res, next) => { try { res.json({ success: true, data: await updateSettings(req.params.category, req.body) }); } catch (e) { next(e); } });
-router.put('/settings', async (req, res, next) => { try { res.json({ success: true, data: await updateAllSettings(req.body) }); } catch (e) { next(e); } });
+router.put('/settings/:category', async (req, res, next) => { try { await updateSettings(req.params.category, req.body); const all = await getSettings(); res.json({ success: true, data: all }); } catch (e) { next(e); } });
+router.put('/settings', async (req, res, next) => { try { await updateAllSettings(req.body); const all = await getSettings(); res.json({ success: true, data: all }); } catch (e) { next(e); } });
 
 export default router;
