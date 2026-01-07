@@ -66,7 +66,7 @@ router.post('/test-runs', async (req, res, next) => {
 router.delete('/test-runs/:id', async (req, res, next) => { try { await deleteTestRun(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 router.get('/test-runs/:runId/results', async (req, res, next) => { try { res.json({ success: true, data: await getExecutionResultsByRunId(req.params.runId) }); } catch (e) { next(e); } });
 
-// EXECUTION RESULT UPDATE (AUTO-COMPLETE LOGIC)
+// EXECUTION RESULT UPDATE (WITH N/A & AUTO-COMPLETE)
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
@@ -76,10 +76,10 @@ router.put('/execution-results/:id', async (req, res, next) => {
       passed: results.filter(r => r.status === 'Passed').length,
       failed: results.filter(r => r.status === 'Failed').length,
       blocked: results.filter(r => r.status === 'Blocked').length,
+      na: results.filter(r => r.status === 'N/A').length, // Count N/A
       notRun: results.filter(r => r.status === 'Not Run').length
     };
 
-    // Auto-Complete Check
     if (stats.notRun === 0) {
       stats.status = 'Completed';
       stats.completedAt = new Date();

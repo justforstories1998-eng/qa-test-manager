@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   FiPlay, FiChevronLeft, FiChevronRight, FiCheckCircle, FiXCircle, 
   FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiCheckSquare, FiSquare, 
-  FiFolder, FiHash, FiUser, FiTarget, FiTrash2, FiMinusCircle // Added FiMinusCircle
+  FiFolder, FiHash, FiUser, FiTarget, FiTrash2, FiMinusCircle
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
@@ -18,8 +18,6 @@ function Execution({
   const [isSaving, setIsSaving] = useState(false);
   const [showNewRunModal, setShowNewRunModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-  
-  // New Run Form State
   const [newRunData, setNewRunData] = useState({ name: '', environment: 'QA', tester: '', description: '' });
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
 
@@ -28,10 +26,7 @@ function Execution({
 
   const suiteCounts = useMemo(() => {
     const counts = {};
-    testCases.forEach(tc => {
-      const sId = String(tc.suiteId);
-      counts[sId] = (counts[sId] || 0) + 1;
-    });
+    testCases.forEach(tc => { const sId = String(tc.suiteId); counts[sId] = (counts[sId] || 0) + 1; });
     return counts;
   }, [testCases]);
 
@@ -56,8 +51,11 @@ function Execution({
     try {
       await onUpdateExecutionResult(currentTest._id || currentTest.id, { status, executedBy: 'QA Tester' });
       setExecutionResults(prev => prev.map((r, i) => i === currentTestIndex ? { ...r, status } : r));
-      if (currentTestIndex < executionResults.length - 1) setCurrentTestIndex(p => p + 1);
-      toast.success(`Marked as ${status}`);
+      if (currentTestIndex < executionResults.length - 1) {
+        setCurrentTestIndex(p => p + 1);
+      } else {
+        toast.success("Run Completed!");
+      }
     } catch (e) { toast.error("Failed to update status"); }
     finally { setIsSaving(false); }
   };
@@ -65,12 +63,9 @@ function Execution({
   const handleCreateRunSubmit = async () => {
     if (!newRunData.name) return toast.error("Run Name is required");
     if (!selectedSuiteId) return toast.error("Please select a Test Suite");
-
     const casesToRun = testCases.filter(tc => String(tc.suiteId) === String(selectedSuiteId));
     const caseIds = casesToRun.map(tc => tc._id || tc.id);
-
     if (caseIds.length === 0) return toast.error("Selected suite has no test cases!");
-
     try {
       await onCreateTestRun({ ...newRunData, testCaseIds: caseIds, totalTests: caseIds.length });
       setShowNewRunModal(false);
@@ -80,7 +75,6 @@ function Execution({
     } catch (e) { toast.error("Failed to create run"); }
   };
 
-  // Execution View
   if (viewMode === 'execution' && activeRun) {
     const tc = currentTest?.testCase;
     return (
@@ -92,7 +86,6 @@ function Execution({
           </div>
           <div className="progress-badge">{currentTestIndex + 1} / {executionResults.length}</div>
         </div>
-
         <div className="execution-content-responsive">
           <div className="test-list-wrapper">
             <div className="list-header">Queue</div>
@@ -105,7 +98,6 @@ function Execution({
               ))}
             </div>
           </div>
-
           <main className="test-execution-panel">
             {tc ? (
               <>
@@ -132,10 +124,7 @@ function Execution({
                   <button className="btn-control pass" onClick={() => handleQuickStatus('Passed')}><FiCheckCircle /> Pass</button>
                   <button className="btn-control fail" onClick={() => handleQuickStatus('Failed')}><FiXCircle /> Fail</button>
                   <button className="btn-control block" onClick={() => handleQuickStatus('Blocked')}><FiAlertCircle /> Block</button>
-                  {/* NEW BUTTON */}
                   <button className="btn-control na" onClick={() => handleQuickStatus('N/A')}><FiMinusCircle /> N/A</button>
-                  
-                  <div className="divider"></div>
                   <button className="btn-control next" onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))}><FiChevronRight /></button>
                 </div>
               </>
@@ -146,14 +135,12 @@ function Execution({
     );
   }
 
-  // Dashboard View
   return (
     <div className="execution-page">
       <div className="page-header responsive">
         <h2 className="section-title">Test Execution</h2>
         <button className="btn btn-primary" onClick={() => setShowNewRunModal(true)}><FiPlus /> New Run</button>
       </div>
-
       <div className="test-runs-grid">
         {testRuns.map(run => (
           <div key={run._id || run.id} className="test-run-card modern">
@@ -164,9 +151,10 @@ function Execution({
               <button className="btn-icon-sm danger" onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}><FiTrash2 /></button>
             </div>
             <div className="card-stats">
-              <div className="mini-stat"><span>Pass</span><strong>{run.passed}</strong></div>
-              <div className="mini-stat"><span>Fail</span><strong>{run.failed}</strong></div>
-              <div className="mini-stat"><span>Total</span><strong>{run.totalTests}</strong></div>
+              <div className="mini-stat"><span>Pass</span><strong style={{color:'#16a34a'}}>{run.passed}</strong></div>
+              <div className="mini-stat"><span>Fail</span><strong style={{color:'#dc2626'}}>{run.failed}</strong></div>
+              <div className="mini-stat"><span>Block</span><strong style={{color:'#d97706'}}>{run.blocked}</strong></div>
+              <div className="mini-stat"><span>N/A</span><strong style={{color:'#64748b'}}>{run.na || 0}</strong></div>
             </div>
             <button className="btn btn-secondary btn-block" onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}>Continue</button>
           </div>
@@ -174,6 +162,7 @@ function Execution({
         {testRuns.length === 0 && <div className="empty-state">No test runs found.</div>}
       </div>
 
+      {/* New Run Modal */}
       {showNewRunModal && (
         <div className="modal-overlay">
           <div className="modal modal-xlarge">
@@ -205,6 +194,7 @@ function Execution({
         </div>
       )}
 
+      {/* Delete Modal */}
       {showDeleteConfirm && (
         <div className="modal-overlay">
           <div className="modal modal-small">
