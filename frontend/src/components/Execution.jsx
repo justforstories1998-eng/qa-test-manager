@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import {
   FiPlay, FiChevronLeft, FiChevronRight, FiCheckCircle, FiXCircle, 
   FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiCheckSquare, FiSquare, 
-  FiFolder, FiHash, FiUser, FiTarget, FiTrash2
+  FiFolder, FiHash, FiUser, FiTarget, FiTrash2, FiMinusCircle // Added FiMinusCircle
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
@@ -19,6 +19,7 @@ function Execution({
   const [showNewRunModal, setShowNewRunModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   
+  // New Run Form State
   const [newRunData, setNewRunData] = useState({ name: '', environment: 'QA', tester: '', description: '' });
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
 
@@ -53,19 +54,10 @@ function Execution({
     if (!currentTest) return;
     setIsSaving(true);
     try {
-      const resultId = currentTest._id || currentTest.id;
-      // Update DB and Trigger parent refresh
-      await onUpdateExecutionResult(resultId, { status, executedBy: 'QA Tester' });
-      
-      // Update Local State for UI
+      await onUpdateExecutionResult(currentTest._id || currentTest.id, { status, executedBy: 'QA Tester' });
       setExecutionResults(prev => prev.map((r, i) => i === currentTestIndex ? { ...r, status } : r));
-      
-      // Auto-advance
-      if (currentTestIndex < executionResults.length - 1) {
-        setCurrentTestIndex(p => p + 1);
-      } else {
-        toast.success("Run Completed!");
-      }
+      if (currentTestIndex < executionResults.length - 1) setCurrentTestIndex(p => p + 1);
+      toast.success(`Marked as ${status}`);
     } catch (e) { toast.error("Failed to update status"); }
     finally { setIsSaving(false); }
   };
@@ -88,7 +80,7 @@ function Execution({
     } catch (e) { toast.error("Failed to create run"); }
   };
 
-  // EXECUTION VIEW
+  // Execution View
   if (viewMode === 'execution' && activeRun) {
     const tc = currentTest?.testCase;
     return (
@@ -106,7 +98,7 @@ function Execution({
             <div className="list-header">Queue</div>
             <div className="test-list-scroll">
               {executionResults.map((res, idx) => (
-                <div key={idx} className={`test-list-item ${idx === currentTestIndex ? 'active' : ''} status-${res.status.toLowerCase().replace(' ', '')}`} onClick={() => setCurrentTestIndex(idx)}>
+                <div key={idx} className={`test-list-item ${idx === currentTestIndex ? 'active' : ''} status-${res.status.toLowerCase().replace(' ', '').replace('/', '')}`} onClick={() => setCurrentTestIndex(idx)}>
                   <span className="status-dot"></span>
                   <span className="test-title">{res.testCase?.title}</span>
                 </div>
@@ -140,6 +132,10 @@ function Execution({
                   <button className="btn-control pass" onClick={() => handleQuickStatus('Passed')}><FiCheckCircle /> Pass</button>
                   <button className="btn-control fail" onClick={() => handleQuickStatus('Failed')}><FiXCircle /> Fail</button>
                   <button className="btn-control block" onClick={() => handleQuickStatus('Blocked')}><FiAlertCircle /> Block</button>
+                  {/* NEW BUTTON */}
+                  <button className="btn-control na" onClick={() => handleQuickStatus('N/A')}><FiMinusCircle /> N/A</button>
+                  
+                  <div className="divider"></div>
                   <button className="btn-control next" onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))}><FiChevronRight /></button>
                 </div>
               </>
@@ -150,7 +146,7 @@ function Execution({
     );
   }
 
-  // DASHBOARD VIEW
+  // Dashboard View
   return (
     <div className="execution-page">
       <div className="page-header responsive">
@@ -184,18 +180,9 @@ function Execution({
             <div className="modal-header"><h3>New Test Run</h3><button onClick={() => setShowNewRunModal(false)}><FiX /></button></div>
             <div className="modal-body-split">
               <div className="modal-sidebar">
-                <div className="form-group">
-                  <label>Run Name</label>
-                  <input type="text" value={newRunData.name} onChange={e => setNewRunData({...newRunData, name: e.target.value})} placeholder="Run Name" />
-                </div>
-                <div className="form-group">
-                  <label>Environment</label>
-                  <select value={newRunData.environment} onChange={e => setNewRunData({...newRunData, environment: e.target.value})}><option>QA</option><option>Staging</option></select>
-                </div>
-                <div className="form-group">
-                  <label>Tester</label>
-                  <input type="text" value={newRunData.tester} onChange={e => setNewRunData({...newRunData, tester: e.target.value})} placeholder="Name" />
-                </div>
+                <div className="form-group"><label>Name</label><input type="text" value={newRunData.name} onChange={e => setNewRunData({...newRunData, name: e.target.value})} placeholder="Run Name" /></div>
+                <div className="form-group"><label>Env</label><select value={newRunData.environment} onChange={e => setNewRunData({...newRunData, environment: e.target.value})}><option>QA</option><option>Staging</option></select></div>
+                <div className="form-group"><label>Tester</label><input type="text" value={newRunData.tester} onChange={e => setNewRunData({...newRunData, tester: e.target.value})} placeholder="Name" /></div>
               </div>
               <div className="modal-content-area">
                 <div className="selection-header"><strong>Select Test Suite</strong></div>

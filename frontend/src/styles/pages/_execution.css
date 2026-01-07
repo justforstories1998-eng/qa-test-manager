@@ -43,8 +43,12 @@
 }
 .test-list-item.active { background: white; border-left: 3px solid #6366f1; font-weight: 600; }
 .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #cbd5e1; }
+
+/* Status Colors */
 .test-list-item.status-passed .status-dot { background: #10b981; }
 .test-list-item.status-failed .status-dot { background: #ef4444; }
+.test-list-item.status-blocked .status-dot { background: #f59e0b; }
+.test-list-item.status-na .status-dot { background: #94a3b8; } /* N/A Color */
 
 /* Main Panel */
 .test-execution-panel {
@@ -80,9 +84,13 @@
 .btn-control.pass { background: #dcfce7; color: #166534; }
 .btn-control.fail { background: #fee2e2; color: #991b1b; }
 .btn-control.block { background: #fef3c7; color: #92400e; }
+.btn-control.na { background: #f1f5f9; color: #64748b; }
+.btn-control.na:hover { background: #e2e8f0; }
 .btn-control.next { width: 48px; flex: none; background: #f1f5f9; }
 
-/* Run Cards & Delete Button */
+.divider { width: 1px; height: 24px; background: #e2e8f0; margin: 0 8px; }
+
+/* Run Cards */
 .test-runs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
 .test-run-card.modern { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; transition: transform 0.2s; position: relative; }
 .test-run-card.modern:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
