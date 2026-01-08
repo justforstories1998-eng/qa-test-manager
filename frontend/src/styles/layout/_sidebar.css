@@ -1,5 +1,5 @@
 /* ============================================
-   SIDEBAR - BLACK TEXT TITLE THEME
+   SIDEBAR - PROFESSIONAL THEME (BLACK TITLE)
    ============================================ */
 .sidebar {
   width: var(--sidebar-width);
@@ -29,43 +29,46 @@
   align-items: center;
   gap: 14px;
   padding: 0 20px;
-  background-color: #ffffff !important; /* White Background for Header */
+  background-color: #ffffff !important; /* Header background remains White */
   border-bottom: 1px solid #e2e8f0;
   overflow: hidden;
   flex-shrink: 0;
 }
 
-/* The box for the icon */
+/* THE LOGO BOX (Restored to Original Indigo Style) */
 .logo-container {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
   border-radius: 10px;
-  background: var(--primary-color); /* Indigo/Purple Icon box */
+  background: var(--primary-color) !important; /* RESTORED: Indigo Background */
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
 }
 
 .custom-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  background: white; /* Ensure white background if a custom image is used */
 }
 
+/* THE "QA" ICON TEXT */
 .default-logo-icon {
-  color: #ffffff;
+  color: #ffffff !important; /* RESTORED: White text inside Indigo box */
   font-weight: 800;
   font-size: 18px;
 }
 
-/* THE "QA MANAGER" TITLE */
+/* THE "QA MANAGER" TITLE TEXT */
 .logo-text {
   font-weight: 800;
   font-size: 18px;
-  color: #000000 !important; /* FIXED: BLACK TEXT */
+  color: #000000 !important; /* MAINTAINED: Black Text */
   white-space: nowrap;
   letter-spacing: -0.5px;
   transition: opacity 0.2s;
@@ -82,14 +85,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background-color: #0f172a; /* Dark Blue for nav area */
+  background-color: #0f172a; /* Body area remains dark */
 }
 
 .nav-link {
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  color: #94a3b8; /* Muted slate color */
+  color: #94a3b8; 
   text-decoration: none;
   border-radius: 12px;
   transition: all 0.2s ease;
@@ -102,7 +105,7 @@
 }
 
 .nav-link.active {
-  background-color: var(--primary-color); /* Indigo active state */
+  background-color: var(--primary-color);
   color: #ffffff;
   box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
 }
@@ -152,5 +155,4 @@
 
 .sidebar-toggle:hover {
   background: var(--primary-color);
-  transform: scale(1.1);
 }
