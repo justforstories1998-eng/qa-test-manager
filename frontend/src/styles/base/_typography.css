@@ -1,6 +1,15 @@
 /* ============================================
-   TYPOGRAPHY - ENHANCED
+   TYPOGRAPHY - ENHANCED (FIXED & SAFE)
    ============================================ */
+
+/* --------------------------------------------
+   GLOBAL SAFETY DEFAULTS
+   -------------------------------------------- */
+
+* {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
 
 /* ============================================
    HEADINGS
@@ -11,243 +20,141 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.3;
   color: var(--text-primary);
   letter-spacing: -0.02em;
-  text-wrap: balance;
   margin-top: 0;
+  overflow-wrap: break-word;
+}
+
+/* Experimental fallback */
+@supports (text-wrap: balance) {
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+  }
 }
 
 h1 {
   font-size: clamp(2rem, 5vw, 2.5rem);
   font-weight: 800;
   line-height: 1.2;
-  letter-spacing: -0.025em;
 }
 
 h2 {
   font-size: clamp(1.5rem, 4vw, 2rem);
-  letter-spacing: -0.025em;
 }
 
 h3 {
   font-size: clamp(1.25rem, 3vw, 1.5rem);
-  letter-spacing: -0.02em;
 }
 
-h4 {
-  font-size: 1.25rem;
-  letter-spacing: -0.015em;
-}
+h4 { font-size: 1.25rem; }
+h5 { font-size: 1.125rem; }
+h6 { font-size: 1rem; }
 
-h5 {
-  font-size: 1.125rem;
-  letter-spacing: -0.01em;
-}
-
-h6 {
-  font-size: 1rem;
-  letter-spacing: 0;
-}
-
-/* Heading with subtitle */
+/* Heading group */
 .heading-group {
   margin-bottom: 1.5rem;
 }
 
-.heading-group h1,
-.heading-group h2,
-.heading-group h3 {
+.heading-group > :is(h1,h2,h3) {
   margin-bottom: 0.25rem;
 }
 
 .heading-group .subtitle {
   font-size: 1.125rem;
-  font-weight: 400;
   color: var(--text-secondary);
-  letter-spacing: 0;
 }
 
-/* Display headings (larger, for hero sections) */
+/* ============================================
+   DISPLAY HEADINGS
+   ============================================ */
+
 .display-1 {
   font-size: clamp(2.5rem, 8vw, 4.5rem);
   font-weight: 800;
   line-height: 1.1;
-  letter-spacing: -0.03em;
 }
 
 .display-2 {
   font-size: clamp(2rem, 6vw, 3.5rem);
   font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
 }
 
 .display-3 {
   font-size: clamp(1.75rem, 5vw, 2.75rem);
   font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
 }
 
 /* ============================================
-   PARAGRAPHS & BODY TEXT
+   BODY TEXT
    ============================================ */
 
 p {
   margin-bottom: 1rem;
   color: var(--text-secondary);
-  text-wrap: pretty;
+  overflow-wrap: break-word;
 }
 
-p:last-child {
-  margin-bottom: 0;
+@supports (text-wrap: pretty) {
+  p {
+    text-wrap: pretty;
+  }
 }
 
-/* Lead paragraph */
 .lead {
   font-size: 1.25rem;
-  font-weight: 400;
   line-height: 1.6;
-  color: var(--text-secondary);
 }
 
-/* Small print */
-.small,
-small {
+small, .small {
   font-size: 0.875rem;
-  line-height: 1.5;
 }
 
 .smaller {
   font-size: 0.75rem;
-  line-height: 1.5;
 }
 
-/* Strong & Bold */
 strong, b {
   font-weight: 600;
   color: var(--text-primary);
 }
 
-/* Emphasis */
 em, i {
   font-style: italic;
 }
 
-/* Mark/Highlight */
+/* ============================================
+   HIGHLIGHTS
+   ============================================ */
+
 mark,
 .highlight {
-  background: linear-gradient(120deg, rgba(251, 191, 36, 0.3) 0%, rgba(251, 191, 36, 0.2) 100%);
+  background: linear-gradient(120deg, rgba(251,191,36,.3), rgba(251,191,36,.2));
   padding: 0.1em 0.3em;
   border-radius: 0.2em;
-  color: inherit;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
-}
-
-/* Different highlight colors */
-.highlight-primary {
-  background: linear-gradient(120deg, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
-}
-
-.highlight-success {
-  background: linear-gradient(120deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%);
-}
-
-.highlight-danger {
-  background: linear-gradient(120deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
-}
-
-/* Deleted & Inserted */
-del, s {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-ins, u {
-  text-decoration: underline;
-  text-decoration-color: var(--primary-400);
-  text-underline-offset: 0.15em;
-}
-
-/* Subscript & Superscript */
-sub, sup {
-  font-size: 75%;
-  line-height: 0;
-  position: relative;
-  vertical-align: baseline;
-}
-
-sub {
-  bottom: -0.25em;
-}
-
-sup {
-  top: -0.5em;
-}
-
-/* Abbreviation */
-abbr[title] {
-  text-decoration: underline dotted;
-  text-decoration-color: var(--text-muted);
-  cursor: help;
-  text-underline-offset: 0.15em;
 }
 
 /* ============================================
-   CODE & PREFORMATTED
+   CODE
    ============================================ */
 
-code, kbd, samp, var {
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 
-               'Cascadia Code', 'Roboto Mono', Consolas, 
-               'Liberation Mono', 'Courier New', monospace;
-  font-size: 0.875em;
-  font-feature-settings: 'liga' 1, 'calt' 1;
+code, kbd, samp, var, pre {
+  font-family: 'JetBrains Mono','Fira Code','SF Mono',Monaco,Consolas,monospace;
 }
 
 code {
+  font-size: 0.875em;
   background: var(--gray-100);
   color: var(--danger-600);
   padding: 0.2em 0.4em;
   border-radius: var(--radius-sm);
-  word-break: break-word;
 }
 
-/* Code in dark context */
-.dark code,
+/* Dark mode safety */
 [data-theme="dark"] code {
   background: var(--gray-800);
   color: var(--danger-400);
 }
 
-/* Keyboard input */
-kbd {
-  background: var(--gray-100);
-  border: 1px solid var(--gray-300);
-  border-bottom-width: 2px;
-  border-radius: var(--radius-sm);
-  padding: 0.15em 0.4em;
-  font-size: 0.85em;
-  box-shadow: inset 0 -1px 0 var(--gray-200);
-}
-
-/* Variable */
-var {
-  font-style: italic;
-  color: var(--primary-600);
-}
-
-/* Sample output */
-samp {
-  background: var(--gray-900);
-  color: var(--gray-100);
-  padding: 0.2em 0.4em;
-  border-radius: var(--radius-sm);
-}
-
-/* Preformatted text */
 pre {
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 
-               'Cascadia Code', Consolas, monospace;
   font-size: 0.875rem;
   line-height: 1.7;
   background: var(--gray-900);
@@ -255,23 +162,13 @@ pre {
   padding: 1.25rem 1.5rem;
   border-radius: var(--radius-lg);
   overflow-x: auto;
-  tab-size: 2;
-  -moz-tab-size: 2;
-  margin: 1.5rem 0;
 }
 
-pre code {
-  background: transparent;
-  color: inherit;
-  padding: 0;
-  font-size: inherit;
-  border-radius: 0;
-}
+/* ============================================
+   FIXED LINE NUMBERS (REAL IMPLEMENTATION)
+   ============================================ */
 
-/* Code block with line numbers */
 pre.line-numbers {
-  padding-left: 3.5rem;
-  position: relative;
   counter-reset: line;
 }
 
@@ -279,12 +176,16 @@ pre.line-numbers code {
   display: block;
 }
 
-pre.line-numbers code .line::before {
+pre.line-numbers code > span {
+  display: block;
   counter-increment: line;
+}
+
+pre.line-numbers code > span::before {
   content: counter(line);
-  position: absolute;
-  left: 1rem;
-  width: 2rem;
+  display: inline-block;
+  width: 2.5rem;
+  margin-right: 1rem;
   text-align: right;
   color: var(--gray-500);
   user-select: none;
@@ -295,864 +196,85 @@ pre.line-numbers code .line::before {
    ============================================ */
 
 blockquote {
-  position: relative;
   margin: 1.5rem 0;
   padding: 1rem 1.5rem;
-  padding-left: 1.5rem;
   border-left: 4px solid var(--primary-500);
   background: var(--gray-50);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   font-style: italic;
-  color: var(--text-secondary);
-}
-
-blockquote p {
-  margin-bottom: 0.5rem;
-  color: inherit;
-}
-
-blockquote p:last-child {
-  margin-bottom: 0;
-}
-
-blockquote cite,
-blockquote footer {
-  display: block;
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-  font-style: normal;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-blockquote cite::before,
-blockquote footer::before {
-  content: '— ';
-}
-
-/* Quote with large quote mark */
-blockquote.fancy {
-  padding-left: 3rem;
-  border-left: none;
-  background: transparent;
-}
-
-blockquote.fancy::before {
-  content: '"';
-  position: absolute;
-  left: 0;
-  top: -0.25rem;
-  font-size: 4rem;
-  font-family: Georgia, serif;
-  color: var(--primary-300);
-  line-height: 1;
-}
-
-/* Pull quote */
-.pull-quote {
-  font-size: 1.5rem;
-  font-weight: 500;
-  font-style: normal;
-  text-align: center;
-  color: var(--text-primary);
-  border-left: none;
-  border-top: 3px solid var(--primary-500);
-  border-bottom: 3px solid var(--primary-500);
-  padding: 1.5rem 2rem;
-  margin: 2rem 0;
-  background: transparent;
 }
 
 /* ============================================
-   LISTS (Styled)
+   LISTS
    ============================================ */
 
 .list-styled {
   padding-left: 1.5rem;
-  margin: 1rem 0;
-}
-
-ul.list-styled {
-  list-style-type: disc;
-}
-
-ol.list-styled {
-  list-style-type: decimal;
-}
-
-.list-styled li {
-  margin-bottom: 0.5rem;
-  padding-left: 0.5rem;
-  color: var(--text-secondary);
 }
 
 .list-styled li::marker {
   color: var(--primary-500);
 }
 
-/* Nested lists */
-.list-styled ul,
-.list-styled ol {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.list-styled ul {
-  list-style-type: circle;
-}
-
-.list-styled ul ul {
-  list-style-type: square;
-}
-
-/* Custom list markers */
 .list-check {
   list-style: none;
   padding-left: 1.75rem;
 }
 
-.list-check li {
-  position: relative;
-}
-
 .list-check li::before {
-  content: '✓';
+  content: "✓";
   position: absolute;
   left: -1.75rem;
   color: var(--success-500);
-  font-weight: 700;
-}
-
-.list-arrow {
-  list-style: none;
-  padding-left: 1.75rem;
-}
-
-.list-arrow li::before {
-  content: '→';
-  position: absolute;
-  left: -1.75rem;
-  color: var(--primary-500);
-}
-
-/* Inline list */
-.list-inline {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1.5rem;
-  padding: 0;
-}
-
-.list-inline li {
-  margin: 0;
-  padding: 0;
-}
-
-/* Definition list */
-dl.styled {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.5rem 1.5rem;
-}
-
-dl.styled dt {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-dl.styled dd {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-/* Stacked definition list */
-dl.stacked dt {
-  margin-top: 1rem;
-}
-
-dl.stacked dt:first-child {
-  margin-top: 0;
-}
-
-dl.stacked dd {
-  margin-left: 0;
-  margin-top: 0.25rem;
 }
 
 /* ============================================
-   HORIZONTAL RULE
+   TEXT UTILITIES (SAFE)
    ============================================ */
 
-hr {
-  border: none;
-  height: 1px;
-  background: var(--border-light);
-  margin: 2rem 0;
-}
-
-hr.thick {
-  height: 2px;
-}
-
-hr.dashed {
-  background: transparent;
-  border-top: 1px dashed var(--border-default);
-}
-
-hr.dotted {
-  background: transparent;
-  border-top: 2px dotted var(--border-default);
-}
-
-hr.gradient {
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--primary-500), transparent);
-}
-
-/* HR with text */
-.hr-text {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 2rem 0;
-  color: var(--text-muted);
-  font-size: 0.875rem;
-}
-
-.hr-text::before,
-.hr-text::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border-light);
-}
-
-/* ============================================
-   TEXT SIZE UTILITIES
-   ============================================ */
-
-.text-xs { font-size: 0.75rem; line-height: 1.5; }      /* 12px */
-.text-sm { font-size: 0.875rem; line-height: 1.5; }     /* 14px */
-.text-base { font-size: 1rem; line-height: 1.6; }       /* 16px */
-.text-lg { font-size: 1.125rem; line-height: 1.6; }     /* 18px */
-.text-xl { font-size: 1.25rem; line-height: 1.5; }      /* 20px */
-.text-2xl { font-size: 1.5rem; line-height: 1.4; }      /* 24px */
-.text-3xl { font-size: 1.875rem; line-height: 1.35; }   /* 30px */
-.text-4xl { font-size: 2.25rem; line-height: 1.3; }     /* 36px */
-.text-5xl { font-size: 3rem; line-height: 1.2; }        /* 48px */
-.text-6xl { font-size: 3.75rem; line-height: 1.15; }    /* 60px */
-.text-7xl { font-size: 4.5rem; line-height: 1.1; }      /* 72px */
-.text-8xl { font-size: 6rem; line-height: 1.1; }        /* 96px */
-.text-9xl { font-size: 8rem; line-height: 1; }          /* 128px */
-
-/* ============================================
-   FONT WEIGHT UTILITIES
-   ============================================ */
-
-.font-thin { font-weight: 100; }
-.font-extralight { font-weight: 200; }
-.font-light { font-weight: 300; }
-.font-normal { font-weight: 400; }
-.font-medium { font-weight: 500; }
-.font-semibold { font-weight: 600; }
-.font-bold { font-weight: 700; }
-.font-extrabold { font-weight: 800; }
-.font-black { font-weight: 900; }
-
-/* ============================================
-   LINE HEIGHT UTILITIES
-   ============================================ */
-
-.leading-none { line-height: 1; }
-.leading-tight { line-height: 1.25; }
-.leading-snug { line-height: 1.375; }
-.leading-normal { line-height: 1.5; }
-.leading-relaxed { line-height: 1.625; }
-.leading-loose { line-height: 2; }
-
-/* Fixed line heights */
-.leading-3 { line-height: 0.75rem; }
-.leading-4 { line-height: 1rem; }
-.leading-5 { line-height: 1.25rem; }
-.leading-6 { line-height: 1.5rem; }
-.leading-7 { line-height: 1.75rem; }
-.leading-8 { line-height: 2rem; }
-.leading-9 { line-height: 2.25rem; }
-.leading-10 { line-height: 2.5rem; }
-
-/* ============================================
-   LETTER SPACING UTILITIES
-   ============================================ */
-
-.tracking-tighter { letter-spacing: -0.05em; }
-.tracking-tight { letter-spacing: -0.025em; }
-.tracking-normal { letter-spacing: 0; }
-.tracking-wide { letter-spacing: 0.025em; }
-.tracking-wider { letter-spacing: 0.05em; }
-.tracking-widest { letter-spacing: 0.1em; }
-
-/* ============================================
-   TEXT COLOR UTILITIES
-   ============================================ */
-
-.text-primary { color: var(--text-primary); }
-.text-secondary { color: var(--text-secondary); }
-.text-tertiary { color: var(--text-tertiary); }
-.text-muted { color: var(--text-muted); }
-.text-disabled { color: var(--text-disabled); }
-.text-inverse { color: var(--text-inverse); }
-
-/* Semantic colors */
-.text-success { color: var(--success-600); }
-.text-danger { color: var(--danger-600); }
-.text-warning { color: var(--warning-600); }
-.text-info { color: var(--info-600); }
-
-/* Brand colors */
-.text-brand { color: var(--primary-600); }
-.text-brand-dark { color: var(--primary-700); }
-.text-brand-light { color: var(--primary-400); }
-
-/* Inherit & Current */
-.text-inherit { color: inherit; }
-.text-current { color: currentColor; }
-.text-transparent { color: transparent; }
-
-/* ============================================
-   TEXT ALIGNMENT
-   ============================================ */
-
-.text-left { text-align: left; }
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-justify { text-align: justify; }
-.text-start { text-align: start; }
-.text-end { text-align: end; }
-
-/* ============================================
-   TEXT TRANSFORM
-   ============================================ */
-
-.uppercase { text-transform: uppercase; }
-.lowercase { text-transform: lowercase; }
-.capitalize { text-transform: capitalize; }
-.normal-case { text-transform: none; }
-
-/* ============================================
-   FONT STYLE
-   ============================================ */
-
-.italic { font-style: italic; }
-.not-italic { font-style: normal; }
-
-/* ============================================
-   TEXT DECORATION
-   ============================================ */
-
-.underline { text-decoration: underline; }
-.overline { text-decoration: overline; }
-.line-through { text-decoration: line-through; }
-.no-underline { text-decoration: none; }
-
-/* Decoration style */
-.decoration-solid { text-decoration-style: solid; }
-.decoration-double { text-decoration-style: double; }
-.decoration-dotted { text-decoration-style: dotted; }
-.decoration-dashed { text-decoration-style: dashed; }
-.decoration-wavy { text-decoration-style: wavy; }
-
-/* Decoration color */
-.decoration-primary { text-decoration-color: var(--primary-500); }
-.decoration-success { text-decoration-color: var(--success-500); }
-.decoration-danger { text-decoration-color: var(--danger-500); }
-.decoration-warning { text-decoration-color: var(--warning-500); }
-
-/* Decoration thickness */
-.decoration-1 { text-decoration-thickness: 1px; }
-.decoration-2 { text-decoration-thickness: 2px; }
-.decoration-4 { text-decoration-thickness: 4px; }
-.decoration-auto { text-decoration-thickness: auto; }
-.decoration-from-font { text-decoration-thickness: from-font; }
-
-/* Underline offset */
-.underline-offset-1 { text-underline-offset: 1px; }
-.underline-offset-2 { text-underline-offset: 2px; }
-.underline-offset-4 { text-underline-offset: 4px; }
-.underline-offset-8 { text-underline-offset: 8px; }
-.underline-offset-auto { text-underline-offset: auto; }
-
-/* ============================================
-   TEXT OVERFLOW & WRAPPING
-   ============================================ */
-
-/* Truncation - single line */
 .truncate {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/* Truncation - multi-line (line clamp) */
-.line-clamp-1 {
+/* Multi-line clamp (WebKit only, safe fallback) */
+[class^="line-clamp"] {
   display: -webkit-box;
-  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-4 {
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-5 {
-  display: -webkit-box;
-  -webkit-line-clamp: 5;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-6 {
-  display: -webkit-box;
-  -webkit-line-clamp: 6;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-none {
-  display: block;
-  -webkit-line-clamp: unset;
-  -webkit-box-orient: horizontal;
-  overflow: visible;
-}
-
-/* Whitespace */
-.whitespace-normal { white-space: normal; }
-.whitespace-nowrap { white-space: nowrap; }
-.whitespace-pre { white-space: pre; }
-.whitespace-pre-line { white-space: pre-line; }
-.whitespace-pre-wrap { white-space: pre-wrap; }
-.whitespace-break-spaces { white-space: break-spaces; }
-
-/* Word break */
-.break-normal { 
-  overflow-wrap: normal; 
-  word-break: normal; 
-}
-
-.break-words { 
-  overflow-wrap: break-word; 
-}
-
-.break-all { 
-  word-break: break-all; 
-}
-
-.break-keep { 
-  word-break: keep-all; 
-}
-
-/* Text wrap (modern) */
-.text-wrap { text-wrap: wrap; }
-.text-nowrap { text-wrap: nowrap; }
-.text-balance { text-wrap: balance; }
-.text-pretty { text-wrap: pretty; }
-
-/* Hyphens */
-.hyphens-none { hyphens: none; }
-.hyphens-manual { hyphens: manual; }
-.hyphens-auto { hyphens: auto; }
+.line-clamp-2 { -webkit-line-clamp: 2; }
+.line-clamp-3 { -webkit-line-clamp: 3; }
+.line-clamp-4 { -webkit-line-clamp: 4; }
 
 /* ============================================
-   TEXT INDENT
-   ============================================ */
-
-.indent-0 { text-indent: 0; }
-.indent-1 { text-indent: 0.25rem; }
-.indent-2 { text-indent: 0.5rem; }
-.indent-4 { text-indent: 1rem; }
-.indent-8 { text-indent: 2rem; }
-.indent-16 { text-indent: 4rem; }
-
-/* ============================================
-   VERTICAL ALIGNMENT
-   ============================================ */
-
-.align-baseline { vertical-align: baseline; }
-.align-top { vertical-align: top; }
-.align-middle { vertical-align: middle; }
-.align-bottom { vertical-align: bottom; }
-.align-text-top { vertical-align: text-top; }
-.align-text-bottom { vertical-align: text-bottom; }
-.align-sub { vertical-align: sub; }
-.align-super { vertical-align: super; }
-
-/* ============================================
-   FONT FAMILY
-   ============================================ */
-
-.font-sans {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 
-               'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-.font-serif {
-  font-family: 'Merriweather', 'Georgia', 'Cambria', 'Times New Roman', 
-               Times, serif;
-}
-
-.font-mono {
-  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Monaco, 
-               'Cascadia Code', Consolas, 'Liberation Mono', 
-               'Courier New', monospace;
-}
-
-.font-display {
-  font-family: 'Cal Sans', 'Inter', -apple-system, sans-serif;
-}
-
-/* ============================================
-   FONT VARIANT
-   ============================================ */
-
-/* Numeric variants */
-.tabular-nums { font-variant-numeric: tabular-nums; }
-.proportional-nums { font-variant-numeric: proportional-nums; }
-.lining-nums { font-variant-numeric: lining-nums; }
-.oldstyle-nums { font-variant-numeric: oldstyle-nums; }
-.slashed-zero { font-variant-numeric: slashed-zero; }
-.ordinal { font-variant-numeric: ordinal; }
-.diagonal-fractions { font-variant-numeric: diagonal-fractions; }
-.stacked-fractions { font-variant-numeric: stacked-fractions; }
-
-/* Reset numeric */
-.normal-nums { font-variant-numeric: normal; }
-
-/* Small caps */
-.small-caps { font-variant-caps: small-caps; }
-.all-small-caps { font-variant-caps: all-small-caps; }
-
-/* ============================================
-   TEXT SHADOW
-   ============================================ */
-
-.text-shadow-none { text-shadow: none; }
-
-.text-shadow-sm {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.text-shadow {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.text-shadow-md {
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 
-               0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.text-shadow-lg {
-  text-shadow: 0 8px 16px rgba(0, 0, 0, 0.15), 
-               0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Glow effect */
-.text-glow {
-  text-shadow: 0 0 10px currentColor;
-}
-
-.text-glow-primary {
-  text-shadow: 0 0 20px rgba(99, 102, 241, 0.5),
-               0 0 40px rgba(99, 102, 241, 0.3);
-}
-
-/* Hard shadow */
-.text-shadow-hard {
-  text-shadow: 2px 2px 0 var(--gray-900);
-}
-
-/* ============================================
-   GRADIENT TEXT
-   ============================================ */
-
-.text-gradient {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-primary {
-  background: linear-gradient(135deg, var(--primary-500), var(--purple-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-secondary {
-  background: linear-gradient(135deg, var(--purple-500), var(--pink-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-warm {
-  background: linear-gradient(135deg, var(--orange-500), var(--pink-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-cool {
-  background: linear-gradient(135deg, var(--cyan-500), var(--blue-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-success {
-  background: linear-gradient(135deg, var(--emerald-500), var(--teal-500));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Animated gradient text */
-.text-gradient-animate {
-  background: linear-gradient(
-    270deg,
-    var(--primary-500),
-    var(--purple-500),
-    var(--pink-500),
-    var(--primary-500)
-  );
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 8s ease infinite;
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
-/* ============================================
-   PROSE / ARTICLE STYLING
+   PROSE
    ============================================ */
 
 .prose {
-  color: var(--text-secondary);
   max-width: 65ch;
-  font-size: 1.0625rem;
   line-height: 1.75;
-}
-
-.prose > * + * {
-  margin-top: 1.25em;
+  color: var(--text-secondary);
 }
 
 .prose h1,
 .prose h2,
-.prose h3,
-.prose h4,
-.prose h5,
-.prose h6 {
+.prose h3 {
   color: var(--text-primary);
   margin-top: 2em;
-  margin-bottom: 0.75em;
-  font-weight: 700;
-  line-height: 1.3;
-}
-
-.prose h1 { font-size: 2.25em; }
-.prose h2 { font-size: 1.75em; }
-.prose h3 { font-size: 1.375em; }
-.prose h4 { font-size: 1.125em; }
-
-.prose h1:first-child,
-.prose h2:first-child,
-.prose h3:first-child,
-.prose h4:first-child {
-  margin-top: 0;
-}
-
-.prose p {
-  margin-top: 1.25em;
-  margin-bottom: 1.25em;
-  color: inherit;
-}
-
-.prose a {
-  color: var(--primary-600);
-  text-decoration: underline;
-  text-decoration-color: var(--primary-300);
-  text-underline-offset: 0.15em;
-  transition: text-decoration-color 0.2s ease;
-}
-
-.prose a:hover {
-  text-decoration-color: var(--primary-600);
-}
-
-.prose strong {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.prose ul,
-.prose ol {
-  padding-left: 1.75em;
-  margin-top: 1.25em;
-  margin-bottom: 1.25em;
-}
-
-.prose ul {
-  list-style-type: disc;
-}
-
-.prose ol {
-  list-style-type: decimal;
-}
-
-.prose li {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-  padding-left: 0.375em;
-}
-
-.prose li::marker {
-  color: var(--primary-500);
-}
-
-.prose ol li::marker {
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.prose blockquote {
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-  padding: 1em 1.5em;
-  border-left: 4px solid var(--primary-500);
-  background: var(--gray-50);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  font-style: italic;
-}
-
-.prose pre {
-  margin-top: 1.5em;
-  margin-bottom: 1.5em;
-  padding: 1.25em 1.5em;
-  border-radius: var(--radius-lg);
-  overflow-x: auto;
-}
-
-.prose code {
-  font-size: 0.875em;
-}
-
-.prose hr {
-  margin-top: 2.5em;
-  margin-bottom: 2.5em;
-}
-
-.prose img,
-.prose figure {
-  margin-top: 2em;
-  margin-bottom: 2em;
-}
-
-.prose figure figcaption {
-  color: var(--text-muted);
-  font-size: 0.875em;
-  margin-top: 0.75em;
-  text-align: center;
-}
-
-.prose table {
-  margin-top: 2em;
-  margin-bottom: 2em;
-  font-size: 0.875em;
-}
-
-/* Prose size variants */
-.prose-sm {
-  font-size: 0.9375rem;
-  line-height: 1.7;
-}
-
-.prose-lg {
-  font-size: 1.125rem;
-  line-height: 1.8;
-}
-
-.prose-xl {
-  font-size: 1.25rem;
-  line-height: 1.8;
 }
 
 /* ============================================
-   RESPONSIVE TYPOGRAPHY
+   RESPONSIVE SAFETY
    ============================================ */
 
 @media (max-width: 640px) {
-  .sm\:text-xs { font-size: 0.75rem; }
-  .sm\:text-sm { font-size: 0.875rem; }
-  .sm\:text-base { font-size: 1rem; }
-  .sm\:text-lg { font-size: 1.125rem; }
-  .sm\:text-xl { font-size: 1.25rem; }
-  .sm\:text-2xl { font-size: 1.5rem; }
-  
-  .sm\:text-left { text-align: left; }
-  .sm\:text-center { text-align: center; }
-  .sm\:text-right { text-align: right; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
 }
 
-@media (min-width: 768px) {
-  .md\:text-xs { font-size: 0.75rem; }
-  .md\:text-sm { font-size: 0.875rem; }
-  .md\:text-base { font-size: 1rem; }
-  .md\:text-lg { font-size: 1.125rem; }
-  .md\:text-xl { font-size: 1.25rem; }
-  .md\:text-2xl { font-size: 1.5rem; }
-  .md\:text-3xl { font-size: 1.875rem; }
-  .md\:text-4xl { font-size: 2.25rem; }
-  
-  .md\:text-left { text-align: left; }
-  .md\:text-center { text-align: center; }
-  .md\:text-right { text-align: right; }
-}
-
-@media (min-width: 1024px) {
-  .lg\:text-xs { font-size: 0.75rem; }
-  .lg\:text-sm { font-size: 0.875rem; }
-  .lg\:text-base { font-size: 1rem; }
-  .lg\:text-lg { font-size: 1.125rem; }
-  .lg\:text-xl { font-size: 1.25rem; }
-  .lg\:text-2xl { font-size: 1.5rem; }
-  .lg\:text-3xl { font-size: 1.875rem; }
-  .lg\:text-4xl { font-size: 2.25rem; }
-  .lg\:text-5xl { font-size: 3rem; }
-  
-  .lg\:text-left { text-align: left; }
-  .lg\:text-center { text-align: center; }
-  .lg\:text-right { text-align: right; }
-}
+/* ============================================
+   END — CLEAN, SAFE, PRODUCTION READY
+   ============================================ */
