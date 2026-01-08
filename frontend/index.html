@@ -1,41 +1,204 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#2563eb" />
-  <meta name="description" content="QA Test Manager" />
-  <title>QA Test Manager</title>
+  <!-- ════════════════════════════════════════
+       ESSENTIAL META CONFIGURATION
+       ════════════════════════════════════════ -->
   
-  <!-- Fonts -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  
+  <!-- ════════════════════════════════════════
+       SECURITY & PERFORMANCE HEADERS
+       ════════════════════════════════════════ -->
+  
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  
+  <!-- ════════════════════════════════════════
+       SITE IDENTITY & SEO FOUNDATION
+       ════════════════════════════════════════ -->
+  
+  <title>QA Manager — Quality Assurance Management Platform</title>
+  <meta name="description" content="Professional quality assurance management system for modern development teams. Streamline testing workflows, track issues, and ensure product excellence." />
+  <meta name="application-name" content="QA Manager" />
+  <meta name="theme-color" content="#0F172A" />
+  <meta name="color-scheme" content="light dark" />
+  
+  <!-- ════════════════════════════════════════
+       PROGRESSIVE WEB APP MANIFEST
+       ════════════════════════════════════════ -->
+  
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="QA Manager" />
+  
+  <!-- ════════════════════════════════════════
+       FAVICONS & PLATFORM-SPECIFIC ICONS
+       ════════════════════════════════════════ -->
+  
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0F172A" />
+  
+  <!-- ════════════════════════════════════════
+       OPTIMIZED FONT LOADING STRATEGY
+       Advanced Performance & FOUT Prevention
+       ════════════════════════════════════════ -->
+  
+  <!-- DNS Prefetch for external resources -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  
+  <!-- Preconnect with crossorigin for optimal loading -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Preload primary font for instant text rendering -->
+  <link 
+    rel="preload" 
+    as="style"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+  />
+  
+  <!-- Load fonts with optimal display strategy -->
+  <link 
+    rel="stylesheet" 
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    media="print" 
+    onload="this.media='all'; this.onload=null;"
+  />
+  
+  <!-- Fallback for no-JS environments -->
+  <noscript>
+    <link 
+      rel="stylesheet" 
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    />
+  </noscript>
+  
+  <!-- ════════════════════════════════════════
+       CRITICAL CSS INLINE (Optional)
+       Prevents FOUC - Flash of Unstyled Content
+       ════════════════════════════════════════ -->
   
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; }
+    /* Critical above-the-fold styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: "kern" 1;
+    }
+    
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      color: #1e293b;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      font-optical-sizing: auto;
+      overflow: hidden;
     }
-    .app-loader {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
+    
+    #root {
+      isolation: isolate;
+      min-height: 100vh;
+      min-height: 100dvh; /* Dynamic viewport height for mobile */
+    }
+    
+    /* Loading state to prevent flash */
+    #root:empty::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
       z-index: 9999;
+      animation: fadeIn 0.3s ease-in-out;
     }
-    .app-loader-text { color: white; font-size: 24px; font-weight: 600; margin-top: 20px; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
+  
+  <!-- ════════════════════════════════════════
+       SOCIAL MEDIA & OPEN GRAPH PROTOCOL
+       ════════════════════════════════════════ -->
+  
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="QA Manager — Quality Assurance Platform" />
+  <meta property="og:description" content="Professional quality assurance management system for modern development teams." />
+  <meta property="og:image" content="/og-image.png" />
+  <meta property="og:url" content="https://yourapp.com" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="QA Manager" />
+  <meta name="twitter:description" content="Quality Assurance Management Platform" />
+  <meta name="twitter:image" content="/twitter-image.png" />
+  
+  <!-- ════════════════════════════════════════
+       RESOURCE HINTS FOR PERFORMANCE
+       ════════════════════════════════════════ -->
+  
+  <link rel="modulepreload" href="/src/index.jsx" />
+  
 </head>
+
 <body>
-  <div id="root">
-    <div class="app-loader" id="app-loader">
-      <div class="app-loader-text">Loading QA Test Manager...</div>
+  <!-- ════════════════════════════════════════
+       APPLICATION ROOT CONTAINER
+       ════════════════════════════════════════ -->
+  
+  <div id="root" role="application" aria-label="QA Manager Application"></div>
+  
+  <!-- ════════════════════════════════════════
+       NO-JAVASCRIPT FALLBACK
+       ════════════════════════════════════════ -->
+  
+  <noscript>
+    <div style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: system-ui, sans-serif;
+      background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+      color: white;
+      text-align: center;
+      padding: 2rem;
+    ">
+      <div>
+        <h1 style="font-size: 2rem; margin-bottom: 1rem;">JavaScript Required</h1>
+        <p style="font-size: 1.125rem; opacity: 0.9; max-width: 500px;">
+          QA Manager requires JavaScript to function properly. 
+          Please enable JavaScript in your browser settings to continue.
+        </p>
+      </div>
     </div>
-  </div>
-  <!-- VITE ENTRY POINT -->
+  </noscript>
+  
+  <!-- ════════════════════════════════════════
+       APPLICATION ENTRY POINT
+       Vite Module System with HMR Support
+       ════════════════════════════════════════ -->
+  
   <script type="module" src="/src/index.jsx"></script>
+  
+  <!-- ════════════════════════════════════════
+       MODULE PRELOAD POLYFILL (Legacy Support)
+       ════════════════════════════════════════ -->
+  
+  <script nomodule>
+    console.warn('Your browser does not support ES modules. Please upgrade to a modern browser for the best experience.');
+  </script>
+  
 </body>
 </html>

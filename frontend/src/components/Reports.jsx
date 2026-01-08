@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiFileText, FiDownload, FiTrash2, FiRefreshCw, FiList } from 'react-icons/fi';
+import { FiFileText, FiDownload, FiTrash2, FiRefreshCw, FiList, FiZap } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
 
@@ -51,8 +51,9 @@ function Reports({ testRuns, settings, projectId }) {
 
   return (
     <div className="reports-page">
-      <div className="page-header">
-        <h2 className="section-title">Reports & Analytics</h2>
+      <div className="reports-header">
+        <h1>Reports & Analytics</h1>
+        <p>Generate comprehensive test reports with AI-powered insights</p>
       </div>
       
       <div className="reports-layout">
@@ -60,7 +61,12 @@ function Reports({ testRuns, settings, projectId }) {
         {/* Left Panel: Generation Form */}
         <div className="generation-panel">
           <div className="panel-card">
-            <div className="panel-header"><h3>Create New Report</h3></div>
+            <div className="panel-header">
+              <div className="panel-header-icon">
+                <FiFileText size={18} />
+              </div>
+              <h3>Create New Report</h3>
+            </div>
             <div className="panel-body">
               <div className="form-group">
                 <label>Report Scope</label>
@@ -69,7 +75,7 @@ function Reports({ testRuns, settings, projectId }) {
                   onChange={e => setSelectedRunId(e.target.value)} 
                   className="form-select"
                 >
-                  <option value="">-- Select --</option>
+                  <option value="">-- Select Test Run or Project Overview --</option>
                   <option value="ALL_PROJECT_RUNS" style={{fontWeight: 'bold', color: '#4f46e5'}}>📊 Project Overview (All Runs)</option>
                   <optgroup label="Individual Test Runs">
                     {testRuns.map(r => (
@@ -82,25 +88,45 @@ function Reports({ testRuns, settings, projectId }) {
               </div>
               
               <div className="form-group">
-                <label>Format</label>
+                <label>Output Format</label>
                 <div className="format-options">
                   <div 
-                    className={`format-option ${reportOptions.format === 'pdf' ? 'active' : ''}`}
+                    className={`format-option pdf ${reportOptions.format === 'pdf' ? 'active' : ''}`}
                     onClick={() => setReportOptions({ format: 'pdf' })}
                   >
-                    <FiFileText /> <span>PDF</span>
+                    <div className="format-icon">
+                      <FiFileText size={20} />
+                    </div>
+                    <span>PDF</span>
                   </div>
                   <div 
-                    className={`format-option ${reportOptions.format === 'word' ? 'active' : ''}`}
+                    className={`format-option word ${reportOptions.format === 'word' ? 'active' : ''}`}
                     onClick={() => setReportOptions({ format: 'word' })}
                   >
-                    <FiList /> <span>Word</span>
+                    <div className="format-icon">
+                      <FiList size={20} />
+                    </div>
+                    <span>Word</span>
                   </div>
                 </div>
               </div>
 
-              <button className="btn btn-primary btn-block" onClick={handleGenerate} disabled={isGenerating}>
-                {isGenerating ? <><FiRefreshCw className="spin" /> Analyzing...</> : "Generate Report"}
+              <button 
+                className="btn-generate" 
+                onClick={handleGenerate} 
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <FiRefreshCw className="spin" size={16} /> 
+                    <span>Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <FiFileText size={16} />
+                    <span>Generate Report</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -108,43 +134,99 @@ function Reports({ testRuns, settings, projectId }) {
           {/* AI Banner */}
           <div className="panel-card ai-panel">
             <div className="panel-body">
-              <p className="ai-description">
-                <strong>✨ AI Analysis Enabled</strong><br/>
-                Reports will include intelligent executive summaries, risk assessment, and release recommendations.
-              </p>
+              <div className="ai-icon">
+                <FiZap size={20} />
+              </div>
+              <div className="ai-content">
+                <strong className="ai-title">✨ AI-Powered Analysis</strong>
+                <p className="ai-description">
+                  Reports include intelligent executive summaries, risk assessment, and release recommendations powered by advanced AI.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Right Panel: Reports List */}
         <div className="reports-list-panel">
+          <div className="list-panel-header">
+            <h2>Generated Reports</h2>
+          </div>
+          
           <div className="table-container">
-            <table className="data-table reports-table">
+            <table className="reports-table">
               <thead>
                 <tr>
                   <th>Report Name</th>
                   <th>Format</th>
                   <th>Generated Date</th>
-                  <th style={{ textAlign: 'right' }}>Actions</th>
+                  <th className="actions-column">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {reports.length > 0 ? (
                   reports.map(rep => (
                     <tr key={rep._id || rep.id}>
-                      <td><span className="report-name">{rep.name}</span></td>
-                      <td><span className={`format-badge ${rep.format}`}>{rep.format.toUpperCase()}</span></td>
-                      <td>{new Date(rep.generatedAt).toLocaleDateString()} {new Date(rep.generatedAt).toLocaleTimeString()}</td>
+                      <td>
+                        <div className="report-name">
+                          <div className={`report-icon ${rep.format}`}>
+                            <FiFileText size={16} />
+                          </div>
+                          <span>{rep.name}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`format-badge ${rep.format}`}>
+                          {rep.format.toUpperCase()}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="report-date">
+                          {new Date(rep.generatedAt).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric' 
+                          })}
+                          <span className="report-time">
+                            {new Date(rep.generatedAt).toLocaleTimeString('en-US', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+                      </td>
                       <td className="actions-cell">
-                        <div>
-                          <button className="action-btn" onClick={() => handleDownload(rep)} title="Download"><FiDownload /></button>
-                          <button className="action-btn danger" onClick={() => handleDelete(rep._id || rep.id)} title="Delete"><FiTrash2 /></button>
+                        <div className="action-buttons">
+                          <button 
+                            className="btn-action download" 
+                            onClick={() => handleDownload(rep)} 
+                            title="Download"
+                          >
+                            <FiDownload size={16} />
+                          </button>
+                          <button 
+                            className="btn-action delete" 
+                            onClick={() => handleDelete(rep._id || rep.id)} 
+                            title="Delete"
+                          >
+                            <FiTrash2 size={16} />
+                          </button>
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : (
-                  <tr><td colSpan="4" className="empty-state" style={{textAlign:'center', padding:'40px'}}>No reports generated yet.</td></tr>
+                  <tr>
+                    <td colSpan="4">
+                      <div className="reports-empty">
+                        <div className="empty-icon">
+                          <FiFileText size={32} />
+                        </div>
+                        <h3>No Reports Yet</h3>
+                        <p>Generate your first report by selecting a test run and clicking "Generate Report"</p>
+                      </div>
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
