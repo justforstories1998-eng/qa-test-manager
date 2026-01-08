@@ -22,64 +22,81 @@ function App() {
   const [testRuns, setTestRuns] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [settings, setSettings] = useState(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [appLogo, setAppLogo] = useState(null); // CENTRAL LOGO STATE
+  
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1024);
 
+  // Initial Load
   useEffect(() => {
+    const handleResize = () => setSidebarCollapsed(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+
     api.getProjects().then(res => {
       if (res.success && res.data.length > 0) {
         setProjects(res.data);
         setActiveProjectId(res.data[0].id || res.data[0]._id);
       }
-    }).catch(console.error);
-    api.getSettings().then(res => res.success && setSettings(res.data)).catch(console.error);
+    });
+
+    api.getSettings().then(res => {
+      if (res.success) {
+        setSettings(res.data);
+        setAppLogo(res.data.general?.logo); // Set initial logo
+      }
+    });
+
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const refreshData = useCallback(async () => {
     if (!activeProjectId) return;
-    try {
-      const [suites, cases, runs, stats] = await Promise.all([
-        api.getTestSuites(activeProjectId),
-        api.getTestCases(activeProjectId),
-        api.getTestRuns(activeProjectId),
-        api.getStatistics(activeProjectId)
-      ]);
-      if (suites.success) setTestSuites(suites.data);
-      if (cases.success) setTestCases(cases.data);
-      if (runs.success) setTestRuns(runs.data);
-      if (stats.success) setStatistics(stats.data);
-    } catch (e) { console.error("Data refresh failed", e); }
+    const [suites, cases, runs, stats] = await Promise.all([
+      api.getTestSuites(activeProjectId),
+      api.getTestCases(activeProjectId),
+      api.getTestRuns(activeProjectId),
+      api.getStatistics(activeProjectId)
+    ]);
+    if (suites.success) setTestSuites(suites.data);
+    if (cases.success) setTestCases(cases.data);
+    if (runs.success) setTestRuns(runs.data);
+    if (stats.success) setStatistics(stats.data);
   }, [activeProjectId]);
 
   useEffect(() => { refreshData(); }, [refreshData]);
 
-  const handleCreateProject = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await api.createProject({ name: newProjectName });
-      if (res.success) {
-        setProjects([...projects, res.data]);
-        setActiveProjectId(res.data.id || res.data._id);
-        setShowProjectModal(false);
-        setNewProjectName('');
-        toast.success("Project Created!");
+  // SETTINGS HANDLER (Updates Logo instantly)
+  const handleUpdateSettings = async (category, data) => {
+    const res = await api.updateSettings(category, data);
+    if (res.success) {
+      setSettings(res.data);
+      if (category === 'general') {
+        setAppLogo(res.data.general?.logo); // Update logo in navbar immediately
       }
-    } catch { toast.error("Failed to create project"); }
+    }
   };
 
-  const handleUploadCSV = (file, name) => api.uploadCSV(file, name, activeProjectId).then(refreshData);
-  const handleCreateSuite = (data) => api.createTestSuite({...data, projectId: activeProjectId}).then(refreshData);
-  const handleCreateCase = (data) => api.createTestCase({...data, projectId: activeProjectId}).then(refreshData);
-  const handleCreateRun = (data) => api.createTestRun({...data, projectId: activeProjectId}).then(refreshData);
-  const handleDeleteSuite = (id) => api.deleteTestSuite(id).then(refreshData);
-  const handleDeleteCase = (id) => api.deleteTestCase(id).then(refreshData);
-  const handleDeleteRun = (id) => api.deleteTestRun(id).then(refreshData);
-  const handleGenerateReport = (runId, format) => api.generateReport(runId, format, activeProjectId);
+  const handleCreateProject = async (e) => {
+    e.preventDefault();
+    const res = await api.createProject({ name: newProjectName });
+    if (res.success) {
+      setProjects([...projects, res.data]);
+      setActiveProjectId(res.data.id || res.data._id);
+      setShowProjectModal(false);
+      setNewProjectName('');
+      toast.success("Project Created!");
+    }
+  };
 
   const activeProjectName = projects.find(p => (p.id || p._id) === activeProjectId)?.name || 'Loading...';
 
   return (
     <div className={`app ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-      <Navbar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} />
+      {/* PASS LOGO TO NAVBAR */}
+      <Navbar 
+        collapsed={sidebarCollapsed} 
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        logo={appLogo} 
+      />
       
       <main className="main-content">
         <div className="top-header">
@@ -98,10 +115,10 @@ function App() {
         {activeProjectId ? (
           <Routes>
             <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} onRefresh={refreshData} />} />
-            <Route path="/test-cases" element={<TestCases testSuites={testSuites} testCases={testCases} onCreateSuite={handleCreateSuite} onDeleteSuite={handleDeleteSuite} onCreateTestCase={handleCreateCase} onUpdateTestCase={(id, d) => api.updateTestCase(id, d).then(refreshData)} onDeleteTestCase={handleDeleteCase} onUploadCSV={handleUploadCSV} />} />
-            <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} onCreateTestRun={handleCreateRun} onDeleteTestRun={handleDeleteRun} onUpdateExecutionResult={(id, d) => api.updateExecutionResult(id, d).then(refreshData)} />} />
-            <Route path="/reports" element={<Reports testRuns={testRuns} settings={settings} onGenerate={handleGenerateReport} projectId={activeProjectId} />} />
-            <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={(cat, d) => api.updateSettings(cat, d).then(res => setSettings(res.data))} />} />
+            <Route path="/test-cases" element={<TestCases testSuites={testSuites} testCases={testCases} onCreateSuite={d => api.createTestSuite({...d, projectId: activeProjectId}).then(refreshData)} onDeleteSuite={id => api.deleteTestSuite(id).then(refreshData)} onCreateTestCase={d => api.createTestCase({...d, projectId: activeProjectId}).then(refreshData)} onUpdateTestCase={(id, d) => api.updateTestCase(id, d).then(refreshData)} onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)} onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)} />} />
+            <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} onCreateTestRun={d => api.createTestRun({...d, projectId: activeProjectId}).then(refreshData)} onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)} onUpdateExecutionResult={(id, d) => api.updateExecutionResult(id, d).then(refreshData)} />} />
+            <Route path="/reports" element={<Reports testRuns={testRuns} settings={settings} projectId={activeProjectId} />} />
+            <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         ) : <div className="loading-state"><p>Loading Projects...</p></div>}
@@ -112,13 +129,8 @@ function App() {
           <div className="modal">
             <div className="modal-header"><h3>New Project</h3></div>
             <form onSubmit={handleCreateProject}>
-              <div className="modal-body">
-                <input type="text" placeholder="Project Name" className="form-input" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} required />
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowProjectModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create</button>
-              </div>
+              <div className="modal-body"><input type="text" placeholder="Project Name" className="form-input" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} required /></div>
+              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setShowProjectModal(false)}>Cancel</button><button type="submit" className="btn btn-primary">Create</button></div>
             </form>
           </div>
         </div>

@@ -10,9 +10,9 @@
 @import './base/_animations.css';
 
 /* Layout */
-@import './layout/_sidebar.css';
 @import './layout/_header.css';
 @import './layout/_main.css';
+@import './layout/_sidebar.css';
 
 /* Components */
 @import './components/_buttons.css';

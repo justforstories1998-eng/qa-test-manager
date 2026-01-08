@@ -1,132 +1,30 @@
 /* ============================================
-   MAIN APPLICATION ARCHITECTURE
-   Premium Fixed-Frame Layout System
+   MAIN LAYOUT - FIXED WRAPPER
    ============================================ */
 
-/* ──────────────────────────────────────────
-   Application Shell Container
-   ────────────────────────────────────────── */
-
 .app {
-  /* Establish primary flex context */
   display: flex;
-  
-  /* Full viewport dimensions - foundation layer */
   height: 100vh;
   width: 100vw;
-  
-  /* Prevent unwanted scrolling at root level */
   overflow: hidden;
-  
-  /* Hardware acceleration for smooth rendering */
-  transform: translateZ(0);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  
-  /* Establish positioning context for fixed elements */
-  position: relative;
+  background-color: var(--bg-app);
 }
-
-/* ──────────────────────────────────────────
-   Primary Content Viewport
-   Advanced Layout with Precise Calculations
-   ────────────────────────────────────────── */
 
 .main-content {
-  /* Flex-based responsive growth */
-  flex: 1 1 auto;
-  
-  /* Nested flex context for content organization */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  
-  /* Dynamic positioning based on sidebar state */
-  margin-left: var(--sidebar-width);
+  /* Match sidebar width to prevent overlap */
+  margin-left: var(--sidebar-width); 
   margin-top: var(--header-height);
-  
-  /* Precision height calculation for perfect fit */
   height: calc(100vh - var(--header-height));
-  min-height: 0; /* Critical for flex children overflow handling */
-  
-  /* Zero padding - child components control their own spacing */
   padding: 0;
-  
-  /* Prevent scroll at container level - children manage their own */
   overflow: hidden;
-  
-  /* Premium visual foundation */
   background-color: var(--bg-app);
-  
-  /* Smooth sidebar collapse animation */
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Establish stacking context */
-  position: relative;
-  z-index: 1;
-  
-  /* Smooth rendering optimization */
-  will-change: margin-left;
-  backface-visibility: hidden;
 }
 
-/* ──────────────────────────────────────────
-   Collapsed Sidebar State
-   Adaptive Layout Transformation
-   ────────────────────────────────────────── */
-
+/* Adjust when sidebar is collapsed */
 .app.sidebar-collapsed .main-content {
-  /* Adjust content area for collapsed sidebar */
   margin-left: var(--sidebar-collapsed-width);
-  
-  /* Enhanced animation for state change */
-  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-/* ──────────────────────────────────────────
-   Performance & Accessibility Enhancements
-   ────────────────────────────────────────── */
-
-/* Respect user motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  .main-content,
-  .app.sidebar-collapsed .main-content {
-    transition: none;
-  }
-}
-
-/* High-DPI display optimization */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .main-content {
-    /* Enhanced rendering on retina displays */
-    -webkit-font-smoothing: subpixel-antialiased;
-  }
-}
-
-/* ──────────────────────────────────────────
-   Layout System Documentation
-   ────────────────────────────────────────── 
-   
-   Architecture Notes:
-   
-   1. Fixed-Frame System:
-      - Root container (.app) establishes viewport boundaries
-      - Main content (.main-content) adapts to dynamic sidebar states
-      - Child components manage their own scroll behavior
-   
-   2. Height Calculation Strategy:
-      - Uses calc() for precise viewport fitting
-      - min-height: 0 enables proper flex child overflow
-      - Prevents layout shift during content changes
-   
-   3. Performance Optimizations:
-      - Hardware acceleration via transforms
-      - Optimized transitions with cubic-bezier easing
-      - will-change hints for animated properties
-      - Backface visibility for smoother rendering
-   
-   4. Responsive Behavior:
-      - Sidebar collapse triggers smooth margin adjustment
-      - Content area expands/contracts fluidly
-      - No layout reflow or jank during transitions
-   
-   ────────────────────────────────────────── */

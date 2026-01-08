@@ -1,20 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import api from '../api';
+import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { 
+  FiHome, 
+  FiFileText, 
+  FiPlay, 
+  FiBarChart2, 
+  FiSettings, 
+  FiChevronLeft, 
+  FiChevronRight 
+} from 'react-icons/fi';
 
-function Navbar({ collapsed, onToggleCollapse }) {
-  const location = useLocation();
-  const [logo, setLogo] = useState(null);
-
-  useEffect(() => {
-    api.getSettings().then(res => {
-      if (res.success && res.data.general?.logo) {
-        setLogo(res.data.general.logo);
-      }
-    });
-  }, []);
-
+function Navbar({ collapsed, onToggleCollapse, logo }) {
+  // Navigation Configuration
   const navItems = [
     { path: '/', label: 'Dashboard', icon: FiHome },
     { path: '/test-cases', label: 'Test Cases', icon: FiFileText },
@@ -25,10 +22,11 @@ function Navbar({ collapsed, onToggleCollapse }) {
 
   return (
     <nav className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
+      {/* SIDEBAR HEADER: This area is now forced dark by CSS */}
       <div className="sidebar-header">
         <div className="logo-container">
           {logo ? (
-            <img src={logo} alt="App Logo" className="custom-logo" />
+            <img src={logo} alt="Logo" className="custom-logo" />
           ) : (
             <div className="default-logo-icon">QA</div>
           )}
@@ -36,21 +34,34 @@ function Navbar({ collapsed, onToggleCollapse }) {
         {!collapsed && <span className="logo-text">QA Manager</span>}
       </div>
 
+      {/* NAVIGATION LINKS */}
       <div className="sidebar-nav">
         {navItems.map((item) => (
-          <NavLink key={item.path} to={item.path} className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
-            <span className="nav-icon"><item.icon /></span>
-            {!collapsed && <span>{item.label}</span>}
+          <NavLink 
+            key={item.path} 
+            to={item.path} 
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+          >
+            <span className="nav-icon">
+              <item.icon size={20} />
+            </span>
+            {!collapsed && <span className="nav-label">{item.label}</span>}
           </NavLink>
         ))}
       </div>
 
+      {/* SIDEBAR FOOTER (Toggle Button) */}
       <div className="sidebar-footer">
-        <button className="sidebar-toggle" onClick={onToggleCollapse}>
+        <button 
+          className="sidebar-toggle" 
+          onClick={onToggleCollapse}
+          title={collapsed ? "Expand" : "Collapse"}
+        >
           {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
         </button>
       </div>
     </nav>
   );
 }
+
 export default Navbar;
