@@ -42,17 +42,28 @@ function App() {
 
   const refreshData = useCallback(async () => {
     if (!activeProjectId) return;
-    const [suites, cases, runs, stats] = await Promise.all([
-      api.getTestSuites(activeProjectId), api.getTestCases(activeProjectId),
-      api.getTestRuns(activeProjectId), api.getStatistics(activeProjectId)
-    ]);
-    if (suites.success) setTestSuites(suites.data);
-    if (cases.success) setTestCases(cases.data);
-    if (runs.success) setTestRuns(runs.data);
-    if (stats.success) setStatistics(stats.data);
+    try {
+      const [suites, cases, runs, stats] = await Promise.all([
+        api.getTestSuites(activeProjectId), api.getTestCases(activeProjectId),
+        api.getTestRuns(activeProjectId), api.getStatistics(activeProjectId)
+      ]);
+      if (suites.success) setTestSuites(suites.data);
+      if (cases.success) setTestCases(cases.data);
+      if (runs.success) setTestRuns(runs.data);
+      if (stats.success) setStatistics(stats.data);
+    } catch (e) { console.error("Refresh failed", e); }
   }, [activeProjectId]);
 
   useEffect(() => { refreshData(); }, [refreshData]);
+
+  // FIXED: Result Update Logic
+  const handleUpdateExecutionResult = async (id, resultData) => {
+    const res = await api.updateExecutionResult(id, resultData);
+    if (res.success) {
+      await refreshData(); // Refresh counts globally
+      return res.data;
+    }
+  };
 
   const handleUpdateSettings = async (category, data) => {
     const res = await api.updateSettings(category, data);
@@ -78,7 +89,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} onRefresh={refreshData} />} />
             <Route path="/test-cases" element={<TestCases testSuites={testSuites} testCases={testCases} onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)} onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)} />} />
-            <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} onCreateTestRun={d => api.createTestRun({...d, projectId: activeProjectId}).then(refreshData)} onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)} onUpdateExecutionResult={(id, d) => api.updateExecutionResult(id, d).then(refreshData)} />} />
+            <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} onCreateTestRun={d => api.createTestRun({...d, projectId: activeProjectId}).then(refreshData)} onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)} onUpdateExecutionResult={handleUpdateExecutionResult} />} />
             <Route path="/reports" element={<Reports testRuns={testRuns} projectId={activeProjectId} onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)} />} />
             <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
             <Route path="*" element={<Navigate to="/" replace />} />

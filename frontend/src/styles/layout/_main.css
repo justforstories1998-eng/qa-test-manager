@@ -1,12 +1,12 @@
 /* ============================================
-   MAIN LAYOUT - FIXED VIEWPORT FRAME
+   MAIN LAYOUT - FIXED WRAPPER
    ============================================ */
 
 .app {
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* No window scroll */
+  overflow: hidden;
   background-color: var(--bg-app);
 }
 
@@ -14,19 +14,20 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* Match sidebar and header variables */
-  margin-left: var(--sidebar-width);
+  /* Match sidebar width exactly to prevent overlap */
+  margin-left: var(--sidebar-width); 
   margin-top: var(--header-height);
   
-  /* Calculate exact available workspace */
-  height: calc(100vh - var(--header-height));
+  /* Calculate exact workspace area */
+  height: calc(100vh - var(--header-height)); 
   width: calc(100vw - var(--sidebar-width));
   
   position: relative;
-  overflow: hidden; /* Children handle their own scrolling */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden; 
+  transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
+/* Logic for when the sidebar is slim */
 .app.sidebar-collapsed .main-content {
   margin-left: var(--sidebar-collapsed-width);
   width: calc(100vw - var(--sidebar-collapsed-width));
