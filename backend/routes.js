@@ -4,13 +4,13 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import {
-  getAllProjects, getProjectById, createProject,
+  getAllProjects, createProject, getProjectById,
   getAllTestSuites, createTestSuite, deleteTestSuite,
   getAllTestCases, getTestCasesBySuiteId, createTestCase, createTestCases, updateTestCase, deleteTestCase,
   getAllTestRuns, getTestRunById, createTestRun, updateTestRun, deleteTestRun,
-  getExecutionResultsByRunId, createExecutionResult, updateExecutionResult,
+  getExecutionResultsByRunId, createExecutionResult, updateExecutionResult, deleteExecutionResult,
   getAllReports, createReport, deleteReport, getReportById,
-  getSettings, updateSettings, updateAllSettings, getStatistics
+  getSettings, updateSettings, getStatistics
 } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
@@ -18,9 +18,7 @@ import { analyzeTestResults } from './services/grokService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
-const uploadDir = join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-const upload = multer({ dest: uploadDir });
+const upload = multer({ dest: join(__dirname, 'uploads') });
 
 // PROJECTS
 router.get('/projects', async (req, res, next) => { try { res.json({ success: true, data: await getAllProjects() }); } catch (e) { next(e); } });
@@ -40,16 +38,13 @@ router.delete('/test-cases/:id', async (req, res, next) => { try { await deleteT
 // CSV
 router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
     const parsedData = await parseCSVFile(req.file.path);
     const testCases = parseADOFormat(parsedData);
-    const suite = await createTestSuite({
-      projectId: req.body.projectId, name: req.body.suiteName, description: req.body.suiteDescription, source: 'ADO Import', testCaseCount: testCases.length
-    });
-    const testCasesWithSuite = testCases.map(tc => { const { id, ...rest } = tc; return { ...rest, suiteId: suite._id, projectId: req.body.projectId }; });
-    await createTestCases(testCasesWithSuite);
+    const suite = await createTestSuite({ projectId: req.body.projectId, name: req.body.suiteName, testCaseCount: testCases.length });
+    const mapped = testCases.map(tc => ({ ...tc, suiteId: suite._id, projectId: req.body.projectId }));
+    await createTestCases(mapped);
     fs.unlink(req.file.path, () => {});
-    res.status(201).json({ success: true, message: `Imported ${testCases.length} cases` });
+    res.status(201).json({ success: true });
   } catch (error) { next(error); }
 });
 
@@ -59,21 +54,19 @@ router.post('/test-runs', async (req, res, next) => {
   try {
     const run = await createTestRun(req.body);
     if (req.body.testCaseIds) {
-      const resultsToCreate = req.body.testCaseIds.map(tcId => ({ runId: run._id, testCaseId: tcId, status: 'Not Run' }));
-      for (const res of resultsToCreate) await createExecutionResult(res);
+      for (const tcId of req.body.testCaseIds) await createExecutionResult({ runId: run._id, testCaseId: tcId, status: 'Not Run' });
     }
     res.status(201).json({ success: true, data: run });
   } catch (e) { next(e); }
 });
 router.delete('/test-runs/:id', async (req, res, next) => { try { await deleteTestRun(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
-router.get('/test-runs/:runId/results', async (req, res, next) => { try { res.json({ success: true, data: await getExecutionResultsByRunId(req.params.runId) }); } catch (e) { next(e); } });
 
-// EXECUTION RESULT UPDATE
+// RESULTS
+router.get('/test-runs/:runId/results', async (req, res, next) => { try { res.json({ success: true, data: await getExecutionResultsByRunId(req.params.runId) }); } catch (e) { next(e); } });
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
     const results = await getExecutionResultsByRunId(updated.runId);
-    
     const stats = {
       passed: results.filter(r => r.status === 'Passed').length,
       failed: results.filter(r => r.status === 'Failed').length,
@@ -81,18 +74,13 @@ router.put('/execution-results/:id', async (req, res, next) => {
       na: results.filter(r => r.status === 'N/A').length,
       notRun: results.filter(r => r.status === 'Not Run').length
     };
-
-    if (stats.notRun === 0) {
-      stats.status = 'Completed';
-      stats.completedAt = new Date();
-    } else {
-      stats.status = 'In Progress';
-    }
-
+    stats.status = stats.notRun === 0 ? 'Completed' : 'In Progress';
+    if (stats.status === 'Completed') stats.completedAt = new Date();
     await updateTestRun(updated.runId, stats);
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 });
+router.delete('/execution-results/:id', async (req, res, next) => { try { await deleteExecutionResult(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // REPORTS
 router.get('/reports', async (req, res, next) => { try { res.json({ success: true, data: await getAllReports(req.query.projectId) }); } catch (e) { next(e); } });
@@ -101,67 +89,46 @@ router.post('/reports/generate', async (req, res, next) => {
     const { runId, format, projectId } = req.body;
     const settings = await getSettings();
     let reportData = {};
-    let reportName = "";
-
     if (runId === 'ALL_PROJECT_RUNS') {
       const project = await getProjectById(projectId);
       const runs = await getAllTestRuns(projectId);
-      let allResults = [];
+      let results = [];
       for (const r of runs) {
-        const results = await getExecutionResultsByRunId(r._id);
-        allResults = [...allResults, ...results.map(res => ({ ...res._doc, runName: r.name }))];
+        const res = await getExecutionResultsByRunId(r._id);
+        results = [...results, ...res.map(item => ({ ...item._doc, runName: r.name }))];
       }
-      reportName = `${project.name} Project Report`;
-      reportData = { type: 'project', project, runs, results: allResults };
+      reportData = { type: 'project', project, runs, results };
     } else {
       const testRun = await getTestRunById(runId);
       const results = await getExecutionResultsByRunId(runId);
-      reportName = `${testRun.name} Report`;
       reportData = { type: 'run', testRun, results };
     }
-
-    console.log("🤖 Asking AI...");
-    const aiAnalysis = await analyzeTestResults(reportData, settings);
-    reportData.aiAnalysis = aiAnalysis;
-
-    let fileResult;
-    if (format === 'pdf') fileResult = await generatePDFReport(reportData);
-    else fileResult = await generateWordReport(reportData);
-
-    const report = await createReport({
-      projectId, name: reportName, runId: runId === 'ALL_PROJECT_RUNS' ? null : runId,
-      format, filePath: fileResult.filePath, fileName: fileResult.fileName, generatedAt: new Date()
-    });
+    reportData.aiAnalysis = await analyzeTestResults(reportData, settings);
+    const file = (format === 'pdf') ? await generatePDFReport(reportData) : await generateWordReport(reportData);
+    const report = await createReport({ projectId, name: reportData.type === 'project' ? `${reportData.project.name} Report` : `${reportData.testRun.name} Report`, format, filePath: file.filePath, fileName: file.fileName });
     res.json({ success: true, data: report });
   } catch (e) { next(e); }
 });
-
 router.get('/reports/:id/download', async (req, res, next) => {
   try {
     const report = await getReportById(req.params.id);
-    if (!report) return res.status(404).json({ error: 'Report not found' });
-    if (fs.existsSync(report.filePath)) {
-      res.download(report.filePath, report.fileName);
-    } else {
-      console.log("File missing, regenerating...");
-      // Simple regen for single runs
+    if (fs.existsSync(report.filePath)) res.download(report.filePath, report.fileName);
+    else {
+      let reportData = {};
       if (report.runId) {
         const testRun = await getTestRunById(report.runId);
         const results = await getExecutionResultsByRunId(report.runId);
-        const fileResult = await generatePDFReport({ type: 'run', testRun, results, aiAnalysis: { isSimulation: true } });
-        res.download(fileResult.filePath, report.fileName);
-      } else {
-        res.status(404).json({ error: 'File expired.' });
-      }
+        reportData = { type: 'run', testRun, results, aiAnalysis: { isSimulation: true } };
+      } else return res.status(404).send("Expired");
+      const file = (report.format === 'pdf') ? await generatePDFReport(reportData) : await generateWordReport(reportData);
+      res.download(file.filePath, report.fileName);
     }
   } catch (e) { next(e); }
 });
-router.delete('/reports/:id', async (req, res, next) => { try { await deleteReport(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
-// SETTINGS & STATS
+// MISC
 router.get('/statistics', async (req, res, next) => { try { res.json({ success: true, data: await getStatistics(req.query.projectId) }); } catch (e) { next(e); } });
 router.get('/settings', async (req, res, next) => { try { res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
-router.put('/settings/:category', async (req, res, next) => { try { await updateSettings(req.params.category, req.body); const all = await getSettings(); res.json({ success: true, data: all }); } catch (e) { next(e); } });
-router.put('/settings', async (req, res, next) => { try { await updateAllSettings(req.body); const all = await getSettings(); res.json({ success: true, data: all }); } catch (e) { next(e); } });
+router.put('/settings/:category', async (req, res, next) => { try { await updateSettings(req.params.category, req.body); res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
 
 export default router;

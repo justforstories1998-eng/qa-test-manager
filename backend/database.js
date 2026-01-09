@@ -3,7 +3,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// GLOBAL PLUGIN: Convert _id to id for Frontend
+// ============================================
+// GLOBAL CONFIG: Transform _id to id
+// ============================================
 mongoose.set('toJSON', {
   virtuals: true,
   versionKey: false,
@@ -98,33 +100,38 @@ const ExecutionResult = mongoose.model('ExecutionResult', executionResultSchema)
 const Report = mongoose.model('Report', reportSchema);
 const Setting = mongoose.model('Setting', settingsSchema);
 
-// INIT
+// ============================================
+// DATABASE INITIALIZATION
+// ============================================
+
 export async function initializeDatabase() {
   try {
-    if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI missing');
+    if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI missing from .env');
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ Connected to MongoDB Atlas');
     
-    // Create Default Project if none exists
+    // Auto-create initial project if DB is empty
     const count = await Project.countDocuments();
     if (count === 0) {
-      await new Project({ name: 'Default Project', description: 'Auto-created' }).save();
-      console.log('✅ Default Project created');
+      await new Project({ name: 'Default Project', description: 'System created' }).save();
+      console.log('✅ Created Default Project');
     }
   } catch (error) {
-    console.error('❌ DB Connection Error:', error.message);
+    console.error('❌ MongoDB Connection Error:', error.message);
     process.exit(1);
   }
 }
 
-// EXPORTS
+// ============================================
+// EXPORTED FUNCTIONS
+// ============================================
 
-// Projects
+// PROJECTS
 export const getAllProjects = () => Project.find().sort({ name: 1 });
 export const getProjectById = (id) => Project.findById(id);
 export const createProject = (data) => new Project(data).save();
 
-// Suites
+// TEST SUITES
 export const getAllTestSuites = (projectId) => TestSuite.find(projectId ? { projectId } : {}).sort({ createdAt: -1 });
 export const getTestSuiteById = (id) => TestSuite.findById(id);
 export const createTestSuite = (data) => new TestSuite(data).save();
@@ -135,7 +142,7 @@ export const deleteTestSuite = async (id) => {
   return TestSuite.findByIdAndDelete(id);
 };
 
-// Cases
+// TEST CASES
 export const getAllTestCases = (projectId) => TestCase.find(projectId ? { projectId } : {}).sort({ createdAt: -1 });
 export const getTestCasesBySuiteId = (suiteId) => TestCase.find({ suiteId });
 export const getTestCaseById = (id) => TestCase.findById(id);
@@ -147,7 +154,7 @@ export const deleteTestCase = (id) => {
   return TestCase.findByIdAndDelete(id);
 };
 
-// Runs
+// TEST RUNS
 export const getAllTestRuns = (projectId) => TestRun.find(projectId ? { projectId } : {}).sort({ createdAt: -1 });
 export const getTestRunById = (id) => TestRun.findById(id);
 export const createTestRun = (data) => new TestRun(data).save();
@@ -158,12 +165,20 @@ export const deleteTestRun = async (id) => {
   return TestRun.findByIdAndDelete(id);
 };
 
-// Results
+// EXECUTION RESULTS
 export const getExecutionResultsByRunId = (runId) => ExecutionResult.find({ runId });
 export const createExecutionResult = (data) => new ExecutionResult(data).save();
 export const updateExecutionResult = (id, data) => ExecutionResult.findByIdAndUpdate(id, data, { new: true });
+export const deleteExecutionResult = async (id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  const res = await ExecutionResult.findByIdAndDelete(id);
+  if (res) {
+    await TestRun.findByIdAndUpdate(res.runId, { $inc: { totalTests: -1 } });
+  }
+  return res;
+};
 
-// Reports
+// REPORTS
 export const getAllReports = (projectId) => Report.find(projectId ? { projectId } : {}).sort({ generatedAt: -1 });
 export const getReportById = (id) => Report.findById(id);
 export const createReport = (data) => new Report(data).save();
@@ -172,14 +187,16 @@ export const deleteReport = (id) => {
   return Report.findByIdAndDelete(id);
 };
 
-// Settings
+// SETTINGS
 export const getSettings = async () => {
   const sets = await Setting.find();
   const result = {};
   sets.forEach(s => result[s.category] = s.data);
   return result;
 };
-export const updateSettings = async (category, data) => Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true });
+export const updateSettings = async (category, data) => {
+  return Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true });
+};
 export const updateAllSettings = async (settingsObj) => {
   const promises = Object.entries(settingsObj).map(([category, data]) => 
     Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true })
@@ -188,9 +205,10 @@ export const updateAllSettings = async (settingsObj) => {
   return getSettings();
 };
 
-// Stats
+// STATISTICS (FIXED LOGIC)
 export const getStatistics = async (projectId) => {
   const query = projectId ? { projectId } : {};
+  
   const totalTestCases = await TestCase.countDocuments(query);
   const totalTestRuns = await TestRun.countDocuments(query);
   const runs = await TestRun.find(query);
@@ -202,15 +220,33 @@ export const getStatistics = async (projectId) => {
     blocked += r.blocked || 0;
     na += r.na || 0;
   });
+
   const totalExecutions = passed + failed + blocked + na;
+
+  // PRIORITY COUNTS LOGIC
+  const allCases = await TestCase.find(query);
+  const priorityCounts = { critical: 0, high: 0, medium: 0, low: 0 };
+  
+  allCases.forEach(tc => {
+    const p = (tc.priority || 'medium').toLowerCase();
+    if (priorityCounts.hasOwnProperty(p)) {
+      priorityCounts[p]++;
+    }
+  });
 
   return {
     totalTestCases,
     totalTestRuns,
     totalExecutions,
-    statusCounts: { passed, failed, blocked, na, notRun: Math.max(0, totalTestCases - totalExecutions) },
-    passRate: totalExecutions > 0 ? ((passed / totalExecutions) * 100).toFixed(1) : 0,
-    priorityCounts: { critical: 0, high: 0, medium: 0, low: 0 } 
+    statusCounts: { 
+      passed, 
+      failed, 
+      blocked, 
+      na, 
+      notRun: Math.max(0, totalTestCases - totalExecutions) 
+    },
+    priorityCounts,
+    passRate: (passed + failed + blocked) > 0 ? ((passed / (passed + failed + blocked)) * 100).toFixed(1) : 0
   };
 };
 

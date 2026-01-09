@@ -1,78 +1,18 @@
-/* ============================================
-   TOP HEADER - ALIGNMENT FIX
-   ============================================ */
 .top-header {
-  position: fixed;
-  top: 0;
-  right: 0;
-  /* CRITICAL: Starts after the sidebar ends */
-  left: var(--sidebar-width); 
-  height: var(--header-height);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-color);
-  z-index: var(--z-header);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 30px;
-  transition: left 0.3s ease;
+  position: fixed; top: 0; right: 0; left: var(--sidebar-width); height: var(--header-height);
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color);
+  z-index: 90; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; transition: left 0.3s ease;
 }
+.app.sidebar-collapsed .top-header { left: var(--sidebar-collapsed-width); }
 
-/* Adjust header when sidebar is collapsed */
-.app.sidebar-collapsed .top-header {
-  left: var(--sidebar-collapsed-width);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-}
-
-.header-right span {
-  font-weight: 700;
-  color: var(--text-main);
-  background: var(--primary-soft);
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-}
-
-/* Project Selector Alignment */
-.project-selector {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.project-dropdown {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.project-icon {
-  position: absolute;
-  left: 12px;
-  color: var(--primary-color);
-  pointer-events: none;
-}
-
+.project-selector { display: flex; align-items: center; gap: 10px; }
+.project-dropdown { position: relative; display: flex; align-items: center; }
+.project-icon { position: absolute; left: 12px; color: var(--primary-color); pointer-events: none; }
 .project-select {
-  padding: 10px 16px 10px 40px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: white;
-  font-weight: 600;
-  color: var(--text-dark);
-  cursor: pointer;
-  min-width: 200px;
-  transition: all 0.2s;
-  outline: none;
+  padding: 10px 16px 10px 40px; border-radius: 10px; border: 1px solid var(--border-color);
+  background: white; font-weight: 700; color: var(--text-dark); cursor: pointer; min-width: 200px;
 }
+.header-right span { font-weight: 800; color: var(--text-main); font-size: 13px; background: var(--primary-soft); padding: 6px 16px; border-radius: 50px; }
 
-.project-select:hover {
-  border-color: var(--primary-color);
-  box-shadow: var(--shadow-sm);
-}
+@media (max-width: 1100px) { .top-header { left: var(--sidebar-collapsed-width); } }
+@media (max-width: 768px) { .top-header { left: 0; padding: 0 15px; } .header-right { display: none; } }
