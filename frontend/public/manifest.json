@@ -1,0 +1,9 @@
+{
+  "short_name": "QA Manager",
+  "name": "QA Test Management System",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#6366f1",
+  "background_color": "#ffffff"
+}
