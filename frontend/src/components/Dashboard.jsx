@@ -86,59 +86,278 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
 
   return (
     <div className="dashboard">
-      <div className="page-header">
-        <div className="header-content">
-          <h2 className="section-title">Project Insights</h2>
-          <p className="section-description">Real-time health metrics and test coverage</p>
-        </div>
-        <button className="btn btn-secondary" onClick={onRefresh}><FiRefreshCw /> Sync Data</button>
+      {/* Ambient Background Effects */}
+      <div className="dashboard-ambient">
+        <div className="ambient-orb ambient-orb-1"></div>
+        <div className="ambient-orb ambient-orb-2"></div>
+        <div className="ambient-orb ambient-orb-3"></div>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon blue"><FiFileText /></div>
-          <div className="stat-content"><span className="stat-value">{stats.totalTestCases}</span><span className="stat-label">Total Cases</span></div>
+      <div className="dashboard-content">
+        <div className="page-header">
+          <div className="header-content">
+            <div className="header-badge">
+              <span className="badge-dot"></span>
+              <span>Live Dashboard</span>
+            </div>
+            <h2 className="section-title">Project Insights</h2>
+            <p className="section-description">Real-time health metrics and test coverage</p>
+          </div>
+          <button className="btn btn-secondary" onClick={onRefresh}>
+            <FiRefreshCw className="btn-icon" /> 
+            <span>Sync Data</span>
+          </button>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon purple"><FiFolder /></div>
-          <div className="stat-content"><span className="stat-value">{testSuites?.length || 0}</span><span className="stat-label">Suites</span></div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon orange"><FiPlay /></div>
-          <div className="stat-content"><span className="stat-value">{activeRuns}</span><span className="stat-label">Active Runs</span></div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-icon green"><FiTrendingUp /></div>
-          <div className="stat-content"><span className="stat-value">{stats.passRate}%</span><span className="stat-label">Stability</span></div>
-        </div>
-      </div>
 
-      <div className="status-summary">
-        <div className="status-card passed"><FiCheckCircle color="#10b981" size={20} /> <div><span className="stat-value">{stats.statusCounts.passed}</span><span className="stat-label">Passed</span></div></div>
-        <div className="status-card failed"><FiXCircle color="#f43f5e" size={20} /> <div><span className="stat-value">{stats.statusCounts.failed}</span><span className="stat-label">Failed</span></div></div>
-        <div className="status-card blocked"><FiAlertCircle color="#f59e0b" size={20} /> <div><span className="stat-value">{stats.statusCounts.blocked}</span><span className="stat-label">Blocked</span></div></div>
-        <div className="status-card not-run"><FiMinusCircle color="#94a3b8" size={20} /> <div><span className="stat-value">{stats.statusCounts.na}</span><span className="stat-label">N/A</span></div></div>
-      </div>
-
-      <div className="charts-grid">
-        <div className="chart-card">
-          <div className="chart-header"><h3>Execution Health</h3></div>
-          <div className="chart-body" style={{height: '300px'}}>
-            <Doughnut data={statusChartData} options={{ responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }} />
+        <div className="stats-grid">
+          <div className="stat-card stat-card-blue">
+            <div className="stat-card-glow"></div>
+            <div className="stat-icon">
+              <FiFileText />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{stats.totalTestCases}</span>
+              <span className="stat-label">Total Cases</span>
+            </div>
+            <div className="stat-trend">
+              <span className="trend-indicator positive">↑</span>
+            </div>
+          </div>
+          
+          <div className="stat-card stat-card-purple">
+            <div className="stat-card-glow"></div>
+            <div className="stat-icon">
+              <FiFolder />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{testSuites?.length || 0}</span>
+              <span className="stat-label">Suites</span>
+            </div>
+            <div className="stat-trend">
+              <span className="trend-indicator neutral">—</span>
+            </div>
+          </div>
+          
+          <div className="stat-card stat-card-orange">
+            <div className="stat-card-glow"></div>
+            <div className="stat-icon">
+              <FiPlay />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{activeRuns}</span>
+              <span className="stat-label">Active Runs</span>
+            </div>
+            <div className="stat-trend">
+              <span className="trend-indicator active">●</span>
+            </div>
+          </div>
+          
+          <div className="stat-card stat-card-green">
+            <div className="stat-card-glow"></div>
+            <div className="stat-icon">
+              <FiTrendingUp />
+            </div>
+            <div className="stat-content">
+              <span className="stat-value">{stats.passRate}%</span>
+              <span className="stat-label">Stability</span>
+            </div>
+            <div className="stat-trend">
+              <span className="trend-indicator positive">↑</span>
+            </div>
           </div>
         </div>
-        
-        <div className="chart-card">
-          <div className="chart-header"><h3>Priority Distribution</h3></div>
-          <div className="chart-body" style={{height: '300px'}}>
-            <Bar data={priorityChartData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }} />
+
+        <div className="status-summary">
+          <div className="status-card passed">
+            <div className="status-icon-wrapper">
+              <FiCheckCircle />
+            </div>
+            <div className="status-info">
+              <span className="stat-value">{stats.statusCounts.passed}</span>
+              <span className="stat-label">Passed</span>
+            </div>
+            <div className="status-bar"></div>
+          </div>
+          
+          <div className="status-card failed">
+            <div className="status-icon-wrapper">
+              <FiXCircle />
+            </div>
+            <div className="status-info">
+              <span className="stat-value">{stats.statusCounts.failed}</span>
+              <span className="stat-label">Failed</span>
+            </div>
+            <div className="status-bar"></div>
+          </div>
+          
+          <div className="status-card blocked">
+            <div className="status-icon-wrapper">
+              <FiAlertCircle />
+            </div>
+            <div className="status-info">
+              <span className="stat-value">{stats.statusCounts.blocked}</span>
+              <span className="stat-label">Blocked</span>
+            </div>
+            <div className="status-bar"></div>
+          </div>
+          
+          <div className="status-card not-run">
+            <div className="status-icon-wrapper">
+              <FiMinusCircle />
+            </div>
+            <div className="status-info">
+              <span className="stat-value">{stats.statusCounts.na}</span>
+              <span className="stat-label">N/A</span>
+            </div>
+            <div className="status-bar"></div>
           </div>
         </div>
 
-        <div className="chart-card wide">
-          <div className="chart-header"><h3>Reliability Trend</h3></div>
-          <div className="chart-body" style={{height: '250px'}}>
-            <Line data={trendChartData} options={{ responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }} />
+        <div className="charts-grid">
+          <div className="chart-card">
+            <div className="chart-card-inner">
+              <div className="chart-header">
+                <div className="chart-title-group">
+                  <h3>Execution Health</h3>
+                  <span className="chart-subtitle">Test status distribution</span>
+                </div>
+                <div className="chart-actions">
+                  <span className="chart-badge">Live</span>
+                </div>
+              </div>
+              <div className="chart-body">
+                <Doughnut 
+                  data={statusChartData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '75%', 
+                    plugins: { 
+                      legend: { 
+                        position: 'bottom',
+                        labels: {
+                          padding: 20,
+                          usePointStyle: true,
+                          pointStyle: 'circle',
+                          font: {
+                            family: "'Inter', sans-serif",
+                            size: 12,
+                            weight: '500'
+                          }
+                        }
+                      } 
+                    } 
+                  }} 
+                />
+              </div>
+            </div>
+          </div>
+          
+          <div className="chart-card">
+            <div className="chart-card-inner">
+              <div className="chart-header">
+                <div className="chart-title-group">
+                  <h3>Priority Distribution</h3>
+                  <span className="chart-subtitle">Cases by priority level</span>
+                </div>
+                <div className="chart-actions">
+                  <span className="chart-badge secondary">Overview</span>
+                </div>
+              </div>
+              <div className="chart-body">
+                <Bar 
+                  data={priorityChartData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                      legend: { display: false } 
+                    },
+                    scales: {
+                      x: {
+                        grid: {
+                          display: false
+                        },
+                        ticks: {
+                          font: {
+                            family: "'Inter', sans-serif",
+                            size: 11,
+                            weight: '500'
+                          }
+                        }
+                      },
+                      y: {
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.04)'
+                        },
+                        ticks: {
+                          font: {
+                            family: "'Inter', sans-serif",
+                            size: 11
+                          }
+                        }
+                      }
+                    }
+                  }} 
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="chart-card wide">
+            <div className="chart-card-inner">
+              <div className="chart-header">
+                <div className="chart-title-group">
+                  <h3>Reliability Trend</h3>
+                  <span className="chart-subtitle">Pass rate over recent runs</span>
+                </div>
+                <div className="chart-actions">
+                  <span className="chart-badge accent">Trending</span>
+                </div>
+              </div>
+              <div className="chart-body chart-body-trend">
+                <Line 
+                  data={trendChartData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                      y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        grid: {
+                          color: 'rgba(0, 0, 0, 0.04)'
+                        },
+                        ticks: {
+                          font: {
+                            family: "'Inter', sans-serif",
+                            size: 11
+                          },
+                          callback: (value) => value + '%'
+                        }
+                      },
+                      x: {
+                        grid: {
+                          display: false
+                        },
+                        ticks: {
+                          font: {
+                            family: "'Inter', sans-serif",
+                            size: 11,
+                            weight: '500'
+                          }
+                        }
+                      }
+                    },
+                    plugins: {
+                      legend: {
+                        display: false
+                      }
+                    }
+                  }} 
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
