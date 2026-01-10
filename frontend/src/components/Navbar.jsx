@@ -22,7 +22,7 @@ function Navbar({ collapsed, onToggleCollapse, logo }) {
 
   return (
     <nav className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
-      {/* SIDEBAR HEADER: This area is now forced dark by CSS */}
+      {/* SIDEBAR HEADER */}
       <div className="sidebar-header">
         <div className="logo-container">
           {logo ? (
@@ -36,29 +36,42 @@ function Navbar({ collapsed, onToggleCollapse, logo }) {
 
       {/* NAVIGATION LINKS */}
       <div className="sidebar-nav">
+        <div className="nav-section-label">
+          {!collapsed && <span>MENU</span>}
+        </div>
         {navItems.map((item) => (
           <NavLink 
             key={item.path} 
             to={item.path} 
             className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
-            <span className="nav-icon">
-              <item.icon size={20} />
+            <span className="nav-icon-wrapper">
+              <span className="nav-icon">
+                <item.icon size={20} />
+              </span>
             </span>
             {!collapsed && <span className="nav-label">{item.label}</span>}
+            {!collapsed && <span className="nav-indicator"></span>}
           </NavLink>
         ))}
       </div>
 
       {/* SIDEBAR FOOTER (Toggle Button) */}
       <div className="sidebar-footer">
-        <button 
-          className="sidebar-toggle" 
-          onClick={onToggleCollapse}
-          title={collapsed ? "Expand" : "Collapse"}
-        >
-          {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
-        </button>
+        <div className="footer-content">
+          {!collapsed && (
+            <div className="footer-info">
+              <span className="footer-version">v2.0.1</span>
+            </div>
+          )}
+          <button 
+            className="sidebar-toggle" 
+            onClick={onToggleCollapse}
+            title={collapsed ? "Expand" : "Collapse"}
+          >
+            {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
+          </button>
+        </div>
       </div>
     </nav>
   );
