@@ -9,6 +9,7 @@ import TestCases from './components/TestCases';
 import Execution from './components/Execution';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
+import Bugs from './components/Bugs'; // NEW
 import api from './api';
 import { FiPlus, FiBriefcase } from 'react-icons/fi';
 
@@ -56,15 +57,6 @@ function App() {
 
   useEffect(() => { refreshData(); }, [refreshData]);
 
-  // FIXED: Result Update Logic
-  const handleUpdateExecutionResult = async (id, resultData) => {
-    const res = await api.updateExecutionResult(id, resultData);
-    if (res.success) {
-      await refreshData(); // Refresh counts globally
-      return res.data;
-    }
-  };
-
   const handleUpdateSettings = async (category, data) => {
     const res = await api.updateSettings(category, data);
     if (res.success) { setSettings(res.data); if (category === 'general') setAppLogo(res.data.general?.logo); }
@@ -89,8 +81,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} onRefresh={refreshData} />} />
             <Route path="/test-cases" element={<TestCases testSuites={testSuites} testCases={testCases} onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)} onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)} />} />
-            <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} onCreateTestRun={d => api.createTestRun({...d, projectId: activeProjectId}).then(refreshData)} onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)} onUpdateExecutionResult={handleUpdateExecutionResult} />} />
+            <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} onCreateTestRun={d => api.createTestRun({...d, projectId: activeProjectId}).then(refreshData)} onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)} onUpdateExecutionResult={(id, d) => api.updateExecutionResult(id, d).then(refreshData)} />} />
             <Route path="/reports" element={<Reports testRuns={testRuns} projectId={activeProjectId} onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)} />} />
+            <Route path="/bugs" element={<Bugs projectId={activeProjectId} />} /> {/* NEW */}
             <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

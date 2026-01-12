@@ -2031,3 +2031,9 @@
     animation: none !important;
   }
 }
+/* Add this to _badges.css */
+
+.status-badge.active { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+.status-badge.underdevelopment { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+.status-badge.resolved { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+.status-badge.closed { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }

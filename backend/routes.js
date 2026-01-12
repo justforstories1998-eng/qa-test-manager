@@ -4,11 +4,12 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import {
-  getAllProjects, createProject, getProjectById,
+  getAllProjects, getProjectById, createProject,
+  getAllBugs, createBug, updateBug, deleteBug,
   getAllTestSuites, createTestSuite, deleteTestSuite,
   getAllTestCases, getTestCasesBySuiteId, createTestCase, createTestCases, updateTestCase, deleteTestCase,
   getAllTestRuns, getTestRunById, createTestRun, updateTestRun, deleteTestRun,
-  getExecutionResultsByRunId, createExecutionResult, updateExecutionResult, deleteExecutionResult,
+  getExecutionResultsByRunId, createExecutionResult, updateExecutionResult,
   getAllReports, createReport, deleteReport, getReportById,
   getSettings, updateSettings, getStatistics
 } from './database.js';
@@ -18,28 +19,45 @@ import { analyzeTestResults } from './services/grokService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
-const upload = multer({ dest: join(__dirname, 'uploads') });
+const uploadDir = join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+const upload = multer({ dest: uploadDir });
 
+// PROJECTS
 router.get('/projects', async (req, res, next) => { try { res.json({ success: true, data: await getAllProjects() }); } catch (e) { next(e); } });
 router.post('/projects', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createProject(req.body) }); } catch (e) { next(e); } });
+
+// BUGS
+router.get('/bugs', async (req, res, next) => { try { res.json({ success: true, data: await getAllBugs(req.query.projectId) }); } catch (e) { next(e); } });
+router.post('/bugs', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createBug(req.body) }); } catch (e) { next(e); } });
+router.put('/bugs/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateBug(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/bugs/:id', async (req, res, next) => { try { await deleteBug(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// SUITES
 router.get('/test-suites', async (req, res, next) => { try { res.json({ success: true, data: await getAllTestSuites(req.query.projectId) }); } catch (e) { next(e); } });
 router.post('/test-suites', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createTestSuite(req.body) }); } catch (e) { next(e); } });
 router.delete('/test-suites/:id', async (req, res, next) => { try { await deleteTestSuite(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// CASES
 router.get('/test-cases', async (req, res, next) => { try { const data = req.query.suiteId ? await getTestCasesBySuiteId(req.query.suiteId) : await getAllTestCases(req.query.projectId); res.json({ success: true, data }); } catch (e) { next(e); } });
 router.post('/test-cases', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createTestCase(req.body) }); } catch (e) { next(e); } });
 router.put('/test-cases/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateTestCase(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/test-cases/:id', async (req, res, next) => { try { await deleteTestCase(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// CSV
 router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
   try {
     const parsedData = await parseCSVFile(req.file.path);
     const testCases = parseADOFormat(parsedData);
     const suite = await createTestSuite({ projectId: req.body.projectId, name: req.body.suiteName, testCaseCount: testCases.length });
-    const mapped = testCases.map(tc => ({ ...tc, suiteId: suite._id, projectId: req.body.projectId }));
+    const mapped = testCases.map(tc => { const { id, ...rest } = tc; return { ...rest, suiteId: suite._id, projectId: req.body.projectId }; });
     await createTestCases(mapped);
     fs.unlink(req.file.path, () => {});
     res.status(201).json({ success: true });
   } catch (error) { next(error); }
 });
+
+// RUNS
 router.get('/test-runs', async (req, res, next) => { try { res.json({ success: true, data: await getAllTestRuns(req.query.projectId) }); } catch (e) { next(e); } });
 router.post('/test-runs', async (req, res, next) => {
   try {
@@ -52,6 +70,7 @@ router.post('/test-runs', async (req, res, next) => {
 });
 router.delete('/test-runs/:id', async (req, res, next) => { try { await deleteTestRun(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 router.get('/test-runs/:runId/results', async (req, res, next) => { try { res.json({ success: true, data: await getExecutionResultsByRunId(req.params.runId) }); } catch (e) { next(e); } });
+
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
@@ -63,7 +82,8 @@ router.put('/execution-results/:id', async (req, res, next) => {
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 });
-router.delete('/execution-results/:id', async (req, res, next) => { try { await deleteExecutionResult(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// REPORTS
 router.get('/reports', async (req, res, next) => { try { res.json({ success: true, data: await getAllReports(req.query.projectId) }); } catch (e) { next(e); } });
 router.post('/reports/generate', async (req, res, next) => {
   try {
@@ -106,7 +126,8 @@ router.get('/reports/:id/download', async (req, res, next) => {
     }
   } catch (e) { next(e); }
 });
-router.delete('/reports/:id', async (req, res, next) => { try { await deleteReport(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// STATS
 router.get('/statistics', async (req, res, next) => { try { res.json({ success: true, data: await getStatistics(req.query.projectId) }); } catch (e) { next(e); } });
 router.get('/settings', async (req, res, next) => { try { res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
 router.put('/settings/:category', async (req, res, next) => { try { await updateSettings(req.params.category, req.body); res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
