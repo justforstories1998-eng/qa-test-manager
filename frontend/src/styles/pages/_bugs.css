@@ -468,6 +468,16 @@
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
+.action-btn.primary {
+  background: white;
+}
+
+.action-btn.primary:hover {
+  background: #e0e7ff;
+  border-color: var(--primary-color);
+  color: var(--primary-dark);
+}
+
 .action-btn.danger:hover {
   background: #fee2e2;
   border-color: #ef4444;
@@ -582,6 +592,11 @@
   letter-spacing: -0.02em;
 }
 
+.view-modal-header {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-bottom: 2px solid #fcd34d;
+}
+
 .close-btn {
   width: 36px;
   height: 36px;
@@ -615,6 +630,146 @@
 
 .modal-body-scroll {
   max-height: calc(90vh - 200px);
+}
+
+/* ============================================
+   VIEW MODAL - PREMIUM SECTIONS
+   ============================================ */
+
+.view-section {
+  margin-bottom: 32px;
+  padding-bottom: 28px;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.view-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.view-title-section {
+  background: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+  padding: 28px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.view-header-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.view-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+.view-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.view-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-light);
+  font-weight: 600;
+  padding: 8px 14px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.view-section h4 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  letter-spacing: 0.06em;
+}
+
+.view-content {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.04);
+}
+
+/* ============================================
+   ATTACHMENT CARD IN VIEW MODAL
+   ============================================ */
+
+.step-row-card.attachment-card {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: all 0.3s var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+}
+
+.step-row-card.attachment-card:hover {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-md), 0 0 0 4px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
+}
+
+.run-icon.attachment-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.attachment-info {
+  flex: 1;
+}
+
+.attachment-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.attachment-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 /* ============================================
@@ -782,6 +937,16 @@
     max-height: 100vh;
     border-radius: 0;
   }
+
+  .view-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .view-meta {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -793,6 +958,14 @@
   .modal-body,
   .modal-footer {
     padding: 20px;
+  }
+
+  .view-title-section {
+    padding: 20px;
+  }
+
+  .step-row-card.attachment-card {
+    padding: 16px;
   }
 }
 

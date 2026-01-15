@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   FiAlertTriangle, FiPlus, FiSearch, FiEdit2, FiTrash2, FiX, 
-  FiPaperclip, FiEye, FiFilter, FiCheckCircle, FiClock, FiCode 
+  FiPaperclip, FiEye, FiFilter, FiCheckCircle, FiClock, FiUser, FiInfo, FiFileText
 } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
@@ -10,8 +10,14 @@ function Bugs({ projectId }) {
   const [bugs, setBugs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  
+  // Modal States
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  
+  // Data States
   const [editingBug, setEditingBug] = useState(null);
+  const [viewingBug, setViewingBug] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -69,7 +75,11 @@ function Bugs({ projectId }) {
     window.open(api.getFileUrl(url), '_blank');
   };
 
-  // Filter Logic
+  const openViewModal = (bug) => {
+    setViewingBug(bug);
+    setShowViewModal(true);
+  };
+
   const filteredBugs = useMemo(() => {
     return bugs.filter(b => {
       const matchesSearch = b.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -107,12 +117,11 @@ function Bugs({ projectId }) {
         </button>
       </div>
 
-      {/* Modern Filter Tabs */}
       <div className="bug-filters-tabs">
         {statusOptions.map(opt => (
           <button 
             key={opt} 
-            className={`bug-tab ${statusFilter === opt ? 'active' : ''}`}
+            className={`bug-tab ${statusFilter === opt ? 'active' : ''}`} 
             onClick={() => setStatusFilter(opt)}
           >
             {opt}
@@ -144,7 +153,7 @@ function Bugs({ projectId }) {
                 <th style={{ fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: '#64748b' }}>TITLE</th>
                 <th style={{width: '180px', fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: '#64748b'}}>STATUS</th>
                 <th style={{width: '140px', fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: '#64748b'}}>EVIDENCE</th>
-                <th style={{width: '120px', textAlign: 'right', fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: '#64748b'}}>ACTIONS</th>
+                <th style={{width: '150px', textAlign: 'right', fontSize: '11px', fontWeight: '700', letterSpacing: '0.06em', color: '#64748b'}}>ACTIONS</th>
               </tr>
             </thead>
             <tbody>
@@ -173,15 +182,18 @@ function Bugs({ projectId }) {
                       <button 
                         className="attachment-preview" 
                         style={{border:'none', cursor:'pointer', background: 'transparent'}} 
-                        onClick={() => handleViewAttachment(bug.attachment)}
+                        onClick={() => handleViewAttachment(bug.attachment.url)}
                       >
-                        <FiEye style={{ fontSize: '16px' }} /> 
-                        <span style={{ fontSize: '13px', fontWeight: '600' }}>View File</span>
+                        <FiPaperclip style={{ fontSize: '16px' }} /> 
+                        <span style={{ fontSize: '13px', fontWeight: '600' }}>File</span>
                       </button>
                     ) : <span style={{color: '#cbd5e1', fontSize: '12px', fontStyle: 'italic', fontWeight: '500'}}>No evidence</span>}
                   </td>
                   <td className="actions-cell">
                     <div style={{display:'flex', gap:'8px', justifyContent:'flex-end'}}>
+                      <button className="action-btn primary" onClick={() => openViewModal(bug)} title="View Detail">
+                        <FiEye />
+                      </button>
                       <button className="action-btn" onClick={() => { setEditingBug(bug); setSelectedFile(null); setShowModal(true); }}>
                         <FiEdit2 />
                       </button>
@@ -192,24 +204,101 @@ function Bugs({ projectId }) {
                   </td>
                 </tr>
               ))}
-              {filteredBugs.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="no-bugs-state">
-                    <FiAlertTriangle size={56} style={{ color: '#cbd5e1', marginBottom: '20px' }} />
-                    <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#334155', marginBottom: '8px' }}>
-                      No defects found
-                    </h3>
-                    <p style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '500' }}>
-                      Change your filter or search criteria
-                    </p>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
       </div>
 
+      {/* --- MODAL 1: VIEW DETAIL --- */}
+      {showViewModal && viewingBug && (
+        <div className="modal-overlay">
+          <div className="modal modal-large view-modal">
+            <div className="modal-header view-modal-header">
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>
+                <FiAlertTriangle style={{ color: '#ef4444', fontSize: '24px' }} /> 
+                Defect Details
+              </h3>
+              <button className="close-btn" onClick={() => setShowViewModal(false)}>
+                <FiX />
+              </button>
+            </div>
+            <div className="modal-body modal-body-scroll">
+              <div className="view-section view-title-section">
+                <div className="view-header-row">
+                   <span className={`priority-badge ${(viewingBug.severity || 'Medium').toLowerCase()}`}>
+                     {viewingBug.severity} Severity
+                   </span>
+                   <span className={`status-badge ${(viewingBug.status || 'Active').toLowerCase().replace(/\s+/g, '')}`}>
+                     {viewingBug.status}
+                   </span>
+                </div>
+                <h2 className="view-title" style={{ marginTop: '20px', fontSize: '24px', fontWeight: '700', color: '#0f172a', lineHeight: '1.4' }}>
+                  {viewingBug.title}
+                </h2>
+                <div className="view-meta" style={{ marginTop: '16px', display: 'flex', flexWrap: 'wrap', gap: '20px' }}>
+                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
+                     <FiUser style={{ fontSize: '16px' }} /> 
+                     {viewingBug.assignedTo || 'Unassigned'}
+                   </span>
+                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b', fontWeight: '600' }}>
+                     <FiClock style={{ fontSize: '16px' }} /> 
+                     {new Date(viewingBug.createdAt).toLocaleDateString()}
+                   </span>
+                </div>
+              </div>
+
+              <div className="view-section">
+                <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.05em' }}>
+                  <FiInfo style={{ fontSize: '18px' }} /> 
+                  Technical Description
+                </h4>
+                <div className="view-content" style={{ whiteSpace: 'pre-wrap', lineHeight: '1.7', fontSize: '14px' }}>
+                  {viewingBug.description || "No description provided."}
+                </div>
+              </div>
+
+              {viewingBug.attachment && (
+                <div className="view-section">
+                  <h4 style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '0.05em' }}>
+                    <FiPaperclip style={{ fontSize: '18px' }} /> 
+                    Evidence Attachment
+                  </h4>
+                  <div 
+                    className="step-row-card attachment-card" 
+                    onClick={() => handleViewAttachment(viewingBug.attachment.url)}
+                  >
+                    <div className="run-icon attachment-icon">
+                      <FiFileText />
+                    </div>
+                    <div className="attachment-info">
+                      <div className="attachment-name">
+                        {viewingBug.attachment.originalName}
+                      </div>
+                      <div className="attachment-hint">
+                        Click to open in new tab
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setShowViewModal(false)}>
+                Close
+              </button>
+              <button 
+                className="btn btn-primary" 
+                onClick={() => { setShowViewModal(false); setEditingBug(viewingBug); setShowModal(true); }}
+              >
+                <FiEdit2 style={{ marginRight: '6px' }} /> 
+                Edit Defect
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL 2: CREATE/EDIT --- */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal modal-large">
@@ -232,21 +321,23 @@ function Bugs({ projectId }) {
                   <textarea 
                     name="description" 
                     defaultValue={editingBug?.description} 
-                    rows={5} 
+                    rows={5}
                     placeholder="Provide clear steps to reproduce the bug..."
                     style={{ lineHeight: '1.6' }}
                   />
                 </div>
-                
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Severity Level</label>
+                    <label>Severity</label>
                     <select name="severity" defaultValue={editingBug?.severity || 'Medium'}>
-                      <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+                      <option>Critical</option>
+                      <option>High</option>
+                      <option>Medium</option>
+                      <option>Low</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Current Status</label>
+                    <label>Status</label>
                     <select name="status" defaultValue={editingBug?.status || 'Active'}>
                       <option>Active</option>
                       <option>Under development</option>
@@ -256,15 +347,14 @@ function Bugs({ projectId }) {
                     </select>
                   </div>
                 </div>
-
                 <div className="form-group">
-                  <label>Evidence Attachment (Image/Video/PDF - Max 10MB)</label>
+                  <label>Evidence Attachment (Max 10MB)</label>
                   <div className="file-upload-area">
                     <input type="file" onChange={handleFileChange} />
                     <div className="file-upload-label">
                       <FiPaperclip size={28} style={{marginBottom:'12px', color: '#6366f1'}} />
                       <span style={{fontWeight:'600', fontSize: '14px', color: '#334155'}}>
-                        {selectedFile ? selectedFile.name : (editingBug?.attachment ? 'Change Evidence File' : 'Click to Upload Attachment')}
+                        {selectedFile ? selectedFile.name : (editingBug?.attachment ? 'Change Evidence File' : 'Upload New Evidence')}
                       </span>
                       <span style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px', fontWeight: '500' }}>
                         Supports images, videos, and PDF documents
@@ -278,10 +368,9 @@ function Bugs({ projectId }) {
                     </div>
                   )}
                 </div>
-
                 <div className="form-group">
                   <label>Assigned Developer</label>
-                  <input name="assignedTo" defaultValue={editingBug?.assignedTo} placeholder="Enter name" />
+                  <input name="assignedTo" defaultValue={editingBug?.assignedTo} placeholder="Enter developer name" />
                 </div>
               </div>
               <div className="modal-footer">
@@ -289,7 +378,7 @@ function Bugs({ projectId }) {
                   Cancel
                 </button>
                 <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                   {isSaving ? "Synchronizing..." : "Commit Defect Record"}
+                  {isSaving ? "Syncing..." : "Save Defect"}
                 </button>
               </div>
             </form>
