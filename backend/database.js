@@ -16,7 +16,6 @@ const testRunSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.T
 const executionResultSchema = new mongoose.Schema({ runId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestRun' }, testCaseId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestCase' }, status: String, comments: String, executedAt: Date });
 const reportSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' }, name: String, runId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestRun' }, format: String, filePath: String, fileName: String, generatedAt: { type: Date, default: Date.now } });
 
-// UPDATED BUG SCHEMA
 const bugSchema = new mongoose.Schema({
   projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
   title: { type: String, required: true },
@@ -24,12 +23,10 @@ const bugSchema = new mongoose.Schema({
   severity: { type: String, default: 'Medium' },
   status: { type: String, default: 'Active' },
   assignedTo: String,
-  testCaseId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestCase' },
   attachment: {
-    fileName: String,
+    url: String,
     originalName: String,
-    mimeType: String,
-    url: String
+    mimeType: String
   }
 }, { timestamps: true });
 
@@ -47,8 +44,9 @@ const Setting = mongoose.model('Setting', settingsSchema);
 export async function initializeDatabase() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
+    console.log('✅ MongoDB Connected');
     if (await Project.countDocuments() === 0) await new Project({ name: 'Default Project' }).save();
-  } catch (e) { console.error(e); process.exit(1); }
+  } catch (e) { process.exit(1); }
 }
 
 export const getAllProjects = () => Project.find().sort({ name: 1 });
@@ -59,20 +57,22 @@ export const createBug = (data) => new Bug(data).save();
 export const updateBug = (id, data) => Bug.findByIdAndUpdate(id, data, { new: true });
 export const deleteBug = (id) => Bug.findByIdAndDelete(id);
 export const getAllTestSuites = (projectId) => TestSuite.find({ projectId }).sort({ createdAt: -1 });
+export const getTestSuiteById = (id) => TestSuite.findById(id);
 export const createTestSuite = (data) => new TestSuite(data).save();
-export const deleteTestSuite = async (id) => { await TestCase.deleteMany({ suiteId: id }); return TestSuite.findByIdAndDelete(id); };
+export const updateTestSuite = (id, data) => TestSuite.findByIdAndUpdate(id, data, { new: true });
+export const deleteTestSuite = async (id) => { if (!mongoose.Types.ObjectId.isValid(id)) return null; await TestCase.deleteMany({ suiteId: id }); return TestSuite.findByIdAndDelete(id); };
 export const getAllTestCases = (projectId) => TestCase.find({ projectId }).sort({ createdAt: -1 });
 export const getTestCasesBySuiteId = (suiteId) => TestCase.find({ suiteId });
 export const getTestCaseById = (id) => TestCase.findById(id);
 export const createTestCase = (data) => new TestCase(data).save();
 export const createTestCases = (dataArray) => TestCase.insertMany(dataArray);
 export const updateTestCase = (id, data) => TestCase.findByIdAndUpdate(id, data, { new: true });
-export const deleteTestCase = (id) => TestCase.findByIdAndDelete(id);
+export const deleteTestCase = (id) => { if (!mongoose.Types.ObjectId.isValid(id)) return null; return TestCase.findByIdAndDelete(id); };
 export const getAllTestRuns = (projectId) => TestRun.find({ projectId }).sort({ createdAt: -1 });
 export const getTestRunById = (id) => TestRun.findById(id);
 export const createTestRun = (data) => new TestRun(data).save();
 export const updateTestRun = (id, data) => TestRun.findByIdAndUpdate(id, data, { new: true });
-export const deleteTestRun = async (id) => { await ExecutionResult.deleteMany({ runId: id }); return TestRun.findByIdAndDelete(id); };
+export const deleteTestRun = async (id) => { if (!mongoose.Types.ObjectId.isValid(id)) return null; await ExecutionResult.deleteMany({ runId: id }); return TestRun.findByIdAndDelete(id); };
 export const getExecutionResultsByRunId = (runId) => ExecutionResult.find({ runId });
 export const createExecutionResult = (data) => new ExecutionResult(data).save();
 export const updateExecutionResult = (id, data) => ExecutionResult.findByIdAndUpdate(id, data, { new: true });
@@ -92,6 +92,7 @@ export const getSettings = async () => {
   return result;
 };
 export const updateSettings = (category, data) => Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true });
+export const updateAllSettings = (data) => Setting.findOneAndUpdate({ category: 'all' }, { data }, { upsert: true, new: true });
 export const getStatistics = async (projectId) => {
   const query = { projectId };
   const totalTestCases = await TestCase.countDocuments(query);
