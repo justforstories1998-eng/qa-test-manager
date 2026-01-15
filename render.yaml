@@ -1,0 +1,13 @@
+services:
+  # The Frontend (Static Site)
+  - type: web
+    name: qamanagerapp # Use your actual frontend name
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    publishDir: build # Ensure this matches your vite.config.js outDir
+    routes:
+      - source: /api/*
+        destination: https://your-backend-url.onrender.com/api/* # Proxy API calls
+      - source: /*
+        handler: index.html # This handles the SPA refresh fix
