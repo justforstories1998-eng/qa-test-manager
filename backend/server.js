@@ -1,40 +1,79 @@
 import express from 'express';
 import cors from 'cors';
-import { dirname, join } from 'path';
+import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './database.js';
 import routes from './routes.js';
 
+// Configuration
 dotenv.config();
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// FOLDER SETUP
-const uploadDir = join(__dirname, 'uploads');
-const bugDir = join(uploadDir, 'bugs');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-if (!fs.existsSync(bugDir)) fs.mkdirSync(bugDir, { recursive: true });
+// ============================================
+// DIRECTORY SETUP (Important for Render)
+// ============================================
+const uploadDir = resolve(__dirname, 'uploads');
+const bugUploadDir = join(uploadDir, 'bugs');
+const reportUploadDir = join(uploadDir, 'reports');
 
+// Ensure all required folders exist
+[uploadDir, bugUploadDir, reportUploadDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`📁 Created directory: ${dir}`);
+  }
+});
+
+// ============================================
+// MIDDLEWARE
+// ============================================
 app.use(cors({ origin: '*' }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// STATIC DIRECTORIES
+// STATIC FILE SERVING
+// This allows: https://your-app.onrender.com/uploads/bugs/filename.mp4
 app.use('/uploads', express.static(uploadDir));
-app.use('/uploads/bugs', express.static(bugDir));
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+// ============================================
+// ROUTES
+// ============================================
+
+// Health Check for Deployment
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// API Routes
 app.use('/api', routes);
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('❌ Server Error:', err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    error: err.message || 'Internal server error'
+  });
+});
+
+// ============================================
+// SERVER STARTUP
+// ============================================
 async function startServer() {
   try {
     await initializeDatabase();
-    app.listen(PORT, () => console.log(`🚀 API: http://localhost:${PORT}/api`));
-  } catch (error) { console.error(error); process.exit(1); }
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`🌐 Static files served from: ${uploadDir}`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
 }
 
 startServer();
