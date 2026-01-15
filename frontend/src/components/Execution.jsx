@@ -4,7 +4,8 @@ import {
   FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiFolder, 
   FiHash, FiTarget, FiTrash2, FiMinusCircle, FiCpu, FiMessageSquare, 
   FiExternalLink, FiFilter, FiAlertTriangle, FiZap, FiLayers,
-  FiActivity, FiShield, FiCommand
+  FiActivity, FiShield, FiCommand, FiTrendingUp, FiAward,
+  FiStar, FiGrid, FiMonitor, FiServer, FiDatabase
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
@@ -101,6 +102,33 @@ function Execution({
     } catch (err) { toast.error("Failed to report bug"); }
   };
 
+  const handleCreateTestRun = async (e) => {
+    e.preventDefault();
+    if (!selectedSuiteId) {
+      toast.error("Please select a test suite");
+      return;
+    }
+    if (!newRunData.name.trim()) {
+      toast.error("Please enter a run name");
+      return;
+    }
+
+    try {
+      await onCreateTestRun({
+        name: newRunData.name,
+        environment: newRunData.environment,
+        tester: newRunData.tester,
+        testSuiteId: selectedSuiteId
+      });
+      setShowNewRunModal(false);
+      setNewRunData({ name: '', environment: 'QA', tester: '' });
+      setSelectedSuiteId(null);
+      toast.success("Test run created successfully");
+    } catch (err) {
+      toast.error("Failed to create test run");
+    }
+  };
+
   const cleanStatus = (s) => (s || 'notrun').toLowerCase().replace(' ', '').replace('/', '');
 
   const getProgressPercentage = (run) => {
@@ -109,217 +137,270 @@ function Execution({
     return total > 0 ? Math.round((completed / total) * 100) : 0;
   };
 
+  const getCompletionStats = (run) => {
+    const total = (run.passed || 0) + (run.failed || 0) + (run.blocked || 0) + (run.na || 0);
+    const executed = (run.passed || 0) + (run.failed || 0) + (run.blocked || 0) + (run.na || 0);
+    return { total, executed };
+  };
+
   if (viewMode === 'execution' && activeRun) {
     const tc = currentTest?.testCase;
     const progress = executionResults.length > 0 ? Math.round(((currentTestIndex + 1) / executionResults.length) * 100) : 0;
+    const completedCount = executionResults.filter(r => r.status && r.status !== 'Not Run').length;
     
     return (
-      <div className="execution-view">
-        <div className="execution-header">
-          <div className="header-left">
-            <button className="btn-back-premium" onClick={() => setViewMode('list')}>
-              <FiChevronLeft />
-              <span>Dashboard</span>
-            </button>
-            <div className="header-divider"></div>
-            <div className="run-title-group">
-              <div className="run-title-icon">
-                <FiZap />
+      <div className="execution-view-ultra">
+        {/* Animated Background */}
+        <div className="exec-bg-effects">
+          <div className="exec-gradient-orb orb-1"></div>
+          <div className="exec-gradient-orb orb-2"></div>
+          <div className="exec-gradient-orb orb-3"></div>
+        </div>
+
+        {/* Header */}
+        <header className="exec-header-ultra">
+          <div className="exec-header-left">
+            <button className="btn-back-ultra" onClick={() => setViewMode('list')}>
+              <div className="btn-back-icon">
+                <FiChevronLeft />
               </div>
-              <div className="run-title-content">
-                <h2>{activeRun.name}</h2>
-                <div className="run-meta-badges">
-                  <span className="meta-badge environment">
-                    <FiLayers /> {activeRun.environment}
+              <span>Back</span>
+            </button>
+            
+            <div className="exec-run-info">
+              <div className="run-icon-animated">
+                <FiZap />
+                <div className="icon-pulse"></div>
+              </div>
+              <div className="run-details">
+                <h1>{activeRun.name}</h1>
+                <div className="run-badges">
+                  <span className="badge-environment">
+                    <FiServer /> {activeRun.environment}
                   </span>
-                  <span className="meta-badge progress-badge">
-                    <FiActivity /> {progress}% Complete
+                  <span className="badge-progress">
+                    <FiActivity /> {completedCount}/{executionResults.length} Executed
                   </span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="header-right">
-            <button className="btn-icon-premium danger" onClick={handleRemoveCase} title="Remove Case">
+
+          <div className="exec-header-right">
+            <button className="btn-icon-ultra danger" onClick={handleRemoveCase} title="Remove Test">
               <FiTrash2 />
             </button>
-            <div className="run-progress-indicator">
-              <div className="progress-ring">
-                <svg viewBox="0 0 36 36">
-                  <path className="progress-ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  <path className="progress-ring-fill" strokeDasharray={`${progress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            
+            <div className="progress-display-ultra">
+              <div className="progress-circle-container">
+                <svg className="progress-circle" viewBox="0 0 100 100">
+                  <circle className="progress-bg" cx="50" cy="50" r="42" />
+                  <circle 
+                    className="progress-fill" 
+                    cx="50" cy="50" r="42" 
+                    style={{ strokeDasharray: `${progress * 2.64} 264` }}
+                  />
                 </svg>
-                <span className="progress-text">{currentTestIndex + 1}</span>
+                <div className="progress-center">
+                  <span className="progress-number">{currentTestIndex + 1}</span>
+                  <span className="progress-divider">/</span>
+                  <span className="progress-total">{executionResults.length}</span>
+                </div>
               </div>
-              <div className="progress-label">
-                <span className="progress-current">Unit {currentTestIndex + 1}</span>
-                <span className="progress-total">of {executionResults.length}</span>
+              <div className="progress-info">
+                <span className="progress-label">Current Test</span>
+                <span className="progress-percent">{progress}% Complete</span>
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="execution-layout-container">
-          <aside className="execution-sidebar">
-            <div className="sidebar-header">
+        {/* Main Layout */}
+        <div className="exec-layout-ultra">
+          {/* Sidebar */}
+          <aside className="exec-sidebar-ultra">
+            <div className="sidebar-header-ultra">
               <div className="sidebar-title">
                 <FiList />
                 <span>Test Queue</span>
               </div>
-              <span className="queue-count">{executionResults.length}</span>
+              <div className="queue-badge">{executionResults.length}</div>
             </div>
-            <div className="execution-test-list">
+            
+            <div className="test-queue-list">
               {executionResults.map((res, idx) => (
                 <div 
                   key={idx} 
-                  className={`test-nav-item ${idx === currentTestIndex ? 'active' : ''} status-${cleanStatus(res.status)}`} 
+                  className={`queue-item ${idx === currentTestIndex ? 'active' : ''} status-${cleanStatus(res.status)}`}
                   onClick={() => setCurrentTestIndex(idx)}
                 >
-                  <div className="nav-item-indicator">
-                    <span className="status-dot"></span>
-                    <span className="nav-index">{idx + 1}</span>
+                  <div className="queue-item-number">
+                    <span>{idx + 1}</span>
+                    <div className="status-glow"></div>
                   </div>
-                  <div className="nav-item-content">
-                    <span className="test-nav-title">{res.testCase?.title}</span>
-                    <span className="test-nav-status">{res.status || 'Not Run'}</span>
+                  <div className="queue-item-content">
+                    <span className="queue-item-title">{res.testCase?.title}</span>
+                    <span className="queue-item-status">{res.status || 'Pending'}</span>
                   </div>
-                  {idx === currentTestIndex && <div className="active-indicator"></div>}
+                  {idx === currentTestIndex && (
+                    <div className="active-marker">
+                      <FiChevronRight />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
           </aside>
 
-          <main className="execution-main-content">
-            <div className="test-execution-card">
+          {/* Main Content */}
+          <main className="exec-main-ultra">
+            <div className="test-content-ultra">
               {tc ? (
                 <>
-                  <div className="test-card-header">
-                    <div className="header-top-row">
-                      <div className="test-id-pill">
+                  {/* Test Header */}
+                  <div className="test-header-ultra">
+                    <div className="test-header-top">
+                      <div className="test-id-ultra">
                         <FiHash />
                         <span>{tc.adoId || 'TC-000'}</span>
                       </div>
-                      <div className={`current-status-badge ${cleanStatus(currentTest?.status)}`}>
-                        {currentTest?.status || 'Pending'}
+                      <div className={`status-indicator-ultra ${cleanStatus(currentTest?.status)}`}>
+                        <span className="status-dot"></span>
+                        <span>{currentTest?.status || 'Pending'}</span>
                       </div>
                     </div>
-                    <h1 className="test-display-title">{tc.title}</h1>
+                    <h2 className="test-title-ultra">{tc.title}</h2>
                     {tc.description && (
-                      <p className="test-description">{tc.description}</p>
+                      <p className="test-desc-ultra">{tc.description}</p>
                     )}
                   </div>
-                  
-                  <div className="test-steps-container">
-                    <div className="steps-header">
-                      <FiCommand />
-                      <span>Test Steps</span>
-                      <span className="steps-count">{tc.steps?.length || 0} steps</span>
-                    </div>
-                    {tc.steps?.map((s, i) => (
-                      <div key={i} className="step-row-card">
-                        <div className="step-number-badge">
-                          <span>{s.stepNumber}</span>
-                        </div>
-                        <div className="step-content">
-                          <div className="step-section action">
-                            <label>
-                              <FiPlay />
-                              Action
-                            </label>
-                            <div className="step-text">{s.action}</div>
-                          </div>
-                          <div className="step-section expected">
-                            <label>
-                              <FiTarget />
-                              Expected Result
-                            </label>
-                            <div className="step-text">{s.expectedResult}</div>
-                          </div>
-                        </div>
+
+                  {/* Test Steps */}
+                  <div className="steps-section-ultra">
+                    <div className="steps-header-ultra">
+                      <div className="steps-title">
+                        <FiCommand />
+                        <span>Test Steps</span>
                       </div>
-                    ))}
+                      <div className="steps-count-badge">{tc.steps?.length || 0} Steps</div>
+                    </div>
+
+                    <div className="steps-list-ultra">
+                      {tc.steps?.map((s, i) => (
+                        <div key={i} className="step-card-ultra">
+                          <div className="step-number-ultra">
+                            <span>{s.stepNumber}</span>
+                          </div>
+                          <div className="step-body-ultra">
+                            <div className="step-action-section">
+                              <div className="step-label">
+                                <FiPlay />
+                                <span>Action</span>
+                              </div>
+                              <p className="step-text-ultra">{s.action}</p>
+                            </div>
+                            <div className="step-expected-section">
+                              <div className="step-label">
+                                <FiTarget />
+                                <span>Expected Result</span>
+                              </div>
+                              <p className="step-text-ultra">{s.expectedResult}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  
-                  <div className="execution-comments-area">
-                    <label>
+
+                  {/* Notes Section */}
+                  <div className="notes-section-ultra">
+                    <div className="notes-header">
                       <FiMessageSquare />
-                      <span>Analyst Notes</span>
-                    </label>
-                    <textarea 
-                      value={comments} 
-                      onChange={(e) => setComments(e.target.value)} 
-                      placeholder="Enter observations, notes, or additional context here..." 
+                      <span>Execution Notes</span>
+                    </div>
+                    <textarea
+                      className="notes-input-ultra"
+                      value={comments}
+                      onChange={(e) => setComments(e.target.value)}
+                      placeholder="Add your observations, notes, or any relevant details here..."
                     />
                   </div>
                 </>
               ) : (
-                <div className="loading-state">
-                  <div className="loading-spinner"></div>
-                  <span>Initializing Test Data...</span>
+                <div className="loading-ultra">
+                  <div className="loading-spinner-ultra"></div>
+                  <span>Loading test data...</span>
                 </div>
               )}
             </div>
 
-            <div className="execution-action-bar">
-              <div className="status-buttons-group">
+            {/* Action Bar */}
+            <div className="action-bar-ultra">
+              <div className="status-actions-ultra">
                 <button 
-                  className={`btn-status pass ${isSaving ? 'saving' : ''}`} 
+                  className={`status-btn-ultra pass ${isSaving ? 'saving' : ''}`}
                   onClick={() => handleQuickStatus('Passed')}
                   disabled={isSaving}
                 >
                   <FiCheckCircle />
                   <span>Pass</span>
+                  <div className="btn-shine"></div>
                 </button>
                 <button 
-                  className={`btn-status fail ${isSaving ? 'saving' : ''}`} 
+                  className={`status-btn-ultra fail ${isSaving ? 'saving' : ''}`}
                   onClick={() => handleQuickStatus('Failed')}
                   disabled={isSaving}
                 >
                   <FiXCircle />
                   <span>Fail</span>
+                  <div className="btn-shine"></div>
                 </button>
                 <button 
-                  className={`btn-status block ${isSaving ? 'saving' : ''}`} 
+                  className={`status-btn-ultra block ${isSaving ? 'saving' : ''}`}
                   onClick={() => handleQuickStatus('Blocked')}
                   disabled={isSaving}
                 >
                   <FiAlertCircle />
                   <span>Block</span>
+                  <div className="btn-shine"></div>
                 </button>
                 <button 
-                  className={`btn-status na ${isSaving ? 'saving' : ''}`} 
+                  className={`status-btn-ultra na ${isSaving ? 'saving' : ''}`}
                   onClick={() => handleQuickStatus('N/A')}
                   disabled={isSaving}
                 >
                   <FiMinusCircle />
                   <span>N/A</span>
+                  <div className="btn-shine"></div>
                 </button>
-                
-                <div className="action-divider"></div>
-                
+
+                <div className="action-separator"></div>
+
                 <button 
-                  className="btn-status bug" 
+                  className="status-btn-ultra bug"
                   onClick={() => setShowBugModal(true)}
                 >
                   <FiAlertTriangle />
                   <span>Report Bug</span>
                 </button>
               </div>
-              
-              <div className="navigation-controls">
+
+              <div className="nav-actions-ultra">
                 <button 
-                  className="btn-nav" 
-                  onClick={() => setCurrentTestIndex(p => Math.max(0, p - 1))} 
+                  className="nav-btn-ultra"
+                  onClick={() => setCurrentTestIndex(p => Math.max(0, p - 1))}
                   disabled={currentTestIndex === 0}
                 >
                   <FiChevronLeft />
                 </button>
-                <div className="nav-indicator">
-                  {currentTestIndex + 1} / {executionResults.length}
+                <div className="nav-counter">
+                  <span className="current">{currentTestIndex + 1}</span>
+                  <span className="separator">of</span>
+                  <span className="total">{executionResults.length}</span>
                 </div>
                 <button 
-                  className="btn-nav" 
-                  onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))} 
+                  className="nav-btn-ultra"
+                  onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))}
                   disabled={currentTestIndex === executionResults.length - 1}
                 >
                   <FiChevronRight />
@@ -329,75 +410,73 @@ function Execution({
           </main>
         </div>
 
-        {/* Bug Report Modal */}
+        {/* Bug Modal */}
         {showBugModal && (
-          <div className="modal-overlay">
-            <div className="modal modal-large">
-              <div className="modal-header">
-                <div className="modal-title-group">
-                  <div className="modal-icon bug">
+          <div className="modal-overlay-ultra">
+            <div className="modal-ultra modal-lg">
+              <div className="modal-header-ultra">
+                <div className="modal-title-ultra">
+                  <div className="modal-icon-ultra danger">
                     <FiAlertTriangle />
                   </div>
                   <div>
                     <h3>Report Bug</h3>
-                    <p className="modal-subtitle">for: {tc?.title}</p>
+                    <p>for: {tc?.title}</p>
                   </div>
                 </div>
-                <button className="close-btn" onClick={() => setShowBugModal(false)}>
+                <button className="modal-close-ultra" onClick={() => setShowBugModal(false)}>
                   <FiX />
                 </button>
               </div>
               <form onSubmit={handleReportBug}>
-                <div className="modal-body">
-                  <div className="form-group">
+                <div className="modal-body-ultra">
+                  <div className="form-group-ultra">
                     <label>Bug Title</label>
                     <input 
+                      type="text"
                       name="title" 
                       defaultValue={`Bug in: ${tc?.title}`} 
                       required 
-                      className="form-input"
+                      className="input-ultra"
                     />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group-ultra">
                     <label>Steps to Reproduce</label>
                     <textarea 
                       name="description" 
                       rows={5} 
                       defaultValue={tc?.steps?.map(s => `Step ${s.stepNumber}: ${s.action}`).join('\n')} 
-                      className="form-textarea"
+                      className="textarea-ultra"
                     />
                   </div>
-                  <div className="form-row">
-                    <div className="form-group">
+                  <div className="form-row-ultra">
+                    <div className="form-group-ultra">
                       <label>Severity</label>
-                      <select name="severity" className="form-select">
+                      <select name="severity" className="select-ultra">
                         <option>Critical</option>
                         <option>High</option>
                         <option selected>Medium</option>
                         <option>Low</option>
                       </select>
                     </div>
-                    <div className="form-group">
+                    <div className="form-group-ultra">
                       <label>Assignee</label>
                       <input 
+                        type="text"
                         name="assignedTo" 
                         placeholder="Developer name" 
-                        className="form-input"
+                        className="input-ultra"
                       />
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer">
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary" 
-                    onClick={() => setShowBugModal(false)}
-                  >
+                <div className="modal-footer-ultra">
+                  <button type="button" className="btn-ultra secondary" onClick={() => setShowBugModal(false)}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn btn-danger">
+                  <button type="submit" className="btn-ultra danger">
                     <FiAlertTriangle />
-                    Confirm & Log Bug
+                    <span>Log Bug</span>
                   </button>
                 </div>
               </form>
@@ -410,112 +489,196 @@ function Execution({
 
   // Dashboard View
   return (
-    <div className="execution-page">
-      <div className="page-header-premium">
-        <div className="header-content">
-          <div className="header-icon">
-            <FiPlay />
-          </div>
-          <div className="header-text">
-            <h2 className="section-title">Execution Control</h2>
-            <p className="section-subtitle">Manage and execute test runs across environments</p>
-          </div>
-        </div>
-        <button className="btn btn-primary-premium" onClick={() => setShowNewRunModal(true)}>
-          <FiPlus />
-          <span>New Test Run</span>
-        </button>
+    <div className="execution-dashboard-ultra">
+      {/* Background Effects */}
+      <div className="dashboard-bg-effects">
+        <div className="bg-gradient-1"></div>
+        <div className="bg-gradient-2"></div>
+        <div className="bg-grid"></div>
       </div>
 
-      {testRuns.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">
+      {/* Header */}
+      <header className="dashboard-header-ultra">
+        <div className="header-content-ultra">
+          <div className="header-icon-ultra">
             <FiPlay />
+            <div className="icon-ring"></div>
+          </div>
+          <div className="header-text-ultra">
+            <h1>Execution Control</h1>
+            <p>Manage and execute your test runs with precision</p>
+          </div>
+        </div>
+        <button className="btn-create-ultra" onClick={() => setShowNewRunModal(true)}>
+          <FiPlus />
+          <span>New Test Run</span>
+          <div className="btn-glow"></div>
+        </button>
+      </header>
+
+      {/* Stats Overview */}
+      <div className="stats-overview-ultra">
+        <div className="stat-card-ultra">
+          <div className="stat-icon-ultra blue">
+            <FiFolder />
+          </div>
+          <div className="stat-info">
+            <span className="stat-number">{testRuns.length}</span>
+            <span className="stat-label">Total Runs</span>
+          </div>
+        </div>
+        <div className="stat-card-ultra">
+          <div className="stat-icon-ultra green">
+            <FiCheckCircle />
+          </div>
+          <div className="stat-info">
+            <span className="stat-number">{testRuns.reduce((acc, r) => acc + (r.passed || 0), 0)}</span>
+            <span className="stat-label">Tests Passed</span>
+          </div>
+        </div>
+        <div className="stat-card-ultra">
+          <div className="stat-icon-ultra red">
+            <FiXCircle />
+          </div>
+          <div className="stat-info">
+            <span className="stat-number">{testRuns.reduce((acc, r) => acc + (r.failed || 0), 0)}</span>
+            <span className="stat-label">Tests Failed</span>
+          </div>
+        </div>
+        <div className="stat-card-ultra">
+          <div className="stat-icon-ultra purple">
+            <FiTrendingUp />
+          </div>
+          <div className="stat-info">
+            <span className="stat-number">
+              {testRuns.length > 0 ? Math.round(testRuns.reduce((acc, r) => acc + getProgressPercentage(r), 0) / testRuns.length) : 0}%
+            </span>
+            <span className="stat-label">Avg. Progress</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Test Runs Grid */}
+      {testRuns.length === 0 ? (
+        <div className="empty-state-ultra">
+          <div className="empty-illustration">
+            <div className="empty-icon-ultra">
+              <FiPlay />
+            </div>
+            <div className="empty-circles">
+              <div className="circle c1"></div>
+              <div className="circle c2"></div>
+              <div className="circle c3"></div>
+            </div>
           </div>
           <h3>No Test Runs Yet</h3>
-          <p>Create your first test run to begin executing tests</p>
-          <button className="btn btn-primary-premium" onClick={() => setShowNewRunModal(true)}>
+          <p>Create your first test run to start executing tests and tracking results</p>
+          <button className="btn-create-ultra" onClick={() => setShowNewRunModal(true)}>
             <FiPlus />
             <span>Create Test Run</span>
+            <div className="btn-glow"></div>
           </button>
         </div>
       ) : (
-        <div className="test-runs-grid">
-          {testRuns.map(run => {
+        <div className="runs-grid-ultra">
+          {testRuns.map((run, index) => {
             const progress = getProgressPercentage(run);
+            const stats = getCompletionStats(run);
             return (
-              <div key={run._id || run.id} className="test-run-card-premium">
-                <div className="card-header">
-                  <div className="card-title-group">
-                    <div className="run-icon-premium">
-                      <FiPlay />
-                    </div>
-                    <div className="run-info">
-                      <h3>{run.name}</h3>
-                      <span className="environment-badge">{run.environment}</span>
+              <div 
+                key={run._id || run.id} 
+                className="run-card-ultra"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="card-glow"></div>
+                
+                <div className="card-header-ultra">
+                  <div className="run-icon-ultra">
+                    <FiPlay />
+                    <div className="icon-pulse-ring"></div>
+                  </div>
+                  <div className="run-info-ultra">
+                    <h3>{run.name}</h3>
+                    <div className="run-tags">
+                      <span className="tag environment">
+                        <FiServer /> {run.environment}
+                      </span>
                     </div>
                   </div>
                   <button 
-                    className="btn-icon-premium danger" 
+                    className="btn-delete-ultra"
                     onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
                   >
                     <FiTrash2 />
                   </button>
                 </div>
 
-                <div className="card-progress">
+                <div className="progress-section-ultra">
                   <div className="progress-header">
-                    <span>Progress</span>
-                    <span className="progress-percentage">{progress}%</span>
+                    <span>Execution Progress</span>
+                    <span className="progress-value">{progress}%</span>
                   </div>
-                  <div className="progress-bar-container">
-                    <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
-                  </div>
-                </div>
-
-                <div className="card-stats-premium">
-                  <div className="stat-item passed">
-                    <div className="stat-icon"><FiCheckCircle /></div>
-                    <div className="stat-content">
-                      <span className="stat-value">{run.passed || 0}</span>
-                      <span className="stat-label">Passed</span>
-                    </div>
-                  </div>
-                  <div className="stat-item failed">
-                    <div className="stat-icon"><FiXCircle /></div>
-                    <div className="stat-content">
-                      <span className="stat-value">{run.failed || 0}</span>
-                      <span className="stat-label">Failed</span>
-                    </div>
-                  </div>
-                  <div className="stat-item blocked">
-                    <div className="stat-icon"><FiAlertCircle /></div>
-                    <div className="stat-content">
-                      <span className="stat-value">{run.blocked || 0}</span>
-                      <span className="stat-label">Blocked</span>
-                    </div>
-                  </div>
-                  <div className="stat-item na">
-                    <div className="stat-icon"><FiMinusCircle /></div>
-                    <div className="stat-content">
-                      <span className="stat-value">{run.na || 0}</span>
-                      <span className="stat-label">N/A</span>
+                  <div className="progress-track-ultra">
+                    <div 
+                      className="progress-fill-ultra" 
+                      style={{ width: `${progress}%` }}
+                    >
+                      <div className="progress-shine"></div>
                     </div>
                   </div>
                 </div>
 
-                <div className="card-actions">
+                <div className="stats-grid-ultra">
+                  <div className="mini-stat passed">
+                    <div className="mini-stat-icon">
+                      <FiCheckCircle />
+                    </div>
+                    <div className="mini-stat-info">
+                      <span className="mini-stat-value">{run.passed || 0}</span>
+                      <span className="mini-stat-label">Passed</span>
+                    </div>
+                  </div>
+                  <div className="mini-stat failed">
+                    <div className="mini-stat-icon">
+                      <FiXCircle />
+                    </div>
+                    <div className="mini-stat-info">
+                      <span className="mini-stat-value">{run.failed || 0}</span>
+                      <span className="mini-stat-label">Failed</span>
+                    </div>
+                  </div>
+                  <div className="mini-stat blocked">
+                    <div className="mini-stat-icon">
+                      <FiAlertCircle />
+                    </div>
+                    <div className="mini-stat-info">
+                      <span className="mini-stat-value">{run.blocked || 0}</span>
+                      <span className="mini-stat-label">Blocked</span>
+                    </div>
+                  </div>
+                  <div className="mini-stat na">
+                    <div className="mini-stat-icon">
+                      <FiMinusCircle />
+                    </div>
+                    <div className="mini-stat-info">
+                      <span className="mini-stat-value">{run.na || 0}</span>
+                      <span className="mini-stat-label">N/A</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card-actions-ultra">
                   <button 
-                    className="btn-execute" 
+                    className="btn-execute-ultra"
                     onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}
                   >
                     <FiPlay />
                     <span>Continue Execution</span>
+                    <div className="btn-shine"></div>
                   </button>
                   <button 
-                    className="btn-results" 
-                    onClick={() => setShowResultsModal(run)} 
-                    title="View Results"
+                    className="btn-results-ultra"
+                    onClick={() => setShowResultsModal(run)}
                   >
                     <FiExternalLink />
                   </button>
@@ -526,88 +689,170 @@ function Execution({
         </div>
       )}
 
+      {/* New Test Run Modal - THIS WAS MISSING */}
+      {showNewRunModal && (
+        <div className="modal-overlay-ultra">
+          <div className="modal-ultra modal-lg">
+            <div className="modal-header-ultra">
+              <div className="modal-title-ultra">
+                <div className="modal-icon-ultra primary">
+                  <FiPlay />
+                </div>
+                <div>
+                  <h3>Create New Test Run</h3>
+                  <p>Configure and start a new test execution</p>
+                </div>
+              </div>
+              <button className="modal-close-ultra" onClick={() => {
+                setShowNewRunModal(false);
+                setNewRunData({ name: '', environment: 'QA', tester: '' });
+                setSelectedSuiteId(null);
+              }}>
+                <FiX />
+              </button>
+            </div>
+            <form onSubmit={handleCreateTestRun}>
+              <div className="modal-body-ultra">
+                <div className="form-group-ultra">
+                  <label>Run Name *</label>
+                  <input 
+                    type="text"
+                    value={newRunData.name}
+                    onChange={(e) => setNewRunData({ ...newRunData, name: e.target.value })}
+                    placeholder="e.g., Sprint 5 Regression Test"
+                    required 
+                    className="input-ultra"
+                  />
+                </div>
+                
+                <div className="form-group-ultra">
+                  <label>Test Suite *</label>
+                  <select 
+                    value={selectedSuiteId || ''}
+                    onChange={(e) => setSelectedSuiteId(e.target.value)}
+                    required
+                    className="select-ultra"
+                  >
+                    <option value="">Select a test suite...</option>
+                    {testSuites.map(suite => (
+                      <option key={suite._id || suite.id} value={suite._id || suite.id}>
+                        {suite.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-row-ultra">
+                  <div className="form-group-ultra">
+                    <label>Environment</label>
+                    <select 
+                      value={newRunData.environment}
+                      onChange={(e) => setNewRunData({ ...newRunData, environment: e.target.value })}
+                      className="select-ultra"
+                    >
+                      <option value="QA">QA</option>
+                      <option value="Staging">Staging</option>
+                      <option value="UAT">UAT</option>
+                      <option value="Production">Production</option>
+                      <option value="Development">Development</option>
+                    </select>
+                  </div>
+                  <div className="form-group-ultra">
+                    <label>Tester</label>
+                    <input 
+                      type="text"
+                      value={newRunData.tester}
+                      onChange={(e) => setNewRunData({ ...newRunData, tester: e.target.value })}
+                      placeholder="Tester name" 
+                      className="input-ultra"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer-ultra">
+                <button 
+                  type="button" 
+                  className="btn-ultra secondary" 
+                  onClick={() => {
+                    setShowNewRunModal(false);
+                    setNewRunData({ name: '', environment: 'QA', tester: '' });
+                    setSelectedSuiteId(null);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn-ultra primary">
+                  <FiPlay />
+                  <span>Create Test Run</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Results Modal */}
       {showResultsModal && (
-        <div className="modal-overlay">
-          <div className="modal modal-xlarge">
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <div className="modal-icon results">
+        <div className="modal-overlay-ultra">
+          <div className="modal-ultra modal-xl">
+            <div className="modal-header-ultra">
+              <div className="modal-title-ultra">
+                <div className="modal-icon-ultra primary">
                   <FiList />
                 </div>
                 <div>
                   <h3>{showResultsModal.name}</h3>
-                  <p className="modal-subtitle">{showResultsModal.environment} Environment</p>
+                  <p>{showResultsModal.environment} Environment</p>
                 </div>
               </div>
-              <button className="close-btn" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
+              <button className="modal-close-ultra" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
                 <FiX />
               </button>
             </div>
-            <div className="modal-body">
-              <div className="results-filter-bar">
+            <div className="modal-body-ultra">
+              <div className="filter-bar-ultra">
                 <div className="filter-label">
                   <FiFilter />
-                  <span>Filter by Status</span>
+                  <span>Filter Results</span>
                 </div>
-                <div className="filter-buttons">
-                  <button 
-                    className={`filter-tag ${resultsFilter === 'All' ? 'active' : ''}`} 
-                    onClick={() => setResultsFilter('All')}
-                  >
-                    All
-                    <span className="filter-count">{executionResults.length}</span>
-                  </button>
-                  <button 
-                    className={`filter-tag passed ${resultsFilter === 'Passed' ? 'active' : ''}`} 
-                    onClick={() => setResultsFilter('Passed')}
-                  >
-                    Passed
-                  </button>
-                  <button 
-                    className={`filter-tag failed ${resultsFilter === 'Failed' ? 'active' : ''}`} 
-                    onClick={() => setResultsFilter('Failed')}
-                  >
-                    Failed
-                  </button>
-                  <button 
-                    className={`filter-tag blocked ${resultsFilter === 'Blocked' ? 'active' : ''}`} 
-                    onClick={() => setResultsFilter('Blocked')}
-                  >
-                    Blocked
-                  </button>
-                  <button 
-                    className={`filter-tag na ${resultsFilter === 'N/A' ? 'active' : ''}`} 
-                    onClick={() => setResultsFilter('N/A')}
-                  >
-                    N/A
-                  </button>
+                <div className="filter-chips">
+                  {['All', 'Passed', 'Failed', 'Blocked', 'N/A'].map(filter => (
+                    <button 
+                      key={filter}
+                      className={`filter-chip ${filter.toLowerCase().replace('/', '')} ${resultsFilter === filter ? 'active' : ''}`}
+                      onClick={() => setResultsFilter(filter)}
+                    >
+                      {filter}
+                      {filter === 'All' && <span className="chip-count">{executionResults.length}</span>}
+                    </button>
+                  ))}
                 </div>
               </div>
-              <div className="table-container">
-                <table className="data-table-premium">
+
+              <div className="results-table-ultra">
+                <table>
                   <thead>
                     <tr>
-                      <th className="col-id">ID</th>
-                      <th className="col-title">Test Case</th>
-                      <th className="col-status">Status</th>
-                      <th className="col-notes">Notes</th>
+                      <th>ID</th>
+                      <th>Test Case</th>
+                      <th>Status</th>
+                      <th>Notes</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredResults.map((r, i) => (
-                      <tr key={i} className={`status-row-${cleanStatus(r.status)}`}>
+                      <tr key={i} className={`row-${cleanStatus(r.status)}`}>
                         <td>
-                          <span className="id-badge">{r.testCase?.adoId || 'TC'}</span>
+                          <span className="id-badge-ultra">{r.testCase?.adoId || 'TC'}</span>
                         </td>
                         <td className="title-cell">{r.testCase?.title}</td>
                         <td>
-                          <span className={`status-badge-premium ${cleanStatus(r.status)}`}>
+                          <span className={`status-pill-ultra ${cleanStatus(r.status)}`}>
                             {r.status || 'Not Run'}
                           </span>
                         </td>
                         <td className="notes-cell">
-                          {r.comments || <span className="no-notes">No notes</span>}
+                          {r.comments || <span className="no-notes">—</span>}
                         </td>
                       </tr>
                     ))}
@@ -615,11 +860,8 @@ function Execution({
                 </table>
               </div>
             </div>
-            <div className="modal-footer">
-              <button 
-                className="btn btn-primary-premium" 
-                onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}
-              >
+            <div className="modal-footer-ultra">
+              <button className="btn-ultra primary" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
                 Close
               </button>
             </div>
@@ -629,41 +871,38 @@ function Execution({
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="modal-overlay">
-          <div className="modal modal-small">
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <div className="modal-icon danger">
+        <div className="modal-overlay-ultra">
+          <div className="modal-ultra modal-sm">
+            <div className="modal-header-ultra">
+              <div className="modal-title-ultra">
+                <div className="modal-icon-ultra danger">
                   <FiTrash2 />
                 </div>
                 <h3>Delete Test Run</h3>
               </div>
-              <button className="close-btn" onClick={() => setShowDeleteConfirm(null)}>
+              <button className="modal-close-ultra" onClick={() => setShowDeleteConfirm(null)}>
                 <FiX />
               </button>
             </div>
-            <div className="modal-body">
-              <p className="confirm-text">
+            <div className="modal-body-ultra">
+              <p className="confirm-message">
                 Are you sure you want to delete <strong>{showDeleteConfirm.name}</strong>? 
                 This action cannot be undone.
               </p>
             </div>
-            <div className="modal-footer">
-              <button 
-                className="btn btn-secondary" 
-                onClick={() => setShowDeleteConfirm(null)}
-              >
+            <div className="modal-footer-ultra">
+              <button className="btn-ultra secondary" onClick={() => setShowDeleteConfirm(null)}>
                 Cancel
               </button>
               <button 
-                className="btn btn-danger" 
+                className="btn-ultra danger"
                 onClick={() => {
                   onDeleteTestRun(showDeleteConfirm._id || showDeleteConfirm.id);
                   setShowDeleteConfirm(null);
                 }}
               >
                 <FiTrash2 />
-                Delete
+                <span>Delete</span>
               </button>
             </div>
           </div>
