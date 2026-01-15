@@ -9,7 +9,7 @@ import {
   getAllTestSuites, createTestSuite, deleteTestSuite,
   getAllTestCases, getTestCasesBySuiteId, createTestCase, createTestCases, updateTestCase, deleteTestCase,
   getAllTestRuns, getTestRunById, createTestRun, updateTestRun, deleteTestRun,
-  getExecutionResultsByRunId, createExecutionResult, updateExecutionResult,
+  getExecutionResultsByRunId, createExecutionResult, updateExecutionResult, deleteExecutionResult,
   getAllReports, createReport, deleteReport, getReportById,
   getSettings, updateSettings, getStatistics
 } from './database.js';
@@ -19,45 +19,88 @@ import { analyzeTestResults } from './services/grokService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const router = express.Router();
-const uploadDir = join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-const upload = multer({ dest: uploadDir });
+
+// MULTER BUG ATTACHMENT CONFIG
+const bugUploadDir = join(__dirname, 'uploads', 'bugs');
+if (!fs.existsSync(bugUploadDir)) fs.mkdirSync(bugUploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, bugUploadDir),
+  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
+});
+
+const upload = multer({ 
+  storage, 
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB
+});
+
+// Standard upload for CSVs
+const csvUpload = multer({ dest: join(__dirname, 'uploads') });
 
 // PROJECTS
 router.get('/projects', async (req, res, next) => { try { res.json({ success: true, data: await getAllProjects() }); } catch (e) { next(e); } });
 router.post('/projects', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createProject(req.body) }); } catch (e) { next(e); } });
 
-// BUGS
+// BUGS (Updated to handle files)
 router.get('/bugs', async (req, res, next) => { try { res.json({ success: true, data: await getAllBugs(req.query.projectId) }); } catch (e) { next(e); } });
-router.post('/bugs', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createBug(req.body) }); } catch (e) { next(e); } });
-router.put('/bugs/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateBug(req.params.id, req.body) }); } catch (e) { next(e); } });
+
+router.post('/bugs', upload.single('attachment'), async (req, res, next) => {
+  try {
+    const bugData = { ...req.body };
+    if (req.file) {
+      bugData.attachment = {
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        url: `/uploads/bugs/${req.file.filename}`
+      };
+    }
+    const bug = await createBug(bugData);
+    res.status(201).json({ success: true, data: bug });
+  } catch (e) { next(e); }
+});
+
+router.put('/bugs/:id', upload.single('attachment'), async (req, res, next) => {
+  try {
+    const bugData = { ...req.body };
+    if (req.file) {
+      bugData.attachment = {
+        fileName: req.file.filename,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        url: `/uploads/bugs/${req.file.filename}`
+      };
+    }
+    const updated = await updateBug(req.params.id, bugData);
+    res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+});
+
 router.delete('/bugs/:id', async (req, res, next) => { try { await deleteBug(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
-// SUITES
+// TEST SUITES / CASES
 router.get('/test-suites', async (req, res, next) => { try { res.json({ success: true, data: await getAllTestSuites(req.query.projectId) }); } catch (e) { next(e); } });
 router.post('/test-suites', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createTestSuite(req.body) }); } catch (e) { next(e); } });
 router.delete('/test-suites/:id', async (req, res, next) => { try { await deleteTestSuite(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
-
-// CASES
 router.get('/test-cases', async (req, res, next) => { try { const data = req.query.suiteId ? await getTestCasesBySuiteId(req.query.suiteId) : await getAllTestCases(req.query.projectId); res.json({ success: true, data }); } catch (e) { next(e); } });
 router.post('/test-cases', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createTestCase(req.body) }); } catch (e) { next(e); } });
 router.put('/test-cases/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateTestCase(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/test-cases/:id', async (req, res, next) => { try { await deleteTestCase(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // CSV
-router.post('/upload/csv', upload.single('file'), async (req, res, next) => {
+router.post('/upload/csv', csvUpload.single('file'), async (req, res, next) => {
   try {
     const parsedData = await parseCSVFile(req.file.path);
     const testCases = parseADOFormat(parsedData);
     const suite = await createTestSuite({ projectId: req.body.projectId, name: req.body.suiteName, testCaseCount: testCases.length });
-    const mapped = testCases.map(tc => { const { id, ...rest } = tc; return { ...rest, suiteId: suite._id, projectId: req.body.projectId }; });
+    const mapped = testCases.map(tc => ({ ...tc, suiteId: suite._id, projectId: req.body.projectId }));
     await createTestCases(mapped);
     fs.unlink(req.file.path, () => {});
     res.status(201).json({ success: true });
   } catch (error) { next(error); }
 });
 
-// RUNS
+// RUNS / EXECUTION
 router.get('/test-runs', async (req, res, next) => { try { res.json({ success: true, data: await getAllTestRuns(req.query.projectId) }); } catch (e) { next(e); } });
 router.post('/test-runs', async (req, res, next) => {
   try {
@@ -70,7 +113,6 @@ router.post('/test-runs', async (req, res, next) => {
 });
 router.delete('/test-runs/:id', async (req, res, next) => { try { await deleteTestRun(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 router.get('/test-runs/:runId/results', async (req, res, next) => { try { res.json({ success: true, data: await getExecutionResultsByRunId(req.params.runId) }); } catch (e) { next(e); } });
-
 router.put('/execution-results/:id', async (req, res, next) => {
   try {
     const updated = await updateExecutionResult(req.params.id, req.body);
@@ -82,6 +124,7 @@ router.put('/execution-results/:id', async (req, res, next) => {
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 });
+router.delete('/execution-results/:id', async (req, res, next) => { try { await deleteExecutionResult(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // REPORTS
 router.get('/reports', async (req, res, next) => { try { res.json({ success: true, data: await getAllReports(req.query.projectId) }); } catch (e) { next(e); } });
@@ -114,18 +157,10 @@ router.get('/reports/:id/download', async (req, res, next) => {
   try {
     const report = await getReportById(req.params.id);
     if (fs.existsSync(report.filePath)) res.download(report.filePath, report.fileName);
-    else {
-      let reportData = {};
-      if (report.runId) {
-        const testRun = await getTestRunById(report.runId);
-        const results = await getExecutionResultsByRunId(report.runId);
-        reportData = { type: 'run', testRun, results, aiAnalysis: { isSimulation: true } };
-      } else return res.status(404).send("Expired");
-      const file = (report.format === 'pdf') ? await generatePDFReport(reportData) : await generateWordReport(reportData);
-      res.download(file.filePath, report.fileName);
-    }
+    else return res.status(404).send("Expired");
   } catch (e) { next(e); }
 });
+router.delete('/reports/:id', async (req, res, next) => { try { await deleteReport(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // STATS
 router.get('/statistics', async (req, res, next) => { try { res.json({ success: true, data: await getStatistics(req.query.projectId) }); } catch (e) { next(e); } });

@@ -29,6 +29,7 @@
 @import './pages/_execution.css';
 @import './pages/_reports.css';
 @import './pages/_settings.css';
+@import './pages/_bugs.css';
 
 /* Utilities */
 @import './utilities/_helpers.css';
