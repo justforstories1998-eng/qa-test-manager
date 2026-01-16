@@ -3,35 +3,42 @@ import {
   FiPlay, FiChevronLeft, FiChevronRight, FiCheckCircle, FiXCircle, 
   FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiFolder, 
   FiHash, FiTarget, FiTrash2, FiMinusCircle, FiCpu, FiMessageSquare, 
-  FiExternalLink, FiFilter, FiAlertTriangle, FiZap, FiLayers,
-  FiActivity, FiShield, FiCommand, FiTrendingUp, FiAward,
-  FiStar, FiGrid, FiMonitor, FiServer, FiDatabase
+  FiExternalLink, FiFilter, FiAlertTriangle, FiZap
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
 
 function Execution({
-  testSuites, testCases, testRuns, onCreateTestRun, 
-  onDeleteTestRun, onUpdateExecutionResult
+  testSuites = [],
+  testCases = [],
+  testRuns = [],
+  onCreateTestRun, 
+  onDeleteTestRun, 
+  onUpdateExecutionResult, 
+  onRefresh 
 }) {
+  // ============================================
+  // STATE
+  // ============================================
   const [activeRunId, setActiveRunId] = useState(null);
   const [executionResults, setExecutionResults] = useState([]);
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
   const [viewMode, setViewMode] = useState('list'); 
   const [isSaving, setIsSaving] = useState(false);
   
-  // Modals
   const [showNewRunModal, setShowNewRunModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [showResultsModal, setShowResultsModal] = useState(null);
   const [showBugModal, setShowBugModal] = useState(false);
   
-  // States
   const [comments, setComments] = useState('');
   const [newRunData, setNewRunData] = useState({ name: '', environment: 'QA', tester: '' });
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
   const [resultsFilter, setResultsFilter] = useState('All');
 
+  // ============================================
+  // COMPUTED VALUES
+  // ============================================
   const activeRun = useMemo(() => 
     testRuns.find(r => (r._id === activeRunId || r.id === activeRunId)), 
     [activeRunId, testRuns]
@@ -39,447 +46,434 @@ function Execution({
 
   const currentTest = useMemo(() => executionResults[currentTestIndex], [executionResults, currentTestIndex]);
 
+  const cleanStatus = (s) => (s || 'notrun').toLowerCase().replace(' ', '').replace('/', '');
+
   const filteredResults = useMemo(() => {
     if (resultsFilter === 'All') return executionResults;
-    return executionResults.filter(r => r.status === resultsFilter);
+    return executionResults.filter(r => {
+      const status = cleanStatus(r.status);
+      if (resultsFilter === 'Passed') return status === 'passed';
+      if (resultsFilter === 'Failed') return status === 'failed';
+      if (resultsFilter === 'Blocked') return status === 'blocked';
+      if (resultsFilter === 'N/A') return status === 'na' || status === 'notrun';
+      return true;
+    });
   }, [executionResults, resultsFilter]);
 
-  useEffect(() => { if (activeRunId) loadResults(activeRunId); }, [activeRunId]);
-  useEffect(() => { if (showResultsModal) loadResults(showResultsModal._id || showResultsModal.id); }, [showResultsModal]);
-  useEffect(() => { if (currentTest) setComments(currentTest.comments || ''); }, [currentTestIndex, executionResults]);
+  const getProgressPercentage = (run) => {
+    if (!run || !run.totalTests) return 0;
+    const completed = (run.passed || 0) + (run.failed || 0) + (run.blocked || 0) + (run.na || 0);
+    return Math.round((completed / run.totalTests) * 100);
+  };
 
+  const getTotalStats = () => {
+    return testRuns.reduce((acc, run) => ({
+      total: acc.total + (run.totalTests || 0),
+      passed: acc.passed + (run.passed || 0),
+      failed: acc.failed + (run.failed || 0),
+      blocked: acc.blocked + (run.blocked || 0)
+    }), { total: 0, passed: 0, failed: 0, blocked: 0 });
+  };
+
+  const stats = getTotalStats();
+
+  // ============================================
+  // DATA LOADING
+  // ============================================
   const loadResults = async (runId) => {
     try {
       const res = await api.getExecutionResults(runId);
       if (res.success) {
-        const merged = res.data.map(r => ({
-          ...r,
-          testCase: testCases.find(tc => String(tc._id || tc.id) === String(r.testCaseId))
-        })).filter(r => r.testCase); 
-        setExecutionResults(merged);
+        const merged = res.data.map(r => {
+          const foundCase = testCases.find(tc => 
+            String(tc._id || tc.id) === String(r.testCaseId)
+          );
+          return { ...r, testCase: foundCase };
+        });
+
+        const validResults = merged.filter(r => r.testCase);
+        if (merged.length > 0 && validResults.length === 0) {
+            if (onRefresh) onRefresh(); 
+        }
+        setExecutionResults(validResults);
       }
-    } catch (e) { toast.error("Error loading mission data"); }
+    } catch (e) { console.error(e); }
   };
 
+  useEffect(() => { if (activeRunId) loadResults(activeRunId); }, [activeRunId, testCases]);
+  useEffect(() => { if (showResultsModal) loadResults(showResultsModal._id || showResultsModal.id); }, [showResultsModal]);
+  useEffect(() => { if (executionResults[currentTestIndex]) setComments(executionResults[currentTestIndex].comments || ''); }, [currentTestIndex, executionResults]);
+
+  // ============================================
+  // HANDLERS
+  // ============================================
   const handleQuickStatus = async (status) => {
-    if (!currentTest) return;
+    const current = executionResults[currentTestIndex];
+    if (!current) return;
     setIsSaving(true);
     try {
-      const resultId = currentTest._id || currentTest.id;
+      const resultId = current._id || current.id;
       await onUpdateExecutionResult(resultId, { status, comments, executedBy: 'QA Tester' });
-      setExecutionResults(prev => prev.map((r, i) => i === currentTestIndex ? { ...r, status, comments } : r));
+      const updated = [...executionResults];
+      updated[currentTestIndex] = { ...updated[currentTestIndex], status, comments };
+      setExecutionResults(updated);
       if (currentTestIndex < executionResults.length - 1) setCurrentTestIndex(p => p + 1);
       else toast.success("Mission Protocol Complete");
-    } catch (e) { toast.error("Sync Protocol Failed"); }
+    } catch (e) { toast.error("Sync Failed"); }
     finally { setIsSaving(false); }
   };
 
   const handleRemoveCase = async () => {
-    if (!currentTest) return;
-    if (!window.confirm("Remove this specific unit?")) return;
+    const current = executionResults[currentTestIndex];
+    if (!current) return;
+    if (!window.confirm("Remove this specific unit from the current mission?")) return;
     try {
-      await api.deleteExecutionResult(currentTest._id || currentTest.id);
+      await api.deleteExecutionResult(current._id || current.id);
       const newResults = executionResults.filter((_, i) => i !== currentTestIndex);
       setExecutionResults(newResults);
       if (currentTestIndex >= newResults.length) setCurrentTestIndex(Math.max(0, newResults.length - 1));
-      toast.success("Purged");
-    } catch (e) { toast.error("Failed"); }
+      toast.success("Unit Purged");
+    } catch (e) { toast.error("Action Failed"); }
   };
 
   const handleReportBug = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const bugData = Object.fromEntries(formData);
-    bugData.projectId = activeRun.projectId;
-    bugData.testCaseId = currentTest.testCaseId;
+    formData.append('projectId', activeRun.projectId);
+    if (currentTest?.testCase?._id || currentTest?.testCase?.id) {
+        formData.append('testCaseId', currentTest.testCase._id || currentTest.testCase.id);
+    }
 
     try {
-      const res = await api.createBug(bugData);
+      const res = await api.createBug(formData);
       if (res.success) {
-        toast.success("Bug reported successfully");
+        toast.success("Defect Logged Successfully");
         setShowBugModal(false);
       }
-    } catch (err) { toast.error("Failed to report bug"); }
+    } catch (err) { toast.error("Failed to log defect"); }
   };
 
-  const handleCreateTestRun = async (e) => {
+  const handleCreateRunSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedSuiteId) {
-      toast.error("Please select a test suite");
-      return;
-    }
-    if (!newRunData.name.trim()) {
-      toast.error("Please enter a run name");
-      return;
-    }
-
+    if (!newRunData.name || !selectedSuiteId) return toast.error("Parameters required");
+    const cases = testCases.filter(tc => String(tc.suiteId) === String(selectedSuiteId));
     try {
-      await onCreateTestRun({
-        name: newRunData.name,
-        environment: newRunData.environment,
-        tester: newRunData.tester,
-        testSuiteId: selectedSuiteId
-      });
-      setShowNewRunModal(false);
-      setNewRunData({ name: '', environment: 'QA', tester: '' });
-      setSelectedSuiteId(null);
-      toast.success("Test run created successfully");
-    } catch (err) {
-      toast.error("Failed to create test run");
-    }
+      const newRun = await onCreateTestRun({ ...newRunData, testCaseIds: cases.map(tc => tc._id || tc.id), totalTests: cases.length });
+      if (newRun) {
+        setShowNewRunModal(false);
+        setActiveRunId(newRun._id || newRun.id);
+        setViewMode('execution');
+      }
+    } catch (e) { toast.error("Launch aborted"); }
   };
 
-  const cleanStatus = (s) => (s || 'notrun').toLowerCase().replace(' ', '').replace('/', '');
-
-  const getProgressPercentage = (run) => {
-    const total = (run.passed || 0) + (run.failed || 0) + (run.blocked || 0) + (run.na || 0);
-    const completed = (run.passed || 0) + (run.failed || 0);
-    return total > 0 ? Math.round((completed / total) * 100) : 0;
-  };
-
-  const getCompletionStats = (run) => {
-    const total = (run.passed || 0) + (run.failed || 0) + (run.blocked || 0) + (run.na || 0);
-    const executed = (run.passed || 0) + (run.failed || 0) + (run.blocked || 0) + (run.na || 0);
-    return { total, executed };
-  };
-
-  if (viewMode === 'execution' && activeRun) {
-    const tc = currentTest?.testCase;
-    const progress = executionResults.length > 0 ? Math.round(((currentTestIndex + 1) / executionResults.length) * 100) : 0;
-    const completedCount = executionResults.filter(r => r.status && r.status !== 'Not Run').length;
-    
+  // ============================================
+  // RENDER: DASHBOARD VIEW
+  // ============================================
+  if (viewMode === 'list') {
     return (
-      <div className="execution-view-ultra">
-        {/* Animated Background */}
-        <div className="exec-bg-effects">
-          <div className="exec-gradient-orb orb-1"></div>
-          <div className="exec-gradient-orb orb-2"></div>
-          <div className="exec-gradient-orb orb-3"></div>
+      <div className="exec-dashboard">
+        {/* Ambient Background Effects */}
+        <div className="ambient-backdrop">
+          <div className="gradient-orb orb-1"></div>
+          <div className="gradient-orb orb-2"></div>
+          <div className="gradient-orb orb-3"></div>
+          <div className="grid-pattern"></div>
         </div>
 
         {/* Header */}
-        <header className="exec-header-ultra">
-          <div className="exec-header-left">
-            <button className="btn-back-ultra" onClick={() => setViewMode('list')}>
-              <div className="btn-back-icon">
-                <FiChevronLeft />
-              </div>
-              <span>Back</span>
-            </button>
-            
-            <div className="exec-run-info">
-              <div className="run-icon-animated">
-                <FiZap />
-                <div className="icon-pulse"></div>
-              </div>
-              <div className="run-details">
-                <h1>{activeRun.name}</h1>
-                <div className="run-badges">
-                  <span className="badge-environment">
-                    <FiServer /> {activeRun.environment}
-                  </span>
-                  <span className="badge-progress">
-                    <FiActivity /> {completedCount}/{executionResults.length} Executed
-                  </span>
-                </div>
-              </div>
+        <header className="dashboard-header">
+          <div className="header-brand">
+            <div className="brand-icon-wrapper">
+              <FiZap />
+              <span className="pulse-ring"></span>
+            </div>
+            <div className="brand-content">
+              <h1>Execution Control</h1>
+              <p>Test orchestration & quality metrics</p>
             </div>
           </div>
-
-          <div className="exec-header-right">
-            <button className="btn-icon-ultra danger" onClick={handleRemoveCase} title="Remove Test">
-              <FiTrash2 />
-            </button>
-            
-            <div className="progress-display-ultra">
-              <div className="progress-circle-container">
-                <svg className="progress-circle" viewBox="0 0 100 100">
-                  <circle className="progress-bg" cx="50" cy="50" r="42" />
-                  <circle 
-                    className="progress-fill" 
-                    cx="50" cy="50" r="42" 
-                    style={{ strokeDasharray: `${progress * 2.64} 264` }}
-                  />
-                </svg>
-                <div className="progress-center">
-                  <span className="progress-number">{currentTestIndex + 1}</span>
-                  <span className="progress-divider">/</span>
-                  <span className="progress-total">{executionResults.length}</span>
-                </div>
-              </div>
-              <div className="progress-info">
-                <span className="progress-label">Current Test</span>
-                <span className="progress-percent">{progress}% Complete</span>
-              </div>
-            </div>
-          </div>
+          <button className="btn-primary-glow" onClick={() => setShowNewRunModal(true)}>
+            <FiPlus />
+            <span>New Test Run</span>
+            <div className="btn-shine"></div>
+          </button>
         </header>
 
-        {/* Main Layout */}
-        <div className="exec-layout-ultra">
-          {/* Sidebar */}
-          <aside className="exec-sidebar-ultra">
-            <div className="sidebar-header-ultra">
-              <div className="sidebar-title">
-                <FiList />
-                <span>Test Queue</span>
-              </div>
-              <div className="queue-badge">{executionResults.length}</div>
+        {/* Stats Overview */}
+        <section className="stats-overview">
+          <div className="stat-card stat-total">
+            <div className="stat-icon"><FiTarget /></div>
+            <div className="stat-data">
+              <span className="stat-number">{stats.total}</span>
+              <span className="stat-label">Total Tests</span>
             </div>
-            
-            <div className="test-queue-list">
-              {executionResults.map((res, idx) => (
-                <div 
-                  key={idx} 
-                  className={`queue-item ${idx === currentTestIndex ? 'active' : ''} status-${cleanStatus(res.status)}`}
-                  onClick={() => setCurrentTestIndex(idx)}
-                >
-                  <div className="queue-item-number">
-                    <span>{idx + 1}</span>
-                    <div className="status-glow"></div>
-                  </div>
-                  <div className="queue-item-content">
-                    <span className="queue-item-title">{res.testCase?.title}</span>
-                    <span className="queue-item-status">{res.status || 'Pending'}</span>
-                  </div>
-                  {idx === currentTestIndex && (
-                    <div className="active-marker">
-                      <FiChevronRight />
-                    </div>
-                  )}
+            <div className="stat-glow"></div>
+          </div>
+          <div className="stat-card stat-passed">
+            <div className="stat-icon"><FiCheckCircle /></div>
+            <div className="stat-data">
+              <span className="stat-number">{stats.passed}</span>
+              <span className="stat-label">Passed</span>
+            </div>
+            <div className="stat-glow"></div>
+          </div>
+          <div className="stat-card stat-failed">
+            <div className="stat-icon"><FiXCircle /></div>
+            <div className="stat-data">
+              <span className="stat-number">{stats.failed}</span>
+              <span className="stat-label">Failed</span>
+            </div>
+            <div className="stat-glow"></div>
+          </div>
+          <div className="stat-card stat-blocked">
+            <div className="stat-icon"><FiAlertCircle /></div>
+            <div className="stat-data">
+              <span className="stat-number">{stats.blocked}</span>
+              <span className="stat-label">Blocked</span>
+            </div>
+            <div className="stat-glow"></div>
+          </div>
+        </section>
+
+        {/* Test Runs Grid */}
+        <section className="runs-section">
+          {testRuns.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-visual">
+                <div className="empty-icon"><FiPlay /></div>
+                <div className="ripple-rings">
+                  <span></span><span></span><span></span>
                 </div>
+              </div>
+              <h3>No Test Runs Yet</h3>
+              <p>Create your first test run to begin tracking execution progress</p>
+              <button className="btn-primary-glow" onClick={() => setShowNewRunModal(true)}>
+                <FiPlus />
+                <span>Create Test Run</span>
+                <div className="btn-shine"></div>
+              </button>
+            </div>
+          ) : (
+            <div className="runs-grid">
+              {testRuns.map((run, idx) => (
+                <article 
+                  key={run._id || run.id} 
+                  className="run-card"
+                  style={{ animationDelay: `${idx * 0.08}s` }}
+                >
+                  <div className="card-shimmer"></div>
+                  
+                  <header className="run-card-header">
+                    <div className="run-identity">
+                      <div className="run-icon"><FiPlay /></div>
+                      <div className="run-info">
+                        <h3>{run.name}</h3>
+                        <span className="env-badge">{run.environment}</span>
+                      </div>
+                    </div>
+                    <button 
+                      className="btn-icon-danger"
+                      onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
+                      aria-label="Delete run"
+                    >
+                      <FiTrash2 />
+                    </button>
+                  </header>
+
+                  <div className="progress-container">
+                    <div className="progress-header">
+                      <span>Completion</span>
+                      <span className="progress-percent">{getProgressPercentage(run)}%</span>
+                    </div>
+                    <div className="progress-track">
+                      <div 
+                        className="progress-bar" 
+                        style={{ width: `${getProgressPercentage(run)}%` }}
+                      >
+                        <div className="progress-shimmer"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="metrics-row">
+                    <div className="metric passed">
+                      <FiCheckCircle />
+                      <span className="metric-val">{run.passed || 0}</span>
+                      <span className="metric-lbl">Pass</span>
+                    </div>
+                    <div className="metric failed">
+                      <FiXCircle />
+                      <span className="metric-val">{run.failed || 0}</span>
+                      <span className="metric-lbl">Fail</span>
+                    </div>
+                    <div className="metric blocked">
+                      <FiAlertCircle />
+                      <span className="metric-val">{run.blocked || 0}</span>
+                      <span className="metric-lbl">Block</span>
+                    </div>
+                    <div className="metric na">
+                      <FiMinusCircle />
+                      <span className="metric-val">{run.na || 0}</span>
+                      <span className="metric-lbl">N/A</span>
+                    </div>
+                  </div>
+
+                  <footer className="run-card-actions">
+                    <button 
+                      className="btn-execute"
+                      onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}
+                    >
+                      <FiPlay />
+                      <span>Continue</span>
+                    </button>
+                    <button 
+                      className="btn-results"
+                      onClick={() => setShowResultsModal(run)}
+                      aria-label="View results"
+                    >
+                      <FiExternalLink />
+                    </button>
+                  </footer>
+                </article>
               ))}
             </div>
-          </aside>
+          )}
+        </section>
 
-          {/* Main Content */}
-          <main className="exec-main-ultra">
-            <div className="test-content-ultra">
-              {tc ? (
-                <>
-                  {/* Test Header */}
-                  <div className="test-header-ultra">
-                    <div className="test-header-top">
-                      <div className="test-id-ultra">
-                        <FiHash />
-                        <span>{tc.adoId || 'TC-000'}</span>
-                      </div>
-                      <div className={`status-indicator-ultra ${cleanStatus(currentTest?.status)}`}>
-                        <span className="status-dot"></span>
-                        <span>{currentTest?.status || 'Pending'}</span>
-                      </div>
-                    </div>
-                    <h2 className="test-title-ultra">{tc.title}</h2>
-                    {tc.description && (
-                      <p className="test-desc-ultra">{tc.description}</p>
-                    )}
+        {/* New Run Modal */}
+        {showNewRunModal && (
+          <div className="modal-backdrop" onClick={() => setShowNewRunModal(false)}>
+            <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
+              <header className="modal-header">
+                <div className="modal-title">
+                  <div className="modal-icon primary"><FiPlay /></div>
+                  <div>
+                    <h3>Launch New Mission</h3>
+                    <p>Configure your test execution parameters</p>
                   </div>
-
-                  {/* Test Steps */}
-                  <div className="steps-section-ultra">
-                    <div className="steps-header-ultra">
-                      <div className="steps-title">
-                        <FiCommand />
-                        <span>Test Steps</span>
-                      </div>
-                      <div className="steps-count-badge">{tc.steps?.length || 0} Steps</div>
+                </div>
+                <button className="btn-close" onClick={() => setShowNewRunModal(false)}>
+                  <FiX />
+                </button>
+              </header>
+              
+              <div className="modal-body">
+                <div className="form-split">
+                  <div className="form-sidebar">
+                    <div className="form-field">
+                      <label>Run Name</label>
+                      <input 
+                        type="text" 
+                        className="input-field"
+                        placeholder="e.g., Sprint 24 Regression"
+                        value={newRunData.name} 
+                        onChange={e => setNewRunData({...newRunData, name: e.target.value})} 
+                      />
                     </div>
-
-                    <div className="steps-list-ultra">
-                      {tc.steps?.map((s, i) => (
-                        <div key={i} className="step-card-ultra">
-                          <div className="step-number-ultra">
-                            <span>{s.stepNumber}</span>
+                    <div className="form-field">
+                      <label>Environment</label>
+                      <select 
+                        className="select-field"
+                        value={newRunData.environment} 
+                        onChange={e => setNewRunData({...newRunData, environment: e.target.value})}
+                      >
+                        <option value="QA">QA Environment</option>
+                        <option value="Staging">Staging Environment</option>
+                        <option value="Production">Production</option>
+                      </select>
+                    </div>
+                    <div className="form-field">
+                      <label>Tester (Optional)</label>
+                      <input 
+                        type="text" 
+                        className="input-field"
+                        placeholder="Enter tester name"
+                        value={newRunData.tester} 
+                        onChange={e => setNewRunData({...newRunData, tester: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-main">
+                    <div className="selection-title">
+                      <FiFolder />
+                      <span>Select Test Suite</span>
+                    </div>
+                    <div className="suite-list">
+                      {testSuites.map(s => (
+                        <div 
+                          key={s._id || s.id} 
+                          className={`suite-option ${selectedSuiteId === (s._id || s.id) ? 'selected' : ''}`} 
+                          onClick={() => setSelectedSuiteId(s._id || s.id)}
+                        >
+                          <div className="radio-indicator">
+                            <span className="radio-dot"></span>
                           </div>
-                          <div className="step-body-ultra">
-                            <div className="step-action-section">
-                              <div className="step-label">
-                                <FiPlay />
-                                <span>Action</span>
-                              </div>
-                              <p className="step-text-ultra">{s.action}</p>
-                            </div>
-                            <div className="step-expected-section">
-                              <div className="step-label">
-                                <FiTarget />
-                                <span>Expected Result</span>
-                              </div>
-                              <p className="step-text-ultra">{s.expectedResult}</p>
-                            </div>
+                          <div className="suite-details">
+                            <span className="suite-name">{s.name}</span>
+                            <span className="suite-count">
+                              {testCases.filter(tc => String(tc.suiteId) === String(s._id || s.id)).length} test cases
+                            </span>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-
-                  {/* Notes Section */}
-                  <div className="notes-section-ultra">
-                    <div className="notes-header">
-                      <FiMessageSquare />
-                      <span>Execution Notes</span>
-                    </div>
-                    <textarea
-                      className="notes-input-ultra"
-                      value={comments}
-                      onChange={(e) => setComments(e.target.value)}
-                      placeholder="Add your observations, notes, or any relevant details here..."
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="loading-ultra">
-                  <div className="loading-spinner-ultra"></div>
-                  <span>Loading test data...</span>
                 </div>
-              )}
-            </div>
-
-            {/* Action Bar */}
-            <div className="action-bar-ultra">
-              <div className="status-actions-ultra">
-                <button 
-                  className={`status-btn-ultra pass ${isSaving ? 'saving' : ''}`}
-                  onClick={() => handleQuickStatus('Passed')}
-                  disabled={isSaving}
-                >
-                  <FiCheckCircle />
-                  <span>Pass</span>
-                  <div className="btn-shine"></div>
-                </button>
-                <button 
-                  className={`status-btn-ultra fail ${isSaving ? 'saving' : ''}`}
-                  onClick={() => handleQuickStatus('Failed')}
-                  disabled={isSaving}
-                >
-                  <FiXCircle />
-                  <span>Fail</span>
-                  <div className="btn-shine"></div>
-                </button>
-                <button 
-                  className={`status-btn-ultra block ${isSaving ? 'saving' : ''}`}
-                  onClick={() => handleQuickStatus('Blocked')}
-                  disabled={isSaving}
-                >
-                  <FiAlertCircle />
-                  <span>Block</span>
-                  <div className="btn-shine"></div>
-                </button>
-                <button 
-                  className={`status-btn-ultra na ${isSaving ? 'saving' : ''}`}
-                  onClick={() => handleQuickStatus('N/A')}
-                  disabled={isSaving}
-                >
-                  <FiMinusCircle />
-                  <span>N/A</span>
-                  <div className="btn-shine"></div>
-                </button>
-
-                <div className="action-separator"></div>
-
-                <button 
-                  className="status-btn-ultra bug"
-                  onClick={() => setShowBugModal(true)}
-                >
-                  <FiAlertTriangle />
-                  <span>Report Bug</span>
-                </button>
               </div>
 
-              <div className="nav-actions-ultra">
-                <button 
-                  className="nav-btn-ultra"
-                  onClick={() => setCurrentTestIndex(p => Math.max(0, p - 1))}
-                  disabled={currentTestIndex === 0}
-                >
-                  <FiChevronLeft />
+              <footer className="modal-footer">
+                <button className="btn-secondary" onClick={() => setShowNewRunModal(false)}>
+                  Cancel
                 </button>
-                <div className="nav-counter">
-                  <span className="current">{currentTestIndex + 1}</span>
-                  <span className="separator">of</span>
-                  <span className="total">{executionResults.length}</span>
-                </div>
-                <button 
-                  className="nav-btn-ultra"
-                  onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))}
-                  disabled={currentTestIndex === executionResults.length - 1}
-                >
-                  <FiChevronRight />
+                <button className="btn-primary" onClick={handleCreateRunSubmit}>
+                  <FiPlay />
+                  <span>Launch Mission</span>
                 </button>
-              </div>
+              </footer>
             </div>
-          </main>
-        </div>
+          </div>
+        )}
 
-        {/* Bug Modal */}
-        {showBugModal && (
-          <div className="modal-overlay-ultra">
-            <div className="modal-ultra modal-lg">
-              <div className="modal-header-ultra">
-                <div className="modal-title-ultra">
-                  <div className="modal-icon-ultra danger">
-                    <FiAlertTriangle />
-                  </div>
+        {/* Delete Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="modal-backdrop" onClick={() => setShowDeleteConfirm(null)}>
+            <div className="modal modal-sm" onClick={e => e.stopPropagation()}>
+              <header className="modal-header">
+                <div className="modal-title">
+                  <div className="modal-icon danger"><FiTrash2 /></div>
                   <div>
-                    <h3>Report Bug</h3>
-                    <p>for: {tc?.title}</p>
+                    <h3>Abort Mission?</h3>
+                    <p>This action cannot be undone</p>
                   </div>
                 </div>
-                <button className="modal-close-ultra" onClick={() => setShowBugModal(false)}>
+                <button className="btn-close" onClick={() => setShowDeleteConfirm(null)}>
                   <FiX />
                 </button>
+              </header>
+              <div className="modal-body">
+                <p className="confirm-message">
+                  Are you sure you want to delete <strong>{showDeleteConfirm.name}</strong>? 
+                  All execution results will be permanently removed.
+                </p>
               </div>
-              <form onSubmit={handleReportBug}>
-                <div className="modal-body-ultra">
-                  <div className="form-group-ultra">
-                    <label>Bug Title</label>
-                    <input 
-                      type="text"
-                      name="title" 
-                      defaultValue={`Bug in: ${tc?.title}`} 
-                      required 
-                      className="input-ultra"
-                    />
-                  </div>
-                  <div className="form-group-ultra">
-                    <label>Steps to Reproduce</label>
-                    <textarea 
-                      name="description" 
-                      rows={5} 
-                      defaultValue={tc?.steps?.map(s => `Step ${s.stepNumber}: ${s.action}`).join('\n')} 
-                      className="textarea-ultra"
-                    />
-                  </div>
-                  <div className="form-row-ultra">
-                    <div className="form-group-ultra">
-                      <label>Severity</label>
-                      <select name="severity" className="select-ultra">
-                        <option>Critical</option>
-                        <option>High</option>
-                        <option selected>Medium</option>
-                        <option>Low</option>
-                      </select>
-                    </div>
-                    <div className="form-group-ultra">
-                      <label>Assignee</label>
-                      <input 
-                        type="text"
-                        name="assignedTo" 
-                        placeholder="Developer name" 
-                        className="input-ultra"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div className="modal-footer-ultra">
-                  <button type="button" className="btn-ultra secondary" onClick={() => setShowBugModal(false)}>
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn-ultra danger">
-                    <FiAlertTriangle />
-                    <span>Log Bug</span>
-                  </button>
-                </div>
-              </form>
+              <footer className="modal-footer">
+                <button className="btn-secondary" onClick={() => setShowDeleteConfirm(null)}>
+                  Cancel
+                </button>
+                <button 
+                  className="btn-danger"
+                  onClick={async () => { 
+                    await onDeleteTestRun(showDeleteConfirm._id || showDeleteConfirm.id); 
+                    setShowDeleteConfirm(null); 
+                    toast.success("Purged"); 
+                  }}
+                >
+                  <FiTrash2 />
+                  <span>Delete</span>
+                </button>
+              </footer>
             </div>
           </div>
         )}
@@ -487,350 +481,300 @@ function Execution({
     );
   }
 
-  // Dashboard View
+  // ============================================
+  // RENDER: EXECUTION VIEW
+  // ============================================
+  const tc = executionResults[currentTestIndex]?.testCase;
+  const currentStatus = cleanStatus(executionResults[currentTestIndex]?.status);
+  const completedCount = executionResults.filter(r => cleanStatus(r.status) !== 'notrun').length;
+
   return (
-    <div className="execution-dashboard-ultra">
+    <div className="exec-stage">
       {/* Background Effects */}
-      <div className="dashboard-bg-effects">
-        <div className="bg-gradient-1"></div>
-        <div className="bg-gradient-2"></div>
-        <div className="bg-grid"></div>
+      <div className="stage-backdrop">
+        <div className="stage-orb orb-1"></div>
+        <div className="stage-orb orb-2"></div>
+        <div className="stage-orb orb-3"></div>
       </div>
 
       {/* Header */}
-      <header className="dashboard-header-ultra">
-        <div className="header-content-ultra">
-          <div className="header-icon-ultra">
-            <FiPlay />
-            <div className="icon-ring"></div>
-          </div>
-          <div className="header-text-ultra">
-            <h1>Execution Control</h1>
-            <p>Manage and execute your test runs with precision</p>
+      <header className="stage-header">
+        <div className="header-left">
+          <button className="btn-back" onClick={() => setViewMode('list')}>
+            <FiChevronLeft />
+            <span>Back</span>
+          </button>
+          <div className="run-identity-header">
+            <div className="run-icon-animated">
+              <FiPlay />
+              <span className="icon-pulse"></span>
+            </div>
+            <div className="run-meta">
+              <h1>{activeRun?.name}</h1>
+              <div className="run-badges">
+                <span className="badge-env">{activeRun?.environment}</span>
+                <span className="badge-progress">{completedCount} / {executionResults.length} completed</span>
+              </div>
+            </div>
           </div>
         </div>
-        <button className="btn-create-ultra" onClick={() => setShowNewRunModal(true)}>
-          <FiPlus />
-          <span>New Test Run</span>
-          <div className="btn-glow"></div>
-        </button>
+
+        <div className="header-right">
+          <button 
+            className="btn-icon-danger" 
+            onClick={handleRemoveCase} 
+            title="Remove from mission"
+          >
+            <FiTrash2 />
+          </button>
+          <div className="progress-ring-wrapper">
+            <svg className="progress-ring" viewBox="0 0 64 64">
+              <defs>
+                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
+              <circle className="ring-bg" cx="32" cy="32" r="26" />
+              <circle 
+                className="ring-fill" 
+                cx="32" cy="32" r="26"
+                strokeDasharray={`${(completedCount / executionResults.length) * 163.36} 163.36`}
+              />
+            </svg>
+            <div className="ring-label">
+              <span className="ring-current">{currentTestIndex + 1}</span>
+              <span className="ring-sep">/</span>
+              <span className="ring-total">{executionResults.length}</span>
+            </div>
+          </div>
+        </div>
       </header>
 
-      {/* Stats Overview */}
-      <div className="stats-overview-ultra">
-        <div className="stat-card-ultra">
-          <div className="stat-icon-ultra blue">
-            <FiFolder />
-          </div>
-          <div className="stat-info">
-            <span className="stat-number">{testRuns.length}</span>
-            <span className="stat-label">Total Runs</span>
-          </div>
-        </div>
-        <div className="stat-card-ultra">
-          <div className="stat-icon-ultra green">
-            <FiCheckCircle />
-          </div>
-          <div className="stat-info">
-            <span className="stat-number">{testRuns.reduce((acc, r) => acc + (r.passed || 0), 0)}</span>
-            <span className="stat-label">Tests Passed</span>
-          </div>
-        </div>
-        <div className="stat-card-ultra">
-          <div className="stat-icon-ultra red">
-            <FiXCircle />
-          </div>
-          <div className="stat-info">
-            <span className="stat-number">{testRuns.reduce((acc, r) => acc + (r.failed || 0), 0)}</span>
-            <span className="stat-label">Tests Failed</span>
-          </div>
-        </div>
-        <div className="stat-card-ultra">
-          <div className="stat-icon-ultra purple">
-            <FiTrendingUp />
-          </div>
-          <div className="stat-info">
-            <span className="stat-number">
-              {testRuns.length > 0 ? Math.round(testRuns.reduce((acc, r) => acc + getProgressPercentage(r), 0) / testRuns.length) : 0}%
-            </span>
-            <span className="stat-label">Avg. Progress</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Test Runs Grid */}
-      {testRuns.length === 0 ? (
-        <div className="empty-state-ultra">
-          <div className="empty-illustration">
-            <div className="empty-icon-ultra">
-              <FiPlay />
+      {/* Main Layout */}
+      <div className="stage-layout">
+        {/* Sidebar Queue */}
+        <aside className="stage-sidebar">
+          <div className="sidebar-header">
+            <div className="sidebar-title">
+              <FiList />
+              <span>Test Queue</span>
             </div>
-            <div className="empty-circles">
-              <div className="circle c1"></div>
-              <div className="circle c2"></div>
-              <div className="circle c3"></div>
-            </div>
+            <span className="queue-badge">{executionResults.length}</span>
           </div>
-          <h3>No Test Runs Yet</h3>
-          <p>Create your first test run to start executing tests and tracking results</p>
-          <button className="btn-create-ultra" onClick={() => setShowNewRunModal(true)}>
-            <FiPlus />
-            <span>Create Test Run</span>
-            <div className="btn-glow"></div>
-          </button>
-        </div>
-      ) : (
-        <div className="runs-grid-ultra">
-          {testRuns.map((run, index) => {
-            const progress = getProgressPercentage(run);
-            const stats = getCompletionStats(run);
-            return (
+          <div className="queue-list">
+            {executionResults.map((res, idx) => (
               <div 
-                key={run._id || run.id} 
-                className="run-card-ultra"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                key={res.id || res._id || idx} 
+                className={`queue-item ${idx === currentTestIndex ? 'active' : ''} status-${cleanStatus(res.status)}`}
+                onClick={() => setCurrentTestIndex(idx)}
               >
-                <div className="card-glow"></div>
-                
-                <div className="card-header-ultra">
-                  <div className="run-icon-ultra">
-                    <FiPlay />
-                    <div className="icon-pulse-ring"></div>
-                  </div>
-                  <div className="run-info-ultra">
-                    <h3>{run.name}</h3>
-                    <div className="run-tags">
-                      <span className="tag environment">
-                        <FiServer /> {run.environment}
-                      </span>
-                    </div>
-                  </div>
-                  <button 
-                    className="btn-delete-ultra"
-                    onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
-                  >
-                    <FiTrash2 />
-                  </button>
+                <div className="queue-number">
+                  <span>{idx + 1}</span>
+                  <div className="status-dot"></div>
                 </div>
-
-                <div className="progress-section-ultra">
-                  <div className="progress-header">
-                    <span>Execution Progress</span>
-                    <span className="progress-value">{progress}%</span>
-                  </div>
-                  <div className="progress-track-ultra">
-                    <div 
-                      className="progress-fill-ultra" 
-                      style={{ width: `${progress}%` }}
-                    >
-                      <div className="progress-shine"></div>
-                    </div>
-                  </div>
+                <div className="queue-info">
+                  <span className="queue-title">{res.testCase?.title}</span>
+                  <span className="queue-status">{res.status || 'Not Run'}</span>
                 </div>
-
-                <div className="stats-grid-ultra">
-                  <div className="mini-stat passed">
-                    <div className="mini-stat-icon">
-                      <FiCheckCircle />
-                    </div>
-                    <div className="mini-stat-info">
-                      <span className="mini-stat-value">{run.passed || 0}</span>
-                      <span className="mini-stat-label">Passed</span>
-                    </div>
-                  </div>
-                  <div className="mini-stat failed">
-                    <div className="mini-stat-icon">
-                      <FiXCircle />
-                    </div>
-                    <div className="mini-stat-info">
-                      <span className="mini-stat-value">{run.failed || 0}</span>
-                      <span className="mini-stat-label">Failed</span>
-                    </div>
-                  </div>
-                  <div className="mini-stat blocked">
-                    <div className="mini-stat-icon">
-                      <FiAlertCircle />
-                    </div>
-                    <div className="mini-stat-info">
-                      <span className="mini-stat-value">{run.blocked || 0}</span>
-                      <span className="mini-stat-label">Blocked</span>
-                    </div>
-                  </div>
-                  <div className="mini-stat na">
-                    <div className="mini-stat-icon">
-                      <FiMinusCircle />
-                    </div>
-                    <div className="mini-stat-info">
-                      <span className="mini-stat-value">{run.na || 0}</span>
-                      <span className="mini-stat-label">N/A</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card-actions-ultra">
-                  <button 
-                    className="btn-execute-ultra"
-                    onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}
-                  >
-                    <FiPlay />
-                    <span>Continue Execution</span>
-                    <div className="btn-shine"></div>
-                  </button>
-                  <button 
-                    className="btn-results-ultra"
-                    onClick={() => setShowResultsModal(run)}
-                  >
-                    <FiExternalLink />
-                  </button>
-                </div>
+                {idx === currentTestIndex && (
+                  <div className="active-marker"><FiChevronRight /></div>
+                )}
               </div>
-            );
-          })}
-        </div>
-      )}
+            ))}
+          </div>
+        </aside>
 
-      {/* New Test Run Modal - THIS WAS MISSING */}
-      {showNewRunModal && (
-        <div className="modal-overlay-ultra">
-          <div className="modal-ultra modal-lg">
-            <div className="modal-header-ultra">
-              <div className="modal-title-ultra">
-                <div className="modal-icon-ultra primary">
-                  <FiPlay />
-                </div>
-                <div>
-                  <h3>Create New Test Run</h3>
-                  <p>Configure and start a new test execution</p>
-                </div>
+        {/* Main Content */}
+        <main className="stage-main">
+          <div className="test-content">
+            {tc ? (
+              <>
+                {/* Test Header */}
+                <header className="test-header">
+                  <div className="test-meta">
+                    <span className="test-id">
+                      <FiHash />
+                      {tc.adoId || `TC-${currentTestIndex + 1}`}
+                    </span>
+                    <span className={`status-indicator ${currentStatus}`}>
+                      <span className="status-dot-lg"></span>
+                      {executionResults[currentTestIndex]?.status || 'Not Run'}
+                    </span>
+                  </div>
+                  <h2 className="test-title">{tc.title}</h2>
+                  {tc.description && (
+                    <p className="test-description">{tc.description}</p>
+                  )}
+                </header>
+
+                {/* Steps */}
+                <section className="steps-section">
+                  <div className="section-header">
+                    <h3><FiList /> Test Steps</h3>
+                    <span className="step-count">{tc.steps?.length || 0} steps</span>
+                  </div>
+                  <div className="steps-list">
+                    {tc.steps?.map((s, i) => (
+                      <div key={i} className="step-card">
+                        <div className="step-number">{s.stepNumber || i + 1}</div>
+                        <div className="step-body">
+                          <div className="step-action">
+                            <label>Action</label>
+                            <p>{s.action}</p>
+                          </div>
+                          <div className="step-expected">
+                            <label>Expected Result</label>
+                            <p>{s.expectedResult}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Notes */}
+                <section className="notes-section">
+                  <label className="notes-label">
+                    <FiMessageSquare />
+                    Analyst Notes
+                  </label>
+                  <textarea 
+                    className="notes-input"
+                    value={comments} 
+                    onChange={(e) => setComments(e.target.value)} 
+                    placeholder="Add observations, defects, or additional context..."
+                  />
+                </section>
+              </>
+            ) : (
+              <div className="loading-state">
+                <div className="loading-spinner"></div>
+                <span>Initializing Stage...</span>
               </div>
-              <button className="modal-close-ultra" onClick={() => {
-                setShowNewRunModal(false);
-                setNewRunData({ name: '', environment: 'QA', tester: '' });
-                setSelectedSuiteId(null);
-              }}>
-                <FiX />
+            )}
+          </div>
+
+          {/* Action Bar */}
+          <footer className="action-bar">
+            <div className="status-actions">
+              <button 
+                className={`status-btn pass ${isSaving ? 'saving' : ''}`}
+                onClick={() => handleQuickStatus('Passed')}
+                disabled={isSaving}
+              >
+                <FiCheckCircle />
+                <span>Pass</span>
+              </button>
+              <button 
+                className={`status-btn fail ${isSaving ? 'saving' : ''}`}
+                onClick={() => handleQuickStatus('Failed')}
+                disabled={isSaving}
+              >
+                <FiXCircle />
+                <span>Fail</span>
+              </button>
+              <button 
+                className={`status-btn block ${isSaving ? 'saving' : ''}`}
+                onClick={() => handleQuickStatus('Blocked')}
+                disabled={isSaving}
+              >
+                <FiAlertCircle />
+                <span>Block</span>
+              </button>
+              <button 
+                className={`status-btn na ${isSaving ? 'saving' : ''}`}
+                onClick={() => handleQuickStatus('N/A')}
+                disabled={isSaving}
+              >
+                <FiMinusCircle />
+                <span>N/A</span>
+              </button>
+              <div className="action-divider"></div>
+              <button 
+                className="status-btn bug"
+                onClick={() => setShowBugModal(true)}
+              >
+                <FiAlertTriangle />
+                <span>Report Bug</span>
               </button>
             </div>
-            <form onSubmit={handleCreateTestRun}>
-              <div className="modal-body-ultra">
-                <div className="form-group-ultra">
-                  <label>Run Name *</label>
-                  <input 
-                    type="text"
-                    value={newRunData.name}
-                    onChange={(e) => setNewRunData({ ...newRunData, name: e.target.value })}
-                    placeholder="e.g., Sprint 5 Regression Test"
-                    required 
-                    className="input-ultra"
-                  />
-                </div>
-                
-                <div className="form-group-ultra">
-                  <label>Test Suite *</label>
-                  <select 
-                    value={selectedSuiteId || ''}
-                    onChange={(e) => setSelectedSuiteId(e.target.value)}
-                    required
-                    className="select-ultra"
-                  >
-                    <option value="">Select a test suite...</option>
-                    {testSuites.map(suite => (
-                      <option key={suite._id || suite.id} value={suite._id || suite.id}>
-                        {suite.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
-                <div className="form-row-ultra">
-                  <div className="form-group-ultra">
-                    <label>Environment</label>
-                    <select 
-                      value={newRunData.environment}
-                      onChange={(e) => setNewRunData({ ...newRunData, environment: e.target.value })}
-                      className="select-ultra"
-                    >
-                      <option value="QA">QA</option>
-                      <option value="Staging">Staging</option>
-                      <option value="UAT">UAT</option>
-                      <option value="Production">Production</option>
-                      <option value="Development">Development</option>
-                    </select>
-                  </div>
-                  <div className="form-group-ultra">
-                    <label>Tester</label>
-                    <input 
-                      type="text"
-                      value={newRunData.tester}
-                      onChange={(e) => setNewRunData({ ...newRunData, tester: e.target.value })}
-                      placeholder="Tester name" 
-                      className="input-ultra"
-                    />
-                  </div>
-                </div>
+            <div className="nav-actions">
+              <button 
+                className="nav-btn"
+                onClick={() => setCurrentTestIndex(p => Math.max(0, p - 1))} 
+                disabled={currentTestIndex === 0}
+              >
+                <FiChevronLeft />
+              </button>
+              <div className="nav-counter">
+                <span className="nav-current">{currentTestIndex + 1}</span>
+                <span className="nav-sep">of</span>
+                <span className="nav-total">{executionResults.length}</span>
               </div>
-              <div className="modal-footer-ultra">
-                <button 
-                  type="button" 
-                  className="btn-ultra secondary" 
-                  onClick={() => {
-                    setShowNewRunModal(false);
-                    setNewRunData({ name: '', environment: 'QA', tester: '' });
-                    setSelectedSuiteId(null);
-                  }}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn-ultra primary">
-                  <FiPlay />
-                  <span>Create Test Run</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+              <button 
+                className="nav-btn"
+                onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))} 
+                disabled={currentTestIndex === executionResults.length - 1}
+              >
+                <FiChevronRight />
+              </button>
+            </div>
+          </footer>
+        </main>
+      </div>
 
       {/* Results Modal */}
       {showResultsModal && (
-        <div className="modal-overlay-ultra">
-          <div className="modal-ultra modal-xl">
-            <div className="modal-header-ultra">
-              <div className="modal-title-ultra">
-                <div className="modal-icon-ultra primary">
-                  <FiList />
-                </div>
+        <div className="modal-backdrop" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
+          <div className="modal modal-xl" onClick={e => e.stopPropagation()}>
+            <header className="modal-header">
+              <div className="modal-title">
+                <div className="modal-icon primary"><FiList /></div>
                 <div>
-                  <h3>{showResultsModal.name}</h3>
-                  <p>{showResultsModal.environment} Environment</p>
+                  <h3>Mission Results: {showResultsModal.name}</h3>
+                  <p>Execution summary and details</p>
                 </div>
               </div>
-              <button className="modal-close-ultra" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
+              <button className="btn-close" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
                 <FiX />
               </button>
-            </div>
-            <div className="modal-body-ultra">
-              <div className="filter-bar-ultra">
+            </header>
+            
+            <div className="modal-body">
+              <div className="filter-bar">
                 <div className="filter-label">
                   <FiFilter />
-                  <span>Filter Results</span>
+                  <span>Filter by status</span>
                 </div>
                 <div className="filter-chips">
-                  {['All', 'Passed', 'Failed', 'Blocked', 'N/A'].map(filter => (
+                  {['All', 'Passed', 'Failed', 'Blocked', 'N/A'].map(f => (
                     <button 
-                      key={filter}
-                      className={`filter-chip ${filter.toLowerCase().replace('/', '')} ${resultsFilter === filter ? 'active' : ''}`}
-                      onClick={() => setResultsFilter(filter)}
+                      key={f} 
+                      className={`filter-chip ${resultsFilter === f ? 'active' : ''} ${f.toLowerCase().replace('/', '')}`}
+                      onClick={() => setResultsFilter(f)}
                     >
-                      {filter}
-                      {filter === 'All' && <span className="chip-count">{executionResults.length}</span>}
+                      {f}
+                      {f !== 'All' && (
+                        <span className="chip-count">
+                          {executionResults.filter(r => {
+                            const st = cleanStatus(r.status);
+                            if (f === 'Passed') return st === 'passed';
+                            if (f === 'Failed') return st === 'failed';
+                            if (f === 'Blocked') return st === 'blocked';
+                            if (f === 'N/A') return st === 'na' || st === 'notrun';
+                            return true;
+                          }).length}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="results-table-ultra">
-                <table>
+              <div className="results-table-wrapper">
+                <table className="results-table">
                   <thead>
                     <tr>
                       <th>ID</th>
@@ -841,18 +785,16 @@ function Execution({
                   </thead>
                   <tbody>
                     {filteredResults.map((r, i) => (
-                      <tr key={i} className={`row-${cleanStatus(r.status)}`}>
-                        <td>
-                          <span className="id-badge-ultra">{r.testCase?.adoId || 'TC'}</span>
-                        </td>
+                      <tr key={r.id || r._id || i}>
+                        <td><span className="id-pill">{r.testCase?.adoId || 'TC'}</span></td>
                         <td className="title-cell">{r.testCase?.title}</td>
                         <td>
-                          <span className={`status-pill-ultra ${cleanStatus(r.status)}`}>
+                          <span className={`status-pill ${cleanStatus(r.status)}`}>
                             {r.status || 'Not Run'}
                           </span>
                         </td>
                         <td className="notes-cell">
-                          {r.comments || <span className="no-notes">—</span>}
+                          {r.comments || <span className="empty-notes">—</span>}
                         </td>
                       </tr>
                     ))}
@@ -860,51 +802,76 @@ function Execution({
                 </table>
               </div>
             </div>
-            <div className="modal-footer-ultra">
-              <button className="btn-ultra primary" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="modal-overlay-ultra">
-          <div className="modal-ultra modal-sm">
-            <div className="modal-header-ultra">
-              <div className="modal-title-ultra">
-                <div className="modal-icon-ultra danger">
-                  <FiTrash2 />
+      {/* Bug Report Modal */}
+      {showBugModal && (
+        <div className="modal-backdrop" onClick={() => setShowBugModal(false)}>
+          <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
+            <header className="modal-header">
+              <div className="modal-title">
+                <div className="modal-icon danger"><FiAlertTriangle /></div>
+                <div>
+                  <h3>Report Defect</h3>
+                  <p>{tc?.title}</p>
                 </div>
-                <h3>Delete Test Run</h3>
               </div>
-              <button className="modal-close-ultra" onClick={() => setShowDeleteConfirm(null)}>
+              <button className="btn-close" onClick={() => setShowBugModal(false)}>
                 <FiX />
               </button>
-            </div>
-            <div className="modal-body-ultra">
-              <p className="confirm-message">
-                Are you sure you want to delete <strong>{showDeleteConfirm.name}</strong>? 
-                This action cannot be undone.
-              </p>
-            </div>
-            <div className="modal-footer-ultra">
-              <button className="btn-ultra secondary" onClick={() => setShowDeleteConfirm(null)}>
-                Cancel
-              </button>
-              <button 
-                className="btn-ultra danger"
-                onClick={() => {
-                  onDeleteTestRun(showDeleteConfirm._id || showDeleteConfirm.id);
-                  setShowDeleteConfirm(null);
-                }}
-              >
-                <FiTrash2 />
-                <span>Delete</span>
-              </button>
-            </div>
+            </header>
+            <form onSubmit={handleReportBug}>
+              <div className="modal-body modal-body-scroll">
+                <div className="form-field">
+                  <label>Bug Title</label>
+                  <input 
+                    name="title" 
+                    className="input-field"
+                    defaultValue={`Defect: ${tc?.title}`} 
+                    required 
+                  />
+                </div>
+                <div className="form-field">
+                  <label>Steps to Reproduce</label>
+                  <textarea 
+                    name="description" 
+                    className="textarea-field"
+                    rows={6} 
+                    defaultValue={tc?.steps?.map(s => `Step ${s.stepNumber}: ${s.action}`).join('\n')} 
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-field">
+                    <label>Severity</label>
+                    <select name="severity" className="select-field">
+                      <option>Critical</option>
+                      <option>High</option>
+                      <option selected>Medium</option>
+                      <option>Low</option>
+                    </select>
+                  </div>
+                  <div className="form-field">
+                    <label>Assignee</label>
+                    <input 
+                      name="assignedTo" 
+                      className="input-field"
+                      placeholder="Developer name" 
+                    />
+                  </div>
+                </div>
+              </div>
+              <footer className="modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowBugModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn-danger">
+                  <FiAlertTriangle />
+                  <span>Commit Defect</span>
+                </button>
+              </footer>
+            </form>
           </div>
         </div>
       )}
