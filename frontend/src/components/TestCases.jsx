@@ -1,102 +1,129 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from "react";
 import {
-  FiPlus, FiUpload, FiSearch, FiFilter, FiEdit2, FiTrash2, 
-  FiFolder, FiFileText, FiChevronDown, FiChevronRight, FiX, 
-  FiAlertCircle, FiUser, FiList, FiTarget, FiPlay, FiEye,
-  FiLayers, FiDatabase, FiCheck
-} from 'react-icons/fi';
-import { toast } from 'react-toastify';
+  FiAlertCircle,
+  FiCheck,
+  FiChevronDown,
+  FiDatabase,
+  FiEdit2,
+  FiEye,
+  FiFileText,
+  FiFilter,
+  FiFolder,
+  FiLayers,
+  FiList,
+  FiPlus,
+  FiSearch,
+  FiTarget,
+  FiTrash2,
+  FiUpload,
+  FiX,
+  FiBox,
+  FiUser,
+  FiActivity,
+} from "react-icons/fi";
+import { toast } from "react-toastify";
 
 function TestCases({
-  testSuites, testCases, onCreateSuite, onUpdateSuite, onDeleteSuite,
-  onCreateTestCase, onUpdateTestCase, onDeleteTestCase, onUploadCSV, onRefresh
+  testSuites = [],
+  testCases = [],
+  onCreateTestCase,
+  onUpdateTestCase,
+  onDeleteTestCase,
+  onDeleteSuite,
+  onUploadCSV,
 }) {
-  // State
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [priorityFilter, setPriorityFilter] = useState('all');
-  
-  // Modal State
+  const [searchTerm, setSearchTerm] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showTestCaseModal, setShowTestCaseModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-  
-  // Data State
+
   const [editingTestCase, setEditingTestCase] = useState(null);
   const [viewingTestCase, setViewingTestCase] = useState(null);
+
   const [uploadFile, setUploadFile] = useState(null);
-  const [uploadSuiteName, setUploadSuiteName] = useState('');
+  const [uploadSuiteName, setUploadSuiteName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
-  // Form State for Editing
   const [tcFormData, setTcFormData] = useState({
-    suiteId: '', title: '', description: '', priority: 'Medium',
-    assignedTo: '', areaPath: '', scenarioType: '', state: 'Active',
-    steps: [{ stepNumber: 1, action: '', expectedResult: '' }]
+    suiteId: "",
+    title: "",
+    description: "",
+    priority: "Medium",
+    assignedTo: "",
+    areaPath: "",
+    scenarioType: "",
+    state: "Active",
+    steps: [{ stepNumber: 1, action: "", expectedResult: "" }],
   });
-
-  // Filter Logic
-  const filteredTestCases = useMemo(() => {
-    let filtered = testCases || [];
-    if (selectedSuiteId) {
-      filtered = filtered.filter(tc => String(tc.suiteId) === String(selectedSuiteId));
-    }
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(tc =>
-        tc.title?.toLowerCase().includes(term) || tc.adoId?.toString().includes(term)
-      );
-    }
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(tc => tc.priority === priorityFilter);
-    }
-    return filtered;
-  }, [testCases, selectedSuiteId, searchTerm, priorityFilter]);
 
   const suiteTestCounts = useMemo(() => {
     const counts = {};
-    (testCases || []).forEach(tc => {
+    (testCases || []).forEach((tc) => {
       const sId = String(tc.suiteId);
       counts[sId] = (counts[sId] || 0) + 1;
     });
     return counts;
   }, [testCases]);
 
-  // Handlers
-  const handleUploadSubmit = async (e) => {
-    e.preventDefault();
-    if (!uploadFile || !uploadSuiteName) return toast.error("File and Suite Name required");
-    setIsUploading(true);
-    try {
-      await onUploadCSV(uploadFile, uploadSuiteName, "");
-      setShowUploadModal(false);
-      setUploadFile(null);
-      setUploadSuiteName('');
-    } catch (error) { console.error(error); }
-    finally { setIsUploading(false); }
-  };
+  const filteredTestCases = useMemo(() => {
+    let filtered = testCases || [];
+
+    if (selectedSuiteId) {
+      filtered = filtered.filter(
+        (tc) => String(tc.suiteId) === String(selectedSuiteId)
+      );
+    }
+
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (tc) =>
+          tc.title?.toLowerCase().includes(term) ||
+          tc.adoId?.toString().includes(term)
+      );
+    }
+
+    if (priorityFilter !== "all") {
+      filtered = filtered.filter((tc) => tc.priority === priorityFilter);
+    }
+
+    return filtered;
+  }, [testCases, selectedSuiteId, searchTerm, priorityFilter]);
 
   const initTestCaseForm = (testCase = null) => {
     if (testCase) {
       setTcFormData({
         suiteId: testCase.suiteId,
-        title: testCase.title,
-        description: testCase.description || '',
-        priority: testCase.priority || 'Medium',
-        assignedTo: testCase.assignedTo || '',
-        areaPath: testCase.areaPath || '',
-        scenarioType: testCase.scenarioType || '',
-        state: testCase.state || 'Active',
-        steps: testCase.steps?.length > 0 ? testCase.steps : [{ stepNumber: 1, action: '', expectedResult: '' }]
+        title: testCase.title || "",
+        description: testCase.description || "",
+        priority: testCase.priority || "Medium",
+        assignedTo: testCase.assignedTo || "",
+        areaPath: testCase.areaPath || "",
+        scenarioType: testCase.scenarioType || "",
+        state: testCase.state || "Active",
+        steps:
+          testCase.steps?.length > 0
+            ? testCase.steps
+            : [{ stepNumber: 1, action: "", expectedResult: "" }],
       });
       setEditingTestCase(testCase);
     } else {
+      const fallbackSuiteId =
+        selectedSuiteId || (testSuites[0]?._id || testSuites[0]?.id) || "";
       setTcFormData({
-        suiteId: selectedSuiteId || (testSuites[0]?._id || testSuites[0]?.id) || '', 
-        title: '', description: '', priority: 'Medium',
-        assignedTo: '', areaPath: '', scenarioType: '', state: 'Active',
-        steps: [{ stepNumber: 1, action: '', expectedResult: '' }]
+        suiteId: fallbackSuiteId,
+        title: "",
+        description: "",
+        priority: "Medium",
+        assignedTo: "",
+        areaPath: "",
+        scenarioType: "",
+        state: "Active",
+        steps: [{ stepNumber: 1, action: "", expectedResult: "" }],
       });
       setEditingTestCase(null);
     }
@@ -104,117 +131,148 @@ function TestCases({
   };
 
   const handleStepChange = (idx, field, value) => {
-    const newSteps = [...tcFormData.steps];
-    newSteps[idx][field] = value;
-    setTcFormData({ ...tcFormData, steps: newSteps });
+    const next = [...tcFormData.steps];
+    next[idx] = { ...next[idx], [field]: value };
+    setTcFormData((p) => ({ ...p, steps: next }));
   };
 
   const addStep = () => {
-    setTcFormData({
-      ...tcFormData,
-      steps: [...tcFormData.steps, { stepNumber: tcFormData.steps.length + 1, action: '', expectedResult: '' }]
-    });
+    setTcFormData((p) => ({
+      ...p,
+      steps: [
+        ...p.steps,
+        { stepNumber: p.steps.length + 1, action: "", expectedResult: "" },
+      ],
+    }));
   };
 
   const removeStep = (idx) => {
-    const newSteps = tcFormData.steps.filter((_, i) => i !== idx).map((s, i) => ({ ...s, stepNumber: i + 1 }));
-    setTcFormData({ ...tcFormData, steps: newSteps });
+    const next = tcFormData.steps
+      .filter((_, i) => i !== idx)
+      .map((s, i) => ({ ...s, stepNumber: i + 1 }));
+    setTcFormData((p) => ({ ...p, steps: next }));
   };
 
   const handleTestCaseSubmit = async (e) => {
     e.preventDefault();
     try {
-      if (editingTestCase) await onUpdateTestCase(editingTestCase._id || editingTestCase.id, tcFormData);
-      else await onCreateTestCase(tcFormData);
+      if (editingTestCase) {
+        await onUpdateTestCase?.(editingTestCase._id || editingTestCase.id, tcFormData);
+      } else {
+        await onCreateTestCase?.(tcFormData);
+      }
       setShowTestCaseModal(false);
       toast.success("Saved successfully");
-    } catch (err) { toast.error("Error saving test case"); }
+    } catch (err) {
+      toast.error("Error saving test case");
+    }
+  };
+
+  const handleUploadSubmit = async (e) => {
+    e.preventDefault();
+    if (!uploadFile || !uploadSuiteName.trim()) {
+      toast.error("File and Suite Name required");
+      return;
+    }
+    setIsUploading(true);
+    try {
+      await onUploadCSV?.(uploadFile, uploadSuiteName.trim(), "");
+      setShowUploadModal(false);
+      setUploadFile(null);
+      setUploadSuiteName("");
+      toast.success("Imported successfully");
+    } catch (error) {
+      toast.error("Import failed");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
     <div className="test-cases-page">
-      {/* Ambient Background */}
-      <div className="page-ambient">
-        <div className="ambient-gradient ambient-gradient-1"></div>
-        <div className="ambient-gradient ambient-gradient-2"></div>
-      </div>
-
+      {/* Ambient Background Effects */}
+      <div className="ambient-glow ambient-glow-1" />
+      <div className="ambient-glow ambient-glow-2" />
+      <div className="ambient-glow ambient-glow-3" />
+      
       <div className="page-content">
         <div className="page-header">
-          <div className="header-content">
+          <div className="header-left">
             <div className="header-badge">
-              <FiDatabase className="badge-icon" />
+              <div className="header-badge-icon">
+                <FiDatabase />
+              </div>
               <span>Test Repository</span>
             </div>
-            <h2 className="section-title">Test Cases Management</h2>
-            <p className="section-description">Manage and organize your test library</p>
+            <h2>Test Cases</h2>
+            <p>Search, filter, and manage your test library with precision.</p>
           </div>
+
           <div className="header-actions">
-            <button className="btn btn-secondary btn-with-icon" onClick={() => setShowUploadModal(true)}>
-              <span className="btn-icon-wrapper">
-                <FiUpload />
-              </span>
-              <span>Import CSV</span>
+            <button className="btn btn-secondary btn-glass" onClick={() => setShowUploadModal(true)}>
+              <FiUpload /> Import CSV
             </button>
-            <button className="btn btn-primary btn-with-icon" onClick={() => initTestCaseForm()}>
-              <span className="btn-icon-wrapper">
-                <FiPlus />
-              </span>
-              <span>New Test Case</span>
+            <button className="btn btn-primary btn-glow" onClick={() => initTestCaseForm()}>
+              <FiPlus /> New Test Case
             </button>
           </div>
         </div>
 
         <div className="test-cases-layout">
           <aside className="suites-sidebar">
-            <div className="sidebar-header">
-              <div className="sidebar-title-group">
-                <FiLayers className="sidebar-icon" />
-                <h3>Test Suites</h3>
+            <div className="sidebar-head">
+              <div className="sidebar-title">
+                <div className="sidebar-title-icon">
+                  <FiLayers />
+                </div>
+                <span>Test Suites</span>
               </div>
-              <span className="suite-count-badge">{testSuites?.length || 0}</span>
+              <span className="count-pill">{testSuites.length}</span>
             </div>
+
             <div className="suites-list">
-              <div 
-                className={`suite-item ${!selectedSuiteId ? 'active' : ''}`} 
+              <button
+                type="button"
+                className={`suite-item ${!selectedSuiteId ? "active" : ""}`}
                 onClick={() => setSelectedSuiteId(null)}
               >
-                <div className="suite-icon-wrapper all">
-                  <FiFileText />
-                </div>
+                <span className="suite-icon">
+                  <FiBox />
+                </span>
                 <span className="suite-name">All Test Cases</span>
-                <span className="suite-test-count">{testCases?.length || 0}</span>
-              </div>
-              
-              {testSuites?.map(suite => (
-                <div 
-                  key={suite._id || suite.id} 
-                  className={`suite-item ${String(selectedSuiteId) === String(suite._id || suite.id) ? 'active' : ''}`}
-                >
-                  <div 
-                    className="suite-info" 
-                    onClick={() => setSelectedSuiteId(suite._id || suite.id)}
-                  >
-                    <div className="suite-icon-wrapper">
-                      <FiFolder />
-                    </div>
-                    <span className="suite-name">{suite.name}</span>
-                    <span className="suite-test-count">
-                      {suiteTestCounts[String(suite._id || suite.id)] || 0}
-                    </span>
+                <span className="suite-count">{testCases.length}</span>
+              </button>
+
+              {testSuites.map((suite) => {
+                const id = suite._id || suite.id;
+                return (
+                  <div className="suite-row" key={id}>
+                    <button
+                      type="button"
+                      className={`suite-item ${String(selectedSuiteId) === String(id) ? "active" : ""}`}
+                      onClick={() => setSelectedSuiteId(id)}
+                    >
+                      <span className="suite-icon">
+                        <FiFolder />
+                      </span>
+                      <span className="suite-name">{suite.name}</span>
+                      <span className="suite-count">{suiteTestCounts[String(id)] || 0}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="icon-btn icon-btn-danger"
+                      title="Delete Suite"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowDeleteConfirm({ type: "suite", id, name: suite.name });
+                      }}
+                    >
+                      <FiTrash2 />
+                    </button>
                   </div>
-                  <button 
-                    className="suite-delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation(); 
-                      setShowDeleteConfirm({ type: 'suite', id: suite._id || suite.id, name: suite.name });
-                    }}
-                    title="Delete Suite"
-                  >
-                    <FiTrash2 size={14} />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </aside>
 
@@ -222,106 +280,112 @@ function TestCases({
             <div className="filters-bar">
               <div className="search-box">
                 <FiSearch className="search-icon" />
-                <input 
-                  type="text" 
-                  placeholder="Search by title or ID..." 
-                  value={searchTerm} 
-                  onChange={e => setSearchTerm(e.target.value)} 
+                <input
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search by title or ID…"
+                  type="text"
                 />
                 {searchTerm && (
-                  <button className="search-clear" onClick={() => setSearchTerm('')}>
-                    <FiX size={14} />
+                  <button
+                    type="button"
+                    className="search-clear"
+                    onClick={() => setSearchTerm("")}
+                    aria-label="Clear search"
+                    title="Clear"
+                  >
+                    <FiX />
                   </button>
                 )}
               </div>
-              <div className="filter-group">
-                <div className="filter-select-wrapper">
-                  <FiFilter className="filter-icon" />
-                  <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)}>
-                    <option value="all">All Priorities</option>
-                    <option value="Critical">Critical</option>
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </select>
-                  <FiChevronDown className="select-arrow" />
-                </div>
+
+              <div className="select-wrap">
+                <FiFilter className="select-icon" />
+                <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
+                  <option value="all">All Priorities</option>
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+                <FiChevronDown className="select-arrow" />
               </div>
-              <div className="results-count">
-                <span className="results-number">{filteredTestCases.length}</span>
-                <span className="results-label">tests found</span>
+
+              <div className="results-pill">
+                <span className="results-num">{filteredTestCases.length}</span>
+                <span className="results-label">results found</span>
               </div>
             </div>
 
             <div className="table-container">
-              {filteredTestCases.length > 0 ? (
+              {filteredTestCases.length ? (
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th style={{width: '100px'}}>
-                        <span className="th-content">ID</span>
-                      </th>
-                      <th>
-                        <span className="th-content">Title</span>
-                      </th>
-                      <th style={{width: '120px'}}>
-                        <span className="th-content">Priority</span>
-                      </th>
-                      <th style={{width: '150px'}}>
-                        <span className="th-content">Assigned To</span>
-                      </th>
-                      <th style={{width: '140px'}}>
-                        <span className="th-content">Actions</span>
-                      </th>
+                      <th style={{ width: 120 }}>ID</th>
+                      <th>Title</th>
+                      <th style={{ width: 140 }}>Priority</th>
+                      <th style={{ width: 180 }}>Assigned To</th>
+                      <th style={{ width: 160, textAlign: "right" }}>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredTestCases.map((tc, idx) => (
-                      <tr key={tc._id || tc.id || idx} className="table-row">
-                        <td className="id-cell">
-                          <span className="id-badge">{tc.adoId || 'TC'}</span>
+                      <tr key={tc._id || tc.id || idx}>
+                        <td>
+                          <span className="id-badge">{tc.adoId || "TC"}</span>
                         </td>
                         <td className="title-cell">
                           <span className="title-text">{tc.title}</span>
                         </td>
                         <td>
-                          <span className={`priority-badge priority-${(tc.priority || 'medium').toLowerCase()}`}>
-                            <span className="priority-dot"></span>
-                            {tc.priority}
+                          <span className={`priority priority-${String(tc.priority || "Medium").toLowerCase()}`}>
+                            <span className="priority-dot" />
+                            {tc.priority || "Medium"}
                           </span>
                         </td>
-                        <td className="assignee-cell">
+                        <td>
                           {tc.assignedTo ? (
-                            <div className="assignee-wrapper">
-                              <div className="assignee-avatar">
-                                {tc.assignedTo.charAt(0).toUpperCase()}
-                              </div>
-                              <span className="assignee-name">{tc.assignedTo}</span>
-                            </div>
+                            <span className="assigned-badge">
+                              <FiUser className="assigned-icon" />
+                              {tc.assignedTo}
+                            </span>
                           ) : (
-                            <span className="no-assignee">Unassigned</span>
+                            <span className="muted">Unassigned</span>
                           )}
                         </td>
-                        <td className="actions-cell">
+                        <td className="actions">
                           <div className="actions-group">
-                            <button 
-                              className="action-btn action-btn-view" 
-                              onClick={() => {setViewingTestCase(tc); setShowViewModal(true);}} 
-                              title="View"
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="View Details"
+                              onClick={() => {
+                                setViewingTestCase(tc);
+                                setShowViewModal(true);
+                              }}
                             >
                               <FiEye />
                             </button>
-                            <button 
-                              className="action-btn action-btn-edit" 
-                              onClick={() => initTestCaseForm(tc)} 
-                              title="Edit"
+                            <button
+                              type="button"
+                              className="icon-btn"
+                              title="Edit Test Case"
+                              onClick={() => initTestCaseForm(tc)}
                             >
                               <FiEdit2 />
                             </button>
-                            <button 
-                              className="action-btn action-btn-delete" 
-                              onClick={() => setShowDeleteConfirm({ type: 'testCase', id: tc._id || tc.id, name: tc.title })} 
-                              title="Delete"
+                            <button
+                              type="button"
+                              className="icon-btn icon-btn-danger"
+                              title="Delete Test Case"
+                              onClick={() =>
+                                setShowDeleteConfirm({
+                                  type: "testCase",
+                                  id: tc._id || tc.id,
+                                  name: tc.title,
+                                })
+                              }
                             >
                               <FiTrash2 />
                             </button>
@@ -332,14 +396,14 @@ function TestCases({
                   </tbody>
                 </table>
               ) : (
-                <div className="empty-state">
-                  <div className="empty-state-icon">
+                <div className="empty">
+                  <div className="empty-icon">
                     <FiFileText />
                   </div>
                   <h3>No test cases found</h3>
-                  <p>Try changing filters or import a CSV file</p>
-                  <button className="btn btn-primary" onClick={() => setShowUploadModal(true)}>
-                    <FiUpload /> Import Test Cases
+                  <p>Try adjusting your filters or import a CSV file to get started.</p>
+                  <button className="btn btn-secondary btn-glass" onClick={() => setShowUploadModal(true)}>
+                    <FiUpload /> Import CSV
                   </button>
                 </div>
               )}
@@ -348,69 +412,78 @@ function TestCases({
         </div>
       </div>
 
-      {/* --- MODALS SECTION --- */}
-
-      {/* 1. VIEW MODAL */}
+      {/* View Modal */}
       {showViewModal && viewingTestCase && (
         <div className="modal-overlay" onClick={() => setShowViewModal(false)}>
-          <div className="modal modal-large" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <span className="modal-badge">Test Case</span>
+          <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div className="modal-head-content">
+                <div className="modal-badge">
+                  <FiFileText />
+                  Test Case
+                </div>
                 <h3>{viewingTestCase.title}</h3>
               </div>
-              <button className="close-btn" onClick={() => setShowViewModal(false)}>
+              <button className="icon-btn modal-close" onClick={() => setShowViewModal(false)} title="Close">
                 <FiX />
               </button>
             </div>
+
             <div className="modal-body">
-              <div className="view-meta-grid">
-                <div className="view-meta-item">
-                  <span className="meta-label">Priority</span>
-                  <span className={`priority-badge priority-${(viewingTestCase.priority || 'medium').toLowerCase()}`}>
-                    <span className="priority-dot"></span>
-                    {viewingTestCase.priority}
+              <div className="meta-grid">
+                <div className="meta-item">
+                  <span className="meta-label">
+                    <FiTarget />
+                    Priority
+                  </span>
+                  <span className={`priority priority-${String(viewingTestCase.priority || "Medium").toLowerCase()}`}>
+                    <span className="priority-dot" />
+                    {viewingTestCase.priority || "Medium"}
                   </span>
                 </div>
-                <div className="view-meta-item">
-                  <span className="meta-label">Assigned To</span>
-                  <span className="meta-value">{viewingTestCase.assignedTo || 'Unassigned'}</span>
+                <div className="meta-item">
+                  <span className="meta-label">
+                    <FiUser />
+                    Assigned To
+                  </span>
+                  <span className="meta-value">{viewingTestCase.assignedTo || "Unassigned"}</span>
                 </div>
-                <div className="view-meta-item">
-                  <span className="meta-label">State</span>
-                  <span className="state-badge">{viewingTestCase.state || 'Active'}</span>
+                <div className="meta-item">
+                  <span className="meta-label">
+                    <FiActivity />
+                    State
+                  </span>
+                  <span className="state-pill">{viewingTestCase.state || "Active"}</span>
                 </div>
               </div>
-              
-              <div className="view-section">
+
+              <div className="section">
                 <h4>
-                  <FiFileText className="section-icon" />
+                  <FiFileText />
                   Description
                 </h4>
-                <div className="view-content-box">
-                  <p>{viewingTestCase.description || "No description provided."}</p>
+                <div className="content-box">
+                  {viewingTestCase.description || "No description provided."}
                 </div>
               </div>
-              
-              <div className="view-section">
+
+              <div className="section">
                 <h4>
-                  <FiList className="section-icon" />
+                  <FiList />
                   Test Steps
                 </h4>
-                <div className="steps-list">
-                  {viewingTestCase.steps?.map((step, i) => (
-                    <div key={i} className="step-item">
-                      <div className="step-number-badge">
-                        <span>{step.stepNumber}</span>
-                      </div>
-                      <div className="step-content">
-                        <div className="step-action">
-                          <span className="step-label">Action</span>
-                          <p>{step.action}</p>
+                <div className="steps-view">
+                  {(viewingTestCase.steps || []).map((s, i) => (
+                    <div className="step-view-item" key={i}>
+                      <div className="step-view-num">{s.stepNumber}</div>
+                      <div className="step-view-content">
+                        <div className="step-view-section">
+                          <span className="step-view-label">Action</span>
+                          <div className="step-view-box">{s.action || "—"}</div>
                         </div>
-                        <div className="step-expected">
-                          <span className="step-label">Expected Result</span>
-                          <p>{step.expectedResult}</p>
+                        <div className="step-view-section">
+                          <span className="step-view-label">Expected Result</span>
+                          <div className="step-view-box">{s.expectedResult || "—"}</div>
                         </div>
                       </div>
                     </div>
@@ -418,11 +491,18 @@ function TestCases({
                 </div>
               </div>
             </div>
-            <div className="modal-footer">
+
+            <div className="modal-foot">
               <button className="btn btn-secondary" onClick={() => setShowViewModal(false)}>
                 Close
               </button>
-              <button className="btn btn-primary" onClick={() => { setShowViewModal(false); initTestCaseForm(viewingTestCase); }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowViewModal(false);
+                  initTestCaseForm(viewingTestCase);
+                }}
+              >
                 <FiEdit2 /> Edit Test Case
               </button>
             </div>
@@ -430,146 +510,142 @@ function TestCases({
         </div>
       )}
 
-      {/* 2. EDIT/CREATE MODAL */}
+      {/* Create/Edit Modal */}
       {showTestCaseModal && (
         <div className="modal-overlay" onClick={() => setShowTestCaseModal(false)}>
-          <div className="modal modal-xlarge" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <span className="modal-badge">{editingTestCase ? 'Edit' : 'Create'}</span>
-                <h3>{editingTestCase ? 'Edit Test Case' : 'New Test Case'}</h3>
+          <div className="modal modal-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div className="modal-head-content">
+                <div className="modal-badge">
+                  {editingTestCase ? <FiEdit2 /> : <FiPlus />}
+                  {editingTestCase ? "Edit" : "Create"}
+                </div>
+                <h3>{editingTestCase ? "Edit Test Case" : "Create New Test Case"}</h3>
               </div>
-              <button className="close-btn" onClick={() => setShowTestCaseModal(false)}>
+              <button className="icon-btn modal-close" onClick={() => setShowTestCaseModal(false)} title="Close">
                 <FiX />
               </button>
             </div>
+
             <form onSubmit={handleTestCaseSubmit}>
               <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">
-                    <FiFileText className="label-icon" />
-                    Title
-                  </label>
-                  <input 
-                    type="text" 
-                    className="form-input"
-                    placeholder="Enter test case title..."
-                    value={tcFormData.title} 
-                    onChange={e => setTcFormData({...tcFormData, title: e.target.value})} 
-                    required 
-                  />
-                </div>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">
-                      <FiFolder className="label-icon" />
-                      Suite
-                    </label>
-                    <div className="select-wrapper">
-                      <select 
-                        className="form-select"
-                        value={tcFormData.suiteId} 
-                        onChange={e => setTcFormData({...tcFormData, suiteId: e.target.value})} 
-                        required
-                      >
-                        <option value="">Select Suite</option>
-                        {testSuites.map(s => (
-                          <option key={s._id || s.id} value={s._id || s.id}>{s.name}</option>
-                        ))}
-                      </select>
-                      <FiChevronDown className="select-arrow" />
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">
-                      <FiTarget className="label-icon" />
-                      Priority
-                    </label>
-                    <div className="select-wrapper">
-                      <select 
-                        className="form-select"
-                        value={tcFormData.priority} 
-                        onChange={e => setTcFormData({...tcFormData, priority: e.target.value})}
-                      >
-                        <option>Critical</option>
-                        <option>High</option>
-                        <option>Medium</option>
-                        <option>Low</option>
-                      </select>
-                      <FiChevronDown className="select-arrow" />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="form-group">
-                  <label className="form-label">Description</label>
-                  <textarea 
-                    className="form-textarea"
-                    placeholder="Enter test case description..."
-                    value={tcFormData.description}
-                    onChange={e => setTcFormData({...tcFormData, description: e.target.value})}
-                    rows={3}
-                  />
-                </div>
-                
-                {/* Steps Editor */}
                 <div className="form-section">
-                  <div className="form-section-header">
-                    <h4>
-                      <FiList className="section-icon" />
-                      Test Steps
-                    </h4>
-                    <button type="button" className="btn btn-sm btn-ghost" onClick={addStep}>
+                  <h5 className="form-section-title">Basic Information</h5>
+                  <div className="form-grid">
+                    <label className="field field-wide">
+                      <span>Title <span className="required">*</span></span>
+                      <input
+                        value={tcFormData.title}
+                        onChange={(e) => setTcFormData((p) => ({ ...p, title: e.target.value }))}
+                        required
+                        placeholder="Enter a descriptive title…"
+                      />
+                    </label>
+
+                    <label className="field">
+                      <span>Test Suite <span className="required">*</span></span>
+                      <div className="select-field">
+                        <select
+                          value={tcFormData.suiteId}
+                          onChange={(e) => setTcFormData((p) => ({ ...p, suiteId: e.target.value }))}
+                          required
+                        >
+                          <option value="">Select a suite</option>
+                          {testSuites.map((s) => (
+                            <option key={s._id || s.id} value={s._id || s.id}>
+                              {s.name}
+                            </option>
+                          ))}
+                        </select>
+                        <FiChevronDown className="select-field-arrow" />
+                      </div>
+                    </label>
+
+                    <label className="field">
+                      <span>Priority</span>
+                      <div className="select-field">
+                        <select
+                          value={tcFormData.priority}
+                          onChange={(e) => setTcFormData((p) => ({ ...p, priority: e.target.value }))}
+                        >
+                          <option>Critical</option>
+                          <option>High</option>
+                          <option>Medium</option>
+                          <option>Low</option>
+                        </select>
+                        <FiChevronDown className="select-field-arrow" />
+                      </div>
+                    </label>
+
+                    <label className="field field-wide">
+                      <span>Description</span>
+                      <textarea
+                        rows={4}
+                        value={tcFormData.description}
+                        onChange={(e) => setTcFormData((p) => ({ ...p, description: e.target.value }))}
+                        placeholder="Provide a detailed description of the test case…"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <div className="steps-editor-head">
+                    <h5 className="form-section-title">Test Steps</h5>
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={addStep}>
                       <FiPlus /> Add Step
                     </button>
                   </div>
-                  <div className="steps-editor">
+
+                  <div className="steps-editor-list">
                     {tcFormData.steps.map((step, idx) => (
-                      <div key={idx} className="step-editor-card">
-                        <div className="step-editor-header">
-                          <div className="step-number-indicator">
-                            <span>Step {idx + 1}</span>
-                          </div>
+                      <div className="step-card" key={idx}>
+                        <div className="step-card-head">
+                          <div className="step-card-num">Step {idx + 1}</div>
                           {tcFormData.steps.length > 1 && (
-                            <button 
-                              type="button" 
-                              className="step-remove-btn" 
+                            <button
+                              type="button"
+                              className="icon-btn icon-btn-sm icon-btn-danger"
                               onClick={() => removeStep(idx)}
+                              title="Remove Step"
                             >
                               <FiX />
                             </button>
                           )}
                         </div>
-                        <div className="step-editor-body">
-                          <div className="step-field">
-                            <label>Action</label>
-                            <textarea 
-                              placeholder="Describe the action to perform..." 
-                              value={step.action} 
-                              onChange={e => handleStepChange(idx, 'action', e.target.value)} 
+
+                        <div className="step-card-body">
+                          <label className="field">
+                            <span>Action</span>
+                            <textarea
+                              rows={3}
+                              value={step.action}
+                              onChange={(e) => handleStepChange(idx, "action", e.target.value)}
+                              placeholder="Describe the action to perform…"
                             />
-                          </div>
-                          <div className="step-field">
-                            <label>Expected Result</label>
-                            <textarea 
-                              placeholder="Describe the expected outcome..." 
-                              value={step.expectedResult} 
-                              onChange={e => handleStepChange(idx, 'expectedResult', e.target.value)} 
+                          </label>
+                          <label className="field">
+                            <span>Expected Result</span>
+                            <textarea
+                              rows={3}
+                              value={step.expectedResult}
+                              onChange={(e) => handleStepChange(idx, "expectedResult", e.target.value)}
+                              placeholder="Describe the expected outcome…"
                             />
-                          </div>
+                          </label>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
+
+              <div className="modal-foot">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowTestCaseModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  <FiCheck /> Save Test Case
+                <button type="submit" className="btn btn-primary btn-glow">
+                  <FiCheck /> {editingTestCase ? "Save Changes" : "Create Test Case"}
                 </button>
               </div>
             </form>
@@ -577,39 +653,58 @@ function TestCases({
         </div>
       )}
 
-      {/* 3. DELETE CONFIRMATION */}
+      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="modal-overlay" onClick={() => setShowDeleteConfirm(null)}>
-          <div className="modal modal-small modal-danger" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Confirm Delete</h3>
-              <button className="close-btn" onClick={() => setShowDeleteConfirm(null)}>
+          <div className="modal modal-sm modal-danger" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div className="modal-head-content">
+                <h3>Confirm Deletion</h3>
+              </div>
+              <button className="icon-btn modal-close" onClick={() => setShowDeleteConfirm(null)} title="Close">
                 <FiX />
               </button>
             </div>
+
             <div className="modal-body">
-              <div className="delete-warning-icon">
-                <FiAlertCircle />
-              </div>
-              <p className="delete-message">
-                Are you sure you want to delete <strong>{showDeleteConfirm.name}</strong>?
-              </p>
-              {showDeleteConfirm.type === 'suite' && (
-                <div className="delete-warning-box">
+              <div className="danger-alert">
+                <div className="danger-alert-icon">
                   <FiAlertCircle />
-                  <span>This will delete ALL test cases in this suite!</span>
                 </div>
-              )}
+                <div className="danger-alert-content">
+                  <p>
+                    Are you sure you want to delete <strong>"{showDeleteConfirm.name}"</strong>?
+                  </p>
+                  {showDeleteConfirm.type === "suite" && (
+                    <p className="danger-alert-warning">
+                      This action will permanently delete all test cases within this suite.
+                    </p>
+                  )}
+                  <p className="danger-alert-note">This action cannot be undone.</p>
+                </div>
+              </div>
             </div>
-            <div className="modal-footer">
+
+            <div className="modal-foot">
               <button className="btn btn-secondary" onClick={() => setShowDeleteConfirm(null)}>
                 Cancel
               </button>
-              <button className="btn btn-danger" onClick={async () => {
-                if (showDeleteConfirm.type === 'suite') await onDeleteSuite(showDeleteConfirm.id);
-                else await onDeleteTestCase(showDeleteConfirm.id);
-                setShowDeleteConfirm(null);
-              }}>
+              <button
+                className="btn btn-danger"
+                onClick={async () => {
+                  try {
+                    if (showDeleteConfirm.type === "suite") {
+                      await onDeleteSuite?.(showDeleteConfirm.id);
+                    } else {
+                      await onDeleteTestCase?.(showDeleteConfirm.id);
+                    }
+                    setShowDeleteConfirm(null);
+                    toast.success("Deleted successfully");
+                  } catch (e) {
+                    toast.error("Delete failed");
+                  }
+                }}
+              >
                 <FiTrash2 /> Delete
               </button>
             </div>
@@ -617,73 +712,72 @@ function TestCases({
         </div>
       )}
 
-      {/* 4. IMPORT CSV MODAL */}
+      {/* Upload Modal */}
       {showUploadModal && (
         <div className="modal-overlay" onClick={() => setShowUploadModal(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-title-group">
-                <span className="modal-badge">Import</span>
-                <h3>Import ADO CSV</h3>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-head">
+              <div className="modal-head-content">
+                <div className="modal-badge">
+                  <FiUpload />
+                  Import
+                </div>
+                <h3>Import Test Cases from CSV</h3>
               </div>
-              <button className="close-btn" onClick={() => setShowUploadModal(false)}>
+              <button className="icon-btn modal-close" onClick={() => setShowUploadModal(false)} title="Close">
                 <FiX />
               </button>
             </div>
+
             <form onSubmit={handleUploadSubmit}>
               <div className="modal-body">
-                <div className="form-group">
-                  <label className="form-label">Select CSV File</label>
-                  <div className={`file-upload-area ${uploadFile ? 'has-file' : ''}`}>
-                    <input 
-                      type="file" 
-                      accept=".csv" 
-                      onChange={e => setUploadFile(e.target.files[0])} 
-                      required 
-                    />
-                    <div className="file-upload-content">
-                      <div className="file-upload-icon">
-                        {uploadFile ? <FiCheck /> : <FiUpload />}
-                      </div>
-                      <div className="file-upload-text">
-                        <span className="file-upload-primary">
-                          {uploadFile ? uploadFile.name : 'Click to upload or drag and drop'}
-                        </span>
-                        <span className="file-upload-secondary">
-                          {uploadFile ? 'Click to change file' : 'CSV files only'}
-                        </span>
-                      </div>
-                    </div>
+                <div className="upload-dropzone">
+                  <div className="upload-dropzone-icon">
+                    <FiUpload />
                   </div>
-                </div>
-                <div className="form-group">
-                  <label className="form-label">
-                    <FiFolder className="label-icon" />
-                    New Suite Name
-                  </label>
+                  <div className="upload-dropzone-text">
+                    <p>Select a CSV file to import</p>
+                    <span>Supported format: .csv</span>
+                  </div>
                   <input 
-                    type="text" 
-                    className="form-input"
-                    placeholder="e.g., Sprint 5 Smoke Tests" 
-                    value={uploadSuiteName} 
-                    onChange={e => setUploadSuiteName(e.target.value)} 
+                    type="file" 
+                    accept=".csv" 
+                    onChange={(e) => setUploadFile(e.target.files?.[0] || null)} 
                     required 
+                    className="upload-dropzone-input"
                   />
+                  {uploadFile && (
+                    <div className="upload-file-selected">
+                      <FiFileText />
+                      <span>{uploadFile.name}</span>
+                    </div>
+                  )}
                 </div>
+
+                <label className="field">
+                  <span>New Suite Name <span className="required">*</span></span>
+                  <input
+                    value={uploadSuiteName}
+                    onChange={(e) => setUploadSuiteName(e.target.value)}
+                    placeholder="e.g., Sprint 5 Regression Tests"
+                    required
+                  />
+                </label>
               </div>
-              <div className="modal-footer">
+
+              <div className="modal-foot">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowUploadModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary" disabled={isUploading}>
+                <button type="submit" className="btn btn-primary btn-glow" disabled={isUploading}>
                   {isUploading ? (
                     <>
-                      <span className="btn-spinner"></span>
-                      Importing...
+                      <span className="btn-spinner" />
+                      Importing…
                     </>
                   ) : (
                     <>
-                      <FiUpload /> Import
+                      <FiUpload /> Import CSV
                     </>
                   )}
                 </button>
