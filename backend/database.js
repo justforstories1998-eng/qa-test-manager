@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -9,9 +10,31 @@ mongoose.set('toJSON', {
   transform: (doc, ret) => { ret.id = ret._id.toString(); }
 });
 
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ['admin', 'user'], default: 'user' },
+  assignedProjects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project' }],
+  mustChangePassword: { type: Boolean, default: false },
+  isActive: { type: Boolean, default: true },
+  lastLogin: Date
+}, { timestamps: true });
+
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
 const projectSchema = new mongoose.Schema({ name: { type: String, required: true }, description: String }, { timestamps: true });
 const testSuiteSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true }, name: String, description: String, testCaseCount: Number }, { timestamps: true });
-const testCaseSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' }, suiteId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestSuite' }, adoId: String, title: String, description: String, steps: Array, priority: String, assignedTo: String, areaPath: String, scenarioType: String }, { timestamps: true });
+const testCaseSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' }, suiteId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestSuite' }, adoId: String, title: String, description: String, steps: Array, priority: String, assignedTo: String, areaPath: String, scenarioType: String, createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } }, { timestamps: true });
 const testRunSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' }, name: String, suiteId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestSuite' }, environment: String, tester: String, status: String, startedAt: Date, completedAt: Date, totalTests: Number, passed: Number, failed: Number, blocked: Number, na: Number, notRun: Number }, { timestamps: true });
 const executionResultSchema = new mongoose.Schema({ runId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestRun' }, testCaseId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestCase' }, status: String, comments: String, executedAt: Date });
 const reportSchema = new mongoose.Schema({ projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project' }, name: String, runId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestRun' }, format: String, filePath: String, fileName: String, generatedAt: { type: Date, default: Date.now } });
@@ -23,6 +46,12 @@ const bugSchema = new mongoose.Schema({
   severity: { type: String, default: 'Medium' },
   status: { type: String, default: 'Active' },
   assignedTo: String,
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  attachments: [{
+    url: String,
+    originalName: String,
+    mimeType: String
+  }],
   attachment: {
     url: String,
     originalName: String,
@@ -32,6 +61,7 @@ const bugSchema = new mongoose.Schema({
 
 const settingsSchema = new mongoose.Schema({ category: { type: String, required: true, unique: true }, data: mongoose.Schema.Types.Mixed });
 
+const User = mongoose.model('User', userSchema);
 const Project = mongoose.model('Project', projectSchema);
 const TestSuite = mongoose.model('TestSuite', testSuiteSchema);
 const TestCase = mongoose.model('TestCase', testCaseSchema);
@@ -46,6 +76,20 @@ export async function initializeDatabase() {
     await mongoose.connect(process.env.MONGODB_URI);
     console.log('✅ MongoDB Connected');
     if (await Project.countDocuments() === 0) await new Project({ name: 'Default Project' }).save();
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@qamanager.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+    const adminExists = await User.findOne({ email: adminEmail });
+    if (!adminExists) {
+      await new User({
+        firstName: 'Admin',
+        lastName: 'User',
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+        mustChangePassword: true
+      }).save();
+      console.log(`✅ Default admin created: ${adminEmail}`);
+    }
   } catch (e) { process.exit(1); }
 }
 
@@ -109,3 +153,21 @@ export const getStatistics = async (projectId) => {
   };
 };
 export const saveDatabase = () => Promise.resolve(true);
+
+// ============================================
+// USER OPERATIONS
+// ============================================
+export const getAllUsers = () => User.find().select('-password').sort({ firstName: 1 });
+export const getUserById = (id) => User.findById(id).select('-password');
+export const getUserByEmail = (email) => User.findOne({ email: email.toLowerCase() });
+export const createUser = (data) => new User(data).save();
+export const updateUser = (id, data) => User.findByIdAndUpdate(id, data, { new: true }).select('-password');
+export const deleteUser = (id) => User.findByIdAndDelete(id);
+export const getUsersByProject = (projectId) => User.find({ assignedProjects: projectId }).select('-password');
+export const searchUsers = (query) => User.find({
+  $or: [
+    { firstName: { $regex: query, $options: 'i' } },
+    { lastName: { $regex: query, $options: 'i' } },
+    { email: { $regex: query, $options: 'i' } }
+  ]
+}).select('-password');

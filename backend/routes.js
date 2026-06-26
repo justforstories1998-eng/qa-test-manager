@@ -11,11 +11,14 @@ import {
   getAllTestRuns, getTestRunById, createTestRun, updateTestRun, deleteTestRun,
   getExecutionResultsByRunId, createExecutionResult, updateExecutionResult, deleteExecutionResult,
   getAllReports, createReport, deleteReport, getReportById,
-  getSettings, updateSettings, updateAllSettings, getStatistics
+  getSettings, updateSettings, updateAllSettings, getStatistics,
+  searchUsers, getAllUsers
 } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
 import { analyzeTestResults } from './services/grokService.js';
+import { sendBugAssignmentEmail } from './services/emailService.js';
+import { authenticateToken } from './middleware/auth.js';
 
 // ============================================
 // FAIL-SAFE: Import Constructor for Node v24
@@ -43,13 +46,13 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'qa_manager_bugs',
     resource_type: 'auto', 
-    allowed_formats: ['jpg', 'png', 'pdf', 'mp4', 'mov', 'docx']
+    allowed_formats: ['jpg', 'png', 'pdf', 'mp4', 'mov', 'docx', 'avi', 'webm']
   },
 });
 
 const upload = multer({ 
   storage: storage, 
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB Limit
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB Limit for video support
 });
 
 const csvUpload = multer({ dest: 'uploads/' });
@@ -61,14 +64,43 @@ router.get('/projects', async (req, res, next) => { try { res.json({ success: tr
 router.post('/projects', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createProject(req.body) }); } catch (e) { next(e); } });
 
 // ============================================
-// BUGS (CLOUDINARY ENABLED)
+// USER SEARCH (For Bug Assignment Dropdown)
+// ============================================
+router.get('/users/search', async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    if (!q || q.length < 2) {
+      return res.json({ success: true, data: [] });
+    }
+    const users = await searchUsers(q);
+    res.json({ success: true, data: users });
+  } catch (e) { next(e); }
+});
+
+router.get('/users', async (req, res, next) => {
+  try {
+    const users = await getAllUsers();
+    res.json({ success: true, data: users });
+  } catch (e) { next(e); }
+});
+
+// ============================================
+// BUGS (CLOUDINARY ENABLED - 50MB VIDEO SUPPORT)
 // ============================================
 router.get('/bugs', async (req, res, next) => { try { res.json({ success: true, data: await getAllBugs(req.query.projectId) }); } catch (e) { next(e); } });
 
 router.post('/bugs', upload.single('attachment'), async (req, res, next) => {
   try {
     const bugData = { ...req.body };
+    if (req.body.createdBy) {
+      bugData.createdBy = req.body.createdBy;
+    }
     if (req.file) {
+      bugData.attachments = [{
+        url: req.file.path || req.file.secure_url,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype
+      }];
       bugData.attachment = {
         url: req.file.path || req.file.secure_url,
         originalName: req.file.originalname,
@@ -76,6 +108,19 @@ router.post('/bugs', upload.single('attachment'), async (req, res, next) => {
       };
     }
     const bug = await createBug(bugData);
+    
+    if (bugData.assignedTo && bugData.createdBy) {
+      try {
+        const assignedUser = await searchUsers(bugData.assignedTo).then(users => users[0]);
+        const createdByUser = await import('./database.js').then(m => m.getUserById(bugData.createdBy));
+        if (assignedUser && createdByUser) {
+          await sendBugAssignmentEmail(bug, assignedUser, createdByUser);
+        }
+      } catch (emailErr) {
+        console.error('Bug assignment email error:', emailErr);
+      }
+    }
+    
     res.status(201).json({ success: true, data: bug });
   } catch (e) { next(e); }
 });
@@ -84,13 +129,30 @@ router.put('/bugs/:id', upload.single('attachment'), async (req, res, next) => {
   try {
     const bugData = { ...req.body };
     if (req.file) {
-      bugData.attachment = {
+      const newAttachment = {
         url: req.file.path || req.file.secure_url,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype
       };
+      bugData.attachments = [newAttachment];
+      bugData.attachment = newAttachment;
     }
     const updated = await updateBug(req.params.id, bugData);
+    
+    if (bugData.assignedTo) {
+      try {
+        const assignedUser = await searchUsers(bugData.assignedTo).then(users => users[0]);
+        if (assignedUser) {
+          const createdByUser = updated.createdBy ? await import('./database.js').then(m => m.getUserById(updated.createdBy)) : null;
+          if (createdByUser) {
+            await sendBugAssignmentEmail(updated, assignedUser, createdByUser);
+          }
+        }
+      } catch (emailErr) {
+        console.error('Bug assignment email error:', emailErr);
+      }
+    }
+    
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 });

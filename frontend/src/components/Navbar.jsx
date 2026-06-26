@@ -1,15 +1,16 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings, FiChevronLeft, FiChevronRight, FiAlertTriangle } from 'react-icons/fi';
+import { FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings, FiChevronLeft, FiChevronRight, FiAlertTriangle, FiUser, FiLogOut, FiShield } from 'react-icons/fi';
 
-function Navbar({ collapsed, onToggleCollapse, logo }) {
+function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin }) {
   const navItems = [
     { path: '/', label: 'Dashboard', icon: FiHome },
     { path: '/test-cases', label: 'Test Cases', icon: FiFileText },
     { path: '/execution', label: 'Execution', icon: FiPlay },
-    { path: '/bugs', label: 'Bugs', icon: FiAlertTriangle }, // NEW
+    { path: '/bugs', label: 'Bugs', icon: FiAlertTriangle },
     { path: '/reports', label: 'Reports', icon: FiBarChart2 },
-    { path: '/settings', label: 'Settings', icon: FiSettings }
+    { path: '/settings', label: 'Settings', icon: FiSettings },
+    ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: FiShield }] : [])
   ];
 
   return (
@@ -28,6 +29,22 @@ function Navbar({ collapsed, onToggleCollapse, logo }) {
           </NavLink>
         ))}
       </div>
+      
+      {user && !collapsed && (
+        <div className="sidebar-user">
+          <div className="user-avatar-nav">
+            {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+          </div>
+          <div className="user-info-nav">
+            <div className="user-name-nav">{user.firstName} {user.lastName}</div>
+            <div className="user-role-nav">{user.role === 'admin' ? 'Administrator' : 'User'}</div>
+          </div>
+          <button className="logout-btn" onClick={onLogout} title="Logout">
+            <FiLogOut size={18} />
+          </button>
+        </div>
+      )}
+      
       <div className="sidebar-footer">
         <button className="sidebar-toggle" onClick={onToggleCollapse}>
           {collapsed ? <FiChevronRight /> : <FiChevronLeft />}

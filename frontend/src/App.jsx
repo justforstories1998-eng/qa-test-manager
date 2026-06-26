@@ -11,6 +11,9 @@ import Execution from './components/Execution';
 import Reports from './components/Reports';
 import Settings from './components/Settings';
 import Bugs from './components/Bugs';
+import Login from './components/Login';
+import ChangePassword from './components/ChangePassword';
+import Admin from './components/Admin';
 
 // API Service
 import api from './api';
@@ -19,6 +22,17 @@ import api from './api';
 import { FiPlus, FiBriefcase } from 'react-icons/fi';
 
 function App() {
+  // ============================================
+  // AUTH STATE
+  // ============================================
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('token');
+  });
+
   // ============================================
   // GLOBAL STATE
   // ============================================
@@ -36,9 +50,33 @@ function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1100);
 
   // ============================================
+  // AUTH HANDLERS
+  // ============================================
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setIsAuthenticated(false);
+    setProjects([]);
+    setActiveProjectId(null);
+    toast.info('Logged out successfully');
+  };
+
+  const handlePasswordChanged = (updatedUser) => {
+    setUser(updatedUser);
+  };
+
+  // ============================================
   // INITIALIZATION
   // ============================================
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     // 1. Load Projects
     api.getProjects().then(res => {
       if (res.success && res.data.length > 0) {
@@ -59,7 +97,7 @@ function App() {
     const handleResize = () => setSidebarCollapsed(window.innerWidth < 1100);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isAuthenticated]);
 
   // ============================================
   // DATA REFRESH LOGIC
@@ -147,20 +185,43 @@ function App() {
   };
 
   // ============================================
-  // HELPER VALUES
-  // ============================================
-  const activeProject = projects.find(p => (p.id || p._id) === activeProjectId);
-  const activeProjectName = activeProject?.name || 'Loading...';
-
-  // ============================================
   // RENDER
   // ============================================
+
+  // Not authenticated - show login
+  if (!isAuthenticated) {
+    return (
+      <div className="app">
+        <Routes>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+        <ToastContainer position="bottom-right" theme="colored" autoClose={3000} />
+      </div>
+    );
+  }
+
+  // Must change password
+  if (user?.mustChangePassword) {
+    return (
+      <div className="app">
+        <Routes>
+          <Route path="*" element={<ChangePassword user={user} onPasswordChanged={handlePasswordChanged} />} />
+        </Routes>
+        <ToastContainer position="bottom-right" theme="colored" autoClose={3000} />
+      </div>
+    );
+  }
+
   return (
     <div className={`app ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       <Navbar 
         collapsed={sidebarCollapsed} 
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)} 
-        logo={appLogo} 
+        logo={appLogo}
+        user={user}
+        onLogout={handleLogout}
+        isAdmin={user?.role === 'admin'}
       />
       
       <main className="main-content">
@@ -212,7 +273,7 @@ function App() {
               />
             } />
 
-            <Route path="/bugs" element={<Bugs projectId={activeProjectId} />} />
+            <Route path="/bugs" element={<Bugs projectId={activeProjectId} user={user} />} />
 
             <Route path="/reports" element={
               <Reports 
@@ -223,6 +284,10 @@ function App() {
             } />
 
             <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
+            
+            {user?.role === 'admin' && (
+              <Route path="/admin" element={<Admin projects={projects} />} />
+            )}
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -262,7 +327,6 @@ function App() {
         </div>
       )}
       
-      {/* ToastContainer must be outside main but inside App */}
       <ToastContainer position="bottom-right" theme="colored" autoClose={3000} />
     </div>
   );

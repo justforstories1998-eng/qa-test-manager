@@ -6,6 +6,8 @@ import fs from 'fs';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './database.js';
 import routes from './routes.js';
+import authRouter from './routes/authRoutes.js';
+import adminRouter from './routes/adminRoutes.js';
 
 // Configuration
 dotenv.config();
@@ -47,6 +49,12 @@ app.use('/uploads', express.static(uploadDir));
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
+
+// Auth Routes
+app.use('/api/auth', authRouter);
+
+// Admin Routes
+app.use('/api/admin', adminRouter);
 
 // API Routes
 app.use('/api', routes);
