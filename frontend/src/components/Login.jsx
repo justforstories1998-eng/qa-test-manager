@@ -19,62 +19,86 @@ function Login({ onLogin }) {
 
   // Three.js particle animation
   useEffect(() => {
+    // Override body background for login page
+    const prevBg = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = '#0a0a1a';
+
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x0a0a1a, 1);
     sceneRef.current = scene;
     rendererRef.current = renderer;
 
     // Create particles
-    const particleCount = 800;
+    const particleCount = 1500;
     const positions = new Float32Array(particleCount * 3);
     const colors = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
 
     const colorPalette = [
-      new THREE.Color('#6366f1'),
-      new THREE.Color('#8b5cf6'),
+      new THREE.Color('#818cf8'),
       new THREE.Color('#a78bfa'),
+      new THREE.Color('#6366f1'),
       new THREE.Color('#c4b5fd'),
+      new THREE.Color('#4f46e5'),
     ];
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      positions[i * 3] = (Math.random() - 0.5) * 30;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
 
       const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
       colors[i * 3] = color.r;
       colors[i * 3 + 1] = color.g;
       colors[i * 3 + 2] = color.b;
-
-      sizes[i] = Math.random() * 0.05 + 0.01;
     }
 
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
     const material = new THREE.PointsMaterial({
-      size: 0.03,
+      size: 0.12,
       vertexColors: true,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
     });
 
     const particles = new THREE.Points(geometry, material);
     particlesRef.current = particles;
     scene.add(particles);
 
-    camera.position.z = 5;
+    // Add ambient glow orbs
+    const orbGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+    const orbMaterial1 = new THREE.MeshBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.08 });
+    const orbMaterial2 = new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.06 });
+    const orbMaterial3 = new THREE.MeshBasicMaterial({ color: 0x4f46e5, transparent: true, opacity: 0.05 });
+
+    const orb1 = new THREE.Mesh(orbGeometry, orbMaterial1);
+    const orb2 = new THREE.Mesh(orbGeometry, orbMaterial2);
+    const orb3 = new THREE.Mesh(orbGeometry, orbMaterial3);
+
+    orb1.scale.set(5, 5, 5);
+    orb1.position.set(-6, 4, -5);
+    orb2.scale.set(7, 7, 7);
+    orb2.position.set(5, -3, -8);
+    orb3.scale.set(4, 4, 4);
+    orb3.position.set(0, 6, -6);
+
+    scene.add(orb1);
+    scene.add(orb2);
+    scene.add(orb3);
+
+    camera.position.z = 8;
 
     // Mouse tracking
     const handleMouseMove = (e) => {
@@ -94,23 +118,36 @@ function Login({ onLogin }) {
 
     // Animation loop
     let animationId;
+    const clock = new THREE.Clock();
     const animate = () => {
       animationId = requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
 
-      const positions = particles.geometry.attributes.position.array;
-      const time = Date.now() * 0.0001;
+      const pos = particles.geometry.attributes.position.array;
 
       for (let i = 0; i < particleCount; i++) {
         const i3 = i * 3;
-        positions[i3 + 1] += Math.sin(time + positions[i3] * 0.5) * 0.002;
-        positions[i3] += Math.cos(time + positions[i3 + 1] * 0.5) * 0.001;
+        pos[i3 + 1] += Math.sin(elapsed * 0.3 + pos[i3] * 0.1) * 0.003;
+        pos[i3] += Math.cos(elapsed * 0.2 + pos[i3 + 1] * 0.1) * 0.002;
       }
 
       particles.geometry.attributes.position.needsUpdate = true;
 
-      // Rotate based on mouse
-      particles.rotation.y += (mouseRef.current.x * 0.05 - particles.rotation.y) * 0.02;
-      particles.rotation.x += (mouseRef.current.y * 0.05 - particles.rotation.x) * 0.02;
+      // Slow rotation
+      particles.rotation.y = elapsed * 0.03;
+      particles.rotation.x = Math.sin(elapsed * 0.1) * 0.1;
+
+      // Mouse influence
+      particles.rotation.y += (mouseRef.current.x * 0.1 - particles.rotation.y) * 0.01;
+      particles.rotation.x += (mouseRef.current.y * 0.05 - particles.rotation.x) * 0.01;
+
+      // Animate glow orbs
+      orb1.position.x = -6 + Math.sin(elapsed * 0.2) * 2;
+      orb1.position.y = 4 + Math.cos(elapsed * 0.15) * 1.5;
+      orb2.position.x = 5 + Math.cos(elapsed * 0.18) * 2;
+      orb2.position.y = -3 + Math.sin(elapsed * 0.22) * 1.5;
+      orb3.position.x = Math.sin(elapsed * 0.25) * 3;
+      orb3.position.y = 6 + Math.cos(elapsed * 0.2) * 1;
 
       renderer.render(scene, camera);
     };
@@ -124,6 +161,7 @@ function Login({ onLogin }) {
       geometry.dispose();
       material.dispose();
       renderer.dispose();
+      document.body.style.backgroundColor = prevBg;
     };
   }, []);
 
