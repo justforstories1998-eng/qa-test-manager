@@ -26,9 +26,9 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-container">
-            {logo ? <img src={logo} alt="Logo" className="custom-logo" /> : <div className="default-logo-icon">QA</div>}
+            <img src="/logo.svg" alt="QALogs" className="custom-logo" />
           </div>
-          {!collapsed && <span className="logo-text">QA Manager</span>}
+          {!collapsed && <span className="logo-text">QALogs</span>}
         </div>
         <div className="sidebar-nav">
           {navItems.map((item) => (

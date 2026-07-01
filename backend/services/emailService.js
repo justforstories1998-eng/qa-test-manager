@@ -23,12 +23,12 @@ export const sendWelcomeEmail = async (user, tempPassword) => {
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       to: user.email,
-      subject: 'Welcome to QA Test Manager - Your Account Details',
+      subject: 'Welcome to QALogs - Your Account Details',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #4f46e5;">Welcome to QA Test Manager</h2>
+          <h2 style="color: #4f46e5;">Welcome to QALogs</h2>
           <p>Hi ${user.firstName},</p>
-          <p>An account has been created for you in the QA Test Manager system.</p>
+          <p>An account has been created for you in the QALogs system.</p>
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <p><strong>Email:</strong> ${user.email}</p>
             <p><strong>Temporary Password:</strong> ${tempPassword}</p>
@@ -164,7 +164,7 @@ export const sendProjectAssignmentEmail = async (user, project, assignedBy) => {
           <p style="margin-top: 20px;">
             <a href="${process.env.APP_URL || 'http://localhost:3000'}" 
                style="background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
-              Open QA Manager
+              Open QALogs
             </a>
           </p>
         </div>

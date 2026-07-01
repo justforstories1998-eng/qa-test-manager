@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUser, FiLock, FiEye, FiEyeOff, FiAlertTriangle } from 'react-icons/fi';
+import { FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import * as THREE from 'three';
 import api from '../api';
@@ -193,11 +193,9 @@ function Login({ onLogin }) {
         <div className="login-card">
           <div className="login-header">
             <div className="login-logo">
-              <div className="logo-icon-large">
-                <FiAlertTriangle size={32} />
-              </div>
+              <img src="/logo.svg" alt="QALogs" className="login-logo-img" />
             </div>
-            <h1>QA Test Manager</h1>
+            <h1>QALogs</h1>
             <p>Sign in to your account</p>
           </div>
 
