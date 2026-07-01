@@ -159,6 +159,7 @@ export const saveDatabase = () => Promise.resolve(true);
 // ============================================
 export const getAllUsers = () => User.find().select('-password').sort({ firstName: 1 });
 export const getUserById = (id) => User.findById(id).select('-password');
+export const getUserByIdWithPassword = (id) => User.findById(id);
 export const getUserByEmail = (email) => User.findOne({ email: email.toLowerCase() });
 export const createUser = (data) => new User(data).save();
 export const updateUser = (id, data) => User.findByIdAndUpdate(id, data, { new: true }).select('-password');

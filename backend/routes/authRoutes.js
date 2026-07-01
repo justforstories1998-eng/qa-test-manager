@@ -1,5 +1,5 @@
 import express from 'express';
-import { getUserByEmail, updateUser, getUserById } from '../database.js';
+import { getUserByEmail, updateUser, getUserById, getUserByIdWithPassword } from '../database.js';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
 
 const authRouter = express.Router();
@@ -63,7 +63,12 @@ authRouter.post('/change-password', authenticateToken, async (req, res) => {
       return res.status(400).json({ success: false, error: 'New password must be at least 6 characters' });
     }
 
-    const user = await getUserById(req.user._id);
+    const user = await getUserByIdWithPassword(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
     const isPasswordValid = await user.comparePassword(currentPassword);
     
     if (!isPasswordValid) {
