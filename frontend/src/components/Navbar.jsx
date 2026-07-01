@@ -152,32 +152,35 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       flexShrink: 0,
     },
     logoWrapper: {
-      width: '42px',
+      width: collapsed ? '42px' : 'auto',
       height: '42px',
       borderRadius: '12px',
-      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)',
+      background: 'transparent',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
-      boxShadow: '0 4px 15px rgba(99, 102, 241, 0.3)',
       position: 'relative',
       overflow: 'hidden',
     },
     logoShine: {
-      position: 'absolute',
-      top: '-50%',
-      left: '-50%',
-      width: '200%',
-      height: '200%',
-      background: 'linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)',
+      display: 'none',
     },
     logoImg: {
-      width: '24px',
-      height: '24px',
-      filter: 'brightness(10)',
+      height: '36px',
+      width: 'auto',
+      objectFit: 'contain',
       position: 'relative',
       zIndex: 1,
+    },
+    logoImgCollapsed: {
+      height: '36px',
+      width: '36px',
+      objectFit: 'cover',
+      objectPosition: 'left center',
+      position: 'relative',
+      zIndex: 1,
+      borderRadius: '8px',
     },
     logoTextContainer: {
       display: 'flex',
@@ -604,8 +607,11 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.logoWrapper}>
-            <div style={styles.logoShine} />
-            <img src="/logo.svg" alt="QALogs" style={styles.logoImg} />
+            <img
+              src="/logo.jpg"
+              alt="QALogs"
+              style={collapsed ? styles.logoImgCollapsed : styles.logoImg}
+            />
           </div>
           {!collapsed && (
             <div style={styles.logoTextContainer}>

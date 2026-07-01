@@ -359,13 +359,13 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .admin-tab:hover {
-  color: #1e293b;
+  color: var(--text-primary);
   background: rgba(255, 255, 255, 0.5);
 }
 
@@ -401,7 +401,7 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .search-box input {
@@ -540,12 +540,12 @@
 
 .user-selection-item .user-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
 .user-selection-item .user-email {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 12px;
 }
 
@@ -638,12 +638,12 @@
 
 .user-search-item .user-name {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 13px;
 }
 
 .user-search-item .user-email {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 11px;
 }
 
@@ -682,7 +682,7 @@
 
 .user-name-nav {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
@@ -690,14 +690,14 @@
 }
 
 .user-role-nav {
-  color: #64748b;
+  color: var(--text-secondary);
   font-size: 11px;
 }
 
 .logout-btn {
   background: none;
   border: none;
-  color: #64748b;
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 6px;
   border-radius: 6px;

@@ -46,9 +46,9 @@
   --exec-glass-border: rgba(255, 255, 255, 0.6);
 
   /* Text */
-  --exec-text: #2b2c41;
-  --exec-text-secondary: #475569;
-  --exec-text-muted: #94a3b8;
+  --exec-text: var(--text-primary);
+  --exec-text-secondary: var(--text-secondary);
+  --exec-text-muted: var(--text-muted);
 
   /* Borders */
   --exec-border: rgba(0, 0, 0, 0.06);
