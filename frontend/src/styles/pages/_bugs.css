@@ -1,48 +1,8 @@
 /* ============================================
-   BUGS PAGE - PREMIUM PROFESSIONAL DESIGN (REFINED)
+   BUGS PAGE - PREMIUM PROFESSIONAL DESIGN
    ============================================ */
 
-:root{
-  /* Brand */
-  --primary-color: #6366f1;
-  --primary-dark: #4f46e5;
-  --primary-darker: #4338ca;
-  --primary-soft: #eef2ff;
-
-  /* Neutrals */
-  --bg-app: #f6f8fc;
-  --bg-white: #ffffff;
-  --surface-1: rgba(255,255,255,0.78);
-  --surface-2: rgba(255,255,255,0.92);
-
-  --border-color: rgba(148, 163, 184, 0.35);
-  --border-strong: rgba(148, 163, 184, 0.55);
-  --border-light: rgba(148, 163, 184, 0.22);
-
-  --text-primary: #0b1220;
-  --text-secondary: #2b3648;
-  --text-light: #52657c;
-  --text-muted: #7b8ca4;
-
-  /* Depth */
-  --shadow-xs: 0 1px 0 rgba(15, 23, 42, 0.05);
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(15, 23, 42, 0.03);
-  --shadow-md: 0 10px 22px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-lg: 0 18px 38px rgba(15, 23, 42, 0.12), 0 6px 16px rgba(15, 23, 42, 0.06);
-  --shadow-xl: 0 28px 70px rgba(15, 23, 42, 0.18), 0 10px 24px rgba(15, 23, 42, 0.10);
-
-  /* Radius / Motion */
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --radius-xl: 22px;
-
-  --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-fast: cubic-bezier(0.2, 0, 0, 1);
-
-  /* Focus */
-  --focus-ring: 0 0 0 4px rgba(99, 102, 241, 0.18);
-}
+/* All design tokens consolidated in _variables.css */
 
 * { box-sizing: border-box; }
 
@@ -105,9 +65,9 @@
   font-size: 13.5px;
   font-weight: 650;
   cursor: pointer;
-  transition: transform 0.22s var(--transition-smooth), box-shadow 0.22s var(--transition-smooth),
-              background 0.22s var(--transition-smooth), border-color 0.22s var(--transition-smooth),
-              color 0.22s var(--transition-smooth);
+  transition: transform 0.22s var(--ease-smooth), box-shadow 0.22s var(--ease-smooth),
+              background 0.22s var(--ease-smooth), border-color 0.22s var(--ease-smooth),
+              color 0.22s var(--ease-smooth);
   outline: none;
   letter-spacing: -0.01em;
   user-select: none;
@@ -179,10 +139,10 @@
   font-size: 12.5px;
   font-weight: 650;
   cursor: pointer;
-  transition: background 0.18s var(--transition-smooth),
-              color 0.18s var(--transition-smooth),
-              transform 0.18s var(--transition-smooth),
-              box-shadow 0.18s var(--transition-smooth);
+  transition: background 0.18s var(--ease-smooth),
+              color 0.18s var(--ease-smooth),
+              transform 0.18s var(--ease-smooth),
+              box-shadow 0.18s var(--ease-smooth);
   color: var(--text-light);
   border: 1px solid transparent;
   background: transparent;
@@ -277,7 +237,7 @@
 
 .data-table tbody tr{
   background: rgba(255,255,255,0.90);
-  transition: background 0.18s var(--transition-smooth), transform 0.18s var(--transition-smooth), box-shadow 0.18s var(--transition-smooth);
+  transition: background 0.18s var(--ease-smooth), transform 0.18s var(--ease-smooth), box-shadow 0.18s var(--ease-smooth);
 }
 
 .data-table tbody tr:hover{
@@ -423,10 +383,10 @@
   padding: 8px 12px;
   border-radius: 12px;
   border: 1px solid rgba(99, 102, 241, 0.14);
-  transition: transform 0.18s var(--transition-smooth),
-              box-shadow 0.18s var(--transition-smooth),
-              background 0.18s var(--transition-smooth),
-              color 0.18s var(--transition-smooth);
+  transition: transform 0.18s var(--ease-smooth),
+              box-shadow 0.18s var(--ease-smooth),
+              background 0.18s var(--ease-smooth),
+              color 0.18s var(--ease-smooth);
 }
 
 .attachment-preview:hover{
@@ -457,11 +417,11 @@
   border-radius: 12px;
   cursor: pointer;
   color: rgba(82, 101, 124, 0.95);
-  transition: transform 0.18s var(--transition-smooth),
-              box-shadow 0.18s var(--transition-smooth),
-              background 0.18s var(--transition-smooth),
-              border-color 0.18s var(--transition-smooth),
-              color 0.18s var(--transition-smooth);
+  transition: transform 0.18s var(--ease-smooth),
+              box-shadow 0.18s var(--ease-smooth),
+              background 0.18s var(--ease-smooth),
+              border-color 0.18s var(--ease-smooth),
+              color 0.18s var(--ease-smooth);
   box-shadow: 0 1px 0 rgba(255,255,255,0.35) inset, var(--shadow-xs);
 }
 
@@ -527,7 +487,7 @@
   justify-content: center;
   z-index: 1000;
   padding: 18px;
-  animation: fadeIn 0.22s var(--transition-smooth);
+  animation: fadeIn 0.22s var(--ease-smooth);
 }
 
 @supports (backdrop-filter: blur(10px)){
@@ -548,7 +508,7 @@
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  animation: slideUp 0.26s var(--transition-smooth);
+  animation: slideUp 0.26s var(--ease-smooth);
   border: 1px solid rgba(148,163,184,0.24);
   overflow: hidden;
 }
@@ -594,11 +554,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.18s var(--transition-smooth),
-              box-shadow 0.18s var(--transition-smooth),
-              background 0.18s var(--transition-smooth),
-              border-color 0.18s var(--transition-smooth),
-              color 0.18s var(--transition-smooth);
+  transition: transform 0.18s var(--ease-smooth),
+              box-shadow 0.18s var(--ease-smooth),
+              background 0.18s var(--ease-smooth),
+              border-color 0.18s var(--ease-smooth),
+              color 0.18s var(--ease-smooth);
   color: rgba(82, 101, 124, 0.95);
   box-shadow: var(--shadow-xs);
 }
@@ -666,9 +626,9 @@
   font-size: 14px;
   color: var(--text-primary);
   background: rgba(255,255,255,0.95);
-  transition: box-shadow 0.18s var(--transition-smooth),
-              border-color 0.18s var(--transition-smooth),
-              background 0.18s var(--transition-smooth);
+  transition: box-shadow 0.18s var(--ease-smooth),
+              border-color 0.18s var(--ease-smooth),
+              background 0.18s var(--ease-smooth);
   font-weight: 560;
   font-family: inherit;
 }
@@ -710,10 +670,10 @@
   padding: 18px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.18s var(--transition-smooth),
-              box-shadow 0.18s var(--transition-smooth),
-              background 0.18s var(--transition-smooth),
-              border-color 0.18s var(--transition-smooth);
+  transition: transform 0.18s var(--ease-smooth),
+              box-shadow 0.18s var(--ease-smooth),
+              background 0.18s var(--ease-smooth),
+              border-color 0.18s var(--ease-smooth);
   background:
     radial-gradient(500px 140px at 15% 0%, rgba(99,102,241,0.10) 0%, rgba(99,102,241,0) 65%),
     linear-gradient(180deg, rgba(250,251,252,0.96) 0%, rgba(248,250,252,0.96) 100%);

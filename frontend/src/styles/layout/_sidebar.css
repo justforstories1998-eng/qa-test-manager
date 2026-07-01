@@ -2,7 +2,7 @@
    SIDEBAR - PREMIUM PROFESSIONAL THEME
    ============================================ */
 
-/* CSS Custom Properties for Premium Design */
+/* Sidebar-specific tokens (main tokens in _variables.css) */
 :root {
   --sidebar-bg-primary: #0a0f1a;
   --sidebar-bg-secondary: #0d1321;
@@ -15,8 +15,6 @@
   --sidebar-text-muted: #475569;
   --sidebar-border-subtle: rgba(255, 255, 255, 0.06);
   --sidebar-hover-bg: rgba(255, 255, 255, 0.04);
-  --sidebar-transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-  --sidebar-transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Main Sidebar Container */
@@ -26,7 +24,7 @@
   color: var(--sidebar-text-primary);
   display: flex;
   flex-direction: column;
-  transition: width 0.35s var(--sidebar-transition-smooth);
+  transition: width 0.35s var(--ease-smooth);
   flex-shrink: 0;
   box-shadow: 
     4px 0 24px rgba(0, 0, 0, 0.25),
@@ -97,7 +95,7 @@
     0 4px 12px rgba(99, 102, 241, 0.35),
     0 2px 4px rgba(99, 102, 241, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: transform 0.3s var(--sidebar-transition-bounce),
+  transition: transform 0.3s var(--ease-bounce),
               box-shadow 0.3s ease;
   position: relative;
 }
@@ -231,7 +229,7 @@
   color: var(--sidebar-text-secondary);
   text-decoration: none;
   border-radius: 14px;
-  transition: all 0.25s var(--sidebar-transition-smooth);
+  transition: all 0.25s var(--ease-smooth);
   font-weight: 500;
   font-size: 14.5px;
   position: relative;
@@ -418,7 +416,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s var(--sidebar-transition-smooth);
+  transition: all 0.3s var(--ease-smooth);
   backdrop-filter: blur(4px);
   font-size: 18px;
 }
@@ -451,8 +449,8 @@
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
-    transition: transform 0.35s var(--sidebar-transition-smooth),
-                width 0.35s var(--sidebar-transition-smooth);
+  transition: transform 0.35s var(--ease-smooth),
+              width 0.35s var(--ease-smooth);
   }
   
   .sidebar.mobile-open {

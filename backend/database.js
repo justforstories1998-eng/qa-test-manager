@@ -90,7 +90,7 @@ export async function initializeDatabase() {
       }).save();
       console.log(`✅ Default admin created: ${adminEmail}`);
     }
-  } catch (e) { process.exit(1); }
+  } catch (e) { console.error('❌ Database initialization failed:', e.message); process.exit(1); }
 }
 
 export const getAllProjects = () => Project.find().sort({ name: 1 });

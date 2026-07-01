@@ -796,19 +796,12 @@
   }
 }
 
-/* ========== DARK MODE (Optional) ========== */
+/* ========== DARK MODE ========== */
 @media (prefers-color-scheme: dark) {
-  /* 
-   * Uncomment and customize if implementing dark mode
-   * 
-   * :root {
-   *   --glass-light: rgba(30, 41, 59, 0.8);
-   *   --glass-light-border: rgba(255, 255, 255, 0.1);
-   *   --text-primary: #f8fafc;
-   *   --text-secondary: #e2e8f0;
-   *   --text-tertiary: #cbd5e1;
-   * }
-   */
+  .Toastify__toast {
+    background: var(--surface-primary) !important;
+    color: var(--text-primary) !important;
+  }
 }
 
 /* ========== PRINT STYLES ========== */

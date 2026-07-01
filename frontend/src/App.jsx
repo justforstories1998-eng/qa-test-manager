@@ -19,7 +19,7 @@ import Admin from './components/Admin';
 import api from './api';
 
 // Icons
-import { FiPlus, FiBriefcase } from 'react-icons/fi';
+import { FiPlus, FiBriefcase, FiMenu } from 'react-icons/fi';
 
 function App() {
   // ============================================
@@ -48,6 +48,7 @@ function App() {
   const [settings, setSettings] = useState(null);
   const [appLogo, setAppLogo] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1100);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // ============================================
   // AUTH HANDLERS
@@ -185,6 +186,11 @@ function App() {
   };
 
   // ============================================
+  // COMPUTED VALUES
+  // ============================================
+  const activeProjectName = projects.find(p => (p.id || p._id) === activeProjectId)?.name || '';
+
+  // ============================================
   // RENDER
   // ============================================
 
@@ -222,11 +228,16 @@ function App() {
         user={user}
         onLogout={handleLogout}
         isAdmin={user?.role === 'admin'}
+        isMobileOpen={mobileMenuOpen}
+        onToggleMobile={() => setMobileMenuOpen(!mobileMenuOpen)}
       />
       
       <main className="main-content">
         <div className="top-header">
           <div className="project-selector">
+            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+              <FiMenu size={20} />
+            </button>
             <div className="project-dropdown">
               <FiBriefcase className="project-icon" />
               <select 
