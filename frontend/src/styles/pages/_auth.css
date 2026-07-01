@@ -224,14 +224,14 @@
 }
 
 .login-header h1 {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
-  color: #1e293b;
+  color: #ffffff;
   margin: 0 0 8px 0;
 }
 
 .login-header p {
-  color: #64748b;
+  color: rgba(148, 163, 184, 0.8);
   margin: 0;
   font-size: 14px;
 }
