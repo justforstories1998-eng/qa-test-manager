@@ -28,62 +28,60 @@
 
 /* Primary */
 .btn-primary {
-  background: #6366f1;
+  background: var(--primary-color);
   color: white;
   box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #4f46e5;
+  background: var(--primary-hover);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
-.btn-primary:active:not(:disabled) {
-  transform: translateY(0);
-}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
 
 .btn-primary:disabled {
-  background: #d0d4dc;
+  background: var(--border-medium);
   cursor: not-allowed;
   box-shadow: none;
-  color: #a3acb9;
+  color: var(--text-muted);
 }
 
 /* Secondary */
 .btn-secondary {
-  background: #ffffff;
-  color: #6c7a89;
-  border-color: #e7e8ed;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: #f5f5f9;
-  color: #2b2c41;
-  border-color: #d0d4dc;
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
 }
 
 /* Danger */
 .btn-danger {
-  background: #f43f5e;
+  background: var(--danger);
   color: white;
   box-shadow: 0 2px 6px rgba(244, 63, 94, 0.3);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #e11d48;
+  background: var(--danger-dark);
   box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
 }
 
 /* Ghost */
 .btn-ghost {
   background: transparent;
-  color: #6c7a89;
+  color: var(--text-secondary);
   border-color: transparent;
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: #f5f5f9;
-  color: #6366f1;
+  background: var(--surface-secondary);
+  color: var(--primary-color);
 }
 
 /* Block */
@@ -101,7 +99,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6c7a89;
+  color: var(--text-secondary);
   border: 1px solid transparent;
   background: transparent;
   transition: all 0.2s ease;
@@ -110,13 +108,13 @@
 }
 
 .btn-icon-sm:hover {
-  background: #eef2ff;
-  color: #6366f1;
+  background: var(--primary-50);
+  color: var(--primary-color);
 }
 
 .btn-icon-sm.danger:hover {
-  background: #ffe4e6;
-  color: #f43f5e;
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 /* Disabled */
@@ -155,13 +153,6 @@
 }
 
 @media (max-width: 768px) {
-  .btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .btn-icon-sm {
-    width: 28px;
-    height: 28px;
-  }
+  .btn { padding: 8px 16px; font-size: 13px; }
+  .btn-icon-sm { width: 28px; height: 28px; }
 }

@@ -16,7 +16,7 @@ import Admin from './components/Admin';
 
 import api from './api';
 
-import { FiPlus, FiBriefcase, FiMenu } from 'react-icons/fi';
+import { FiPlus, FiBriefcase, FiMenu, FiSun, FiMoon } from 'react-icons/fi';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -40,6 +40,18 @@ function App() {
   const [appLogo, setAppLogo] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1100);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -216,6 +228,9 @@ function App() {
           </div>
           <div className="header-right">
             <span>{activeProjectName}</span>
+            <button className="theme-toggle-btn" onClick={toggleTheme} title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+              {theme === 'light' ? <FiMoon size={18} /> : <FiSun size={18} />}
+            </button>
           </div>
         </div>
 

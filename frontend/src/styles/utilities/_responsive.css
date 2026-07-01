@@ -797,11 +797,9 @@
 }
 
 /* ========== DARK MODE ========== */
-@media (prefers-color-scheme: dark) {
-  .Toastify__toast {
-    background: var(--surface-primary) !important;
-    color: var(--text-primary) !important;
-  }
+[data-theme="dark"] .Toastify__toast {
+  background: var(--surface-primary) !important;
+  color: var(--text-primary) !important;
 }
 
 /* ========== PRINT STYLES ========== */

@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2b2c41;
+  background: var(--sidebar-bg, #2b2c41);
   z-index: 9999;
 }
 
@@ -68,8 +68,8 @@
 }
 
 .spinner.spinner-primary {
-  border-color: #e7e8ed;
-  border-top-color: #6366f1;
+  border-color: var(--border-color, #e7e8ed);
+  border-top-color: var(--primary-color, #6366f1);
 }
 
 .spinner.spinner-white {
@@ -84,12 +84,12 @@
   align-items: center;
   justify-content: center;
   padding: 60px 24px;
-  color: #6c7a89;
+  color: var(--text-secondary, #6c7a89);
 }
 
 .loading-state .spinner {
-  border-color: #e7e8ed;
-  border-top-color: #6366f1;
+  border-color: var(--border-color, #e7e8ed);
+  border-top-color: var(--primary-color, #6366f1);
   margin-bottom: 16px;
 }
 
@@ -110,19 +110,19 @@
 
 .empty-state svg {
   margin-bottom: 16px;
-  color: #d0d4dc;
+  color: var(--border-medium, #d0d4dc);
 }
 
 .empty-state h3,
 .empty-state h4 {
-  color: #2b2c41;
+  color: var(--text-primary, #2b2c41);
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 8px;
 }
 
 .empty-state p {
-  color: #6c7a89;
+  color: var(--text-secondary, #6c7a89);
   font-size: 14px;
   max-width: 320px;
   margin-bottom: 20px;
@@ -137,22 +137,22 @@
 .empty-suites {
   text-align: center;
   padding: 40px 20px;
-  color: #a3acb9;
+  color: var(--text-muted, #a3acb9);
 }
 
 .empty-suites svg {
   margin-bottom: 12px;
-  color: #d0d4dc;
+  color: var(--border-medium, #d0d4dc);
 }
 
 .empty-suites p {
   font-size: 14px;
   margin-bottom: 16px;
-  color: #6c7a89;
+  color: var(--text-secondary, #6c7a89);
 }
 
 .no-data {
-  color: #a3acb9;
+  color: var(--text-muted, #a3acb9);
   font-style: italic;
   padding: 24px;
   text-align: center;
@@ -165,7 +165,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  color: #a3acb9;
+  color: var(--text-muted, #a3acb9);
   text-align: center;
   gap: 12px;
 }
@@ -178,7 +178,7 @@
 
 /* Skeleton Loading */
 .skeleton {
-  background: linear-gradient(90deg, #e7e8ed 25%, #f5f5f9 50%, #e7e8ed 75%);
+  background: linear-gradient(90deg, var(--border-color, #e7e8ed) 25%, var(--surface-secondary, #f5f5f9) 50%, var(--border-color, #e7e8ed) 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
   border-radius: 8px;
