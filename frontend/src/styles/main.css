@@ -15,6 +15,7 @@
 @import './layout/_sidebar.css';
 
 /* Components */
+@import './components/_glass.css';
 @import './components/_buttons.css';
 @import './components/_cards.css';
 @import './components/_badges.css';

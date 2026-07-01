@@ -5,6 +5,8 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
+import { Modal, ConfirmDialog } from './shared/Modal';
+import Badge from './shared/Badge';
 
 function Admin({ projects }) {
   const [activeTab, setActiveTab] = useState('users');
@@ -15,6 +17,8 @@ function Admin({ projects }) {
   const [isSaving, setIsSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [projectSearchQuery, setProjectSearchQuery] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmReset, setConfirmReset] = useState(null);
 
   const [userForm, setUserForm] = useState({
     firstName: '',
@@ -81,10 +85,10 @@ function Admin({ projects }) {
   };
 
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
     try {
       await api.deleteUser(userId);
       toast.success('User deleted successfully');
+      setConfirmDelete(null);
       loadUsers();
     } catch (err) {
       toast.error(err.error || 'Failed to delete user');
@@ -92,11 +96,11 @@ function Admin({ projects }) {
   };
 
   const handleResetPassword = async (userId) => {
-    if (!window.confirm('Reset this user\'s password? A new temporary password will be generated.')) return;
     try {
       const res = await api.resetPassword(userId);
       if (res.success) {
         toast.success('Password reset successfully');
+        setConfirmReset(null);
         if (res.tempPassword) {
           toast.info(`New Temporary Password: ${res.tempPassword}`, { autoClose: 10000 });
         }
@@ -147,23 +151,23 @@ function Admin({ projects }) {
   );
 
   return (
-    <div className="admin-page">
-      <div className="page-header responsive">
-        <div className="header-content">
-          <h2 className="section-title">Administration</h2>
-          <p className="section-subtitle">Manage users and project assignments</p>
+    <div className="dg-page">
+      <div className="dg-page-header">
+        <div>
+          <h2 className="dg-page-title">Administration</h2>
+          <p style={{ color: 'rgba(203,213,225,0.5)', margin: '4px 0 0 0', fontSize: '14px' }}>Manage users and project assignments</p>
         </div>
       </div>
 
-      <div className="admin-tabs">
+      <div className="dg-tabs" style={{ marginBottom: '24px' }}>
         <button 
-          className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
+          className={`dg-tab ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
           <FiUsers size={16} /> User Management
         </button>
         <button 
-          className={`admin-tab ${activeTab === 'projects' ? 'active' : ''}`}
+          className={`dg-tab ${activeTab === 'projects' ? 'active' : ''}`}
           onClick={() => setActiveTab('projects')}
         >
           <FiBriefcase size={16} /> Project Assignment
@@ -171,24 +175,25 @@ function Admin({ projects }) {
       </div>
 
       {activeTab === 'users' && (
-        <div className="admin-content">
-          <div className="admin-toolbar">
-            <div className="search-box">
-              <FiSearch className="search-icon" />
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
+            <div className="dg-search" style={{ flex: 1, maxWidth: '400px' }}>
+              <FiSearch size={16} style={{ color: 'rgba(203,213,225,0.4)', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search users by name or email..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ paddingLeft: '38px' }}
               />
             </div>
-            <button className="btn btn-primary" onClick={() => { setSelectedUser(null); setUserForm({ firstName: '', lastName: '', email: '', role: 'user' }); setShowUserModal(true); }}>
-              <FiPlus /> Add User
+            <button className="dg-btn dg-btn-primary" onClick={() => { setSelectedUser(null); setUserForm({ firstName: '', lastName: '', email: '', role: 'user' }); setShowUserModal(true); }}>
+              <FiPlus size={16} /> Add User
             </button>
           </div>
 
-          <div className="table-container">
-            <table className="data-table">
+          <div className="dg-table-wrapper">
+            <table className="dg-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -205,30 +210,32 @@ function Admin({ projects }) {
                   <tr key={user.id || user._id}>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="user-avatar">
+                        <div style={{ 
+                          width: '34px', height: '34px', borderRadius: '10px', 
+                          background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.3))',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '13px', fontWeight: 600, color: 'var(--dg-accent)'
+                        }}>
                           {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                         </div>
-                        <span style={{ fontWeight: 600 }}>{user.firstName} {user.lastName}</span>
+                        <span style={{ fontWeight: 600, color: 'var(--dg-text)' }}>{user.firstName} {user.lastName}</span>
                       </div>
                     </td>
-                    <td>{user.email}</td>
+                    <td style={{ color: 'rgba(203,213,225,0.6)' }}>{user.email}</td>
                     <td>
-                      <span className={`role-badge ${user.role}`}>
-                        {user.role === 'admin' ? 'Administrator' : 'User'}
-                      </span>
+                      <Badge>{user.role}</Badge>
                     </td>
                     <td>
-                      <span className={`status-indicator ${user.isActive ? 'active' : 'inactive'}`}>
-                        {user.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                      <Badge variant={user.isActive ? 'Active' : 'Inactive'}>{user.isActive ? 'Active' : 'Inactive'}</Badge>
                     </td>
-                    <td>{user.assignedProjects?.length || 0} projects</td>
-                    <td>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
-                    <td className="actions-cell">
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                    <td style={{ color: 'rgba(203,213,225,0.6)' }}>{user.assignedProjects?.length || 0} projects</td>
+                    <td style={{ color: 'rgba(203,213,225,0.5)' }}>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
+                    <td>
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                         <button 
-                          className="action-btn"
+                          className="dg-btn dg-btn-ghost"
                           title="Edit User"
+                          style={{ padding: '6px', minWidth: 'auto' }}
                           onClick={() => {
                             setSelectedUser(user);
                             setUserForm({
@@ -241,26 +248,38 @@ function Admin({ projects }) {
                             setShowUserModal(true);
                           }}
                         >
-                          <FiEdit2 />
+                          <FiEdit2 size={15} />
                         </button>
                         <button 
-                          className="action-btn"
+                          className="dg-btn dg-btn-ghost"
                           title="Reset Password"
-                          onClick={() => handleResetPassword(user.id || user._id)}
+                          style={{ padding: '6px', minWidth: 'auto', color: '#f59e0b' }}
+                          onClick={() => setConfirmReset(user)}
                         >
-                          <FiKey />
+                          <FiKey size={15} />
                         </button>
                         <button 
-                          className="action-btn danger"
+                          className="dg-btn dg-btn-ghost"
                           title="Delete User"
-                          onClick={() => handleDeleteUser(user.id || user._id)}
+                          style={{ padding: '6px', minWidth: 'auto', color: '#ef4444' }}
+                          onClick={() => setConfirmDelete(user)}
                         >
-                          <FiTrash2 />
+                          <FiTrash2 size={15} />
                         </button>
                       </div>
                     </td>
                   </tr>
                 ))}
+                {filteredUsers.length === 0 && (
+                  <tr>
+                    <td colSpan="7">
+                      <div className="dg-empty" style={{ padding: '40px 20px' }}>
+                        <FiUsers size={40} style={{ color: 'rgba(203,213,225,0.2)' }} />
+                        <p>No users found</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -268,24 +287,25 @@ function Admin({ projects }) {
       )}
 
       {activeTab === 'projects' && (
-        <div className="admin-content">
-          <div className="admin-toolbar">
-            <div className="search-box">
-              <FiSearch className="search-icon" />
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
+            <div className="dg-search" style={{ flex: 1, maxWidth: '400px' }}>
+              <FiSearch size={16} style={{ color: 'rgba(203,213,225,0.4)', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search projects..."
                 value={projectSearchQuery}
                 onChange={(e) => setProjectSearchQuery(e.target.value)}
+                style={{ paddingLeft: '38px' }}
               />
             </div>
-            <button className="btn btn-primary" onClick={() => { setAssignForm({ projectId: projects[0]?._id || '', userIds: [] }); setShowAssignModal(true); }}>
-              <FiBriefcase /> Assign Project
+            <button className="dg-btn dg-btn-primary" onClick={() => { setAssignForm({ projectId: projects[0]?._id || '', userIds: [] }); setShowAssignModal(true); }}>
+              <FiBriefcase size={16} /> Assign Project
             </button>
           </div>
 
-          <div className="table-container">
-            <table className="data-table">
+          <div className="dg-table-wrapper">
+            <table className="dg-table">
               <thead>
                 <tr>
                   <th>Project Name</th>
@@ -302,197 +322,264 @@ function Admin({ projects }) {
                   );
                   return (
                     <tr key={project._id || project.id}>
-                      <td style={{ fontWeight: 600 }}>{project.name}</td>
-                      <td>{project.description || '-'}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--dg-text)' }}>{project.name}</td>
+                      <td style={{ color: 'rgba(203,213,225,0.6)' }}>{project.description || '-'}</td>
                       <td>
-                        <div className="assigned-users-chips">
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                           {projectUsers.length > 0 ? (
                             projectUsers.slice(0, 3).map(u => (
-                              <span key={u._id} className="user-chip">
+                              <span key={u._id} className="dg-badge dg-badge-indigo" style={{ fontSize: '11px' }}>
                                 {u.firstName} {u.lastName}
                               </span>
                             ))
                           ) : (
-                            <span style={{ color: '#94a3b8', fontSize: '12px' }}>No users assigned</span>
+                            <span style={{ color: 'rgba(203,213,225,0.4)', fontSize: '12px' }}>No users assigned</span>
                           )}
                           {projectUsers.length > 3 && (
-                            <span className="user-chip more">+{projectUsers.length - 3}</span>
+                            <span className="dg-badge dg-badge-gray" style={{ fontSize: '11px' }}>+{projectUsers.length - 3}</span>
                           )}
                         </div>
                       </td>
-                      <td>{new Date(project.createdAt).toLocaleDateString()}</td>
-                      <td className="actions-cell">
+                      <td style={{ color: 'rgba(203,213,225,0.5)' }}>{new Date(project.createdAt).toLocaleDateString()}</td>
+                      <td>
                         <button 
-                          className="btn btn-sm btn-secondary"
+                          className="dg-btn dg-btn-secondary"
+                          style={{ padding: '5px 12px', fontSize: '12px' }}
                           onClick={() => {
                             setAssignForm({ projectId: project._id || project.id, userIds: [] });
                             setShowAssignModal(true);
                           }}
                         >
-                          <FiPlus /> Assign Users
+                          <FiPlus size={14} /> Assign Users
                         </button>
                       </td>
                     </tr>
                   );
                 })}
+                {filteredProjects.length === 0 && (
+                  <tr>
+                    <td colSpan="5">
+                      <div className="dg-empty" style={{ padding: '40px 20px' }}>
+                        <FiBriefcase size={40} style={{ color: 'rgba(203,213,225,0.2)' }} />
+                        <p>No projects found</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {showUserModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>{selectedUser ? 'Edit User' : 'Create New User'}</h3>
-              <button onClick={() => { setShowUserModal(false); setSelectedUser(null); }}><FiX /></button>
+      {/* User Create/Edit Modal */}
+      <Modal
+        isOpen={showUserModal}
+        onClose={() => { setShowUserModal(false); setSelectedUser(null); }}
+        title={selectedUser ? 'Edit User' : 'Create New User'}
+        footer={
+          <>
+            <button className="dg-btn dg-btn-secondary" onClick={() => { setShowUserModal(false); setSelectedUser(null); }}>
+              Cancel
+            </button>
+            <button className="dg-btn dg-btn-primary" onClick={selectedUser ? handleUpdateUser : handleCreateUser} disabled={isSaving}>
+              {isSaving ? 'Saving...' : (selectedUser ? 'Update User' : 'Create User')}
+            </button>
+          </>
+        }
+      >
+        <form onSubmit={selectedUser ? handleUpdateUser : handleCreateUser}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <div className="dg-input-group">
+              <label className="dg-input-label">First Name *</label>
+              <input
+                type="text"
+                className="dg-input"
+                value={userForm.firstName}
+                onChange={(e) => setUserForm({ ...userForm, firstName: e.target.value })}
+                required
+                placeholder="Enter first name"
+              />
             </div>
-            <form onSubmit={selectedUser ? handleUpdateUser : handleCreateUser}>
-              <div className="modal-body">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>First Name *</label>
-                    <input
-                      type="text"
-                      value={userForm.firstName}
-                      onChange={(e) => setUserForm({ ...userForm, firstName: e.target.value })}
-                      required
-                      placeholder="Enter first name"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Last Name *</label>
-                    <input
-                      type="text"
-                      value={userForm.lastName}
-                      onChange={(e) => setUserForm({ ...userForm, lastName: e.target.value })}
-                      required
-                      placeholder="Enter last name"
-                    />
-                  </div>
-                </div>
-                <div className="form-group">
-                  <label>Email Address *</label>
-                  <input
-                    type="email"
-                    value={userForm.email}
-                    onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                    required
-                    placeholder="Enter email address"
-                    disabled={!!selectedUser}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Role</label>
-                  <select
-                    value={userForm.role}
-                    onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Administrator</option>
-                  </select>
-                </div>
-                {selectedUser && (
-                  <div className="form-group">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={userForm.isActive !== false}
-                        onChange={(e) => setUserForm({ ...userForm, isActive: e.target.checked })}
-                      />
-                      {' '}Account Active
-                    </label>
-                  </div>
-                )}
-                {!selectedUser && (
-                  <div className="info-box">
-                    <FiAlertCircle size={16} />
-                    <span>A temporary password will be generated and emailed to the user. They must change it on first login.</span>
-                  </div>
-                )}
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => { setShowUserModal(false); setSelectedUser(null); }}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={isSaving}>
-                  {isSaving ? 'Saving...' : (selectedUser ? 'Update User' : 'Create User')}
-                </button>
-              </div>
-            </form>
+            <div className="dg-input-group">
+              <label className="dg-input-label">Last Name *</label>
+              <input
+                type="text"
+                className="dg-input"
+                value={userForm.lastName}
+                onChange={(e) => setUserForm({ ...userForm, lastName: e.target.value })}
+                required
+                placeholder="Enter last name"
+              />
+            </div>
           </div>
-        </div>
-      )}
+          <div className="dg-input-group" style={{ marginBottom: '16px' }}>
+            <label className="dg-input-label">Email Address *</label>
+            <input
+              type="email"
+              className="dg-input"
+              value={userForm.email}
+              onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
+              required
+              placeholder="Enter email address"
+              disabled={!!selectedUser}
+            />
+          </div>
+          <div className="dg-input-group" style={{ marginBottom: '16px' }}>
+            <label className="dg-input-label">Role</label>
+            <select
+              className="dg-select"
+              value={userForm.role}
+              onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
+            >
+              <option value="user">User</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          {selectedUser && (
+            <div className="dg-input-group" style={{ marginBottom: '16px' }}>
+              <label className="dg-toggle" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <input
+                  type="checkbox"
+                  checked={userForm.isActive !== false}
+                  onChange={(e) => setUserForm({ ...userForm, isActive: e.target.checked })}
+                />
+                <span className="dg-toggle-slider"></span>
+                <span className="dg-input-label" style={{ margin: 0 }}>Account Active</span>
+              </label>
+            </div>
+          )}
+          {!selectedUser && (
+            <div style={{ 
+              padding: '12px 16px', borderRadius: '10px', 
+              background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)',
+              display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '13px', color: 'rgba(203,213,225,0.7)'
+            }}>
+              <FiAlertCircle size={16} style={{ color: 'var(--dg-accent)', flexShrink: 0, marginTop: '2px' }} />
+              <span>A temporary password will be generated and emailed to the user. They must change it on first login.</span>
+            </div>
+          )}
+        </form>
+      </Modal>
 
-      {showAssignModal && (
-        <div className="modal-overlay">
-          <div className="modal modal-large">
-            <div className="modal-header">
-              <h3>Assign Project to Users</h3>
-              <button onClick={() => setShowAssignModal(false)}><FiX /></button>
-            </div>
-            <form onSubmit={handleAssignProject}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Select Project *</label>
-                  <select
-                    value={assignForm.projectId}
-                    onChange={(e) => setAssignForm({ ...assignForm, projectId: e.target.value })}
-                    required
-                  >
-                    <option value="">Select a project...</option>
-                    {projects.map(p => (
-                      <option key={p._id || p.id} value={p._id || p.id}>{p.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Select Users to Assign *</label>
-                  <div className="user-selection-list">
-                    {users.filter(u => u.role === 'user').map(user => (
-                      <div 
-                        key={user._id || user.id}
-                        className={`user-selection-item ${assignForm.userIds.includes(user._id || user.id) ? 'selected' : ''}`}
-                        onClick={() => toggleUserSelection(user._id || user.id)}
-                      >
-                        <div className="user-avatar-small">
-                          {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
-                        </div>
-                        <div className="user-info">
-                          <div className="user-name">{user.firstName} {user.lastName}</div>
-                          <div className="user-email">{user.email}</div>
-                        </div>
-                        <div className="user-check">
-                          {assignForm.userIds.includes(user._id || user.id) ? (
-                            <FiCheck size={18} className="check-icon" />
-                          ) : (
-                            <div className="check-box"></div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                {assignForm.userIds.length > 0 && (
-                  <div className="info-box">
-                    <FiMail size={16} />
-                    <span>Email notifications will be sent to {assignForm.userIds.length} user(s) with project details.</span>
-                  </div>
-                )}
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowAssignModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary" disabled={isSaving || !assignForm.projectId || assignForm.userIds.length === 0}>
-                  {isSaving ? 'Assigning...' : `Assign ${assignForm.userIds.length} User(s)`}
-                </button>
-              </div>
-            </form>
+      {/* Project Assignment Modal */}
+      <Modal
+        isOpen={showAssignModal}
+        onClose={() => setShowAssignModal(false)}
+        title="Assign Project to Users"
+        size="lg"
+        footer={
+          <>
+            <button className="dg-btn dg-btn-secondary" onClick={() => setShowAssignModal(false)}>
+              Cancel
+            </button>
+            <button 
+              className="dg-btn dg-btn-primary" 
+              onClick={handleAssignProject} 
+              disabled={isSaving || !assignForm.projectId || assignForm.userIds.length === 0}
+            >
+              {isSaving ? 'Assigning...' : `Assign ${assignForm.userIds.length} User(s)`}
+            </button>
+          </>
+        }
+      >
+        <form onSubmit={handleAssignProject}>
+          <div className="dg-input-group" style={{ marginBottom: '20px' }}>
+            <label className="dg-input-label">Select Project *</label>
+            <select
+              className="dg-select"
+              value={assignForm.projectId}
+              onChange={(e) => setAssignForm({ ...assignForm, projectId: e.target.value })}
+              required
+            >
+              <option value="">Select a project...</option>
+              {projects.map(p => (
+                <option key={p._id || p.id} value={p._id || p.id}>{p.name}</option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+          <div className="dg-input-group">
+            <label className="dg-input-label">Select Users to Assign *</label>
+            <div style={{ 
+              maxHeight: '300px', overflowY: 'auto', borderRadius: '10px', 
+              border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)'
+            }}>
+              {users.filter(u => u.role === 'user').map(user => (
+                <div 
+                  key={user._id || user.id}
+                  style={{ 
+                    display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
+                    cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    background: assignForm.userIds.includes(user._id || user.id) ? 'rgba(139,92,246,0.08)' : 'transparent',
+                    transition: 'all 0.15s'
+                  }}
+                  onClick={() => toggleUserSelection(user._id || user.id)}
+                >
+                  <div style={{ 
+                    width: '32px', height: '32px', borderRadius: '8px', 
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.3))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '12px', fontWeight: 600, color: 'var(--dg-accent)', flexShrink: 0
+                  }}>
+                    {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '13px' }}>{user.firstName} {user.lastName}</div>
+                    <div style={{ color: 'rgba(203,213,225,0.5)', fontSize: '12px' }}>{user.email}</div>
+                  </div>
+                  <div>
+                    {assignForm.userIds.includes(user._id || user.id) ? (
+                      <div style={{ 
+                        width: '22px', height: '22px', borderRadius: '6px', 
+                        background: 'var(--dg-accent)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }}>
+                        <FiCheck size={14} style={{ color: '#fff' }} />
+                      </div>
+                    ) : (
+                      <div style={{ 
+                        width: '22px', height: '22px', borderRadius: '6px', 
+                        border: '2px solid rgba(255,255,255,0.15)'
+                      }}></div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {assignForm.userIds.length > 0 && (
+            <div style={{ 
+              marginTop: '14px', padding: '12px 16px', borderRadius: '10px', 
+              background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)',
+              display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'rgba(203,213,225,0.7)'
+            }}>
+              <FiMail size={16} style={{ color: '#3b82f6' }} />
+              <span>Email notifications will be sent to {assignForm.userIds.length} user(s) with project details.</span>
+            </div>
+          )}
+        </form>
+      </Modal>
+
+      {/* Confirm Delete Dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => handleDeleteUser(confirmDelete?.id || confirmDelete?._id)}
+        title="Delete User"
+        message={`Are you sure you want to delete ${confirmDelete?.firstName} ${confirmDelete?.lastName}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        danger={true}
+      />
+
+      {/* Confirm Reset Password Dialog */}
+      <ConfirmDialog
+        isOpen={!!confirmReset}
+        onClose={() => setConfirmReset(null)}
+        onConfirm={() => handleResetPassword(confirmReset?.id || confirmReset?._id)}
+        title="Reset Password"
+        message={`Reset ${confirmReset?.firstName} ${confirmReset?.lastName}'s password? A new temporary password will be generated and emailed to them.`}
+        confirmLabel="Reset Password"
+        danger={false}
+      />
     </div>
   );
 }

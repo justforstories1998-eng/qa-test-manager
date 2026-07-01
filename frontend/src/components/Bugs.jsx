@@ -5,6 +5,8 @@ import {
 } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
+import { Modal, ConfirmDialog } from './shared/Modal';
+import Badge from './shared/Badge';
 
 function Bugs({ projectId, user }) {
   const [bugs, setBugs] = useState([]);
@@ -16,8 +18,7 @@ function Bugs({ projectId, user }) {
   const [viewingBug, setViewingBug] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // User search for assignedTo
+
   const [assignedToQuery, setAssignedToQuery] = useState('');
   const [assignedToResults, setAssignedToResults] = useState([]);
   const [showAssignedDropdown, setShowAssignedDropdown] = useState(false);
@@ -39,14 +40,14 @@ function Bugs({ projectId, user }) {
       e.target.value = null;
       return;
     }
-    
+
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
     if (file && !allowedTypes.includes(file.type)) {
       toast.error("File type not supported. Allowed: JPG, PNG, PDF, MP4, MOV, AVI, WebM, DOCX");
       e.target.value = null;
       return;
     }
-    
+
     setSelectedFile(file);
   };
 
@@ -136,217 +137,415 @@ function Bugs({ projectId, user }) {
     return <FiFileText />;
   };
 
+  const tabOptions = ['All', 'Active', 'Under development', 'In Progress', 'Resolved', 'Closed'];
+
   return (
-    <div className="bugs-page">
-      <div className="page-header responsive">
-        <div className="header-content">
-          <h2 className="section-title">Defect Management</h2>
+    <div className="dg-page">
+      {/* Header */}
+      <div className="dg-page-header">
+        <div>
+          <h2 className="dg-page-title">Defect Management</h2>
+          <p style={{ color: 'rgba(203,213,225,0.6)', margin: 0, fontSize: '14px' }}>
+            Track, assign, and resolve defects across your projects.
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => { setEditingBug(null); setSelectedFile(null); setSelectedAssignee(''); setAssignedToQuery(''); setShowModal(true); }}>
-          <FiPlus /> Report Defect
+        <button
+          className="dg-btn dg-btn-primary"
+          onClick={() => {
+            setEditingBug(null);
+            setSelectedFile(null);
+            setSelectedAssignee('');
+            setAssignedToQuery('');
+            setShowModal(true);
+          }}
+        >
+          <FiPlus style={{ marginRight: 6 }} /> Report Defect
         </button>
       </div>
 
-      <div className="bug-filters-tabs">
-        {['All', 'Active', 'Under development', 'In Progress', 'Resolved', 'Closed'].map(opt => (
-          <button key={opt} className={`bug-tab ${statusFilter === opt ? 'active' : ''}`} onClick={() => setStatusFilter(opt)}>{opt}</button>
+      {/* Status Tabs */}
+      <div className="dg-tabs" style={{ marginBottom: '16px' }}>
+        {tabOptions.map(opt => (
+          <button
+            key={opt}
+            className={`dg-tab ${statusFilter === opt ? 'active' : ''}`}
+            onClick={() => setStatusFilter(opt)}
+          >
+            {opt}
+            {opt !== 'All' && (
+              <span style={{
+                marginLeft: '6px', fontSize: '11px',
+                background: statusFilter === opt ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.06)',
+                padding: '1px 7px', borderRadius: '10px',
+              }}>
+                {bugs.filter(b => b.status === opt).length}
+              </span>
+            )}
+          </button>
         ))}
       </div>
 
-      <div className="test-cases-main">
-        <div className="table-container">
-          <table className="data-table bugs-table">
-            <thead>
-              <tr>
-                <th style={{width: '120px'}}>Severity</th>
-                <th>Title</th>
-                <th style={{width: '150px'}}>Assigned To</th>
-                <th style={{width: '150px'}}>Status</th>
-                <th style={{width: '120px'}}>Evidence</th>
-                <th style={{width: '100px'}}>Created By</th>
-                <th style={{width: '150px', textAlign: 'right'}}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBugs.map(bug => {
-                const fileUrl = getSafeUrl(bug);
-                return (
-                  <tr key={bug._id || bug.id}>
-                    <td><span className={`priority-badge ${(bug.severity || 'Medium').toLowerCase()}`}>{bug.severity}</span></td>
-                    <td><div style={{fontWeight: 700}}>{bug.title}</div></td>
-                    <td>
-                      {bug.assignedTo ? (
-                        <span className="assigned-user-badge">
-                          <FiUser size={12} /> {bug.assignedTo}
-                        </span>
-                      ) : (
-                        <span style={{color: '#cbd5e1', fontSize: '11px'}}>Unassigned</span>
-                      )}
-                    </td>
-                    <td><span className={`status-badge ${(bug.status || 'Active').toLowerCase().replace(/\s+/g, '')}`}>{bug.status}</span></td>
-                    <td>
-                      {fileUrl ? (
-                        <a
-                          href={api.getFileUrl(fileUrl)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="attachment-preview"
-                          style={{textDecoration:'none', border:'none', cursor:'pointer', display: 'flex', alignItems: 'center', gap: '5px'}}
-                        >
-                          {getFileIcon(bug)} View
-                        </a>
-                      ) : <span style={{color: '#cbd5e1', fontSize: '11px'}}>No file</span>}
-                    </td>
-                    <td style={{fontSize: '12px', color: '#64748b'}}>
-                      {bug.createdBy?.firstName ? `${bug.createdBy.firstName} ${bug.createdBy.lastName}` : '-'}
-                    </td>
-                    <td className="actions-cell">
-                      <div style={{display:'flex', gap:'8px', justifyContent:'flex-end'}}>
-                        <button className="action-btn" onClick={() => { setViewingBug(bug); setShowViewModal(true); }}><FiEye /></button>
-                        <button className="action-btn" onClick={() => { 
-                          setEditingBug(bug); 
-                          setSelectedFile(null); 
-                          setSelectedAssignee(bug.assignedTo || '');
-                          setAssignedToQuery(bug.assignedTo || '');
-                          setShowModal(true); 
-                        }}><FiEdit2 /></button>
-                        <button className="action-btn danger" onClick={() => handleDelete(bug._id || bug.id)}><FiTrash2 /></button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      {/* Search + Filter */}
+      <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', marginBottom: '16px' }}>
+        <div className="dg-search" style={{ flex: 1 }}>
+          <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '15px' }} />
+          <input
+            className="dg-input"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search defects by title…"
+            type="text"
+            style={{ paddingLeft: '36px', background: 'rgba(255,255,255,0.03)' }}
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+              onClick={() => setSearchTerm("")}
+            >
+              <FiX />
+            </button>
+          )}
+        </div>
+        <div style={{ color: '#94a3b8', fontSize: '13px', whiteSpace: 'nowrap' }}>
+          <span style={{ color: '#a5b4fc', fontWeight: 600 }}>{filteredBugs.length}</span> defects
         </div>
       </div>
 
-      {/* VIEW MODAL */}
-      {showViewModal && viewingBug && (
-        <div className="modal-overlay">
-          <div className="modal modal-large">
-            <div className="modal-header"><h3>Defect Detail</h3><button onClick={() => setShowViewModal(false)}><FiX /></button></div>
-            <div className="modal-body modal-body-scroll">
-              <h2 style={{marginBottom:'10px'}}>{viewingBug.title}</h2>
-              <div style={{display:'flex', gap:'10px', marginBottom:'20px', flexWrap: 'wrap'}}>
-                 <span className={`status-badge ${viewingBug.status?.toLowerCase().replace(/\s+/g, '')}`}>{viewingBug.status}</span>
-                 <span className="priority-badge">{viewingBug.severity}</span>
-                 {viewingBug.assignedTo && (
-                   <span className="assigned-user-badge">
-                     <FiUser size={12} /> {viewingBug.assignedTo}
-                   </span>
-                 )}
-              </div>
-              <p style={{whiteSpace:'pre-wrap', background:'#f8fafc', padding:'15px', borderRadius:'8px'}}>{viewingBug.description}</p>
+      {/* Bugs Table */}
+      <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+        {filteredBugs.length ? (
+          <div className="dg-table-wrapper">
+            <table className="dg-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '120px' }}>Severity</th>
+                  <th>Title</th>
+                  <th style={{ width: '150px' }}>Assigned To</th>
+                  <th style={{ width: '150px' }}>Status</th>
+                  <th style={{ width: '120px' }}>Evidence</th>
+                  <th style={{ width: '100px' }}>Created By</th>
+                  <th style={{ width: '150px', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredBugs.map(bug => {
+                  const fileUrl = getSafeUrl(bug);
+                  return (
+                    <tr key={bug._id || bug.id}>
+                      <td><Badge>{bug.severity || 'Medium'}</Badge></td>
+                      <td style={{ fontWeight: 600, color: '#e2e8f0' }}>{bug.title}</td>
+                      <td>
+                        {bug.assignedTo ? (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#cbd5e1', fontSize: '13px' }}>
+                            <FiUser size={13} style={{ color: '#818cf8' }} /> {bug.assignedTo}
+                          </span>
+                        ) : (
+                          <span style={{ color: '#475569', fontSize: '12px' }}>Unassigned</span>
+                        )}
+                      </td>
+                      <td><Badge>{bug.status || 'Active'}</Badge></td>
+                      <td>
+                        {fileUrl ? (
+                          <a
+                            href={api.getFileUrl(fileUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '6px',
+                              color: '#a5b4fc', textDecoration: 'none', fontSize: '13px',
+                            }}
+                          >
+                            {getFileIcon(bug)} View
+                          </a>
+                        ) : (
+                          <span style={{ color: '#475569', fontSize: '12px' }}>No file</span>
+                        )}
+                      </td>
+                      <td style={{ fontSize: '12px', color: '#64748b' }}>
+                        {bug.createdBy?.firstName ? `${bug.createdBy.firstName} ${bug.createdBy.lastName}` : '-'}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                          <button
+                            className="dg-btn dg-btn-ghost"
+                            style={{ padding: '6px 8px' }}
+                            onClick={() => { setViewingBug(bug); setShowViewModal(true); }}
+                          >
+                            <FiEye size={15} />
+                          </button>
+                          <button
+                            className="dg-btn dg-btn-ghost"
+                            style={{ padding: '6px 8px' }}
+                            onClick={() => {
+                              setEditingBug(bug);
+                              setSelectedFile(null);
+                              setSelectedAssignee(bug.assignedTo || '');
+                              setAssignedToQuery(bug.assignedTo || '');
+                              setShowModal(true);
+                            }}
+                          >
+                            <FiEdit2 size={15} />
+                          </button>
+                          <button
+                            className="dg-btn dg-btn-danger"
+                            style={{ padding: '6px 8px' }}
+                            onClick={() => handleDelete(bug._id || bug.id)}
+                          >
+                            <FiTrash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="dg-empty" style={{ padding: '60px 20px' }}>
+            <FiAlertTriangle size={48} style={{ color: '#475569', marginBottom: '16px' }} />
+            <h3 style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '16px' }}>No defects found</h3>
+            <p style={{ color: '#64748b', margin: 0, fontSize: '13px' }}>
+              {searchTerm ? 'Try a different search term.' : 'No defects reported yet.'}
+            </p>
+          </div>
+        )}
+      </div>
 
-              {getSafeUrl(viewingBug) && (
-                <div style={{marginTop:'20px'}}>
-                   {isVideoFile(viewingBug.attachment?.mimeType || viewingBug.attachments?.[0]?.mimeType) ? (
-                     <div style={{border:'1px solid #e2e8f0', borderRadius:'12px', overflow:'hidden'}}>
-                       <video 
-                         controls 
-                         style={{width: '100%', maxHeight: '400px', background: '#000'}}
-                         src={api.getFileUrl(getSafeUrl(viewingBug))}
-                       >
-                         Your browser does not support video playback.
-                       </video>
-                       <div style={{padding: '10px', background: '#f8fafc'}}>
-                         <div style={{fontWeight:'700'}}>{viewingBug.attachment?.originalName || viewingBug.attachments?.[0]?.originalName || 'Video Evidence'}</div>
-                       </div>
-                     </div>
-                   ) : (
-                     <a
-                       href={api.getFileUrl(getSafeUrl(viewingBug))}
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       style={{display:'flex', alignItems:'center', gap:'15px', padding:'20px', border:'1px solid #e2e8f0', borderRadius:'12px', textDecoration:'none', color:'inherit', background: '#fff'}}
-                     >
-                       <FiFileText size={24} color="#6366f1" />
-                       <div>
-                         <div style={{fontWeight:'700'}}>{viewingBug.attachment?.originalName || viewingBug.attachments?.[0]?.originalName || 'View Evidence'}</div>
-                         <div style={{fontSize:'12px', color:'#94a3b8'}}>Open in new tab</div>
-                       </div>
-                     </a>
-                   )}
+      {/* View Modal */}
+      <Modal
+        isOpen={showViewModal && !!viewingBug}
+        onClose={() => setShowViewModal(false)}
+        title="Defect Detail"
+        size="lg"
+        footer={
+          <button className="dg-btn dg-btn-secondary" onClick={() => setShowViewModal(false)}>Close</button>
+        }
+      >
+        {viewingBug && (
+          <>
+            <h2 style={{ color: '#e2e8f0', margin: '0 0 14px 0', fontSize: '18px', fontWeight: 600 }}>
+              {viewingBug.title}
+            </h2>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+              <Badge>{viewingBug.status}</Badge>
+              <Badge>{viewingBug.severity}</Badge>
+              {viewingBug.assignedTo && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#cbd5e1', fontSize: '13px' }}>
+                  <FiUser size={13} style={{ color: '#818cf8' }} /> {viewingBug.assignedTo}
+                </span>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <h4 style={{ color: '#a5b4fc', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Description</h4>
+              <p style={{
+                whiteSpace: 'pre-wrap', background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)', padding: '16px',
+                borderRadius: '8px', color: '#cbd5e1', fontSize: '14px', lineHeight: 1.6,
+                margin: 0,
+              }}>
+                {viewingBug.description}
+              </p>
+            </div>
+
+            {getSafeUrl(viewingBug) && (
+              <div>
+                <h4 style={{ color: '#a5b4fc', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Evidence</h4>
+                {isVideoFile(viewingBug.attachment?.mimeType || viewingBug.attachments?.[0]?.mimeType) ? (
+                  <div style={{
+                    border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px',
+                    overflow: 'hidden',
+                  }}>
+                    <video
+                      controls
+                      style={{ width: '100%', maxHeight: '400px', background: '#000', display: 'block' }}
+                      src={api.getFileUrl(getSafeUrl(viewingBug))}
+                    >
+                      Your browser does not support video playback.
+                    </video>
+                    <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.03)' }}>
+                      <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '13px' }}>
+                        {viewingBug.attachment?.originalName || viewingBug.attachments?.[0]?.originalName || 'Video Evidence'}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <a
+                    href={api.getFileUrl(getSafeUrl(viewingBug))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '14px', padding: '18px',
+                      border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px',
+                      textDecoration: 'none', color: 'inherit', background: 'rgba(255,255,255,0.03)',
+                    }}
+                  >
+                    <FiFileText size={24} style={{ color: '#818cf8' }} />
+                    <div>
+                      <div style={{ fontWeight: 600, color: '#e2e8f0', fontSize: '14px' }}>
+                        {viewingBug.attachment?.originalName || viewingBug.attachments?.[0]?.originalName || 'View Evidence'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b' }}>Open in new tab</div>
+                    </div>
+                  </a>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </Modal>
+
+      {/* Create/Edit Modal */}
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={editingBug ? 'Update Bug' : 'Report Bug'}
+        size="lg"
+        footer={
+          <>
+            <button type="button" className="dg-btn dg-btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
+            <button type="submit" form="bug-form" className="dg-btn dg-btn-primary" disabled={isSaving}>
+              {isSaving ? 'Saving…' : 'Save'}
+            </button>
+          </>
+        }
+      >
+        <form id="bug-form" onSubmit={handleSave}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="dg-input-group">
+              <label className="dg-input-label">
+                Title <span style={{ color: '#f87171' }}>*</span>
+              </label>
+              <input
+                className="dg-input"
+                name="title"
+                defaultValue={editingBug?.title}
+                required
+                placeholder="Brief description of the defect…"
+              />
+            </div>
+
+            <div className="dg-input-group">
+              <label className="dg-input-label">Description</label>
+              <textarea
+                className="dg-textarea"
+                name="description"
+                defaultValue={editingBug?.description}
+                rows={5}
+                placeholder="Detailed steps to reproduce…"
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+              <div className="dg-input-group">
+                <label className="dg-input-label">Severity</label>
+                <select className="dg-select" name="severity" defaultValue={editingBug?.severity || 'Medium'}>
+                  <option>Critical</option>
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+              </div>
+              <div className="dg-input-group">
+                <label className="dg-input-label">Status</label>
+                <select className="dg-select" name="status" defaultValue={editingBug?.status || 'Active'}>
+                  <option>Active</option>
+                  <option>Under development</option>
+                  <option>In Progress</option>
+                  <option>Resolved</option>
+                  <option>Closed</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="dg-input-group" style={{ position: 'relative' }}>
+              <label className="dg-input-label">Assigned To</label>
+              <input
+                className="dg-input"
+                type="text"
+                value={assignedToQuery}
+                onChange={(e) => handleAssigneeSearch(e.target.value)}
+                onFocus={() => assignedToResults.length > 0 && setShowAssignedDropdown(true)}
+                onBlur={() => setTimeout(() => setShowAssignedDropdown(false), 200)}
+                placeholder="Search by name or email…"
+              />
+              <input type="hidden" name="assignedTo" value={selectedAssignee} />
+              {showAssignedDropdown && assignedToResults.length > 0 && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                  background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
+                  marginTop: '4px', maxHeight: '200px', overflowY: 'auto',
+                }}>
+                  {assignedToResults.map(u => (
+                    <div
+                      key={u._id || u.id}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        padding: '10px 14px', cursor: 'pointer',
+                        borderBottom: '1px solid rgba(255,255,255,0.04)',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseDown={() => selectAssignee(u)}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div style={{
+                        width: '32px', height: '32px', borderRadius: '50%',
+                        background: 'rgba(99,102,241,0.2)', color: '#a5b4fc',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '12px', fontWeight: 700, flexShrink: 0,
+                      }}>
+                        {u.firstName?.charAt(0)}{u.lastName?.charAt(0)}
+                      </div>
+                      <div>
+                        <div style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 500 }}>{u.firstName} {u.lastName}</div>
+                        <div style={{ color: '#64748b', fontSize: '12px' }}>{u.email}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
-            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setShowViewModal(false)}>Close</button></div>
-          </div>
-        </div>
-      )}
 
-      {/* CREATE/EDIT MODAL */}
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal modal-large">
-            <div className="modal-header"><h3>{editingBug ? 'Update' : 'Report'} Bug</h3><button onClick={() => setShowModal(false)}><FiX /></button></div>
-            <form onSubmit={handleSave}>
-              <div className="modal-body modal-body-scroll">
-                <div className="form-group"><label>Title</label><input name="title" defaultValue={editingBug?.title} required /></div>
-                <div className="form-group"><label>Description</label><textarea name="description" defaultValue={editingBug?.description} rows={5} /></div>
-                <div className="form-row">
-                   <div className="form-group"><label>Severity</label><select name="severity" defaultValue={editingBug?.severity || 'Medium'}><option>Critical</option><option>High</option><option>Medium</option><option>Low</option></select></div>
-                   <div className="form-group"><label>Status</label><select name="status" defaultValue={editingBug?.status || 'Active'}><option>Active</option><option>Under development</option><option>In Progress</option><option>Resolved</option><option>Closed</option></select></div>
-                </div>
-                <div className="form-group" style={{position: 'relative'}}>
-                  <label>Assigned To</label>
-                  <input 
-                    type="text"
-                    value={assignedToQuery}
-                    onChange={(e) => handleAssigneeSearch(e.target.value)}
-                    onFocus={() => assignedToResults.length > 0 && setShowAssignedDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowAssignedDropdown(false), 200)}
-                    placeholder="Search by name or email..."
-                  />
-                  <input type="hidden" name="assignedTo" value={selectedAssignee} />
-                  {showAssignedDropdown && assignedToResults.length > 0 && (
-                    <div className="user-search-dropdown">
-                      {assignedToResults.map(u => (
-                        <div 
-                          key={u._id || u.id} 
-                          className="user-search-item"
-                          onMouseDown={() => selectAssignee(u)}
-                        >
-                          <div className="user-avatar-small">
-                            {u.firstName?.charAt(0)}{u.lastName?.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="user-name">{u.firstName} {u.lastName}</div>
-                            <div className="user-email">{u.email}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label>Attachment (Max 50MB - Images, Videos, PDFs)</label>
-                  <div className="file-upload-area" style={{height:'100px'}}>
-                    <input 
-                      type="file" 
-                      onChange={handleFileChange} 
-                      accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.webm,.docx"
-                    />
-                    <div className="file-upload-label">
-                      {selectedFile && isVideoFile(selectedFile.type) ? <FiVideo /> : <FiPaperclip />}
-                      <span>{selectedFile ? selectedFile.name : 'Upload Image, Video (max 50MB), or Document'}</span>
-                    </div>
-                  </div>
-                </div>
-                {user && (
-                  <div className="info-box" style={{marginTop: '10px'}}>
-                    <FiInfo size={16} />
-                    <span>Reported by: {user.firstName} {user.lastName}</span>
-                  </div>
-                )}
+            <div className="dg-input-group">
+              <label className="dg-input-label">Attachment (Max 50MB)</label>
+              <div style={{
+                border: '2px dashed rgba(255,255,255,0.1)', borderRadius: '10px',
+                padding: '20px', textAlign: 'center', position: 'relative',
+                background: 'rgba(255,255,255,0.02)', minHeight: '80px',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.webm,.docx"
+                  style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
+                />
+                {selectedFile && isVideoFile(selectedFile.type) ? <FiVideo size={20} style={{ color: '#475569', marginBottom: '6px' }} /> : <FiPaperclip size={20} style={{ color: '#475569', marginBottom: '6px' }} />}
+                <span style={{ color: selectedFile ? '#a5b4fc' : '#64748b', fontSize: '13px' }}>
+                  {selectedFile ? selectedFile.name : 'Upload Image, Video (max 50MB), or Document'}
+                </span>
               </div>
-              <div className="modal-footer"><button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button><button type="submit" className="btn btn-primary" disabled={isSaving}>Save</button></div>
-            </form>
+            </div>
+
+            {user && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 14px', background: 'rgba(99,102,241,0.08)',
+                borderRadius: '8px', color: '#94a3b8', fontSize: '13px',
+              }}>
+                <FiInfo size={15} style={{ color: '#818cf8', flexShrink: 0 }} />
+                Reported by: <span style={{ color: '#e2e8f0' }}>{user.firstName} {user.lastName}</span>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </div>
   );
 }
+
 export default Bugs;

@@ -1,46 +1,42 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
-  FiPlay, FiChevronLeft, FiChevronRight, FiCheckCircle, FiXCircle, 
-  FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiFolder, 
-  FiHash, FiTarget, FiTrash2, FiMinusCircle, FiCpu, FiMessageSquare, 
+  FiPlay, FiChevronLeft, FiChevronRight, FiCheckCircle, FiXCircle,
+  FiAlertCircle, FiClock, FiList, FiPlus, FiX, FiFolder,
+  FiHash, FiTarget, FiTrash2, FiMinusCircle, FiCpu, FiMessageSquare,
   FiExternalLink, FiFilter, FiAlertTriangle, FiZap
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
+import { Modal, ConfirmDialog } from './shared/Modal';
+import Badge from './shared/Badge';
 
 function Execution({
   testSuites = [],
   testCases = [],
   testRuns = [],
-  onCreateTestRun, 
-  onDeleteTestRun, 
-  onUpdateExecutionResult, 
-  onRefresh 
+  onCreateTestRun,
+  onDeleteTestRun,
+  onUpdateExecutionResult,
+  onRefresh
 }) {
-  // ============================================
-  // STATE
-  // ============================================
   const [activeRunId, setActiveRunId] = useState(null);
   const [executionResults, setExecutionResults] = useState([]);
   const [currentTestIndex, setCurrentTestIndex] = useState(0);
-  const [viewMode, setViewMode] = useState('list'); 
+  const [viewMode, setViewMode] = useState('list');
   const [isSaving, setIsSaving] = useState(false);
-  
+
   const [showNewRunModal, setShowNewRunModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [showResultsModal, setShowResultsModal] = useState(null);
   const [showBugModal, setShowBugModal] = useState(false);
-  
+
   const [comments, setComments] = useState('');
   const [newRunData, setNewRunData] = useState({ name: '', environment: 'QA', tester: '' });
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
   const [resultsFilter, setResultsFilter] = useState('All');
 
-  // ============================================
-  // COMPUTED VALUES
-  // ============================================
-  const activeRun = useMemo(() => 
-    testRuns.find(r => (r._id === activeRunId || r.id === activeRunId)), 
+  const activeRun = useMemo(() =>
+    testRuns.find(r => (r._id === activeRunId || r.id === activeRunId)),
     [activeRunId, testRuns]
   );
 
@@ -77,23 +73,19 @@ function Execution({
 
   const stats = getTotalStats();
 
-  // ============================================
-  // DATA LOADING
-  // ============================================
   const loadResults = async (runId) => {
     try {
       const res = await api.getExecutionResults(runId);
       if (res.success) {
         const merged = res.data.map(r => {
-          const foundCase = testCases.find(tc => 
+          const foundCase = testCases.find(tc =>
             String(tc._id || tc.id) === String(r.testCaseId)
           );
           return { ...r, testCase: foundCase };
         });
-
         const validResults = merged.filter(r => r.testCase);
         if (merged.length > 0 && validResults.length === 0) {
-            if (onRefresh) onRefresh(); 
+          if (onRefresh) onRefresh();
         }
         setExecutionResults(validResults);
       }
@@ -104,9 +96,6 @@ function Execution({
   useEffect(() => { if (showResultsModal) loadResults(showResultsModal._id || showResultsModal.id); }, [showResultsModal]);
   useEffect(() => { if (executionResults[currentTestIndex]) setComments(executionResults[currentTestIndex].comments || ''); }, [currentTestIndex, executionResults]);
 
-  // ============================================
-  // HANDLERS
-  // ============================================
   const handleQuickStatus = async (status) => {
     const current = executionResults[currentTestIndex];
     if (!current) return;
@@ -141,9 +130,8 @@ function Execution({
     const formData = new FormData(e.target);
     formData.append('projectId', activeRun.projectId);
     if (currentTest?.testCase?._id || currentTest?.testCase?.id) {
-        formData.append('testCaseId', currentTest.testCase._id || currentTest.testCase.id);
+      formData.append('testCaseId', currentTest.testCase._id || currentTest.testCase.id);
     }
-
     try {
       const res = await api.createBug(formData);
       if (res.success) {
@@ -168,315 +156,222 @@ function Execution({
   };
 
   // ============================================
-  // RENDER: DASHBOARD VIEW
+  // RENDER: LIST VIEW
   // ============================================
   if (viewMode === 'list') {
     return (
-      <div className="exec-dashboard">
-        {/* Ambient Background Effects */}
-        <div className="ambient-backdrop">
-          <div className="gradient-orb orb-1"></div>
-          <div className="gradient-orb orb-2"></div>
-          <div className="gradient-orb orb-3"></div>
-          <div className="grid-pattern"></div>
+      <div className="dg-page">
+        <div className="dg-page-header">
+          <div>
+            <h1 className="dg-page-title">
+              <FiZap style={{ marginRight: 8 }} /> Execution Control
+            </h1>
+            <p style={{ color: 'rgba(203,213,225,0.6)', margin: 0, fontSize: '0.9rem' }}>
+              Test orchestration &amp; quality metrics
+            </p>
+          </div>
+          <button className="dg-btn dg-btn-primary" onClick={() => setShowNewRunModal(true)}>
+            <FiPlus /> New Test Run
+          </button>
         </div>
 
-        {/* Header */}
-        <header className="dashboard-header">
-          <div className="header-brand">
-            <div className="brand-icon-wrapper">
-              <FiZap />
-              <span className="pulse-ring"></span>
-            </div>
-            <div className="brand-content">
-              <h1>Execution Control</h1>
-              <p>Test orchestration & quality metrics</p>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          <div className="dg-stat-card">
+            <div className="dg-stat-icon"><FiTarget /></div>
+            <div>
+              <div className="dg-stat-value">{stats.total}</div>
+              <div className="dg-stat-label">Total Tests</div>
             </div>
           </div>
-          <button className="btn-primary-glow" onClick={() => setShowNewRunModal(true)}>
-            <FiPlus />
-            <span>New Test Run</span>
-            <div className="btn-shine"></div>
-          </button>
-        </header>
+          <div className="dg-stat-card">
+            <div className="dg-stat-icon"><FiCheckCircle /></div>
+            <div>
+              <div className="dg-stat-value">{stats.passed}</div>
+              <div className="dg-stat-label">Passed</div>
+            </div>
+          </div>
+          <div className="dg-stat-card">
+            <div className="dg-stat-icon"><FiXCircle /></div>
+            <div>
+              <div className="dg-stat-value">{stats.failed}</div>
+              <div className="dg-stat-label">Failed</div>
+            </div>
+          </div>
+          <div className="dg-stat-card">
+            <div className="dg-stat-icon"><FiAlertCircle /></div>
+            <div>
+              <div className="dg-stat-value">{stats.blocked}</div>
+              <div className="dg-stat-label">Blocked</div>
+            </div>
+          </div>
+        </div>
 
-        {/* Stats Overview */}
-        <section className="stats-overview">
-          <div className="stat-card stat-total">
-            <div className="stat-icon"><FiTarget /></div>
-            <div className="stat-data">
-              <span className="stat-number">{stats.total}</span>
-              <span className="stat-label">Total Tests</span>
-            </div>
-            <div className="stat-glow"></div>
+        {/* Test Runs */}
+        {testRuns.length === 0 ? (
+          <div className="dg-empty">
+            <FiPlay size={48} style={{ opacity: 0.3 }} />
+            <h3>No Test Runs Yet</h3>
+            <p>Create your first test run to begin tracking execution progress</p>
+            <button className="dg-btn dg-btn-primary" onClick={() => setShowNewRunModal(true)}>
+              <FiPlus /> Create Test Run
+            </button>
           </div>
-          <div className="stat-card stat-passed">
-            <div className="stat-icon"><FiCheckCircle /></div>
-            <div className="stat-data">
-              <span className="stat-number">{stats.passed}</span>
-              <span className="stat-label">Passed</span>
-            </div>
-            <div className="stat-glow"></div>
-          </div>
-          <div className="stat-card stat-failed">
-            <div className="stat-icon"><FiXCircle /></div>
-            <div className="stat-data">
-              <span className="stat-number">{stats.failed}</span>
-              <span className="stat-label">Failed</span>
-            </div>
-            <div className="stat-glow"></div>
-          </div>
-          <div className="stat-card stat-blocked">
-            <div className="stat-icon"><FiAlertCircle /></div>
-            <div className="stat-data">
-              <span className="stat-number">{stats.blocked}</span>
-              <span className="stat-label">Blocked</span>
-            </div>
-            <div className="stat-glow"></div>
-          </div>
-        </section>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+            {testRuns.map((run) => (
+              <div key={run._id || run.id} className="glass-card" style={{ padding: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <FiPlay size={18} color="var(--dg-accent)" />
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{run.name}</h3>
+                      <Badge>{run.environment}</Badge>
+                    </div>
+                  </div>
+                  <button
+                    className="dg-btn dg-btn-ghost"
+                    style={{ padding: '4px 8px', minWidth: 'auto' }}
+                    onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
+                    aria-label="Delete run"
+                  >
+                    <FiTrash2 size={14} />
+                  </button>
+                </div>
 
-        {/* Test Runs Grid */}
-        <section className="runs-section">
-          {testRuns.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-visual">
-                <div className="empty-icon"><FiPlay /></div>
-                <div className="ripple-rings">
-                  <span></span><span></span><span></span>
+                <div style={{ marginBottom: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(203,213,225,0.7)', marginBottom: 4 }}>
+                    <span>Completion</span>
+                    <span>{getProgressPercentage(run)}%</span>
+                  </div>
+                  <div className="dg-progress">
+                    <div className="dg-progress-bar" style={{ width: `${getProgressPercentage(run)}%` }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16, fontSize: '0.8rem' }}>
+                  <span style={{ color: '#34d399' }}><FiCheckCircle /> {run.passed || 0} Pass</span>
+                  <span style={{ color: '#f87171' }}><FiXCircle /> {run.failed || 0} Fail</span>
+                  <span style={{ color: '#fbbf24' }}><FiAlertCircle /> {run.blocked || 0} Block</span>
+                  <span style={{ color: '#94a3b8' }}><FiMinusCircle /> {run.na || 0} N/A</span>
+                </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    className="dg-btn dg-btn-primary"
+                    style={{ flex: 1 }}
+                    onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}
+                  >
+                    <FiPlay /> Continue
+                  </button>
+                  <button
+                    className="dg-btn dg-btn-secondary"
+                    onClick={() => setShowResultsModal(run)}
+                    aria-label="View results"
+                  >
+                    <FiExternalLink />
+                  </button>
                 </div>
               </div>
-              <h3>No Test Runs Yet</h3>
-              <p>Create your first test run to begin tracking execution progress</p>
-              <button className="btn-primary-glow" onClick={() => setShowNewRunModal(true)}>
-                <FiPlus />
-                <span>Create Test Run</span>
-                <div className="btn-shine"></div>
-              </button>
-            </div>
-          ) : (
-            <div className="runs-grid">
-              {testRuns.map((run, idx) => (
-                <article 
-                  key={run._id || run.id} 
-                  className="run-card"
-                  style={{ animationDelay: `${idx * 0.08}s` }}
-                >
-                  <div className="card-shimmer"></div>
-                  
-                  <header className="run-card-header">
-                    <div className="run-identity">
-                      <div className="run-icon"><FiPlay /></div>
-                      <div className="run-info">
-                        <h3>{run.name}</h3>
-                        <span className="env-badge">{run.environment}</span>
-                      </div>
-                    </div>
-                    <button 
-                      className="btn-icon-danger"
-                      onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(run); }}
-                      aria-label="Delete run"
-                    >
-                      <FiTrash2 />
-                    </button>
-                  </header>
-
-                  <div className="progress-container">
-                    <div className="progress-header">
-                      <span>Completion</span>
-                      <span className="progress-percent">{getProgressPercentage(run)}%</span>
-                    </div>
-                    <div className="progress-track">
-                      <div 
-                        className="progress-bar" 
-                        style={{ width: `${getProgressPercentage(run)}%` }}
-                      >
-                        <div className="progress-shimmer"></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="metrics-row">
-                    <div className="metric passed">
-                      <FiCheckCircle />
-                      <span className="metric-val">{run.passed || 0}</span>
-                      <span className="metric-lbl">Pass</span>
-                    </div>
-                    <div className="metric failed">
-                      <FiXCircle />
-                      <span className="metric-val">{run.failed || 0}</span>
-                      <span className="metric-lbl">Fail</span>
-                    </div>
-                    <div className="metric blocked">
-                      <FiAlertCircle />
-                      <span className="metric-val">{run.blocked || 0}</span>
-                      <span className="metric-lbl">Block</span>
-                    </div>
-                    <div className="metric na">
-                      <FiMinusCircle />
-                      <span className="metric-val">{run.na || 0}</span>
-                      <span className="metric-lbl">N/A</span>
-                    </div>
-                  </div>
-
-                  <footer className="run-card-actions">
-                    <button 
-                      className="btn-execute"
-                      onClick={() => { setActiveRunId(run._id || run.id); setViewMode('execution'); }}
-                    >
-                      <FiPlay />
-                      <span>Continue</span>
-                    </button>
-                    <button 
-                      className="btn-results"
-                      onClick={() => setShowResultsModal(run)}
-                      aria-label="View results"
-                    >
-                      <FiExternalLink />
-                    </button>
-                  </footer>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+            ))}
+          </div>
+        )}
 
         {/* New Run Modal */}
-        {showNewRunModal && (
-          <div className="modal-backdrop" onClick={() => setShowNewRunModal(false)}>
-            <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
-              <header className="modal-header">
-                <div className="modal-title">
-                  <div className="modal-icon primary"><FiPlay /></div>
-                  <div>
-                    <h3>Launch New Mission</h3>
-                    <p>Configure your test execution parameters</p>
-                  </div>
-                </div>
-                <button className="btn-close" onClick={() => setShowNewRunModal(false)}>
-                  <FiX />
-                </button>
-              </header>
-              
-              <div className="modal-body">
-                <div className="form-split">
-                  <div className="form-sidebar">
-                    <div className="form-field">
-                      <label>Run Name</label>
-                      <input 
-                        type="text" 
-                        className="input-field"
-                        placeholder="e.g., Sprint 24 Regression"
-                        value={newRunData.name} 
-                        onChange={e => setNewRunData({...newRunData, name: e.target.value})} 
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label>Environment</label>
-                      <select 
-                        className="select-field"
-                        value={newRunData.environment} 
-                        onChange={e => setNewRunData({...newRunData, environment: e.target.value})}
-                      >
-                        <option value="QA">QA Environment</option>
-                        <option value="Staging">Staging Environment</option>
-                        <option value="Production">Production</option>
-                      </select>
-                    </div>
-                    <div className="form-field">
-                      <label>Tester (Optional)</label>
-                      <input 
-                        type="text" 
-                        className="input-field"
-                        placeholder="Enter tester name"
-                        value={newRunData.tester} 
-                        onChange={e => setNewRunData({...newRunData, tester: e.target.value})} 
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="form-main">
-                    <div className="selection-title">
-                      <FiFolder />
-                      <span>Select Test Suite</span>
-                    </div>
-                    <div className="suite-list">
-                      {testSuites.map(s => (
-                        <div 
-                          key={s._id || s.id} 
-                          className={`suite-option ${selectedSuiteId === (s._id || s.id) ? 'selected' : ''}`} 
-                          onClick={() => setSelectedSuiteId(s._id || s.id)}
-                        >
-                          <div className="radio-indicator">
-                            <span className="radio-dot"></span>
-                          </div>
-                          <div className="suite-details">
-                            <span className="suite-name">{s.name}</span>
-                            <span className="suite-count">
-                              {testCases.filter(tc => String(tc.suiteId) === String(s._id || s.id)).length} test cases
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+        <Modal
+          isOpen={showNewRunModal}
+          onClose={() => setShowNewRunModal(false)}
+          title="Launch New Mission"
+          footer={
+            <>
+              <button className="dg-btn dg-btn-secondary" onClick={() => setShowNewRunModal(false)}>Cancel</button>
+              <button className="dg-btn dg-btn-primary" onClick={handleCreateRunSubmit}>
+                <FiPlay /> Launch Mission
+              </button>
+            </>
+          }
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div>
+              <div className="dg-input-group">
+                <label className="dg-input-label">Run Name</label>
+                <input
+                  type="text"
+                  className="dg-input"
+                  placeholder="e.g., Sprint 24 Regression"
+                  value={newRunData.name}
+                  onChange={e => setNewRunData({ ...newRunData, name: e.target.value })}
+                />
               </div>
-
-              <footer className="modal-footer">
-                <button className="btn-secondary" onClick={() => setShowNewRunModal(false)}>
-                  Cancel
-                </button>
-                <button className="btn-primary" onClick={handleCreateRunSubmit}>
-                  <FiPlay />
-                  <span>Launch Mission</span>
-                </button>
-              </footer>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteConfirm && (
-          <div className="modal-backdrop" onClick={() => setShowDeleteConfirm(null)}>
-            <div className="modal modal-sm" onClick={e => e.stopPropagation()}>
-              <header className="modal-header">
-                <div className="modal-title">
-                  <div className="modal-icon danger"><FiTrash2 /></div>
-                  <div>
-                    <h3>Abort Mission?</h3>
-                    <p>This action cannot be undone</p>
-                  </div>
-                </div>
-                <button className="btn-close" onClick={() => setShowDeleteConfirm(null)}>
-                  <FiX />
-                </button>
-              </header>
-              <div className="modal-body">
-                <p className="confirm-message">
-                  Are you sure you want to delete <strong>{showDeleteConfirm.name}</strong>? 
-                  All execution results will be permanently removed.
-                </p>
-              </div>
-              <footer className="modal-footer">
-                <button className="btn-secondary" onClick={() => setShowDeleteConfirm(null)}>
-                  Cancel
-                </button>
-                <button 
-                  className="btn-danger"
-                  onClick={async () => { 
-                    await onDeleteTestRun(showDeleteConfirm._id || showDeleteConfirm.id); 
-                    setShowDeleteConfirm(null); 
-                    toast.success("Purged"); 
-                  }}
+              <div className="dg-input-group">
+                <label className="dg-input-label">Environment</label>
+                <select
+                  className="dg-select"
+                  value={newRunData.environment}
+                  onChange={e => setNewRunData({ ...newRunData, environment: e.target.value })}
                 >
-                  <FiTrash2 />
-                  <span>Delete</span>
-                </button>
-              </footer>
+                  <option value="QA">QA Environment</option>
+                  <option value="Staging">Staging Environment</option>
+                  <option value="Production">Production</option>
+                </select>
+              </div>
+              <div className="dg-input-group">
+                <label className="dg-input-label">Tester (Optional)</label>
+                <input
+                  type="text"
+                  className="dg-input"
+                  placeholder="Enter tester name"
+                  value={newRunData.tester}
+                  onChange={e => setNewRunData({ ...newRunData, tester: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="dg-input-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                <FiFolder /> Select Test Suite
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
+                {testSuites.map(s => (
+                  <div
+                    key={s._id || s.id}
+                    onClick={() => setSelectedSuiteId(s._id || s.id)}
+                    style={{
+                      padding: '10px 14px',
+                      borderRadius: 8,
+                      border: selectedSuiteId === (s._id || s.id)
+                        ? '1px solid var(--dg-accent)'
+                        : '1px solid rgba(255,255,255,0.08)',
+                      background: selectedSuiteId === (s._id || s.id)
+                        ? 'rgba(99,102,241,0.15)'
+                        : 'rgba(255,255,255,0.03)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ fontWeight: 500, color: '#e2e8f0', fontSize: '0.9rem' }}>{s.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'rgba(203,213,225,0.5)', marginTop: 2 }}>
+                      {testCases.filter(tc => String(tc.suiteId) === String(s._id || s.id)).length} test cases
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        )}
+        </Modal>
+
+        {/* Delete Confirmation */}
+        <ConfirmDialog
+          isOpen={!!showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(null)}
+          onConfirm={async () => {
+            await onDeleteTestRun(showDeleteConfirm._id || showDeleteConfirm.id);
+            setShowDeleteConfirm(null);
+            toast.success("Purged");
+          }}
+          title="Abort Mission?"
+          message={`Are you sure you want to delete "${showDeleteConfirm?.name}"? All execution results will be permanently removed.`}
+          confirmLabel="Delete"
+        />
       </div>
     );
   }
@@ -489,233 +384,231 @@ function Execution({
   const completedCount = executionResults.filter(r => cleanStatus(r.status) !== 'notrun').length;
 
   return (
-    <div className="exec-stage">
-      {/* Background Effects */}
-      <div className="stage-backdrop">
-        <div className="stage-orb orb-1"></div>
-        <div className="stage-orb orb-2"></div>
-        <div className="stage-orb orb-3"></div>
-      </div>
-
+    <div className="dg-page" style={{ display: 'flex', flexDirection: 'column', height: '100vh', padding: 0 }}>
       {/* Header */}
-      <header className="stage-header">
-        <div className="header-left">
-          <button className="btn-back" onClick={() => setViewMode('list')}>
-            <FiChevronLeft />
-            <span>Back</span>
+      <header style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        padding: '12px 24px',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(15,23,42,0.6)',
+        backdropFilter: 'blur(20px)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button className="dg-btn dg-btn-ghost" onClick={() => setViewMode('list')}>
+            <FiChevronLeft /> Back
           </button>
-          <div className="run-identity-header">
-            <div className="run-icon-animated">
-              <FiPlay />
-              <span className="icon-pulse"></span>
-            </div>
-            <div className="run-meta">
-              <h1>{activeRun?.name}</h1>
-              <div className="run-badges">
-                <span className="badge-env">{activeRun?.environment}</span>
-                <span className="badge-progress">{completedCount} / {executionResults.length} completed</span>
-              </div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#e2e8f0' }}>{activeRun?.name}</h2>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
+              <Badge>{activeRun?.environment}</Badge>
+              <span style={{ fontSize: '0.8rem', color: 'rgba(203,213,225,0.5)' }}>
+                {completedCount} / {executionResults.length} completed
+              </span>
             </div>
           </div>
         </div>
-
-        <div className="header-right">
-          <button 
-            className="btn-icon-danger" 
-            onClick={handleRemoveCase} 
-            title="Remove from mission"
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="dg-btn dg-btn-ghost" onClick={handleRemoveCase} title="Remove from mission">
             <FiTrash2 />
           </button>
-          <div className="progress-ring-wrapper">
-            <svg className="progress-ring" viewBox="0 0 64 64">
-              <defs>
-                <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
-                </linearGradient>
-              </defs>
-              <circle className="ring-bg" cx="32" cy="32" r="26" />
-              <circle 
-                className="ring-fill" 
-                cx="32" cy="32" r="26"
-                strokeDasharray={`${(completedCount / executionResults.length) * 163.36} 163.36`}
-              />
-            </svg>
-            <div className="ring-label">
-              <span className="ring-current">{currentTestIndex + 1}</span>
-              <span className="ring-sep">/</span>
-              <span className="ring-total">{executionResults.length}</span>
-            </div>
+          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)' }}>
+            <span style={{ fontWeight: 600, color: '#e2e8f0' }}>{currentTestIndex + 1}</span>
+            <span> / {executionResults.length}</span>
           </div>
         </div>
       </header>
 
       {/* Main Layout */}
-      <div className="stage-layout">
+      <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Sidebar Queue */}
-        <aside className="stage-sidebar">
-          <div className="sidebar-header">
-            <div className="sidebar-title">
-              <FiList />
-              <span>Test Queue</span>
-            </div>
-            <span className="queue-badge">{executionResults.length}</span>
+        <aside style={{
+          width: 260, minWidth: 260,
+          borderRight: '1px solid rgba(255,255,255,0.06)',
+          background: 'rgba(15,23,42,0.4)',
+          display: 'flex', flexDirection: 'column'
+        }}>
+          <div style={{
+            padding: '14px 16px',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)' }}>
+              <FiList /> Test Queue
+            </span>
+            <span className="dg-badge dg-badge-indigo">{executionResults.length}</span>
           </div>
-          <div className="queue-list">
+          <div style={{ flex: 1, overflowY: 'auto', padding: 8 }}>
             {executionResults.map((res, idx) => (
-              <div 
-                key={res.id || res._id || idx} 
-                className={`queue-item ${idx === currentTestIndex ? 'active' : ''} status-${cleanStatus(res.status)}`}
+              <div
+                key={res.id || res._id || idx}
                 onClick={() => setCurrentTestIndex(idx)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                  background: idx === currentTestIndex ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: idx === currentTestIndex ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
+                  marginBottom: 2, transition: 'all 0.15s'
+                }}
               >
-                <div className="queue-number">
-                  <span>{idx + 1}</span>
-                  <div className="status-dot"></div>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.75rem', fontWeight: 600,
+                  background: idx === currentTestIndex ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)',
+                  color: idx === currentTestIndex ? '#a5b4fc' : 'rgba(203,213,225,0.6)'
+                }}>
+                  {idx + 1}
                 </div>
-                <div className="queue-info">
-                  <span className="queue-title">{res.testCase?.title}</span>
-                  <span className="queue-status">{res.status || 'Not Run'}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: '0.8rem', color: '#e2e8f0',
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                  }}>
+                    {res.testCase?.title}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: 'rgba(203,213,225,0.4)' }}>
+                    {res.status || 'Not Run'}
+                  </div>
                 </div>
-                {idx === currentTestIndex && (
-                  <div className="active-marker"><FiChevronRight /></div>
-                )}
+                {idx === currentTestIndex && <FiChevronRight size={14} color="var(--dg-accent)" />}
               </div>
             ))}
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="stage-main">
-          <div className="test-content">
+        <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
             {tc ? (
               <>
                 {/* Test Header */}
-                <header className="test-header">
-                  <div className="test-meta">
-                    <span className="test-id">
-                      <FiHash />
-                      {tc.adoId || `TC-${currentTestIndex + 1}`}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                    <span style={{ fontSize: '0.8rem', color: 'rgba(203,213,225,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <FiHash /> {tc.adoId || `TC-${currentTestIndex + 1}`}
                     </span>
-                    <span className={`status-indicator ${currentStatus}`}>
-                      <span className="status-dot-lg"></span>
-                      {executionResults[currentTestIndex]?.status || 'Not Run'}
-                    </span>
+                    <Badge>{executionResults[currentTestIndex]?.status || 'Not Run'}</Badge>
                   </div>
-                  <h2 className="test-title">{tc.title}</h2>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#e2e8f0' }}>{tc.title}</h2>
                   {tc.description && (
-                    <p className="test-description">{tc.description}</p>
+                    <p style={{ color: 'rgba(203,213,225,0.6)', marginTop: 6, fontSize: '0.9rem' }}>{tc.description}</p>
                   )}
-                </header>
+                </div>
 
                 {/* Steps */}
-                <section className="steps-section">
-                  <div className="section-header">
-                    <h3><FiList /> Test Steps</h3>
-                    <span className="step-count">{tc.steps?.length || 0} steps</span>
-                  </div>
-                  <div className="steps-list">
+                <div style={{ marginBottom: 24 }}>
+                  <h3 style={{ fontSize: '0.95rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                    <FiList /> Test Steps
+                    <span style={{ fontSize: '0.75rem', color: 'rgba(203,213,225,0.4)', fontWeight: 400 }}>
+                      ({tc.steps?.length || 0} steps)
+                    </span>
+                  </h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {tc.steps?.map((s, i) => (
-                      <div key={i} className="step-card">
-                        <div className="step-number">{s.stepNumber || i + 1}</div>
-                        <div className="step-body">
-                          <div className="step-action">
-                            <label>Action</label>
-                            <p>{s.action}</p>
+                      <div key={i} className="glass-card" style={{ padding: 14, display: 'flex', gap: 12 }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          background: 'rgba(99,102,241,0.15)', color: '#a5b4fc',
+                          fontSize: '0.8rem', fontWeight: 600
+                        }}>
+                          {s.stepNumber || i + 1}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ marginBottom: 8 }}>
+                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(203,213,225,0.4)' }}>Action</span>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5 }}>{s.action}</p>
                           </div>
-                          <div className="step-expected">
-                            <label>Expected Result</label>
-                            <p>{s.expectedResult}</p>
+                          <div>
+                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(203,213,225,0.4)' }}>Expected Result</span>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)', lineHeight: 1.5 }}>{s.expectedResult}</p>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                </section>
+                </div>
 
                 {/* Notes */}
-                <section className="notes-section">
-                  <label className="notes-label">
-                    <FiMessageSquare />
-                    Analyst Notes
+                <div className="dg-input-group">
+                  <label className="dg-input-label">
+                    <FiMessageSquare style={{ marginRight: 4 }} /> Analyst Notes
                   </label>
-                  <textarea 
-                    className="notes-input"
-                    value={comments} 
-                    onChange={(e) => setComments(e.target.value)} 
+                  <textarea
+                    className="dg-textarea"
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
                     placeholder="Add observations, defects, or additional context..."
+                    rows={4}
                   />
-                </section>
+                </div>
               </>
             ) : (
-              <div className="loading-state">
-                <div className="loading-spinner"></div>
-                <span>Initializing Stage...</span>
+              <div className="dg-empty">
+                <div className="dg-spinner" />
+                <p>Initializing Stage...</p>
               </div>
             )}
           </div>
 
           {/* Action Bar */}
-          <footer className="action-bar">
-            <div className="status-actions">
-              <button 
-                className={`status-btn pass ${isSaving ? 'saving' : ''}`}
+          <footer style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '12px 24px',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(15,23,42,0.5)'
+          }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <button
+                className="dg-btn dg-btn-primary"
                 onClick={() => handleQuickStatus('Passed')}
                 disabled={isSaving}
+                style={{ background: isSaving ? undefined : 'rgba(34,197,94,0.2)', borderColor: 'rgba(34,197,94,0.4)', color: '#34d399' }}
               >
-                <FiCheckCircle />
-                <span>Pass</span>
+                <FiCheckCircle /> Pass
               </button>
-              <button 
-                className={`status-btn fail ${isSaving ? 'saving' : ''}`}
+              <button
+                className="dg-btn dg-btn-primary"
                 onClick={() => handleQuickStatus('Failed')}
                 disabled={isSaving}
+                style={{ background: isSaving ? undefined : 'rgba(239,68,68,0.2)', borderColor: 'rgba(239,68,68,0.4)', color: '#f87171' }}
               >
-                <FiXCircle />
-                <span>Fail</span>
+                <FiXCircle /> Fail
               </button>
-              <button 
-                className={`status-btn block ${isSaving ? 'saving' : ''}`}
+              <button
+                className="dg-btn dg-btn-primary"
                 onClick={() => handleQuickStatus('Blocked')}
                 disabled={isSaving}
+                style={{ background: isSaving ? undefined : 'rgba(251,191,36,0.2)', borderColor: 'rgba(251,191,36,0.4)', color: '#fbbf24' }}
               >
-                <FiAlertCircle />
-                <span>Block</span>
+                <FiAlertCircle /> Block
               </button>
-              <button 
-                className={`status-btn na ${isSaving ? 'saving' : ''}`}
+              <button
+                className="dg-btn dg-btn-secondary"
                 onClick={() => handleQuickStatus('N/A')}
                 disabled={isSaving}
               >
-                <FiMinusCircle />
-                <span>N/A</span>
+                <FiMinusCircle /> N/A
               </button>
-              <div className="action-divider"></div>
-              <button 
-                className="status-btn bug"
-                onClick={() => setShowBugModal(true)}
-              >
-                <FiAlertTriangle />
-                <span>Report Bug</span>
+              <button className="dg-btn dg-btn-danger" onClick={() => setShowBugModal(true)}>
+                <FiAlertTriangle /> Report Bug
               </button>
             </div>
 
-            <div className="nav-actions">
-              <button 
-                className="nav-btn"
-                onClick={() => setCurrentTestIndex(p => Math.max(0, p - 1))} 
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button
+                className="dg-btn dg-btn-ghost"
+                onClick={() => setCurrentTestIndex(p => Math.max(0, p - 1))}
                 disabled={currentTestIndex === 0}
               >
                 <FiChevronLeft />
               </button>
-              <div className="nav-counter">
-                <span className="nav-current">{currentTestIndex + 1}</span>
-                <span className="nav-sep">of</span>
-                <span className="nav-total">{executionResults.length}</span>
-              </div>
-              <button 
-                className="nav-btn"
-                onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))} 
+              <span style={{ fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)', minWidth: 60, textAlign: 'center' }}>
+                {currentTestIndex + 1} of {executionResults.length}
+              </span>
+              <button
+                className="dg-btn dg-btn-ghost"
+                onClick={() => setCurrentTestIndex(p => Math.min(p + 1, executionResults.length - 1))}
                 disabled={currentTestIndex === executionResults.length - 1}
               >
                 <FiChevronRight />
@@ -726,155 +619,111 @@ function Execution({
       </div>
 
       {/* Results Modal */}
-      {showResultsModal && (
-        <div className="modal-backdrop" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
-          <div className="modal modal-xl" onClick={e => e.stopPropagation()}>
-            <header className="modal-header">
-              <div className="modal-title">
-                <div className="modal-icon primary"><FiList /></div>
-                <div>
-                  <h3>Mission Results: {showResultsModal.name}</h3>
-                  <p>Execution summary and details</p>
-                </div>
-              </div>
-              <button className="btn-close" onClick={() => { setShowResultsModal(null); setExecutionResults([]); }}>
-                <FiX />
-              </button>
-            </header>
-            
-            <div className="modal-body">
-              <div className="filter-bar">
-                <div className="filter-label">
-                  <FiFilter />
-                  <span>Filter by status</span>
-                </div>
-                <div className="filter-chips">
-                  {['All', 'Passed', 'Failed', 'Blocked', 'N/A'].map(f => (
-                    <button 
-                      key={f} 
-                      className={`filter-chip ${resultsFilter === f ? 'active' : ''} ${f.toLowerCase().replace('/', '')}`}
-                      onClick={() => setResultsFilter(f)}
-                    >
-                      {f}
-                      {f !== 'All' && (
-                        <span className="chip-count">
-                          {executionResults.filter(r => {
-                            const st = cleanStatus(r.status);
-                            if (f === 'Passed') return st === 'passed';
-                            if (f === 'Failed') return st === 'failed';
-                            if (f === 'Blocked') return st === 'blocked';
-                            if (f === 'N/A') return st === 'na' || st === 'notrun';
-                            return true;
-                          }).length}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="results-table-wrapper">
-                <table className="results-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Test Case</th>
-                      <th>Status</th>
-                      <th>Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredResults.map((r, i) => (
-                      <tr key={r.id || r._id || i}>
-                        <td><span className="id-pill">{r.testCase?.adoId || 'TC'}</span></td>
-                        <td className="title-cell">{r.testCase?.title}</td>
-                        <td>
-                          <span className={`status-pill ${cleanStatus(r.status)}`}>
-                            {r.status || 'Not Run'}
-                          </span>
-                        </td>
-                        <td className="notes-cell">
-                          {r.comments || <span className="empty-notes">—</span>}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+      <Modal
+        isOpen={!!showResultsModal}
+        onClose={() => { setShowResultsModal(null); setExecutionResults([]); }}
+        title={`Mission Results: ${showResultsModal?.name || ''}`}
+        size="lg"
+      >
+        <div style={{ marginBottom: 16, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {['All', 'Passed', 'Failed', 'Blocked', 'N/A'].map(f => (
+            <button
+              key={f}
+              className={`dg-btn ${resultsFilter === f ? 'dg-btn-primary' : 'dg-btn-ghost'}`}
+              onClick={() => setResultsFilter(f)}
+              style={{ padding: '4px 12px', fontSize: '0.8rem' }}
+            >
+              {f}
+              {f !== 'All' && (
+                <span style={{ marginLeft: 4, opacity: 0.6 }}>
+                  {executionResults.filter(r => {
+                    const st = cleanStatus(r.status);
+                    if (f === 'Passed') return st === 'passed';
+                    if (f === 'Failed') return st === 'failed';
+                    if (f === 'Blocked') return st === 'blocked';
+                    if (f === 'N/A') return st === 'na' || st === 'notrun';
+                    return true;
+                  }).length}
+                </span>
+              )}
+            </button>
+          ))}
         </div>
-      )}
+
+        <div className="dg-table-wrapper">
+          <table className="dg-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Test Case</th>
+                <th>Status</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredResults.map((r, i) => (
+                <tr key={r.id || r._id || i}>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.testCase?.adoId || 'TC'}</td>
+                  <td>{r.testCase?.title}</td>
+                  <td><Badge>{r.status || 'Not Run'}</Badge></td>
+                  <td style={{ color: 'rgba(203,213,225,0.5)' }}>{r.comments || '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Modal>
 
       {/* Bug Report Modal */}
-      {showBugModal && (
-        <div className="modal-backdrop" onClick={() => setShowBugModal(false)}>
-          <div className="modal modal-lg" onClick={e => e.stopPropagation()}>
-            <header className="modal-header">
-              <div className="modal-title">
-                <div className="modal-icon danger"><FiAlertTriangle /></div>
-                <div>
-                  <h3>Report Defect</h3>
-                  <p>{tc?.title}</p>
-                </div>
-              </div>
-              <button className="btn-close" onClick={() => setShowBugModal(false)}>
-                <FiX />
-              </button>
-            </header>
-            <form onSubmit={handleReportBug}>
-              <div className="modal-body modal-body-scroll">
-                <div className="form-field">
-                  <label>Bug Title</label>
-                  <input 
-                    name="title" 
-                    className="input-field"
-                    defaultValue={`Defect: ${tc?.title}`} 
-                    required 
-                  />
-                </div>
-                <div className="form-field">
-                  <label>Steps to Reproduce</label>
-                  <textarea 
-                    name="description" 
-                    className="textarea-field"
-                    rows={6} 
-                    defaultValue={tc?.steps?.map(s => `Step ${s.stepNumber}: ${s.action}`).join('\n')} 
-                  />
-                </div>
-                <div className="form-row">
-                  <div className="form-field">
-                    <label>Severity</label>
-                    <select name="severity" className="select-field">
-                      <option>Critical</option>
-                      <option>High</option>
-                      <option selected>Medium</option>
-                      <option>Low</option>
-                    </select>
-                  </div>
-                  <div className="form-field">
-                    <label>Assignee</label>
-                    <input 
-                      name="assignedTo" 
-                      className="input-field"
-                      placeholder="Developer name" 
-                    />
-                  </div>
-                </div>
-              </div>
-              <footer className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setShowBugModal(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-danger">
-                  <FiAlertTriangle />
-                  <span>Commit Defect</span>
-                </button>
-              </footer>
-            </form>
+      <Modal
+        isOpen={showBugModal}
+        onClose={() => setShowBugModal(false)}
+        title="Report Defect"
+        footer={
+          <>
+            <button className="dg-btn dg-btn-secondary" onClick={() => setShowBugModal(false)}>Cancel</button>
+            <button type="submit" form="bug-report-form" className="dg-btn dg-btn-danger">
+              <FiAlertTriangle /> Commit Defect
+            </button>
+          </>
+        }
+      >
+        <form id="bug-report-form" onSubmit={handleReportBug}>
+          <div className="dg-input-group">
+            <label className="dg-input-label">Bug Title</label>
+            <input
+              name="title"
+              className="dg-input"
+              defaultValue={`Defect: ${tc?.title}`}
+              required
+            />
           </div>
-        </div>
-      )}
+          <div className="dg-input-group">
+            <label className="dg-input-label">Steps to Reproduce</label>
+            <textarea
+              name="description"
+              className="dg-textarea"
+              rows={4}
+              defaultValue={tc?.steps?.map(s => `Step ${s.stepNumber}: ${s.action}`).join('\n')}
+            />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="dg-input-group">
+              <label className="dg-input-label">Severity</label>
+              <select name="severity" className="dg-select">
+                <option>Critical</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+            <div className="dg-input-group">
+              <label className="dg-input-label">Assignee</label>
+              <input name="assignedTo" className="dg-input" placeholder="Developer name" />
+            </div>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

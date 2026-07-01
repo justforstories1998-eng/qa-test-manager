@@ -60,21 +60,18 @@ function Settings({ settings, onUpdateSettings }) {
   };
 
   const renderToggle = (category, field, label, description) => (
-    <div className="setting-item">
-      <div className="setting-info">
-        <label className="setting-label">{label}</label>
-        {description && <span className="setting-description">{description}</span>}
+    <div className="dg-setting-item">
+      <div className="dg-setting-info">
+        <label className="dg-input-label">{label}</label>
+        {description && <span className="dg-setting-desc">{description}</span>}
       </div>
-      <label className="toggle-switch">
+      <label className="dg-toggle">
         <input 
           type="checkbox" 
           checked={formData[category]?.[field] || false} 
           onChange={e => handleInputChange(category, field, e.target.checked)} 
         />
-        <span className="toggle-slider">
-          <span className="toggle-icon toggle-icon-off">✕</span>
-          <span className="toggle-icon toggle-icon-on">✓</span>
-        </span>
+        <span className="dg-toggle-slider"></span>
       </label>
     </div>
   );
@@ -92,653 +89,562 @@ function Settings({ settings, onUpdateSettings }) {
   const activeTabData = tabs.find(t => t.id === activeTab);
 
   return (
-    <div className="settings-page">
-      {/* Ambient Background */}
-      <div className="settings-ambient">
-        <div className="ambient-orb ambient-orb-1"></div>
-        <div className="ambient-orb ambient-orb-2"></div>
+    <div className="dg-page">
+      <div className="dg-page-header" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
+            <FiSettings size={20} style={{ color: 'var(--dg-accent)' }} />
+            <span style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--dg-accent)' }}>Configuration</span>
+          </div>
+          <h2 className="dg-page-title">Settings</h2>
+          <p style={{ color: 'rgba(203,213,225,0.6)', margin: '4px 0 0 0' }}>Manage your application preferences and configurations</p>
+        </div>
+        {hasChanges && (
+          <div className="dg-badge dg-badge-amber" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}>
+            <FiAlertTriangle size={14} />
+            <span>Unsaved changes</span>
+          </div>
+        )}
       </div>
 
-      {/* Main Scrollable Container */}
-      <div className="settings-scroll-container">
-        <div className="settings-inner">
-          {/* Page Header */}
-          <div className="page-header">
-            <div className="header-content">
-              <div className="header-badge">
-                <FiSettings className="badge-icon" />
-                <span>Configuration</span>
-              </div>
-              <h2 className="section-title">Settings</h2>
-              <p className="section-description">Manage your application preferences and configurations</p>
-            </div>
-            {hasChanges && (
-              <div className="unsaved-indicator">
-                <FiAlertTriangle />
-                <span>Unsaved changes</span>
-              </div>
+      <div className="dg-tabs" style={{ marginBottom: '24px' }}>
+        {tabs.map(t => (
+          <button 
+            key={t.id} 
+            className={`dg-tab ${activeTab === t.id ? 'active' : ''}`} 
+            onClick={() => setActiveTab(t.id)}
+            style={{ position: 'relative' }}
+          >
+            <t.icon size={16} />
+            <span>{t.label}</span>
+            {t.badge && (
+              <span className="dg-badge dg-badge-purple" style={{ marginLeft: '6px', fontSize: '10px', padding: '1px 6px' }}>{t.badge}</span>
             )}
+          </button>
+        ))}
+      </div>
+
+      <div className="glass-card" style={{ padding: '28px', maxWidth: '800px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {activeTabData && <activeTabData.icon size={20} style={{ color: 'var(--dg-accent)' }} />}
           </div>
+          <div>
+            <h3 style={{ margin: 0, color: 'var(--dg-text)', fontWeight: 600 }}>{activeTabData?.label} Settings</h3>
+            <p style={{ margin: 0, color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>{activeTabData?.description}</p>
+          </div>
+        </div>
 
-          <div className="settings-layout">
-            {/* Settings Navigation */}
-            <nav className="settings-nav">
-              <div className="nav-header">
-                <h3>Categories</h3>
+        {/* General Settings */}
+        {activeTab === 'general' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiImage size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Branding</span>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">App Logo</label>
+                <span className="dg-setting-desc">Upload your organization's logo (Max 500KB)</span>
               </div>
-              <div className="nav-list">
-                {tabs.map(t => (
-                  <button 
-                    key={t.id} 
-                    className={`settings-nav-item ${activeTab === t.id ? 'active' : ''}`} 
-                    onClick={() => setActiveTab(t.id)}
-                  >
-                    <div className="nav-item-icon">
-                      <t.icon />
-                    </div>
-                    <div className="nav-item-content">
-                      <span className="nav-item-label">{t.label}</span>
-                      <span className="nav-item-description">{t.description}</span>
-                    </div>
-                    {t.badge && (
-                      <span className="nav-item-badge">{t.badge}</span>
-                    )}
-                    <FiChevronRight className="nav-item-arrow" />
-                  </button>
-                ))}
-              </div>
-              
-              {/* Quick Actions */}
-              <div className="nav-footer">
-                <div className="nav-footer-title">Quick Actions</div>
-                <button className="quick-action-btn" onClick={() => window.location.reload()}>
-                  <FiRefreshCw />
-                  <span>Reset to Default</span>
-                </button>
-              </div>
-            </nav>
-
-            {/* Settings Content */}
-            <div className="settings-content">
-              <div className="settings-content-scroll">
-                <div className="settings-section">
-                  {/* Section Header */}
-                  <div className="section-header">
-                    <div className="section-header-icon">
-                      {activeTabData && <activeTabData.icon />}
-                    </div>
-                    <div className="section-header-content">
-                      <h3>{activeTabData?.label} Settings</h3>
-                      <p>{activeTabData?.description}</p>
-                    </div>
-                  </div>
-                  
-                  {/* General Settings */}
-                  {activeTab === 'general' && (
-                    <div className="settings-group">
-                      <div className="group-title">
-                        <FiImage />
-                        <span>Branding</span>
-                      </div>
-                      
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">App Logo</label>
-                          <span className="setting-description">Upload your organization's logo (Max 500KB)</span>
-                        </div>
-                        <div className="logo-upload-container">
-                          <div className="logo-preview">
-                            {formData.general?.logo ? (
-                              <img src={formData.general.logo} alt="Logo" />
-                            ) : (
-                              <div className="logo-placeholder">
-                                <FiImage />
-                                <span>No logo</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="logo-actions">
-                            <input type="file" id="logo-upload" hidden accept="image/*" onChange={handleLogoUpload} />
-                            <label htmlFor="logo-upload" className="btn btn-secondary btn-sm">
-                              <FiUpload />
-                              <span>Upload</span>
-                            </label>
-                            {formData.general?.logo && (
-                              <button 
-                                className="btn btn-ghost btn-sm btn-danger"
-                                onClick={() => handleInputChange('general', 'logo', '')}
-                              >
-                                <FiTrash2 />
-                                <span>Remove</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="group-title">
-                        <FiGlobe />
-                        <span>Organization</span>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Organization Name</label>
-                          <span className="setting-description">Your company or team name</span>
-                        </div>
-                        <div className="setting-control">
-                          <input 
-                            type="text" 
-                            className="setting-input"
-                            placeholder="Enter organization name..."
-                            value={formData.general?.organization || ''} 
-                            onChange={e => handleInputChange('general', 'organization', e.target.value)} 
-                          />
-                        </div>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Project Name</label>
-                          <span className="setting-description">Current project identifier</span>
-                        </div>
-                        <div className="setting-control">
-                          <input 
-                            type="text" 
-                            className="setting-input"
-                            placeholder="Enter project name..."
-                            value={formData.general?.projectName || ''} 
-                            onChange={e => handleInputChange('general', 'projectName', e.target.value)} 
-                          />
-                        </div>
-                      </div>
-
-                      <div className="group-title">
-                        <FiClock />
-                        <span>Localization</span>
-                      </div>
-
-                      <div className="settings-row">
-                        <div className="setting-item setting-item-vertical">
-                          <div className="setting-info">
-                            <label className="setting-label">Date Format</label>
-                            <span className="setting-description">How dates are displayed</span>
-                          </div>
-                          <div className="setting-control">
-                            <div className="select-wrapper">
-                              <select 
-                                className="setting-select"
-                                value={formData.general?.dateFormat} 
-                                onChange={e => handleInputChange('general', 'dateFormat', e.target.value)}
-                              >
-                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="setting-item setting-item-vertical">
-                          <div className="setting-info">
-                            <label className="setting-label">Time Zone</label>
-                            <span className="setting-description">Default timezone for reports</span>
-                          </div>
-                          <div className="setting-control">
-                            <div className="select-wrapper">
-                              <select 
-                                className="setting-select"
-                                value={formData.general?.timeZone} 
-                                onChange={e => handleInputChange('general', 'timeZone', e.target.value)}
-                              >
-                                <option value="UTC">UTC</option>
-                                <option value="EST">EST (Eastern)</option>
-                                <option value="PST">PST (Pacific)</option>
-                                <option value="CST">CST (Central)</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'rgba(255,255,255,0.03)' }}>
+                  {formData.general?.logo ? (
+                    <img src={formData.general.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <div style={{ textAlign: 'center', color: 'rgba(203,213,225,0.4)' }}>
+                      <FiImage size={24} />
                     </div>
                   )}
-
-                  {/* Execution Settings */}
-                  {activeTab === 'execution' && (
-                    <div className="settings-group">
-                      <div className="group-title">
-                        <FiPlay />
-                        <span>Test Run Behavior</span>
-                      </div>
-                      
-                      {renderToggle('execution', 'autoSave', 'Auto-Save Results', 'Automatically save test results as you progress')}
-                      {renderToggle('execution', 'autoAdvance', 'Auto-Advance on Pass', 'Move to next test case when current passes')}
-                      {renderToggle('execution', 'requireCommentsOnFail', 'Require Comments on Fail', 'Force testers to add comments for failed tests')}
-                      
-                      <div className="group-title">
-                        <FiClock />
-                        <span>Session</span>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Session Timeout</label>
-                          <span className="setting-description">Auto-logout after inactivity (minutes)</span>
-                        </div>
-                        <div className="setting-control">
-                          <div className="input-with-suffix">
-                            <input 
-                              type="number" 
-                              className="setting-input"
-                              min="5"
-                              max="120"
-                              value={formData.execution?.sessionTimeout || 30} 
-                              onChange={e => handleInputChange('execution', 'sessionTimeout', e.target.value)} 
-                            />
-                            <span className="input-suffix">minutes</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input type="file" id="logo-upload" hidden accept="image/*" onChange={handleLogoUpload} />
+                  <label htmlFor="logo-upload" className="dg-btn dg-btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}>
+                    <FiUpload size={14} />
+                    Upload
+                  </label>
+                  {formData.general?.logo && (
+                    <button 
+                      className="dg-btn dg-btn-ghost" style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}
+                      onClick={() => handleInputChange('general', 'logo', '')}
+                    >
+                      <FiTrash2 size={14} />
+                      Remove
+                    </button>
                   )}
-
-                  {/* Reporting Settings */}
-                  {activeTab === 'reporting' && (
-                    <div className="settings-group">
-                      <div className="group-title">
-                        <FiFileText />
-                        <span>Report Content</span>
-                      </div>
-                      
-                      {renderToggle('reporting', 'includePassedTests', 'Include Passed Tests', 'Show passed test cases in reports')}
-                      {renderToggle('reporting', 'includeFailedTests', 'Include Failed Tests', 'Show failed test cases in reports')}
-                      {renderToggle('reporting', 'includeCharts', 'Include Charts', 'Add visual charts and graphs')}
-                      
-                      <div className="group-title">
-                        <FiFileText />
-                        <span>Report Branding</span>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Report Header</label>
-                          <span className="setting-description">Text displayed at the top of reports</span>
-                        </div>
-                        <div className="setting-control">
-                          <input 
-                            type="text" 
-                            className="setting-input"
-                            placeholder="Enter header text..."
-                            value={formData.reporting?.reportHeader || ''} 
-                            onChange={e => handleInputChange('reporting', 'reportHeader', e.target.value)} 
-                          />
-                        </div>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Report Footer</label>
-                          <span className="setting-description">Text displayed at the bottom of reports</span>
-                        </div>
-                        <div className="setting-control">
-                          <input 
-                            type="text" 
-                            className="setting-input"
-                            placeholder="Enter footer text..."
-                            value={formData.reporting?.reportFooter || ''} 
-                            onChange={e => handleInputChange('reporting', 'reportFooter', e.target.value)} 
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* AI Integration Settings */}
-                  {activeTab === 'grokAI' && (
-                    <div className="settings-group">
-                      {/* AI Feature Banner */}
-                      <div className="feature-banner ai-banner">
-                        <div className="feature-banner-icon">
-                          <FiZap />
-                        </div>
-                        <div className="feature-banner-content">
-                          <h4>AI-Powered Analysis</h4>
-                          <p>Enable intelligent test analysis, automatic summaries, and smart recommendations</p>
-                        </div>
-                      </div>
-
-                      <div className="group-title">
-                        <FiCpu />
-                        <span>Configuration</span>
-                      </div>
-                      
-                      {renderToggle('grokAI', 'enabled', 'Enable AI Analysis', 'Use AI to analyze test results and generate insights')}
-                      
-                      {formData.grokAI?.enabled && (
-                        <>
-                          <div className="setting-item setting-item-vertical">
-                            <div className="setting-info">
-                              <label className="setting-label">AI Provider</label>
-                              <span className="setting-description">Select your preferred AI service</span>
-                            </div>
-                            <div className="setting-control">
-                              <div className="provider-options">
-                                <div 
-                                  className={`provider-option ${formData.grokAI?.provider === 'gemini' ? 'active' : ''}`}
-                                  onClick={() => handleInputChange('grokAI', 'provider', 'gemini')}
-                                >
-                                  <div className="provider-icon gemini">G</div>
-                                  <div className="provider-info">
-                                    <span className="provider-name">Google Gemini</span>
-                                    <span className="provider-tier free">Free Tier</span>
-                                  </div>
-                                  {formData.grokAI?.provider === 'gemini' && (
-                                    <FiCheckCircle className="provider-check" />
-                                  )}
-                                </div>
-                                <div 
-                                  className={`provider-option ${formData.grokAI?.provider === 'groq_cloud' ? 'active' : ''}`}
-                                  onClick={() => handleInputChange('grokAI', 'provider', 'groq_cloud')}
-                                >
-                                  <div className="provider-icon groq">⚡</div>
-                                  <div className="provider-info">
-                                    <span className="provider-name">Groq Cloud</span>
-                                    <span className="provider-tier free">Free Tier</span>
-                                  </div>
-                                  {formData.grokAI?.provider === 'groq_cloud' && (
-                                    <FiCheckCircle className="provider-check" />
-                                  )}
-                                </div>
-                                <div 
-                                  className={`provider-option ${formData.grokAI?.provider === 'openai' ? 'active' : ''}`}
-                                  onClick={() => handleInputChange('grokAI', 'provider', 'openai')}
-                                >
-                                  <div className="provider-icon openai">◯</div>
-                                  <div className="provider-info">
-                                    <span className="provider-name">OpenAI</span>
-                                    <span className="provider-tier paid">Paid</span>
-                                  </div>
-                                  {formData.grokAI?.provider === 'openai' && (
-                                    <FiCheckCircle className="provider-check" />
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="group-title">
-                            <FiLock />
-                            <span>Authentication</span>
-                          </div>
-
-                          <div className="setting-item setting-item-vertical">
-                            <div className="setting-info">
-                              <label className="setting-label">API Key</label>
-                              <span className="setting-description">Your provider's API key (stored securely)</span>
-                            </div>
-                            <div className="setting-control">
-                              <div className="api-key-input">
-                                <div className="input-with-button">
-                                  <input 
-                                    type={showApiKey ? "text" : "password"} 
-                                    className="setting-input api-key"
-                                    placeholder="Enter your API key..."
-                                    value={formData.grokAI?.apiKey || ''} 
-                                    onChange={e => handleInputChange('grokAI', 'apiKey', e.target.value)} 
-                                  />
-                                  <button 
-                                    type="button" 
-                                    className="btn-icon visibility-toggle"
-                                    onClick={() => setShowApiKey(!showApiKey)}
-                                    title={showApiKey ? "Hide API Key" : "Show API Key"}
-                                  >
-                                    {showApiKey ? <FiEyeOff /> : <FiEye />}
-                                  </button>
-                                </div>
-                                <div className="api-key-status">
-                                  {formData.grokAI?.apiKey ? (
-                                    <span className="status-valid">
-                                      <FiCheckCircle /> API key configured
-                                    </span>
-                                  ) : (
-                                    <span className="status-missing">
-                                      <FiAlertTriangle /> API key required
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Export Settings */}
-                  {activeTab === 'export' && (
-                    <div className="settings-group">
-                      <div className="group-title">
-                        <FiDownload />
-                        <span>Export Preferences</span>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Default Format</label>
-                          <span className="setting-description">Preferred export file format</span>
-                        </div>
-                        <div className="setting-control">
-                          <div className="format-selector">
-                            <div 
-                              className={`format-option ${formData.export?.defaultFormat === 'pdf' ? 'active' : ''}`}
-                              onClick={() => handleInputChange('export', 'defaultFormat', 'pdf')}
-                            >
-                              <FiFileText className="format-icon" />
-                              <span className="format-name">PDF</span>
-                              <span className="format-desc">Best for sharing</span>
-                            </div>
-                            <div 
-                              className={`format-option ${formData.export?.defaultFormat === 'word' ? 'active' : ''}`}
-                              onClick={() => handleInputChange('export', 'defaultFormat', 'word')}
-                            >
-                              <FiFileText className="format-icon" />
-                              <span className="format-name">Word</span>
-                              <span className="format-desc">Editable document</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Page Size</label>
-                          <span className="setting-description">PDF document page size</span>
-                        </div>
-                        <div className="setting-control">
-                          <div className="select-wrapper">
-                            <select 
-                              className="setting-select"
-                              value={formData.export?.pdfPageSize || 'A4'} 
-                              onChange={e => handleInputChange('export', 'pdfPageSize', e.target.value)}
-                            >
-                              <option value="A4">A4 (210 × 297 mm)</option>
-                              <option value="Letter">Letter (8.5 × 11 in)</option>
-                              <option value="Legal">Legal (8.5 × 14 in)</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Notifications Settings */}
-                  {activeTab === 'notifications' && (
-                    <div className="settings-group">
-                      <div className="group-title">
-                        <FiBell />
-                        <span>Notification Preferences</span>
-                      </div>
-                      
-                      {renderToggle('notifications', 'showSuccess', 'Success Notifications', 'Show success messages after actions')}
-                      {renderToggle('notifications', 'showErrors', 'Error Notifications', 'Show error messages when issues occur')}
-                      
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Notification Duration</label>
-                          <span className="setting-description">How long notifications stay visible</span>
-                        </div>
-                        <div className="setting-control">
-                          <div className="input-with-suffix">
-                            <input 
-                              type="number" 
-                              className="setting-input"
-                              min="1000"
-                              max="10000"
-                              step="500"
-                              value={formData.notifications?.duration || 3000} 
-                              onChange={e => handleInputChange('notifications', 'duration', parseInt(e.target.value))} 
-                            />
-                            <span className="input-suffix">ms</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Display Settings */}
-                  {activeTab === 'display' && (
-                    <div className="settings-group">
-                      <div className="group-title">
-                        <FiMonitor />
-                        <span>Appearance</span>
-                      </div>
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Theme</label>
-                          <span className="setting-description">Choose your preferred color scheme</span>
-                        </div>
-                        <div className="setting-control">
-                          <div className="theme-selector">
-                            <div 
-                              className={`theme-option ${formData.display?.theme === 'light' ? 'active' : ''}`}
-                              onClick={() => handleInputChange('display', 'theme', 'light')}
-                            >
-                              <div className="theme-preview light">
-                                <div className="preview-sidebar"></div>
-                                <div className="preview-content"></div>
-                              </div>
-                              <span className="theme-name">Light</span>
-                              {formData.display?.theme === 'light' && (
-                                <FiCheck className="theme-check" />
-                              )}
-                            </div>
-                            <div 
-                              className={`theme-option ${formData.display?.theme === 'dark' ? 'active' : ''}`}
-                              onClick={() => handleInputChange('display', 'theme', 'dark')}
-                            >
-                              <div className="theme-preview dark">
-                                <div className="preview-sidebar"></div>
-                                <div className="preview-content"></div>
-                              </div>
-                              <span className="theme-name">Dark</span>
-                              {formData.display?.theme === 'dark' && (
-                                <FiCheck className="theme-check" />
-                              )}
-                            </div>
-                            <div 
-                              className={`theme-option ${formData.display?.theme === 'system' ? 'active' : ''}`}
-                              onClick={() => handleInputChange('display', 'theme', 'system')}
-                            >
-                              <div className="theme-preview system">
-                                <div className="preview-sidebar"></div>
-                                <div className="preview-content"></div>
-                              </div>
-                              <span className="theme-name">System</span>
-                              {formData.display?.theme === 'system' && (
-                                <FiCheck className="theme-check" />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="group-title">
-                        <FiSettings />
-                        <span>Table Settings</span>
-                      </div>
-
-                      {renderToggle('display', 'showIds', 'Show Test Case IDs', 'Display ADO IDs in test case lists')}
-
-                      <div className="setting-item setting-item-vertical">
-                        <div className="setting-info">
-                          <label className="setting-label">Items Per Page</label>
-                          <span className="setting-description">Number of items shown in tables</span>
-                        </div>
-                        <div className="setting-control">
-                          <div className="select-wrapper">
-                            <select 
-                              className="setting-select"
-                              value={formData.display?.itemsPerPage || 20} 
-                              onChange={e => handleInputChange('display', 'itemsPerPage', parseInt(e.target.value))}
-                            >
-                              <option value="10">10 items</option>
-                              <option value="20">20 items</option>
-                              <option value="50">50 items</option>
-                              <option value="100">100 items</option>
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Save Actions */}
-                  <div className="settings-actions">
-                    <div className="actions-info">
-                      {hasChanges ? (
-                        <span className="changes-indicator">
-                          <span className="indicator-dot"></span>
-                          You have unsaved changes
-                        </span>
-                      ) : (
-                        <span className="saved-indicator">
-                          <FiCheckCircle />
-                          All changes saved
-                        </span>
-                      )}
-                    </div>
-                    <div className="actions-buttons">
-                      <button 
-                        className="btn btn-secondary" 
-                        onClick={() => setFormData(JSON.parse(JSON.stringify(settings)))}
-                        disabled={!hasChanges}
-                      >
-                        <FiRefreshCw />
-                        <span>Reset</span>
-                      </button>
-                      <button 
-                        className="btn btn-primary" 
-                        onClick={handleSave} 
-                        disabled={isSaving || !hasChanges}
-                      >
-                        {isSaving ? (
-                          <>
-                            <span className="btn-spinner"></span>
-                            <span>Saving...</span>
-                          </>
-                        ) : (
-                          <>
-                            <FiSave />
-                            <span>Save Changes</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiGlobe size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Organization</span>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Organization Name</label>
+                <span className="dg-setting-desc">Your company or team name</span>
+              </div>
+              <input 
+                type="text" 
+                className="dg-input"
+                placeholder="Enter organization name..."
+                value={formData.general?.organization || ''} 
+                onChange={e => handleInputChange('general', 'organization', e.target.value)} 
+                style={{ width: '100%', maxWidth: '400px' }}
+              />
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Project Name</label>
+                <span className="dg-setting-desc">Current project identifier</span>
+              </div>
+              <input 
+                type="text" 
+                className="dg-input"
+                placeholder="Enter project name..."
+                value={formData.general?.projectName || ''} 
+                onChange={e => handleInputChange('general', 'projectName', e.target.value)} 
+                style={{ width: '100%', maxWidth: '400px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiClock size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Localization</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                <div className="dg-setting-info">
+                  <label className="dg-input-label">Date Format</label>
+                  <span className="dg-setting-desc">How dates are displayed</span>
+                </div>
+                <select 
+                  className="dg-select"
+                  value={formData.general?.dateFormat} 
+                  onChange={e => handleInputChange('general', 'dateFormat', e.target.value)}
+                  style={{ width: '100%' }}
+                >
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                  <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                </select>
+              </div>
+
+              <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                <div className="dg-setting-info">
+                  <label className="dg-input-label">Time Zone</label>
+                  <span className="dg-setting-desc">Default timezone for reports</span>
+                </div>
+                <select 
+                  className="dg-select"
+                  value={formData.general?.timeZone} 
+                  onChange={e => handleInputChange('general', 'timeZone', e.target.value)}
+                  style={{ width: '100%' }}
+                >
+                  <option value="UTC">UTC</option>
+                  <option value="EST">EST (Eastern)</option>
+                  <option value="PST">PST (Pacific)</option>
+                  <option value="CST">CST (Central)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Execution Settings */}
+        {activeTab === 'execution' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiPlay size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Test Run Behavior</span>
+            </div>
+            
+            {renderToggle('execution', 'autoSave', 'Auto-Save Results', 'Automatically save test results as you progress')}
+            {renderToggle('execution', 'autoAdvance', 'Auto-Advance on Pass', 'Move to next test case when current passes')}
+            {renderToggle('execution', 'requireCommentsOnFail', 'Require Comments on Fail', 'Force testers to add comments for failed tests')}
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiClock size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Session</span>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Session Timeout</label>
+                <span className="dg-setting-desc">Auto-logout after inactivity (minutes)</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="number" 
+                  className="dg-input"
+                  min="5"
+                  max="120"
+                  value={formData.execution?.sessionTimeout || 30} 
+                  onChange={e => handleInputChange('execution', 'sessionTimeout', e.target.value)} 
+                  style={{ width: '120px' }}
+                />
+                <span style={{ color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>minutes</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reporting Settings */}
+        {activeTab === 'reporting' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiFileText size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Report Content</span>
+            </div>
+            
+            {renderToggle('reporting', 'includePassedTests', 'Include Passed Tests', 'Show passed test cases in reports')}
+            {renderToggle('reporting', 'includeFailedTests', 'Include Failed Tests', 'Show failed test cases in reports')}
+            {renderToggle('reporting', 'includeCharts', 'Include Charts', 'Add visual charts and graphs')}
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiFileText size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Report Branding</span>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Report Header</label>
+                <span className="dg-setting-desc">Text displayed at the top of reports</span>
+              </div>
+              <input 
+                type="text" 
+                className="dg-input"
+                placeholder="Enter header text..."
+                value={formData.reporting?.reportHeader || ''} 
+                onChange={e => handleInputChange('reporting', 'reportHeader', e.target.value)} 
+                style={{ width: '100%', maxWidth: '500px' }}
+              />
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Report Footer</label>
+                <span className="dg-setting-desc">Text displayed at the bottom of reports</span>
+              </div>
+              <input 
+                type="text" 
+                className="dg-input"
+                placeholder="Enter footer text..."
+                value={formData.reporting?.reportFooter || ''} 
+                onChange={e => handleInputChange('reporting', 'reportFooter', e.target.value)} 
+                style={{ width: '100%', maxWidth: '500px' }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* AI Integration Settings */}
+        {activeTab === 'grokAI' && (
+          <div>
+            <div className="glass-card" style={{ padding: '20px', marginBottom: '24px', border: '1px solid rgba(139,92,246,0.2)', background: 'rgba(139,92,246,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <FiZap size={22} style={{ color: 'var(--dg-accent)' }} />
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, color: 'var(--dg-text)', fontWeight: 600 }}>AI-Powered Analysis</h4>
+                  <p style={{ margin: '2px 0 0 0', color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>Enable intelligent test analysis, automatic summaries, and smart recommendations</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiCpu size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Configuration</span>
+            </div>
+            
+            {renderToggle('grokAI', 'enabled', 'Enable AI Analysis', 'Use AI to analyze test results and generate insights')}
+            
+            {formData.grokAI?.enabled && (
+              <>
+                <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+                  <div className="dg-setting-info">
+                    <label className="dg-input-label">AI Provider</label>
+                    <span className="dg-setting-desc">Select your preferred AI service</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', width: '100%' }}>
+                    {[
+                      { id: 'gemini', name: 'Google Gemini', tier: 'Free', icon: 'G', color: '#4285f4' },
+                      { id: 'groq_cloud', name: 'Groq Cloud', tier: 'Free', icon: '⚡', color: '#f97316' },
+                      { id: 'openai', name: 'OpenAI', tier: 'Paid', icon: '◯', color: '#10a37f' }
+                    ].map(p => (
+                      <div 
+                        key={p.id}
+                        className="glass-card"
+                        style={{ 
+                          padding: '14px', cursor: 'pointer', textAlign: 'center',
+                          border: formData.grokAI?.provider === p.id ? '2px solid var(--dg-accent)' : '2px solid rgba(255,255,255,0.06)',
+                          background: formData.grokAI?.provider === p.id ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
+                          transition: 'all 0.2s'
+                        }}
+                        onClick={() => handleInputChange('grokAI', 'provider', p.id)}
+                      >
+                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${p.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', color: p.color, fontWeight: 700, fontSize: '16px' }}>
+                          {p.icon}
+                        </div>
+                        <div style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '13px' }}>{p.name}</div>
+                        <div className={`dg-badge dg-badge-${p.tier === 'Free' ? 'green' : 'amber'}`} style={{ marginTop: '4px', fontSize: '10px' }}>{p.tier}</div>
+                        {formData.grokAI?.provider === p.id && (
+                          <FiCheckCircle size={16} style={{ color: 'var(--dg-accent)', marginTop: '6px' }} />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+                  <FiLock size={16} style={{ color: 'var(--dg-accent)' }} />
+                  <span>Authentication</span>
+                </div>
+
+                <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
+                  <div className="dg-setting-info">
+                    <label className="dg-input-label">API Key</label>
+                    <span className="dg-setting-desc">Your provider's API key (stored securely)</span>
+                  </div>
+                  <div style={{ width: '100%', maxWidth: '500px' }}>
+                    <div style={{ position: 'relative' }}>
+                      <input 
+                        type={showApiKey ? "text" : "password"} 
+                        className="dg-input"
+                        placeholder="Enter your API key..."
+                        value={formData.grokAI?.apiKey || ''} 
+                        onChange={e => handleInputChange('grokAI', 'apiKey', e.target.value)} 
+                        style={{ width: '100%', paddingRight: '44px' }}
+                      />
+                      <button 
+                        type="button" 
+                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(203,213,225,0.5)', cursor: 'pointer', padding: '4px' }}
+                        onClick={() => setShowApiKey(!showApiKey)}
+                        title={showApiKey ? "Hide API Key" : "Show API Key"}
+                      >
+                        {showApiKey ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                      </button>
+                    </div>
+                    <div style={{ marginTop: '8px', fontSize: '12px' }}>
+                      {formData.grokAI?.apiKey ? (
+                        <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <FiCheckCircle size={14} /> API key configured
+                        </span>
+                      ) : (
+                        <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <FiAlertTriangle size={14} /> API key required
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Export Settings */}
+        {activeTab === 'export' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiDownload size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Export Preferences</span>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Default Format</label>
+                <span className="dg-setting-desc">Preferred export file format</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', maxWidth: '400px' }}>
+                {[
+                  { id: 'pdf', name: 'PDF', desc: 'Best for sharing' },
+                  { id: 'word', name: 'Word', desc: 'Editable document' }
+                ].map(f => (
+                  <div 
+                    key={f.id}
+                    className="glass-card"
+                    style={{ 
+                      padding: '16px', cursor: 'pointer', textAlign: 'center',
+                      border: formData.export?.defaultFormat === f.id ? '2px solid var(--dg-accent)' : '2px solid rgba(255,255,255,0.06)',
+                      background: formData.export?.defaultFormat === f.id ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
+                      transition: 'all 0.2s'
+                    }}
+                    onClick={() => handleInputChange('export', 'defaultFormat', f.id)}
+                  >
+                    <FiFileText size={20} style={{ color: 'var(--dg-accent)', marginBottom: '6px' }} />
+                    <div style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '14px' }}>{f.name}</div>
+                    <div style={{ color: 'rgba(203,213,225,0.5)', fontSize: '12px', marginTop: '2px' }}>{f.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginTop: '20px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Page Size</label>
+                <span className="dg-setting-desc">PDF document page size</span>
+              </div>
+              <select 
+                className="dg-select"
+                value={formData.export?.pdfPageSize || 'A4'} 
+                onChange={e => handleInputChange('export', 'pdfPageSize', e.target.value)}
+                style={{ width: '100%', maxWidth: '300px' }}
+              >
+                <option value="A4">A4 (210 × 297 mm)</option>
+                <option value="Letter">Letter (8.5 × 11 in)</option>
+                <option value="Legal">Legal (8.5 × 14 in)</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Notifications Settings */}
+        {activeTab === 'notifications' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiBell size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Notification Preferences</span>
+            </div>
+            
+            {renderToggle('notifications', 'showSuccess', 'Success Notifications', 'Show success messages after actions')}
+            {renderToggle('notifications', 'showErrors', 'Error Notifications', 'Show error messages when issues occur')}
+            
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginTop: '20px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Notification Duration</label>
+                <span className="dg-setting-desc">How long notifications stay visible</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="number" 
+                  className="dg-input"
+                  min="1000"
+                  max="10000"
+                  step="500"
+                  value={formData.notifications?.duration || 3000} 
+                  onChange={e => handleInputChange('notifications', 'duration', parseInt(e.target.value))} 
+                  style={{ width: '120px' }}
+                />
+                <span style={{ color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>ms</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Display Settings */}
+        {activeTab === 'display' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiMonitor size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Appearance</span>
+            </div>
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Theme</label>
+                <span className="dg-setting-desc">Choose your preferred color scheme</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', width: '100%' }}>
+                {[
+                  { id: 'light', name: 'Light' },
+                  { id: 'dark', name: 'Dark' },
+                  { id: 'system', name: 'System' }
+                ].map(t => (
+                  <div 
+                    key={t.id}
+                    className="glass-card"
+                    style={{ 
+                      padding: '14px', cursor: 'pointer', textAlign: 'center',
+                      border: formData.display?.theme === t.id ? '2px solid var(--dg-accent)' : '2px solid rgba(255,255,255,0.06)',
+                      background: formData.display?.theme === t.id ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
+                      transition: 'all 0.2s'
+                    }}
+                    onClick={() => handleInputChange('display', 'theme', t.id)}
+                  >
+                    <div style={{ 
+                      width: '100%', height: '50px', borderRadius: '8px', marginBottom: '8px',
+                      background: t.id === 'dark' ? '#0f172a' : t.id === 'light' ? '#f1f5f9' : 'linear-gradient(135deg, #f1f5f9 50%, #0f172a 50%)',
+                      border: '1px solid rgba(255,255,255,0.1)'
+                    }}></div>
+                    <span style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '13px' }}>{t.name}</span>
+                    {formData.display?.theme === t.id && (
+                      <FiCheck size={16} style={{ color: 'var(--dg-accent)', marginTop: '4px', display: 'block', margin: '4px auto 0' }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+              <FiSettings size={16} style={{ color: 'var(--dg-accent)' }} />
+              <span>Table Settings</span>
+            </div>
+
+            {renderToggle('display', 'showIds', 'Show Test Case IDs', 'Display ADO IDs in test case lists')}
+
+            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginTop: '20px' }}>
+              <div className="dg-setting-info">
+                <label className="dg-input-label">Items Per Page</label>
+                <span className="dg-setting-desc">Number of items shown in tables</span>
+              </div>
+              <select 
+                className="dg-select"
+                value={formData.display?.itemsPerPage || 20} 
+                onChange={e => handleInputChange('display', 'itemsPerPage', parseInt(e.target.value))}
+                style={{ width: '100%', maxWidth: '300px' }}
+              >
+                <option value="10">10 items</option>
+                <option value="20">20 items</option>
+                <option value="50">50 items</option>
+                <option value="100">100 items</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Save Actions */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div>
+            {hasChanges ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontSize: '13px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 2s infinite' }}></span>
+                You have unsaved changes
+              </span>
+            ) : (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontSize: '13px' }}>
+                <FiCheckCircle size={16} />
+                All changes saved
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className="dg-btn dg-btn-secondary" 
+              onClick={() => setFormData(JSON.parse(JSON.stringify(settings)))}
+              disabled={!hasChanges}
+            >
+              <FiRefreshCw size={16} />
+              Reset
+            </button>
+            <button 
+              className="dg-btn dg-btn-primary" 
+              onClick={handleSave} 
+              disabled={isSaving || !hasChanges}
+            >
+              {isSaving ? (
+                <span className="dg-spinner" style={{ width: '16px', height: '16px' }}></span>
+              ) : (
+                <FiSave size={16} />
+              )}
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </button>
           </div>
         </div>
       </div>
