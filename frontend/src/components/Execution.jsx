@@ -166,7 +166,7 @@ function Execution({
             <h1 className="dg-page-title">
               <FiZap style={{ marginRight: 8 }} /> Execution Control
             </h1>
-            <p style={{ color: '#6c7a89', margin: 0, fontSize: '0.9rem' }}>
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
               Test orchestration &amp; quality metrics
             </p>
           </div>
@@ -225,7 +225,7 @@ function Execution({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <FiPlay size={18} color="var(--dg-accent)" />
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1rem', color: '#2b2c41' }}>{run.name}</h3>
+                      <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>{run.name}</h3>
                       <Badge>{run.environment}</Badge>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ function Execution({
                 </div>
 
                 <div style={{ marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#6c7a89', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 4 }}>
                     <span>Completion</span>
                     <span>{getProgressPercentage(run)}%</span>
                   </div>
@@ -253,7 +253,7 @@ function Execution({
                   <span style={{ color: '#34d399' }}><FiCheckCircle /> {run.passed || 0} Pass</span>
                   <span style={{ color: '#f87171' }}><FiXCircle /> {run.failed || 0} Fail</span>
                   <span style={{ color: '#fbbf24' }}><FiAlertCircle /> {run.blocked || 0} Block</span>
-                  <span style={{ color: '#a3acb9' }}><FiMinusCircle /> {run.na || 0} N/A</span>
+                  <span style={{ color: 'var(--text-muted)' }}><FiMinusCircle /> {run.na || 0} N/A</span>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -348,8 +348,8 @@ function Execution({
                       transition: 'all 0.2s'
                     }}
                   >
-                    <div style={{ fontWeight: 500, color: '#2b2c41', fontSize: '0.9rem' }}>{s.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#a3acb9', marginTop: 2 }}>
+                    <div style={{ fontWeight: 500, color: 'var(--text-primary)', fontSize: '0.9rem' }}>{s.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>
                       {testCases.filter(tc => String(tc.suiteId) === String(s._id || s.id)).length} test cases
                     </div>
                   </div>
@@ -397,10 +397,10 @@ function Execution({
             <FiChevronLeft /> Back
           </button>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#2b2c41' }}>{activeRun?.name}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{activeRun?.name}</h2>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
               <Badge>{activeRun?.environment}</Badge>
-              <span style={{ fontSize: '0.8rem', color: '#a3acb9' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                 {completedCount} / {executionResults.length} completed
               </span>
             </div>
@@ -410,8 +410,8 @@ function Execution({
           <button className="dg-btn dg-btn-ghost" onClick={handleRemoveCase} title="Remove from mission">
             <FiTrash2 />
           </button>
-          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#6c7a89' }}>
-            <span style={{ fontWeight: 600, color: '#2b2c41' }}>{currentTestIndex + 1}</span>
+          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{currentTestIndex + 1}</span>
             <span> / {executionResults.length}</span>
           </div>
         </div>
@@ -431,7 +431,7 @@ function Execution({
             borderBottom: '1px solid #e7e8ed',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: '#6c7a89' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
               <FiList /> Test Queue
             </span>
             <span className="dg-badge dg-badge-indigo">{executionResults.length}</span>
@@ -454,18 +454,18 @@ function Execution({
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.75rem', fontWeight: 600,
                   background: idx === currentTestIndex ? 'rgba(99,102,241,0.15)' : '#e7e8ed',
-                  color: idx === currentTestIndex ? '#6366f1' : '#6c7a89'
+                  color: idx === currentTestIndex ? '#6366f1' : 'var(--text-secondary)'
                 }}>
                   {idx + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontSize: '0.8rem', color: '#2b2c41',
+                    fontSize: '0.8rem', color: 'var(--text-primary)',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                   }}>
                     {res.testCase?.title}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                     {res.status || 'Not Run'}
                   </div>
                 </div>
@@ -483,22 +483,22 @@ function Execution({
                 {/* Test Header */}
                 <div style={{ marginBottom: 24 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                    <span style={{ fontSize: '0.8rem', color: '#a3acb9', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <FiHash /> {tc.adoId || `TC-${currentTestIndex + 1}`}
                     </span>
                     <Badge>{executionResults[currentTestIndex]?.status || 'Not Run'}</Badge>
                   </div>
-                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#2b2c41' }}>{tc.title}</h2>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-primary)' }}>{tc.title}</h2>
                   {tc.description && (
-                    <p style={{ color: '#6c7a89', marginTop: 6, fontSize: '0.9rem' }}>{tc.description}</p>
+                    <p style={{ color: 'var(--text-secondary)', marginTop: 6, fontSize: '0.9rem' }}>{tc.description}</p>
                   )}
                 </div>
 
                 {/* Steps */}
                 <div style={{ marginBottom: 24 }}>
-                  <h3 style={{ fontSize: '0.95rem', color: '#2b2c41', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                  <h3 style={{ fontSize: '0.95rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                     <FiList /> Test Steps
-                    <span style={{ fontSize: '0.75rem', color: '#a3acb9', fontWeight: 400 }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400 }}>
                       ({tc.steps?.length || 0} steps)
                     </span>
                   </h3>
@@ -515,12 +515,12 @@ function Execution({
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ marginBottom: 8 }}>
-                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a3acb9' }}>Action</span>
-                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#2b2c41', lineHeight: 1.5 }}>{s.action}</p>
+                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Action</span>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>{s.action}</p>
                           </div>
                           <div>
-                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a3acb9' }}>Expected Result</span>
-                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#6c7a89', lineHeight: 1.5 }}>{s.expectedResult}</p>
+                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>Expected Result</span>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{s.expectedResult}</p>
                           </div>
                         </div>
                       </div>
@@ -602,7 +602,7 @@ function Execution({
               >
                 <FiChevronLeft />
               </button>
-              <span style={{ fontSize: '0.85rem', color: '#6c7a89', minWidth: 60, textAlign: 'center' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', minWidth: 60, textAlign: 'center' }}>
                 {currentTestIndex + 1} of {executionResults.length}
               </span>
               <button
@@ -665,7 +665,7 @@ function Execution({
                   <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.testCase?.adoId || 'TC'}</td>
                   <td>{r.testCase?.title}</td>
                   <td><Badge>{r.status || 'Not Run'}</Badge></td>
-                  <td style={{ color: '#a3acb9' }}>{r.comments || '—'}</td>
+                  <td style={{ color: 'var(--text-muted)' }}>{r.comments || '—'}</td>
                 </tr>
               ))}
             </tbody>

@@ -85,13 +85,13 @@
   --surface-glass-hover: #f9fafb;
 
   /* ── Text Colors (Light) ── */
-  --text-main: #334155;
-  --text-primary: #2b2c41;
-  --text-dark: #1a1a2e;
-  --text-secondary: #6c7a89;
-  --text-tertiary: #6c7a89;
-  --text-muted: #a3acb9;
-  --text-light: #a3acb9;
+  --text-main: #1e293b;
+  --text-primary: #0f172a;
+  --text-dark: #020617;
+  --text-secondary: #334155;
+  --text-tertiary: #475569;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
   --text-on-dark: #ffffff;
 
   /* ── Border Colors (Light) ── */
@@ -191,13 +191,13 @@
   --surface-glass: #232430;
   --surface-glass-hover: #2a2b3a;
 
-  --text-main: #e0e0e8;
-  --text-primary: #f0f0f5;
-  --text-dark: #f0f0f5;
-  --text-secondary: #9ca3b4;
-  --text-tertiary: #9ca3b4;
-  --text-muted: #6b7080;
-  --text-light: #6b7080;
+  --text-main: #e2e8f0;
+  --text-primary: #f1f5f9;
+  --text-dark: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-tertiary: #94a3b8;
+  --text-muted: #64748b;
+  --text-light: #475569;
 
   --border-color: #33344a;
   --border-light: #2d2e42;

@@ -72,7 +72,7 @@ function Reports({ testRuns, settings, projectId }) {
           <h1 className="dg-page-title">
             <FiPieChart style={{ marginRight: 8 }} /> Reports &amp; Analytics
           </h1>
-          <p style={{ color: '#6c7a89', margin: 0, fontSize: '0.9rem' }}>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.9rem' }}>
             Generate comprehensive test reports with AI-powered insights
           </p>
         </div>
@@ -104,8 +104,8 @@ function Reports({ testRuns, settings, projectId }) {
                 <FiZap />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1rem', color: '#2b2c41' }}>Create New Report</h3>
-                <span style={{ fontSize: '0.75rem', color: '#a3acb9' }}>Configure and generate</span>
+                <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>Create New Report</h3>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Configure and generate</span>
               </div>
             </div>
 
@@ -155,10 +155,10 @@ function Reports({ testRuns, settings, projectId }) {
                     display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.2s'
                   }}
                 >
-                  <FiFileText size={18} color={reportOptions.format === 'pdf' ? '#6366f1' : '#a3acb9'} />
+                  <FiFileText size={18} color={reportOptions.format === 'pdf' ? '#6366f1' : 'var(--text-muted)'} />
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#2b2c41' }}>PDF</div>
-                    <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>Best for sharing</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-primary)' }}>PDF</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Best for sharing</div>
                   </div>
                   {reportOptions.format === 'pdf' && (
                     <FiCheckCircle size={14} color="var(--dg-accent)" style={{ marginLeft: 'auto' }} />
@@ -177,10 +177,10 @@ function Reports({ testRuns, settings, projectId }) {
                     display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.2s'
                   }}
                 >
-                  <FiList size={18} color={reportOptions.format === 'word' ? '#6366f1' : '#a3acb9'} />
+                  <FiList size={18} color={reportOptions.format === 'word' ? '#6366f1' : 'var(--text-muted)'} />
                   <div>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#2b2c41' }}>Word</div>
-                    <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>Editable DOCX</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-primary)' }}>Word</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Editable DOCX</div>
                   </div>
                   {reportOptions.format === 'word' && (
                     <FiCheckCircle size={14} color="var(--dg-accent)" style={{ marginLeft: 'auto' }} />
@@ -215,8 +215,8 @@ function Reports({ testRuns, settings, projectId }) {
               <FiStar size={14} color="#fbbf24" />
               <span className="dg-badge dg-badge-amber">AI-Powered</span>
             </div>
-            <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', color: '#2b2c41' }}>Intelligent Analysis</h4>
-            <p style={{ margin: '0 0 14px', fontSize: '0.8rem', color: '#a3acb9' }}>
+            <h4 style={{ margin: '0 0 4px', fontSize: '0.95rem', color: 'var(--text-primary)' }}>Intelligent Analysis</h4>
+            <p style={{ margin: '0 0 14px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               Reports include AI-generated insights for better decision making
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -225,7 +225,7 @@ function Reports({ testRuns, settings, projectId }) {
                 { icon: <FiAlertTriangle />, label: 'Risk Assessment' },
                 { icon: <FiShield />, label: 'Release Readiness' }
               ].map((f, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: '#6c7a89' }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   <div style={{
                     width: 28, height: 28, borderRadius: 6,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -251,10 +251,10 @@ function Reports({ testRuns, settings, projectId }) {
                   <FiFileText />
                 </div>
                 <div>
-                  <div style={{ fontSize: '1rem', fontWeight: 600, color: '#2b2c41' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {reports.filter(r => r.format === 'pdf').length}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>PDF Reports</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>PDF Reports</div>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -266,10 +266,10 @@ function Reports({ testRuns, settings, projectId }) {
                   <FiFile />
                 </div>
                 <div>
-                  <div style={{ fontSize: '1rem', fontWeight: 600, color: '#2b2c41' }}>
+                  <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                     {reports.filter(r => r.format === 'word').length}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>Word Reports</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Word Reports</div>
                 </div>
               </div>
             </div>
@@ -277,13 +277,13 @@ function Reports({ testRuns, settings, projectId }) {
 
           {/* Info Card */}
           <div className="dg-card" style={{ padding: 20 }}>
-            <h4 style={{ margin: '0 0 8px', fontSize: '0.9rem', color: '#2b2c41', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <h4 style={{ margin: '0 0 8px', fontSize: '0.9rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
               <FiClock size={14} /> Report History
             </h4>
-            <p style={{ margin: '0 0 10px', fontSize: '0.8rem', color: '#a3acb9', lineHeight: 1.5 }}>
+            <p style={{ margin: '0 0 10px', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
               Your generated reports are stored securely and can be downloaded anytime.
             </p>
-            <ul style={{ margin: 0, paddingLeft: 16, fontSize: '0.75rem', color: '#a3acb9', lineHeight: 1.8 }}>
+            <ul style={{ margin: 0, paddingLeft: 16, fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.8 }}>
               <li>Reports are retained for 90 days</li>
               <li>Download in original format</li>
               <li>Share via secure links</li>
@@ -299,8 +299,8 @@ function Reports({ testRuns, settings, projectId }) {
             borderBottom: '1px solid #e7e8ed'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <FiArchive size={16} color="#a3acb9" />
-              <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#2b2c41' }}>Generated Reports</h3>
+              <FiArchive size={16} color="var(--text-muted)" />
+              <h3 style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)' }}>Generated Reports</h3>
               <span className="dg-badge dg-badge-indigo">{reports.length}</span>
             </div>
             <button className="dg-btn dg-btn-ghost" onClick={loadReports} style={{ padding: '4px 10px' }}>
@@ -333,8 +333,8 @@ function Reports({ testRuns, settings, projectId }) {
                               {getFormatIcon(rep.format)}
                             </div>
                             <div>
-                              <div style={{ fontSize: '0.85rem', color: '#2b2c41' }}>{rep.name}</div>
-                              <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>
+                              <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{rep.name}</div>
+                              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                                 ID: {(rep._id || rep.id).slice(-8)}
                               </div>
                             </div>
@@ -345,7 +345,7 @@ function Reports({ testRuns, settings, projectId }) {
                             {rep.format.toUpperCase()}
                           </Badge>
                         </td>
-                        <td style={{ fontSize: '0.8rem', color: '#6c7a89' }}>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                           <FiCalendar style={{ marginRight: 4, verticalAlign: 'middle' }} />
                           {new Date(rep.generatedAt).toLocaleDateString()}
                         </td>
@@ -381,7 +381,7 @@ function Reports({ testRuns, settings, projectId }) {
                 <p>Create your first report by selecting a test run and clicking generate</p>
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 6,
-                  marginTop: 8, fontSize: '0.8rem', color: '#a3acb9'
+                  marginTop: 8, fontSize: '0.8rem', color: 'var(--text-muted)'
                 }}>
                   <FiZap size={14} />
                   <span>Reports include AI-powered insights and recommendations</span>

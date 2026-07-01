@@ -34,8 +34,8 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { display: false }, ticks: { color: '#a3acb9', font: { size: 11 } } },
-      y: { beginAtZero: true, max: yMax, grid: { color: '#f1f4f9' }, ticks: { color: '#a3acb9', font: { size: 11 } } }
+      x: { grid: { display: false }, ticks: { color: 'var(--text-muted)', font: { size: 11 } } },
+      y: { beginAtZero: true, max: yMax, grid: { color: '#f1f4f9' }, ticks: { color: 'var(--text-muted)', font: { size: 11 } } }
     }
   });
 
@@ -87,7 +87,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
           <div className="chart-header">
             <h3 className="chart-title"><FiCheckCircle /> Execution Health</h3>
           </div>
-          <div className="chart-body" style={{ height: 240 }}><Doughnut data={statusChartData} options={{ responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', color: '#6c7a89', font: { size: 11 } } } } }} /></div>
+          <div className="chart-body" style={{ height: 240 }}><Doughnut data={statusChartData} options={{ responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', color: 'var(--text-secondary)', font: { size: 11 } } } } }} /></div>
         </div>
         <div className="chart-card" style={{ height: 320 }}>
           <div className="chart-header">

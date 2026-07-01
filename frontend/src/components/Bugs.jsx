@@ -145,7 +145,7 @@ function Bugs({ projectId, user }) {
       <div className="dg-page-header">
         <div>
           <h2 className="dg-page-title">Defect Management</h2>
-          <p style={{ color: '#6c7a89', margin: 0, fontSize: '14px' }}>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '14px' }}>
             Track, assign, and resolve defects across your projects.
           </p>
         </div>
@@ -188,7 +188,7 @@ function Bugs({ projectId, user }) {
       {/* Search + Filter */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', marginBottom: '16px', background: '#ffffff', border: '1px solid #e7e8ed', borderRadius: '10px' }}>
         <div className="dg-search" style={{ flex: 1 }}>
-          <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#6c7a89', fontSize: '15px' }} />
+          <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)', fontSize: '15px' }} />
           <input
             className="dg-input"
             value={searchTerm}
@@ -200,14 +200,14 @@ function Bugs({ projectId, user }) {
           {searchTerm && (
             <button
               type="button"
-              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#6c7a89', cursor: 'pointer', padding: '2px' }}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '2px' }}
               onClick={() => setSearchTerm("")}
             >
               <FiX />
             </button>
           )}
         </div>
-        <div style={{ color: '#6c7a89', fontSize: '13px', whiteSpace: 'nowrap' }}>
+        <div style={{ color: 'var(--text-secondary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
           <span style={{ color: '#6366f1', fontWeight: 600 }}>{filteredBugs.length}</span> defects
         </div>
       </div>
@@ -234,14 +234,14 @@ function Bugs({ projectId, user }) {
                   return (
                     <tr key={bug._id || bug.id}>
                       <td><Badge>{bug.severity || 'Medium'}</Badge></td>
-                      <td style={{ fontWeight: 600, color: '#2b2c41' }}>{bug.title}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{bug.title}</td>
                       <td>
                         {bug.assignedTo ? (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#6c7a89', fontSize: '13px' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '13px' }}>
                             <FiUser size={13} style={{ color: '#6366f1' }} /> {bug.assignedTo}
                           </span>
                         ) : (
-                          <span style={{ color: '#a3acb9', fontSize: '12px' }}>Unassigned</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Unassigned</span>
                         )}
                       </td>
                       <td><Badge>{bug.status || 'Active'}</Badge></td>
@@ -259,10 +259,10 @@ function Bugs({ projectId, user }) {
                             {getFileIcon(bug)} View
                           </a>
                         ) : (
-                          <span style={{ color: '#a3acb9', fontSize: '12px' }}>No file</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>No file</span>
                         )}
                       </td>
-                      <td style={{ fontSize: '12px', color: '#6c7a89' }}>
+                      <td style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                         {bug.createdBy?.firstName ? `${bug.createdBy.firstName} ${bug.createdBy.lastName}` : '-'}
                       </td>
                       <td>
@@ -304,9 +304,9 @@ function Bugs({ projectId, user }) {
           </div>
         ) : (
           <div className="dg-empty" style={{ padding: '60px 20px' }}>
-            <FiAlertTriangle size={48} style={{ color: '#a3acb9', marginBottom: '16px' }} />
-            <h3 style={{ color: '#6c7a89', margin: '0 0 8px 0', fontSize: '16px' }}>No defects found</h3>
-            <p style={{ color: '#a3acb9', margin: 0, fontSize: '13px' }}>
+            <FiAlertTriangle size={48} style={{ color: 'var(--text-muted)', marginBottom: '16px' }} />
+            <h3 style={{ color: 'var(--text-secondary)', margin: '0 0 8px 0', fontSize: '16px' }}>No defects found</h3>
+            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '13px' }}>
               {searchTerm ? 'Try a different search term.' : 'No defects reported yet.'}
             </p>
           </div>
@@ -325,14 +325,14 @@ function Bugs({ projectId, user }) {
       >
         {viewingBug && (
           <>
-            <h2 style={{ color: '#2b2c41', margin: '0 0 14px 0', fontSize: '18px', fontWeight: 600 }}>
+            <h2 style={{ color: 'var(--text-primary)', margin: '0 0 14px 0', fontSize: '18px', fontWeight: 600 }}>
               {viewingBug.title}
             </h2>
             <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
               <Badge>{viewingBug.status}</Badge>
               <Badge>{viewingBug.severity}</Badge>
               {viewingBug.assignedTo && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#6c7a89', fontSize: '13px' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '13px' }}>
                   <FiUser size={13} style={{ color: '#6366f1' }} /> {viewingBug.assignedTo}
                 </span>
               )}
@@ -343,7 +343,7 @@ function Bugs({ projectId, user }) {
               <p style={{
                 whiteSpace: 'pre-wrap', background: '#f5f5f9',
                 border: '1px solid #e7e8ed', padding: '16px',
-                borderRadius: '8px', color: '#2b2c41', fontSize: '14px', lineHeight: 1.6,
+                borderRadius: '8px', color: 'var(--text-primary)', fontSize: '14px', lineHeight: 1.6,
                 margin: 0,
               }}>
                 {viewingBug.description}
@@ -366,7 +366,7 @@ function Bugs({ projectId, user }) {
                       Your browser does not support video playback.
                     </video>
                     <div style={{ padding: '10px 14px', background: '#f5f5f9' }}>
-                      <div style={{ fontWeight: 600, color: '#2b2c41', fontSize: '13px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>
                         {viewingBug.attachment?.originalName || viewingBug.attachments?.[0]?.originalName || 'Video Evidence'}
                       </div>
                     </div>
@@ -384,10 +384,10 @@ function Bugs({ projectId, user }) {
                   >
                     <FiFileText size={24} style={{ color: '#6366f1' }} />
                     <div>
-                      <div style={{ fontWeight: 600, color: '#2b2c41', fontSize: '14px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>
                         {viewingBug.attachment?.originalName || viewingBug.attachments?.[0]?.originalName || 'View Evidence'}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#a3acb9' }}>Open in new tab</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Open in new tab</div>
                     </div>
                   </a>
                 )}
@@ -502,8 +502,8 @@ function Bugs({ projectId, user }) {
                         {u.firstName?.charAt(0)}{u.lastName?.charAt(0)}
                       </div>
                       <div>
-                        <div style={{ color: '#2b2c41', fontSize: '13px', fontWeight: 500 }}>{u.firstName} {u.lastName}</div>
-                        <div style={{ color: '#a3acb9', fontSize: '12px' }}>{u.email}</div>
+                        <div style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 500 }}>{u.firstName} {u.lastName}</div>
+                        <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{u.email}</div>
                       </div>
                     </div>
                   ))}
@@ -525,8 +525,8 @@ function Bugs({ projectId, user }) {
                   accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.webm,.docx"
                   style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
                 />
-                {selectedFile && isVideoFile(selectedFile.type) ? <FiVideo size={20} style={{ color: '#a3acb9', marginBottom: '6px' }} /> : <FiPaperclip size={20} style={{ color: '#a3acb9', marginBottom: '6px' }} />}
-                <span style={{ color: selectedFile ? '#6366f1' : '#6c7a89', fontSize: '13px' }}>
+                {selectedFile && isVideoFile(selectedFile.type) ? <FiVideo size={20} style={{ color: 'var(--text-muted)', marginBottom: '6px' }} /> : <FiPaperclip size={20} style={{ color: 'var(--text-muted)', marginBottom: '6px' }} />}
+                <span style={{ color: selectedFile ? '#6366f1' : 'var(--text-secondary)', fontSize: '13px' }}>
                   {selectedFile ? selectedFile.name : 'Upload Image, Video (max 50MB), or Document'}
                 </span>
               </div>
@@ -536,10 +536,10 @@ function Bugs({ projectId, user }) {
               <div style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
                 padding: '10px 14px', background: 'rgba(99,102,241,0.08)',
-                borderRadius: '8px', color: '#6c7a89', fontSize: '13px',
+                borderRadius: '8px', color: 'var(--text-secondary)', fontSize: '13px',
               }}>
                 <FiInfo size={15} style={{ color: '#6366f1', flexShrink: 0 }} />
-                Reported by: <span style={{ color: '#2b2c41' }}>{user.firstName} {user.lastName}</span>
+                Reported by: <span style={{ color: 'var(--text-primary)' }}>{user.firstName} {user.lastName}</span>
               </div>
             )}
           </div>

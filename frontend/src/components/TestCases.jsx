@@ -231,7 +231,7 @@ function TestCases({
                 padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
                 fontSize: '13px', fontWeight: 500,
                 background: !selectedSuiteId ? 'rgba(99,102,241,0.15)' : 'transparent',
-                color: !selectedSuiteId ? '#a5b4fc' : '#94a3b8',
+                color: !selectedSuiteId ? '#a5b4fc' : 'var(--text-tertiary)',
                 transition: 'all 0.2s',
               }}
               onClick={() => setSelectedSuiteId(null)}
@@ -253,7 +253,7 @@ function TestCases({
                       padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
                       fontSize: '13px', fontWeight: 500,
                       background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                      color: isActive ? '#a5b4fc' : '#94a3b8',
+                      color: isActive ? '#a5b4fc' : 'var(--text-tertiary)',
                       transition: 'all 0.2s',
                     }}
                     onClick={() => setSelectedSuiteId(id)}
@@ -285,7 +285,7 @@ function TestCases({
           {/* Filters */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#fff', border: '1px solid #e7e8ed', borderRadius: 12 }}>
             <div className="dg-search" style={{ flex: 1 }}>
-              <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '15px' }} />
+              <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '15px' }} />
               <input
                 className="dg-input"
                 value={searchTerm}
@@ -297,7 +297,7 @@ function TestCases({
               {searchTerm && (
                 <button
                   type="button"
-                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: '2px' }}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '2px' }}
                   onClick={() => setSearchTerm("")}
                   aria-label="Clear search"
                   title="Clear"
@@ -308,7 +308,7 @@ function TestCases({
             </div>
 
             <div style={{ position: 'relative' }}>
-              <FiFilter style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '14px', pointerEvents: 'none' }} />
+              <FiFilter style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: '14px', pointerEvents: 'none' }} />
               <select
                 className="dg-select"
                 value={priorityFilter}
@@ -323,7 +323,7 @@ function TestCases({
               </select>
             </div>
 
-            <div style={{ color: '#94a3b8', fontSize: '13px', whiteSpace: 'nowrap' }}>
+            <div style={{ color: 'var(--text-tertiary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
               <span style={{ color: '#a5b4fc', fontWeight: 600 }}>{filteredTestCases.length}</span> results
             </div>
           </div>
@@ -356,12 +356,12 @@ function TestCases({
                         </td>
                         <td>
                           {tc.assignedTo ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#cbd5e1', fontSize: '13px' }}>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '13px' }}>
                               <FiUser size={13} style={{ color: '#818cf8' }} />
                               {tc.assignedTo}
                             </span>
                           ) : (
-                            <span style={{ color: '#475569', fontSize: '12px' }}>Unassigned</span>
+                            <span style={{ color: 'var(--text-tertiary)', fontSize: '12px' }}>Unassigned</span>
                           )}
                         </td>
                         <td style={{ textAlign: 'right' }}>
@@ -411,9 +411,9 @@ function TestCases({
               </div>
             ) : (
               <div className="dg-empty" style={{ padding: '60px 20px' }}>
-                <FiFileText size={48} style={{ color: '#475569', marginBottom: '16px' }} />
-                <h3 style={{ color: '#94a3b8', margin: '0 0 8px 0', fontSize: '16px' }}>No test cases found</h3>
-                <p style={{ color: '#64748b', margin: '0 0 20px 0', fontSize: '13px' }}>
+                <FiFileText size={48} style={{ color: 'var(--text-tertiary)', marginBottom: '16px' }} />
+                <h3 style={{ color: 'var(--text-tertiary)', margin: '0 0 8px 0', fontSize: '16px' }}>No test cases found</h3>
+                <p style={{ color: 'var(--text-muted)', margin: '0 0 20px 0', fontSize: '13px' }}>
                   Try adjusting your filters or import a CSV file to get started.
                 </p>
                 <button className="dg-btn dg-btn-secondary" onClick={() => setShowUploadModal(true)}>
@@ -451,32 +451,32 @@ function TestCases({
             <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FiTarget size={14} style={{ color: '#818cf8' }} />
-                <span style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority:</span>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Priority:</span>
                 <Badge>{viewingTestCase.priority || "Medium"}</Badge>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FiUser size={14} style={{ color: '#818cf8' }} />
-                <span style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Assigned:</span>
-                <span style={{ color: '#e2e8f0', fontSize: '13px' }}>{viewingTestCase.assignedTo || "Unassigned"}</span>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Assigned:</span>
+                <span style={{ color: 'var(--text-on-dark)', fontSize: '13px' }}>{viewingTestCase.assignedTo || "Unassigned"}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FiActivity size={14} style={{ color: '#818cf8' }} />
-                <span style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>State:</span>
+                <span style={{ color: 'var(--text-tertiary)', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>State:</span>
                 <Badge variant="cyan">{viewingTestCase.state || "Active"}</Badge>
               </div>
             </div>
 
             <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <h4 style={{ color: 'var(--text-on-dark)', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FiFileText size={14} style={{ color: '#818cf8' }} /> Description
               </h4>
-              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', padding: '16px', color: '#cbd5e1', fontSize: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', padding: '16px', color: 'var(--text-secondary)', fontSize: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                 {viewingTestCase.description || "No description provided."}
               </div>
             </div>
 
             <div>
-              <h4 style={{ color: '#e2e8f0', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <h4 style={{ color: 'var(--text-on-dark)', fontSize: '13px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <FiList size={14} style={{ color: '#818cf8' }} /> Test Steps
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -493,11 +493,11 @@ function TestCases({
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       <div>
                         <span style={{ fontSize: '11px', color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Action</span>
-                        <div style={{ color: '#cbd5e1', fontSize: '13px', marginTop: '4px', lineHeight: 1.5 }}>{s.action || "—"}</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '4px', lineHeight: 1.5 }}>{s.action || "—"}</div>
                       </div>
                       <div>
                         <span style={{ fontSize: '11px', color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Expected Result</span>
-                        <div style={{ color: '#cbd5e1', fontSize: '13px', marginTop: '4px', lineHeight: 1.5 }}>{s.expectedResult || "—"}</div>
+                        <div style={{ color: 'var(--text-secondary)', fontSize: '13px', marginTop: '4px', lineHeight: 1.5 }}>{s.expectedResult || "—"}</div>
                       </div>
                     </div>
                   </div>
@@ -662,7 +662,7 @@ function TestCases({
                 This action will permanently delete all test cases within this suite.
               </p>
             )}
-            <p style={{ color: '#64748b', margin: '8px 0 0 0', fontSize: '12px' }}>This action cannot be undone.</p>
+            <p style={{ color: 'var(--text-muted)', margin: '8px 0 0 0', fontSize: '12px' }}>This action cannot be undone.</p>
           </>
         }
         confirmLabel="Delete"
@@ -711,9 +711,9 @@ function TestCases({
             background: 'rgba(255,255,255,0.02)',
             marginBottom: '16px',
           }}>
-            <FiUpload size={32} style={{ color: '#475569', marginBottom: '10px' }} />
-            <p style={{ color: '#94a3b8', margin: '0 0 4px 0', fontSize: '14px' }}>Select a CSV file to import</p>
-            <span style={{ color: '#64748b', fontSize: '12px' }}>Supported format: .csv</span>
+            <FiUpload size={32} style={{ color: 'var(--text-tertiary)', marginBottom: '10px' }} />
+            <p style={{ color: 'var(--text-tertiary)', margin: '0 0 4px 0', fontSize: '14px' }}>Select a CSV file to import</p>
+            <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Supported format: .csv</span>
             <input
               type="file"
               accept=".csv"
