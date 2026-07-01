@@ -136,7 +136,6 @@ export const getSettings = async () => {
   return result;
 };
 export const updateSettings = (category, data) => Setting.findOneAndUpdate({ category }, { data }, { upsert: true, new: true });
-export const updateAllSettings = (data) => Setting.findOneAndUpdate({ category: 'all' }, { data }, { upsert: true, new: true });
 export const getStatistics = async (projectId) => {
   const query = { projectId };
   const totalTestCases = await TestCase.countDocuments(query);

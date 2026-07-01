@@ -11,7 +11,7 @@ import {
   getAllTestRuns, getTestRunById, createTestRun, updateTestRun, deleteTestRun,
   getExecutionResultsByRunId, createExecutionResult, updateExecutionResult, deleteExecutionResult,
   getAllReports, createReport, deleteReport, getReportById,
-  getSettings, updateSettings, updateAllSettings, getStatistics,
+  getSettings, updateSettings, getStatistics,
   searchUsers, getAllUsers
 } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
@@ -28,6 +28,9 @@ const CloudinaryStorage = multerStorageCloudinary.CloudinaryStorage ||
                          multerStorageCloudinary;
 
 const router = express.Router();
+
+// Protect all routes with authentication
+router.use(authenticateToken);
 
 // ============================================
 // CLOUDINARY CONFIGURATION
@@ -315,6 +318,5 @@ router.delete('/reports/:id', async (req, res, next) => { try { await deleteRepo
 router.get('/statistics', async (req, res, next) => { try { res.json({ success: true, data: await getStatistics(req.query.projectId) }); } catch (e) { next(e); } });
 router.get('/settings', async (req, res, next) => { try { res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
 router.put('/settings/:category', async (req, res, next) => { try { await updateSettings(req.params.category, req.body); const allSettings = await getSettings(); res.json({ success: true, data: allSettings }); } catch (e) { next(e); } });
-router.put('/settings', async (req, res, next) => { try { await updateAllSettings(req.body); const allSettings = await getSettings(); res.json({ success: true, data: allSettings }); } catch (e) { next(e); } });
 
 export default router;

@@ -53,7 +53,6 @@ function Settings({ settings, onUpdateSettings }) {
     setIsSaving(true);
     try {
       await onUpdateSettings(activeTab, formData[activeTab]);
-      toast.success("Settings saved!");
       setHasChanges(false);
     } catch { toast.error("Failed to save"); }
     finally { setIsSaving(false); }
@@ -285,7 +284,7 @@ function Settings({ settings, onUpdateSettings }) {
                   min="5"
                   max="120"
                   value={formData.execution?.sessionTimeout || 30} 
-                  onChange={e => handleInputChange('execution', 'sessionTimeout', e.target.value)} 
+                   onChange={e => handleInputChange('execution', 'sessionTimeout', parseInt(e.target.value) || 30)} 
                   style={{ width: '120px' }}
                 />
                 <span style={{ color: '#a3acb9', fontSize: '13px' }}>minutes</span>

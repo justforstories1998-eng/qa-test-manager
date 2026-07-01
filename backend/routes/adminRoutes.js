@@ -86,7 +86,15 @@ adminRouter.put('/users/:id', async (req, res) => {
     
     if (firstName !== undefined) updateData.firstName = firstName;
     if (lastName !== undefined) updateData.lastName = lastName;
-    if (email !== undefined) updateData.email = email;
+    if (email !== undefined) {
+      // Check for duplicate email
+      const existingUser = await searchUsers(email);
+      const duplicate = existingUser.find(u => (u.id || u._id).toString() !== req.params.id);
+      if (duplicate) {
+        return res.status(400).json({ success: false, error: 'Email already in use' });
+      }
+      updateData.email = email;
+    }
     if (role !== undefined) updateData.role = role;
     if (isActive !== undefined) updateData.isActive = isActive;
     if (assignedProjects !== undefined) updateData.assignedProjects = assignedProjects;
