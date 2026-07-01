@@ -1,5 +1,5 @@
 /* ============================================
-   MODALS (Fixed Scroll & Layout)
+   MODALS - SNEAT-STYLE
    ============================================ */
 
 .modal-overlay {
@@ -8,46 +8,42 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(4px);
+  background-color: rgba(43, 44, 65, 0.5);
   z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.15s ease-out;
 }
 
 .modal {
   background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(43, 44, 65, 0.12);
   width: 100%;
   max-width: 500px;
-  /* CRITICAL FIX: Limit height and use flex column */
-  max-height: 90vh; 
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e7e8ed;
   overflow: hidden;
-  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUp 0.2s ease-out;
 }
 
-/* Modal Sizes */
 .modal.modal-large { max-width: 800px; }
-.modal.modal-xlarge { max-width: 950px; } /* Edit Modal uses this */
+.modal.modal-xlarge { max-width: 950px; }
 .modal.modal-small { max-width: 400px; }
 
-/* Modal Header - Fixed at Top */
 .modal-header {
   padding: 16px 24px;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid #e7e8ed;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: #ffffff;
-  flex-shrink: 0; /* Prevents header shrinking */
+  flex-shrink: 0;
   z-index: 10;
 }
 
@@ -55,11 +51,11 @@
   margin: 0;
   font-size: 18px;
   font-weight: 700;
-  color: #1e293b;
+  color: #2b2c41;
 }
 
 .close-btn {
-  background: #f1f5f9;
+  background: #f5f5f9;
   border: none;
   width: 32px;
   height: 32px;
@@ -67,59 +63,55 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
+  color: #6c7a89;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .close-btn:hover {
-  background: #fee2e2;
-  color: #ef4444;
+  background: #ffe4e6;
+  color: #f43f5e;
 }
 
-/* IMPORTANT FIX: Handle Form Wrapper */
-/* If the modal content is wrapped in a form tag, ensure it flexes */
 .modal > form {
   display: flex;
   flex-direction: column;
-  flex: 1;           /* Take all remaining height */
-  min-height: 0;     /* Required for nested flex scrolling */
-  overflow: hidden;  /* Contain children */
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Modal Body - Scrollable Area */
 .modal-body {
   padding: 24px;
-  overflow-y: auto; /* Enable vertical scroll */
-  flex: 1;          /* Grow to fill space between header and footer */
+  overflow-y: auto;
+  flex: 1;
   width: 100%;
 }
 
-/* Modal Footer - Fixed at Bottom */
 .modal-footer {
   padding: 16px 24px;
-  border-top: 1px solid #f1f5f9;
-  background: #f8fafc;
+  border-top: 1px solid #e7e8ed;
+  background: #f9fafb;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  flex-shrink: 0; /* Prevents footer shrinking */
+  flex-shrink: 0;
   z-index: 10;
 }
 
-/* Split Layout (for Execution Modal) */
+/* Split Layout */
 .modal-body-split {
   display: flex;
   flex: 1;
-  overflow: hidden; /* Prevent body scroll, inner panes will scroll */
+  overflow: hidden;
   height: 100%;
 }
 
 .modal-sidebar {
   width: 250px;
-  background: #f8fafc;
+  background: #f9fafb;
   padding: 20px;
-  border-right: 1px solid #e2e8f0;
+  border-right: 1px solid #e7e8ed;
   overflow-y: auto;
 }
 
@@ -135,13 +127,12 @@
   overflow-y: auto;
 }
 
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }

@@ -215,8 +215,8 @@ function TestCases({
 
       <div style={{ display: 'flex', gap: '20px', minHeight: 0 }}>
         {/* Suites Sidebar */}
-        <aside className="glass-card" style={{ width: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column', padding: 0 }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <aside style={{ width: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column', padding: 0, background: '#fff', border: '1px solid #e7e8ed', borderRadius: 12 }}>
+          <div style={{ padding: '16px 20px', borderBottom: '1px solid #e7e8ed', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600, color: '#e2e8f0', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               <FiLayers size={15} /> Test Suites
             </div>
@@ -283,7 +283,7 @@ function TestCases({
         {/* Main Content */}
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0 }}>
           {/* Filters */}
-          <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: '#fff', border: '1px solid #e7e8ed', borderRadius: 12 }}>
             <div className="dg-search" style={{ flex: 1 }}>
               <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: '15px' }} />
               <input
@@ -329,7 +329,7 @@ function TestCases({
           </div>
 
           {/* Table */}
-          <div className="glass-card" style={{ flex: 1, padding: 0, overflow: 'hidden' }}>
+          <div style={{ flex: 1, padding: 0, overflow: 'hidden', background: '#fff', border: '1px solid #e7e8ed', borderRadius: 12 }}>
             {filteredTestCases.length ? (
               <div className="dg-table-wrapper">
                 <table className="dg-table">

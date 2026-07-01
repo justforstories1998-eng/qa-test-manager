@@ -161,7 +161,7 @@
   color: var(--text-primary);
   margin: 0;
   line-height: 1.2;
-  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  background: #ffffff;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

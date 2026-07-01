@@ -956,14 +956,14 @@
 }
 
 /* ============================================
-   DARK GLASS DESIGN SYSTEM - RESPONSIVE
+   SNEAT DESIGN SYSTEM - RESPONSIVE
    ============================================ */
 
 @media (max-width: 768px) {
   .dg-page { padding: 16px; }
   .dg-page-header { flex-direction: column; align-items: flex-start; }
   .dg-page-title { font-size: 22px; }
-  .dg-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+  .dg-stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px; }
   .dg-stat-card { padding: 14px !important; gap: 10px; }
   .dg-stat-value { font-size: 18px !important; }
   .dg-modal { max-width: 95vw; margin: 10px; }
@@ -971,10 +971,13 @@
   .dg-modal-body { padding: 16px; }
   .dg-tabs { flex-wrap: nowrap; overflow-x: auto; }
   .dg-table th, .dg-table td { padding: 8px 10px; font-size: 12px; }
+  .status-summary { grid-template-columns: repeat(2, 1fr); }
+  .test-runs-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
   .dg-stats-grid { grid-template-columns: 1fr !important; }
   .dg-page-actions { width: 100%; }
   .dg-page-actions .dg-btn { flex: 1; justify-content: center; }
+  .status-summary { grid-template-columns: 1fr; }
 }

@@ -166,7 +166,7 @@ function Execution({
             <h1 className="dg-page-title">
               <FiZap style={{ marginRight: 8 }} /> Execution Control
             </h1>
-            <p style={{ color: 'rgba(203,213,225,0.6)', margin: 0, fontSize: '0.9rem' }}>
+            <p style={{ color: '#6c7a89', margin: 0, fontSize: '0.9rem' }}>
               Test orchestration &amp; quality metrics
             </p>
           </div>
@@ -220,12 +220,12 @@ function Execution({
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
             {testRuns.map((run) => (
-              <div key={run._id || run.id} className="glass-card" style={{ padding: 20 }}>
+              <div key={run._id || run.id} style={{ padding: 20, background: '#fff', border: '1px solid #e7e8ed', borderRadius: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <FiPlay size={18} color="var(--dg-accent)" />
                     <div>
-                      <h3 style={{ margin: 0, fontSize: '1rem', color: '#e2e8f0' }}>{run.name}</h3>
+                      <h3 style={{ margin: 0, fontSize: '1rem', color: '#2b2c41' }}>{run.name}</h3>
                       <Badge>{run.environment}</Badge>
                     </div>
                   </div>
@@ -240,7 +240,7 @@ function Execution({
                 </div>
 
                 <div style={{ marginBottom: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'rgba(203,213,225,0.7)', marginBottom: 4 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#6c7a89', marginBottom: 4 }}>
                     <span>Completion</span>
                     <span>{getProgressPercentage(run)}%</span>
                   </div>
@@ -253,7 +253,7 @@ function Execution({
                   <span style={{ color: '#34d399' }}><FiCheckCircle /> {run.passed || 0} Pass</span>
                   <span style={{ color: '#f87171' }}><FiXCircle /> {run.failed || 0} Fail</span>
                   <span style={{ color: '#fbbf24' }}><FiAlertCircle /> {run.blocked || 0} Block</span>
-                  <span style={{ color: '#94a3b8' }}><FiMinusCircle /> {run.na || 0} N/A</span>
+                  <span style={{ color: '#a3acb9' }}><FiMinusCircle /> {run.na || 0} N/A</span>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -340,16 +340,16 @@ function Execution({
                       borderRadius: 8,
                       border: selectedSuiteId === (s._id || s.id)
                         ? '1px solid var(--dg-accent)'
-                        : '1px solid rgba(255,255,255,0.08)',
+                        : '1px solid #e7e8ed',
                       background: selectedSuiteId === (s._id || s.id)
-                        ? 'rgba(99,102,241,0.15)'
-                        : 'rgba(255,255,255,0.03)',
+                        ? 'rgba(99,102,241,0.1)'
+                        : '#f9fafb',
                       cursor: 'pointer',
                       transition: 'all 0.2s'
                     }}
                   >
-                    <div style={{ fontWeight: 500, color: '#e2e8f0', fontSize: '0.9rem' }}>{s.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'rgba(203,213,225,0.5)', marginTop: 2 }}>
+                    <div style={{ fontWeight: 500, color: '#2b2c41', fontSize: '0.9rem' }}>{s.name}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#a3acb9', marginTop: 2 }}>
                       {testCases.filter(tc => String(tc.suiteId) === String(s._id || s.id)).length} test cases
                     </div>
                   </div>
@@ -389,19 +389,18 @@ function Execution({
       <header style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '12px 24px',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        background: 'rgba(15,23,42,0.6)',
-        backdropFilter: 'blur(20px)'
+        borderBottom: '1px solid #e7e8ed',
+        background: '#ffffff'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button className="dg-btn dg-btn-ghost" onClick={() => setViewMode('list')}>
             <FiChevronLeft /> Back
           </button>
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#e2e8f0' }}>{activeRun?.name}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.1rem', color: '#2b2c41' }}>{activeRun?.name}</h2>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 2 }}>
               <Badge>{activeRun?.environment}</Badge>
-              <span style={{ fontSize: '0.8rem', color: 'rgba(203,213,225,0.5)' }}>
+              <span style={{ fontSize: '0.8rem', color: '#a3acb9' }}>
                 {completedCount} / {executionResults.length} completed
               </span>
             </div>
@@ -411,8 +410,8 @@ function Execution({
           <button className="dg-btn dg-btn-ghost" onClick={handleRemoveCase} title="Remove from mission">
             <FiTrash2 />
           </button>
-          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)' }}>
-            <span style={{ fontWeight: 600, color: '#e2e8f0' }}>{currentTestIndex + 1}</span>
+          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#6c7a89' }}>
+            <span style={{ fontWeight: 600, color: '#2b2c41' }}>{currentTestIndex + 1}</span>
             <span> / {executionResults.length}</span>
           </div>
         </div>
@@ -423,16 +422,16 @@ function Execution({
         {/* Sidebar Queue */}
         <aside style={{
           width: 260, minWidth: 260,
-          borderRight: '1px solid rgba(255,255,255,0.06)',
-          background: 'rgba(15,23,42,0.4)',
+          borderRight: '1px solid #e7e8ed',
+          background: '#f5f5f9',
           display: 'flex', flexDirection: 'column'
         }}>
           <div style={{
             padding: '14px 16px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            borderBottom: '1px solid #e7e8ed',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.85rem', color: '#6c7a89' }}>
               <FiList /> Test Queue
             </span>
             <span className="dg-badge dg-badge-indigo">{executionResults.length}</span>
@@ -445,8 +444,8 @@ function Execution({
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
-                  background: idx === currentTestIndex ? 'rgba(99,102,241,0.15)' : 'transparent',
-                  border: idx === currentTestIndex ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
+                  background: idx === currentTestIndex ? 'rgba(99,102,241,0.1)' : 'transparent',
+                  border: idx === currentTestIndex ? '1px solid #e7e8ed' : '1px solid transparent',
                   marginBottom: 2, transition: 'all 0.15s'
                 }}
               >
@@ -454,19 +453,19 @@ function Execution({
                   width: 28, height: 28, borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.75rem', fontWeight: 600,
-                  background: idx === currentTestIndex ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.06)',
-                  color: idx === currentTestIndex ? '#a5b4fc' : 'rgba(203,213,225,0.6)'
+                  background: idx === currentTestIndex ? 'rgba(99,102,241,0.15)' : '#e7e8ed',
+                  color: idx === currentTestIndex ? '#6366f1' : '#6c7a89'
                 }}>
                   {idx + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontSize: '0.8rem', color: '#e2e8f0',
+                    fontSize: '0.8rem', color: '#2b2c41',
                     whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
                   }}>
                     {res.testCase?.title}
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'rgba(203,213,225,0.4)' }}>
+                  <div style={{ fontSize: '0.7rem', color: '#a3acb9' }}>
                     {res.status || 'Not Run'}
                   </div>
                 </div>
@@ -484,44 +483,44 @@ function Execution({
                 {/* Test Header */}
                 <div style={{ marginBottom: 24 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                    <span style={{ fontSize: '0.8rem', color: 'rgba(203,213,225,0.5)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ fontSize: '0.8rem', color: '#a3acb9', display: 'flex', alignItems: 'center', gap: 4 }}>
                       <FiHash /> {tc.adoId || `TC-${currentTestIndex + 1}`}
                     </span>
                     <Badge>{executionResults[currentTestIndex]?.status || 'Not Run'}</Badge>
                   </div>
-                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#e2e8f0' }}>{tc.title}</h2>
+                  <h2 style={{ margin: 0, fontSize: '1.25rem', color: '#2b2c41' }}>{tc.title}</h2>
                   {tc.description && (
-                    <p style={{ color: 'rgba(203,213,225,0.6)', marginTop: 6, fontSize: '0.9rem' }}>{tc.description}</p>
+                    <p style={{ color: '#6c7a89', marginTop: 6, fontSize: '0.9rem' }}>{tc.description}</p>
                   )}
                 </div>
 
                 {/* Steps */}
                 <div style={{ marginBottom: 24 }}>
-                  <h3 style={{ fontSize: '0.95rem', color: '#e2e8f0', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                  <h3 style={{ fontSize: '0.95rem', color: '#2b2c41', display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                     <FiList /> Test Steps
-                    <span style={{ fontSize: '0.75rem', color: 'rgba(203,213,225,0.4)', fontWeight: 400 }}>
+                    <span style={{ fontSize: '0.75rem', color: '#a3acb9', fontWeight: 400 }}>
                       ({tc.steps?.length || 0} steps)
                     </span>
                   </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {tc.steps?.map((s, i) => (
-                      <div key={i} className="glass-card" style={{ padding: 14, display: 'flex', gap: 12 }}>
+                      <div key={i} style={{ padding: 14, display: 'flex', gap: 12, background: '#fff', border: '1px solid #e7e8ed', borderRadius: 12 }}>
                         <div style={{
                           width: 32, height: 32, borderRadius: 8, flexShrink: 0,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          background: 'rgba(99,102,241,0.15)', color: '#a5b4fc',
+                          background: 'rgba(99,102,241,0.1)', color: '#6366f1',
                           fontSize: '0.8rem', fontWeight: 600
                         }}>
                           {s.stepNumber || i + 1}
                         </div>
                         <div style={{ flex: 1 }}>
                           <div style={{ marginBottom: 8 }}>
-                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(203,213,225,0.4)' }}>Action</span>
-                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#e2e8f0', lineHeight: 1.5 }}>{s.action}</p>
+                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a3acb9' }}>Action</span>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#2b2c41', lineHeight: 1.5 }}>{s.action}</p>
                           </div>
                           <div>
-                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(203,213,225,0.4)' }}>Expected Result</span>
-                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)', lineHeight: 1.5 }}>{s.expectedResult}</p>
+                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a3acb9' }}>Expected Result</span>
+                            <p style={{ margin: '2px 0 0', fontSize: '0.85rem', color: '#6c7a89', lineHeight: 1.5 }}>{s.expectedResult}</p>
                           </div>
                         </div>
                       </div>
@@ -555,15 +554,15 @@ function Execution({
           <footer style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '12px 24px',
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            background: 'rgba(15,23,42,0.5)'
+            borderTop: '1px solid #e7e8ed',
+            background: '#ffffff'
           }}>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               <button
                 className="dg-btn dg-btn-primary"
                 onClick={() => handleQuickStatus('Passed')}
                 disabled={isSaving}
-                style={{ background: isSaving ? undefined : 'rgba(34,197,94,0.2)', borderColor: 'rgba(34,197,94,0.4)', color: '#34d399' }}
+                style={{ background: isSaving ? undefined : 'rgba(34,197,94,0.2)', borderColor: 'rgba(34,197,94,0.4)', color: '#22c55e' }}
               >
                 <FiCheckCircle /> Pass
               </button>
@@ -571,7 +570,7 @@ function Execution({
                 className="dg-btn dg-btn-primary"
                 onClick={() => handleQuickStatus('Failed')}
                 disabled={isSaving}
-                style={{ background: isSaving ? undefined : 'rgba(239,68,68,0.2)', borderColor: 'rgba(239,68,68,0.4)', color: '#f87171' }}
+                style={{ background: isSaving ? undefined : 'rgba(239,68,68,0.2)', borderColor: 'rgba(239,68,68,0.4)', color: '#ef4444' }}
               >
                 <FiXCircle /> Fail
               </button>
@@ -579,7 +578,7 @@ function Execution({
                 className="dg-btn dg-btn-primary"
                 onClick={() => handleQuickStatus('Blocked')}
                 disabled={isSaving}
-                style={{ background: isSaving ? undefined : 'rgba(251,191,36,0.2)', borderColor: 'rgba(251,191,36,0.4)', color: '#fbbf24' }}
+                style={{ background: isSaving ? undefined : 'rgba(251,191,36,0.2)', borderColor: 'rgba(251,191,36,0.4)', color: '#f59e0b' }}
               >
                 <FiAlertCircle /> Block
               </button>
@@ -603,7 +602,7 @@ function Execution({
               >
                 <FiChevronLeft />
               </button>
-              <span style={{ fontSize: '0.85rem', color: 'rgba(203,213,225,0.7)', minWidth: 60, textAlign: 'center' }}>
+              <span style={{ fontSize: '0.85rem', color: '#6c7a89', minWidth: 60, textAlign: 'center' }}>
                 {currentTestIndex + 1} of {executionResults.length}
               </span>
               <button
@@ -666,7 +665,7 @@ function Execution({
                   <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.testCase?.adoId || 'TC'}</td>
                   <td>{r.testCase?.title}</td>
                   <td><Badge>{r.status || 'Not Run'}</Badge></td>
-                  <td style={{ color: 'rgba(203,213,225,0.5)' }}>{r.comments || '—'}</td>
+                  <td style={{ color: '#a3acb9' }}>{r.comments || '—'}</td>
                 </tr>
               ))}
             </tbody>

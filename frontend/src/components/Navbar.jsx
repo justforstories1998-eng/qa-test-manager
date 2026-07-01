@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings, FiChevronLeft, FiChevronRight, FiAlertTriangle, FiUser, FiLogOut, FiShield, FiMenu } from 'react-icons/fi';
+import { FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings, FiChevronLeft, FiChevronRight, FiAlertTriangle, FiLogOut, FiShield, FiMenu } from 'react-icons/fi';
 
 function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, isMobileOpen, onToggleMobile }) {
   const navItems = [
@@ -15,12 +15,10 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
 
   return (
     <>
-      {/* Mobile Hamburger Button */}
       <button className="mobile-menu-btn" onClick={onToggleMobile} aria-label="Toggle menu">
         <FiMenu size={20} />
       </button>
 
-      {/* Mobile Overlay */}
       {isMobileOpen && <div className="sidebar-overlay visible" onClick={onToggleMobile} />}
 
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}>
@@ -30,6 +28,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
           </div>
           {!collapsed && <span className="logo-text">QALogs</span>}
         </div>
+
         <div className="sidebar-nav">
           {navItems.map((item) => (
             <NavLink
@@ -43,7 +42,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
             </NavLink>
           ))}
         </div>
-        
+
         {user && !collapsed && (
           <div className="sidebar-user">
             <div className="user-avatar-nav">
@@ -54,11 +53,11 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
               <div className="user-role-nav">{user.role === 'admin' ? 'Administrator' : 'User'}</div>
             </div>
             <button className="logout-btn" onClick={onLogout} title="Logout">
-              <FiLogOut size={18} />
+              <FiLogOut size={16} />
             </button>
           </div>
         )}
-        
+
         <div className="sidebar-footer">
           <button className="sidebar-toggle" onClick={onToggleCollapse}>
             {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
@@ -68,4 +67,5 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     </>
   );
 }
+
 export default Navbar;

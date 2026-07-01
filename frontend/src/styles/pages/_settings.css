@@ -30,7 +30,7 @@
   --set-surface-tertiary: #f1f5f9;
   
   /* Text */
-  --set-text-primary: #0f172a;
+  --set-text-primary: #2b2c41;
   --set-text-secondary: #475569;
   --set-text-tertiary: #64748b;
   --set-text-muted: #94a3b8;
@@ -214,7 +214,7 @@
   color: var(--set-text-primary);
   margin: 0;
   line-height: 1.2;
-  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  background: #ffffff;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

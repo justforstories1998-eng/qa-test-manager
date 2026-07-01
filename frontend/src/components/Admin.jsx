@@ -155,7 +155,7 @@ function Admin({ projects }) {
       <div className="dg-page-header">
         <div>
           <h2 className="dg-page-title">Administration</h2>
-          <p style={{ color: 'rgba(203,213,225,0.5)', margin: '4px 0 0 0', fontSize: '14px' }}>Manage users and project assignments</p>
+          <p style={{ color: '#a3acb9', margin: '4px 0 0 0', fontSize: '14px' }}>Manage users and project assignments</p>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ function Admin({ projects }) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
             <div className="dg-search" style={{ flex: 1, maxWidth: '400px' }}>
-              <FiSearch size={16} style={{ color: 'rgba(203,213,225,0.4)', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <FiSearch size={16} style={{ color: '#a3acb9', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search users by name or email..."
@@ -212,7 +212,7 @@ function Admin({ projects }) {
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ 
                           width: '34px', height: '34px', borderRadius: '10px', 
-                          background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.3))',
+                          background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15))',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: '13px', fontWeight: 600, color: 'var(--dg-accent)'
                         }}>
@@ -221,15 +221,15 @@ function Admin({ projects }) {
                         <span style={{ fontWeight: 600, color: 'var(--dg-text)' }}>{user.firstName} {user.lastName}</span>
                       </div>
                     </td>
-                    <td style={{ color: 'rgba(203,213,225,0.6)' }}>{user.email}</td>
+                    <td style={{ color: '#6c7a89' }}>{user.email}</td>
                     <td>
                       <Badge>{user.role}</Badge>
                     </td>
                     <td>
                       <Badge variant={user.isActive ? 'Active' : 'Inactive'}>{user.isActive ? 'Active' : 'Inactive'}</Badge>
                     </td>
-                    <td style={{ color: 'rgba(203,213,225,0.6)' }}>{user.assignedProjects?.length || 0} projects</td>
-                    <td style={{ color: 'rgba(203,213,225,0.5)' }}>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
+                    <td style={{ color: '#6c7a89' }}>{user.assignedProjects?.length || 0} projects</td>
+                    <td style={{ color: '#a3acb9' }}>{user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}</td>
                     <td>
                       <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                         <button 
@@ -274,7 +274,7 @@ function Admin({ projects }) {
                   <tr>
                     <td colSpan="7">
                       <div className="dg-empty" style={{ padding: '40px 20px' }}>
-                        <FiUsers size={40} style={{ color: 'rgba(203,213,225,0.2)' }} />
+                        <FiUsers size={40} style={{ color: '#a3acb9' }} />
                         <p>No users found</p>
                       </div>
                     </td>
@@ -290,7 +290,7 @@ function Admin({ projects }) {
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
             <div className="dg-search" style={{ flex: 1, maxWidth: '400px' }}>
-              <FiSearch size={16} style={{ color: 'rgba(203,213,225,0.4)', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+              <FiSearch size={16} style={{ color: '#a3acb9', position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="text"
                 placeholder="Search projects..."
@@ -323,7 +323,7 @@ function Admin({ projects }) {
                   return (
                     <tr key={project._id || project.id}>
                       <td style={{ fontWeight: 600, color: 'var(--dg-text)' }}>{project.name}</td>
-                      <td style={{ color: 'rgba(203,213,225,0.6)' }}>{project.description || '-'}</td>
+                      <td style={{ color: '#6c7a89' }}>{project.description || '-'}</td>
                       <td>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                           {projectUsers.length > 0 ? (
@@ -333,14 +333,14 @@ function Admin({ projects }) {
                               </span>
                             ))
                           ) : (
-                            <span style={{ color: 'rgba(203,213,225,0.4)', fontSize: '12px' }}>No users assigned</span>
+                            <span style={{ color: '#a3acb9', fontSize: '12px' }}>No users assigned</span>
                           )}
                           {projectUsers.length > 3 && (
                             <span className="dg-badge dg-badge-gray" style={{ fontSize: '11px' }}>+{projectUsers.length - 3}</span>
                           )}
                         </div>
                       </td>
-                      <td style={{ color: 'rgba(203,213,225,0.5)' }}>{new Date(project.createdAt).toLocaleDateString()}</td>
+                      <td style={{ color: '#a3acb9' }}>{new Date(project.createdAt).toLocaleDateString()}</td>
                       <td>
                         <button 
                           className="dg-btn dg-btn-secondary"
@@ -360,7 +360,7 @@ function Admin({ projects }) {
                   <tr>
                     <td colSpan="5">
                       <div className="dg-empty" style={{ padding: '40px 20px' }}>
-                        <FiBriefcase size={40} style={{ color: 'rgba(203,213,225,0.2)' }} />
+                        <FiBriefcase size={40} style={{ color: '#a3acb9' }} />
                         <p>No projects found</p>
                       </div>
                     </td>
@@ -452,8 +452,8 @@ function Admin({ projects }) {
           {!selectedUser && (
             <div style={{ 
               padding: '12px 16px', borderRadius: '10px', 
-              background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)',
-              display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '13px', color: 'rgba(203,213,225,0.7)'
+              background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)',
+              display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '13px', color: '#6c7a89'
             }}>
               <FiAlertCircle size={16} style={{ color: 'var(--dg-accent)', flexShrink: 0, marginTop: '2px' }} />
               <span>A temporary password will be generated and emailed to the user. They must change it on first login.</span>
@@ -502,22 +502,22 @@ function Admin({ projects }) {
             <label className="dg-input-label">Select Users to Assign *</label>
             <div style={{ 
               maxHeight: '300px', overflowY: 'auto', borderRadius: '10px', 
-              border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)'
+              border: '1px solid #e7e8ed', background: '#f5f5f9'
             }}>
               {users.filter(u => u.role === 'user').map(user => (
                 <div 
                   key={user._id || user.id}
                   style={{ 
                     display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
-                    cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)',
-                    background: assignForm.userIds.includes(user._id || user.id) ? 'rgba(139,92,246,0.08)' : 'transparent',
+                    cursor: 'pointer', borderBottom: '1px solid #e7e8ed',
+                    background: assignForm.userIds.includes(user._id || user.id) ? 'rgba(139,92,246,0.06)' : 'transparent',
                     transition: 'all 0.15s'
                   }}
                   onClick={() => toggleUserSelection(user._id || user.id)}
                 >
                   <div style={{ 
                     width: '32px', height: '32px', borderRadius: '8px', 
-                    background: 'linear-gradient(135deg, rgba(139,92,246,0.3), rgba(59,130,246,0.3))',
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.15), rgba(59,130,246,0.15))',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '12px', fontWeight: 600, color: 'var(--dg-accent)', flexShrink: 0
                   }}>
@@ -525,7 +525,7 @@ function Admin({ projects }) {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '13px' }}>{user.firstName} {user.lastName}</div>
-                    <div style={{ color: 'rgba(203,213,225,0.5)', fontSize: '12px' }}>{user.email}</div>
+                    <div style={{ color: '#a3acb9', fontSize: '12px' }}>{user.email}</div>
                   </div>
                   <div>
                     {assignForm.userIds.includes(user._id || user.id) ? (
@@ -538,7 +538,7 @@ function Admin({ projects }) {
                     ) : (
                       <div style={{ 
                         width: '22px', height: '22px', borderRadius: '6px', 
-                        border: '2px solid rgba(255,255,255,0.15)'
+                        border: '2px solid #e7e8ed'
                       }}></div>
                     )}
                   </div>
@@ -549,8 +549,8 @@ function Admin({ projects }) {
           {assignForm.userIds.length > 0 && (
             <div style={{ 
               marginTop: '14px', padding: '12px 16px', borderRadius: '10px', 
-              background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)',
-              display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'rgba(203,213,225,0.7)'
+              background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)',
+              display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#6c7a89'
             }}>
               <FiMail size={16} style={{ color: '#3b82f6' }} />
               <span>Email notifications will be sent to {assignForm.userIds.length} user(s) with project details.</span>

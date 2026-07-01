@@ -27,15 +27,15 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
 
   const trendChartData = {
     labels: recentRuns.map((_, i) => `Run ${recentRuns.length - i}`).reverse(),
-    datasets: [{ label: 'Pass Rate %', data: recentRuns.map(r => { const t = (r.passed || 0) + (r.failed || 0) + (r.blocked || 0); return t > 0 ? ((r.passed / t) * 100).toFixed(0) : 0; }).reverse(), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }]
+    datasets: [{ label: 'Pass Rate %', data: recentRuns.map(r => { const t = (r.passed || 0) + (r.failed || 0) + (r.blocked || 0); return t > 0 ? ((r.passed / t) * 100).toFixed(0) : 0; }).reverse(), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.08)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#6366f1' }]
   };
 
   const chartOpts = (yMax) => ({
     responsive: true, maintainAspectRatio: false,
     plugins: { legend: { display: false } },
     scales: {
-      x: { grid: { display: false }, ticks: { color: 'rgba(148,163,184,0.5)', font: { size: 11 } } },
-      y: { beginAtZero: true, max: yMax, grid: { color: 'rgba(51,65,85,0.2)' }, ticks: { color: 'rgba(148,163,184,0.5)', font: { size: 11 } } }
+      x: { grid: { display: false }, ticks: { color: '#a3acb9', font: { size: 11 } } },
+      y: { beginAtZero: true, max: yMax, grid: { color: '#f1f4f9' }, ticks: { color: '#a3acb9', font: { size: 11 } } }
     }
   });
 
@@ -83,22 +83,25 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
-        <div className="glass-card" style={{ height: 320 }}>
-          <h3 style={{ color: '#f8fafc', fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Execution Health</h3>
-          <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: 12, marginBottom: 16 }}>Status distribution</p>
-          <div style={{ height: 240 }}><Doughnut data={statusChartData} options={{ responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', color: 'rgba(203,213,225,0.7)', font: { size: 11 } } } } }} /></div>
+        <div className="chart-card" style={{ height: 320 }}>
+          <div className="chart-header">
+            <h3 className="chart-title"><FiCheckCircle /> Execution Health</h3>
+          </div>
+          <div className="chart-body" style={{ height: 240 }}><Doughnut data={statusChartData} options={{ responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle', color: '#6c7a89', font: { size: 11 } } } } }} /></div>
         </div>
-        <div className="glass-card" style={{ height: 320 }}>
-          <h3 style={{ color: '#f8fafc', fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Priority Distribution</h3>
-          <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: 12, marginBottom: 16 }}>Cases by priority</p>
-          <div style={{ height: 240 }}><Bar data={priorityChartData} options={chartOpts()} /></div>
+        <div className="chart-card" style={{ height: 320 }}>
+          <div className="chart-header">
+            <h3 className="chart-title"><FiTrendingUp /> Priority Distribution</h3>
+          </div>
+          <div className="chart-body" style={{ height: 240 }}><Bar data={priorityChartData} options={chartOpts()} /></div>
         </div>
       </div>
 
-      <div className="glass-card" style={{ height: 280 }}>
-        <h3 style={{ color: '#f8fafc', fontSize: 16, fontWeight: 600, marginBottom: 4 }}>Reliability Trend</h3>
-        <p style={{ color: 'rgba(148,163,184,0.6)', fontSize: 12, marginBottom: 16 }}>Pass rate over recent runs</p>
-        <div style={{ height: 200 }}><Line data={trendChartData} options={{ ...chartOpts(100), plugins: { legend: { display: false } } }} /></div>
+      <div className="chart-card" style={{ height: 280 }}>
+        <div className="chart-header">
+          <h3 className="chart-title"><FiTrendingUp /> Reliability Trend</h3>
+        </div>
+        <div className="chart-body" style={{ height: 200 }}><Line data={trendChartData} options={{ ...chartOpts(100), plugins: { legend: { display: false } } }} /></div>
       </div>
     </div>
   );

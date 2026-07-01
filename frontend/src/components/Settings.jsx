@@ -97,7 +97,7 @@ function Settings({ settings, onUpdateSettings }) {
             <span style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--dg-accent)' }}>Configuration</span>
           </div>
           <h2 className="dg-page-title">Settings</h2>
-          <p style={{ color: 'rgba(203,213,225,0.6)', margin: '4px 0 0 0' }}>Manage your application preferences and configurations</p>
+          <p style={{ color: '#6c7a89', margin: '4px 0 0 0' }}>Manage your application preferences and configurations</p>
         </div>
         {hasChanges && (
           <div className="dg-badge dg-badge-amber" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}>
@@ -124,21 +124,21 @@ function Settings({ settings, onUpdateSettings }) {
         ))}
       </div>
 
-      <div className="glass-card" style={{ padding: '28px', maxWidth: '800px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ padding: '28px', maxWidth: '800px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e7e8ed' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingBottom: '20px', borderBottom: '1px solid #e7e8ed' }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {activeTabData && <activeTabData.icon size={20} style={{ color: 'var(--dg-accent)' }} />}
           </div>
           <div>
-            <h3 style={{ margin: 0, color: 'var(--dg-text)', fontWeight: 600 }}>{activeTabData?.label} Settings</h3>
-            <p style={{ margin: 0, color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>{activeTabData?.description}</p>
+            <h3 style={{ margin: 0, color: '#2b2c41', fontWeight: 600 }}>{activeTabData?.label} Settings</h3>
+            <p style={{ margin: 0, color: '#a3acb9', fontSize: '13px' }}>{activeTabData?.description}</p>
           </div>
         </div>
 
         {/* General Settings */}
         {activeTab === 'general' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiImage size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Branding</span>
             </div>
@@ -149,11 +149,11 @@ function Settings({ settings, onUpdateSettings }) {
                 <span className="dg-setting-desc">Upload your organization's logo (Max 500KB)</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '80px', height: '80px', borderRadius: '12px', border: '2px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'rgba(255,255,255,0.03)' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '12px', border: '2px solid #e7e8ed', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#f5f5f9' }}>
                   {formData.general?.logo ? (
                     <img src={formData.general.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   ) : (
-                    <div style={{ textAlign: 'center', color: 'rgba(203,213,225,0.4)' }}>
+                    <div style={{ textAlign: 'center', color: '#a3acb9' }}>
                       <FiImage size={24} />
                     </div>
                   )}
@@ -177,7 +177,7 @@ function Settings({ settings, onUpdateSettings }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiGlobe size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Organization</span>
             </div>
@@ -212,7 +212,7 @@ function Settings({ settings, onUpdateSettings }) {
               />
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiClock size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Localization</span>
             </div>
@@ -259,7 +259,7 @@ function Settings({ settings, onUpdateSettings }) {
         {/* Execution Settings */}
         {activeTab === 'execution' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiPlay size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Test Run Behavior</span>
             </div>
@@ -268,7 +268,7 @@ function Settings({ settings, onUpdateSettings }) {
             {renderToggle('execution', 'autoAdvance', 'Auto-Advance on Pass', 'Move to next test case when current passes')}
             {renderToggle('execution', 'requireCommentsOnFail', 'Require Comments on Fail', 'Force testers to add comments for failed tests')}
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiClock size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Session</span>
             </div>
@@ -288,7 +288,7 @@ function Settings({ settings, onUpdateSettings }) {
                   onChange={e => handleInputChange('execution', 'sessionTimeout', e.target.value)} 
                   style={{ width: '120px' }}
                 />
-                <span style={{ color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>minutes</span>
+                <span style={{ color: '#a3acb9', fontSize: '13px' }}>minutes</span>
               </div>
             </div>
           </div>
@@ -297,7 +297,7 @@ function Settings({ settings, onUpdateSettings }) {
         {/* Reporting Settings */}
         {activeTab === 'reporting' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiFileText size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Report Content</span>
             </div>
@@ -306,7 +306,7 @@ function Settings({ settings, onUpdateSettings }) {
             {renderToggle('reporting', 'includeFailedTests', 'Include Failed Tests', 'Show failed test cases in reports')}
             {renderToggle('reporting', 'includeCharts', 'Include Charts', 'Add visual charts and graphs')}
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiFileText size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Report Branding</span>
             </div>
@@ -346,19 +346,19 @@ function Settings({ settings, onUpdateSettings }) {
         {/* AI Integration Settings */}
         {activeTab === 'grokAI' && (
           <div>
-            <div className="glass-card" style={{ padding: '20px', marginBottom: '24px', border: '1px solid rgba(139,92,246,0.2)', background: 'rgba(139,92,246,0.06)' }}>
+            <div style={{ padding: '20px', marginBottom: '24px', border: '1px solid rgba(99,102,241,0.2)', background: 'rgba(99,102,241,0.06)', borderRadius: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(139,92,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <FiZap size={22} style={{ color: 'var(--dg-accent)' }} />
                 </div>
                 <div>
-                  <h4 style={{ margin: 0, color: 'var(--dg-text)', fontWeight: 600 }}>AI-Powered Analysis</h4>
-                  <p style={{ margin: '2px 0 0 0', color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>Enable intelligent test analysis, automatic summaries, and smart recommendations</p>
+                  <h4 style={{ margin: 0, color: '#2b2c41', fontWeight: 600 }}>AI-Powered Analysis</h4>
+                  <p style={{ margin: '2px 0 0 0', color: '#a3acb9', fontSize: '13px' }}>Enable intelligent test analysis, automatic summaries, and smart recommendations</p>
                 </div>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiCpu size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Configuration</span>
             </div>
@@ -380,19 +380,19 @@ function Settings({ settings, onUpdateSettings }) {
                     ].map(p => (
                       <div 
                         key={p.id}
-                        className="glass-card"
                         style={{ 
                           padding: '14px', cursor: 'pointer', textAlign: 'center',
-                          border: formData.grokAI?.provider === p.id ? '2px solid var(--dg-accent)' : '2px solid rgba(255,255,255,0.06)',
-                          background: formData.grokAI?.provider === p.id ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
-                          transition: 'all 0.2s'
+                          border: formData.grokAI?.provider === p.id ? '2px solid var(--dg-accent)' : '2px solid #e7e8ed',
+                          background: formData.grokAI?.provider === p.id ? 'rgba(99,102,241,0.08)' : '#f5f5f9',
+                          transition: 'all 0.2s',
+                          borderRadius: '12px'
                         }}
                         onClick={() => handleInputChange('grokAI', 'provider', p.id)}
                       >
                         <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${p.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', color: p.color, fontWeight: 700, fontSize: '16px' }}>
                           {p.icon}
                         </div>
-                        <div style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '13px' }}>{p.name}</div>
+                        <div style={{ fontWeight: 600, color: '#2b2c41', fontSize: '13px' }}>{p.name}</div>
                         <div className={`dg-badge dg-badge-${p.tier === 'Free' ? 'green' : 'amber'}`} style={{ marginTop: '4px', fontSize: '10px' }}>{p.tier}</div>
                         {formData.grokAI?.provider === p.id && (
                           <FiCheckCircle size={16} style={{ color: 'var(--dg-accent)', marginTop: '6px' }} />
@@ -402,7 +402,7 @@ function Settings({ settings, onUpdateSettings }) {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
                   <FiLock size={16} style={{ color: 'var(--dg-accent)' }} />
                   <span>Authentication</span>
                 </div>
@@ -424,7 +424,7 @@ function Settings({ settings, onUpdateSettings }) {
                       />
                       <button 
                         type="button" 
-                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(203,213,225,0.5)', cursor: 'pointer', padding: '4px' }}
+                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#a3acb9', cursor: 'pointer', padding: '4px' }}
                         onClick={() => setShowApiKey(!showApiKey)}
                         title={showApiKey ? "Hide API Key" : "Show API Key"}
                       >
@@ -452,7 +452,7 @@ function Settings({ settings, onUpdateSettings }) {
         {/* Export Settings */}
         {activeTab === 'export' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiDownload size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Export Preferences</span>
             </div>
@@ -469,18 +469,18 @@ function Settings({ settings, onUpdateSettings }) {
                 ].map(f => (
                   <div 
                     key={f.id}
-                    className="glass-card"
                     style={{ 
                       padding: '16px', cursor: 'pointer', textAlign: 'center',
-                      border: formData.export?.defaultFormat === f.id ? '2px solid var(--dg-accent)' : '2px solid rgba(255,255,255,0.06)',
-                      background: formData.export?.defaultFormat === f.id ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
-                      transition: 'all 0.2s'
+                      border: formData.export?.defaultFormat === f.id ? '2px solid var(--dg-accent)' : '2px solid #e7e8ed',
+                      background: formData.export?.defaultFormat === f.id ? 'rgba(99,102,241,0.08)' : '#f5f5f9',
+                      transition: 'all 0.2s',
+                      borderRadius: '12px'
                     }}
                     onClick={() => handleInputChange('export', 'defaultFormat', f.id)}
                   >
                     <FiFileText size={20} style={{ color: 'var(--dg-accent)', marginBottom: '6px' }} />
-                    <div style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '14px' }}>{f.name}</div>
-                    <div style={{ color: 'rgba(203,213,225,0.5)', fontSize: '12px', marginTop: '2px' }}>{f.desc}</div>
+                    <div style={{ fontWeight: 600, color: '#2b2c41', fontSize: '14px' }}>{f.name}</div>
+                    <div style={{ color: '#a3acb9', fontSize: '12px', marginTop: '2px' }}>{f.desc}</div>
                   </div>
                 ))}
               </div>
@@ -508,7 +508,7 @@ function Settings({ settings, onUpdateSettings }) {
         {/* Notifications Settings */}
         {activeTab === 'notifications' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiBell size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Notification Preferences</span>
             </div>
@@ -532,7 +532,7 @@ function Settings({ settings, onUpdateSettings }) {
                   onChange={e => handleInputChange('notifications', 'duration', parseInt(e.target.value))} 
                   style={{ width: '120px' }}
                 />
-                <span style={{ color: 'rgba(203,213,225,0.5)', fontSize: '13px' }}>ms</span>
+                <span style={{ color: '#a3acb9', fontSize: '13px' }}>ms</span>
               </div>
             </div>
           </div>
@@ -541,7 +541,7 @@ function Settings({ settings, onUpdateSettings }) {
         {/* Display Settings */}
         {activeTab === 'display' && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiMonitor size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Appearance</span>
             </div>
@@ -559,21 +559,21 @@ function Settings({ settings, onUpdateSettings }) {
                 ].map(t => (
                   <div 
                     key={t.id}
-                    className="glass-card"
                     style={{ 
                       padding: '14px', cursor: 'pointer', textAlign: 'center',
-                      border: formData.display?.theme === t.id ? '2px solid var(--dg-accent)' : '2px solid rgba(255,255,255,0.06)',
-                      background: formData.display?.theme === t.id ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
-                      transition: 'all 0.2s'
+                      border: formData.display?.theme === t.id ? '2px solid var(--dg-accent)' : '2px solid #e7e8ed',
+                      background: formData.display?.theme === t.id ? 'rgba(99,102,241,0.08)' : '#f5f5f9',
+                      transition: 'all 0.2s',
+                      borderRadius: '12px'
                     }}
                     onClick={() => handleInputChange('display', 'theme', t.id)}
                   >
                     <div style={{ 
                       width: '100%', height: '50px', borderRadius: '8px', marginBottom: '8px',
                       background: t.id === 'dark' ? '#0f172a' : t.id === 'light' ? '#f1f5f9' : 'linear-gradient(135deg, #f1f5f9 50%, #0f172a 50%)',
-                      border: '1px solid rgba(255,255,255,0.1)'
+                      border: '1px solid #e7e8ed'
                     }}></div>
-                    <span style={{ fontWeight: 600, color: 'var(--dg-text)', fontSize: '13px' }}>{t.name}</span>
+                    <span style={{ fontWeight: 600, color: '#2b2c41', fontSize: '13px' }}>{t.name}</span>
                     {formData.display?.theme === t.id && (
                       <FiCheck size={16} style={{ color: 'var(--dg-accent)', marginTop: '4px', display: 'block', margin: '4px auto 0' }} />
                     )}
@@ -582,7 +582,7 @@ function Settings({ settings, onUpdateSettings }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--dg-text)', fontWeight: 600, fontSize: '14px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: '#2b2c41', fontWeight: 600, fontSize: '14px' }}>
               <FiSettings size={16} style={{ color: 'var(--dg-accent)' }} />
               <span>Table Settings</span>
             </div>
@@ -610,7 +610,7 @@ function Settings({ settings, onUpdateSettings }) {
         )}
 
         {/* Save Actions */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid #e7e8ed' }}>
           <div>
             {hasChanges ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontSize: '13px' }}>
