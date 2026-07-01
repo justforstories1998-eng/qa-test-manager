@@ -16,25 +16,50 @@ import {
   FiSun,
   FiMoon,
   FiBell,
-  FiSearch,
-  FiHelpCircle,
-  FiChevronDown
+  FiChevronDown,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiInfo
 } from 'react-icons/fi';
+import api from '../api';
 
 function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, isMobileOpen, onToggleMobile }) {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
-  const [notificationCount] = useState(3);
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const location = useLocation();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
     localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }, [isDarkMode]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.getBugs();
+        if (res.success && res.data) {
+          const recent = res.data.slice(0, 10).map(bug => ({
+            id: bug._id,
+            title: bug.title,
+            type: bug.severity === 'Critical' ? 'critical' : bug.severity === 'High' ? 'warning' : 'info',
+            time: new Date(bug.createdAt || bug.updatedAt).toLocaleDateString(),
+            read: false,
+          }));
+          setNotifications(recent);
+        }
+      } catch (e) {
+        setNotifications([]);
+      }
+    };
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const navSections = [
     {
@@ -66,10 +91,13 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       if (showUserMenu && !e.target.closest('.navbar-user-section')) {
         setShowUserMenu(false);
       }
+      if (showNotifications && !e.target.closest('.navbar-notifications')) {
+        setShowNotifications(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showUserMenu]);
+  }, [showUserMenu, showNotifications]);
 
   useEffect(() => {
     if (isMobileOpen) {
@@ -486,83 +514,88 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       fontWeight: '500',
       flexShrink: 0,
     },
-    searchOverlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0, 0, 0, 0.7)',
-      backdropFilter: 'blur(8px)',
-      zIndex: 2000,
-      display: 'flex',
-      alignItems: 'flex-start',
-      justifyContent: 'center',
-      paddingTop: '20vh',
-      opacity: searchOpen ? 1 : 0,
-      visibility: searchOpen ? 'visible' : 'hidden',
-      transition: 'all 0.3s ease',
-    },
-    searchModal: {
-      width: '90%',
-      maxWidth: '520px',
-      background: '#1e293b',
-      borderRadius: '16px',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-      boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
-      overflow: 'hidden',
-      transform: searchOpen ? 'translateY(0) scale(1)' : 'translateY(-20px) scale(0.95)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    },
-    searchInput: {
-      width: '100%',
-      padding: '18px 20px 18px 50px',
-      background: 'transparent',
-      border: 'none',
-      color: '#f1f5f9',
-      fontSize: '16px',
-      outline: 'none',
-      fontFamily: 'inherit',
-    },
-    searchIconInner: {
+    notificationDropdown: {
       position: 'absolute',
-      left: '18px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: 'rgba(148, 163, 184, 0.5)',
+      bottom: '100%',
+      right: '0',
+      marginBottom: '8px',
+      width: '320px',
+      background: '#1e293b',
+      borderRadius: '14px',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
+      overflow: 'hidden',
+      opacity: showNotifications ? 1 : 0,
+      transform: showNotifications ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.97)',
+      visibility: showNotifications ? 'visible' : 'hidden',
+      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+      zIndex: 1200,
     },
-    searchHint: {
-      padding: '12px 20px',
-      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+    notificationHeader: {
+      padding: '14px 16px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
       display: 'flex',
       alignItems: 'center',
-      gap: '6px',
-      color: 'rgba(148, 163, 184, 0.4)',
-      fontSize: '12px',
+      justifyContent: 'space-between',
     },
-    kbd: {
-      padding: '2px 6px',
-      borderRadius: '4px',
-      background: 'rgba(255, 255, 255, 0.06)',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
+    notificationTitle: {
+      fontSize: '14px',
+      fontWeight: '700',
+      color: '#f1f5f9',
+    },
+    notificationBadge: {
+      padding: '2px 8px',
+      borderRadius: '10px',
       fontSize: '11px',
-      fontFamily: 'monospace',
-    }
+      fontWeight: '700',
+      background: 'rgba(239, 68, 68, 0.15)',
+      color: '#f87171',
+    },
+    notificationItem: {
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: '12px',
+      padding: '12px 16px',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+      cursor: 'pointer',
+      transition: 'background 0.15s ease',
+    },
+    notificationIcon: (type) => ({
+      width: '32px',
+      height: '32px',
+      borderRadius: '8px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+      background: type === 'critical' ? 'rgba(239, 68, 68, 0.15)' : type === 'warning' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(99, 102, 241, 0.15)',
+      color: type === 'critical' ? '#f87171' : type === 'warning' ? '#fbbf24' : '#818cf8',
+    }),
+    notificationText: {
+      flex: 1,
+      minWidth: 0,
+    },
+    notificationItemTitle: {
+      fontSize: '13px',
+      fontWeight: '600',
+      color: '#e2e8f0',
+      lineHeight: 1.3,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+    notificationItemTime: {
+      fontSize: '11px',
+      color: 'rgba(148, 163, 184, 0.6)',
+      marginTop: '2px',
+    },
+    notificationEmpty: {
+      padding: '30px 16px',
+      textAlign: 'center',
+      color: 'rgba(148, 163, 184, 0.5)',
+      fontSize: '13px',
+    },
   };
-
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setSearchOpen(prev => !prev);
-      }
-      if (e.key === 'Escape') {
-        setSearchOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   return (
     <>
@@ -578,26 +611,6 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
 
       {/* Overlay */}
       <div style={styles.overlay} onClick={onToggleMobile} />
-
-      {/* Search Modal */}
-      <div style={styles.searchOverlay} onClick={() => setSearchOpen(false)}>
-        <div style={styles.searchModal} onClick={e => e.stopPropagation()}>
-          <div style={{ position: 'relative' }}>
-            <FiSearch size={18} style={styles.searchIconInner} />
-            <input
-              style={styles.searchInput}
-              type="text"
-              placeholder="Search test cases, bugs, reports..."
-              autoFocus={searchOpen}
-            />
-          </div>
-          <div style={styles.searchHint}>
-            <span style={styles.kbd}>ESC</span> to close
-            <span style={{ margin: '0 4px' }}>·</span>
-            <span style={styles.kbd}>⌘K</span> to toggle
-          </div>
-        </div>
-      </div>
 
       {/* Sidebar */}
       <nav
@@ -623,26 +636,46 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
 
         {/* Quick Actions */}
         <div style={styles.quickActions}>
-          <button
-            style={styles.quickActionBtn(false)}
-            onClick={() => setSearchOpen(true)}
-            title="Search (⌘K)"
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(148, 163, 184, 0.8)'; }}
-          >
-            <FiSearch size={16} />
-          </button>
           {!collapsed && (
             <>
-              <button
-                style={styles.quickActionBtn(false)}
-                title="Notifications"
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(148, 163, 184, 0.8)'; }}
-              >
-                <FiBell size={16} />
-                {notificationCount > 0 && <div style={styles.notificationDot} />}
-              </button>
+              <div style={{ position: 'relative' }} className="navbar-notifications">
+                <button
+                  style={styles.quickActionBtn(notifications.length > 0)}
+                  onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false); }}
+                  title="Notifications"
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = notifications.length > 0 ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = notifications.length > 0 ? '#818cf8' : 'rgba(148, 163, 184, 0.8)'; }}
+                >
+                  <FiBell size={16} />
+                  {notifications.length > 0 && <div style={styles.notificationDot} />}
+                </button>
+                <div style={styles.notificationDropdown}>
+                  <div style={styles.notificationHeader}>
+                    <span style={styles.notificationTitle}>Notifications</span>
+                    {notifications.length > 0 && <span style={styles.notificationBadge}>{notifications.length}</span>}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div style={styles.notificationEmpty}>No new notifications</div>
+                  ) : (
+                    notifications.map((n, i) => (
+                      <div
+                        key={n.id || i}
+                        style={styles.notificationItem}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <div style={styles.notificationIcon(n.type)}>
+                          {n.type === 'critical' ? <FiAlertCircle size={16} /> : n.type === 'warning' ? <FiAlertTriangle size={16} /> : <FiInfo size={16} />}
+                        </div>
+                        <div style={styles.notificationText}>
+                          <div style={styles.notificationItemTitle}>{n.title}</div>
+                          <div style={styles.notificationItemTime}>{n.time}</div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
               <button
                 style={styles.quickActionBtn(isDarkMode)}
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -720,20 +753,6 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
                 {user.email && <div style={styles.userMenuEmail}>{user.email}</div>}
               </div>
               <div style={{ padding: '6px 0' }}>
-                <button
-                  style={styles.userMenuItem(false)}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <FiSettings size={15} /> Account Settings
-                </button>
-                <button
-                  style={styles.userMenuItem(false)}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                  <FiHelpCircle size={15} /> Help & Support
-                </button>
               </div>
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '6px 0' }}>
                 <button
