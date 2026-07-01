@@ -267,7 +267,7 @@
   border-radius: 12px;
   font-size: 15px;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: var(--surface-secondary);
 }
 
 .input-with-icon input:focus {
@@ -527,7 +527,7 @@
 }
 
 .user-selection-item:hover {
-  background: #f8fafc;
+  background: var(--surface-secondary);
 }
 
 .user-selection-item.selected {

@@ -36,9 +36,9 @@
   --exec-neutral-bg: rgba(107, 114, 128, 0.1);
 
   /* Surfaces */
-  --exec-bg: #f8fafc;
-  --exec-bg-elevated: #ffffff;
-  --exec-bg-subtle: #f1f5f9;
+  --exec-bg: var(--bg-app);
+  --exec-bg-elevated: var(--bg-card);
+  --exec-bg-subtle: var(--surface-secondary);
   
   /* Glass */
   --exec-glass: rgba(255, 255, 255, 0.8);
@@ -787,7 +787,7 @@
 }
 
 .modal {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: var(--bg-card);
   border: 1px solid var(--exec-border);
   border-radius: var(--exec-radius-2xl);
   max-height: 90vh;

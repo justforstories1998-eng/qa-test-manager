@@ -5,9 +5,9 @@
 /* Design Tokens */
 .test-cases-page {
   /* Core Colors */
-  --bg-base: #f8fafc;
-  --bg-elevated: #ffffff;
-  --bg-subtle: #f1f5f9;
+  --bg-base: var(--bg-app);
+  --bg-elevated: var(--bg-card);
+  --bg-subtle: var(--surface-secondary);
   
   /* Brand Colors */
   --primary-50: #eef2ff;

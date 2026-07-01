@@ -645,7 +645,7 @@
   outline: none;
   border-color: rgba(99, 102, 241, 0.65);
   box-shadow: var(--focus-ring);
-  background: #fff;
+  background: var(--bg-card);
 }
 
 .form-group textarea{

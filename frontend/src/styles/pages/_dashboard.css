@@ -15,8 +15,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
-  background: 
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background: var(--bg-app);
 }
 
 .dashboard-content {
@@ -161,10 +160,6 @@
   color: var(--text-primary);
   margin: 0;
   line-height: 1.2;
-  background: #ffffff;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .section-description {
@@ -473,7 +468,7 @@
 
 /* Status Card Variants */
 .status-card.passed {
-  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  background: var(--bg-card);
 }
 .status-card.passed .status-bar {
   background: linear-gradient(180deg, #10b981, #059669);
@@ -484,7 +479,7 @@
 }
 
 .status-card.failed {
-  background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+  background: var(--bg-card);
 }
 .status-card.failed .status-bar {
   background: linear-gradient(180deg, #f43f5e, #dc2626);
@@ -495,7 +490,7 @@
 }
 
 .status-card.blocked {
-  background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+  background: var(--bg-card);
 }
 .status-card.blocked .status-bar {
   background: linear-gradient(180deg, #f59e0b, #d97706);
@@ -506,7 +501,7 @@
 }
 
 .status-card.not-run {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  background: var(--bg-card);
 }
 .status-card.not-run .status-bar {
   background: linear-gradient(180deg, #94a3b8, #64748b);
@@ -561,7 +556,7 @@
   align-items: center;
   padding: var(--space-6);
   border-bottom: 1px solid var(--border-light);
-  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  background: var(--surface-secondary);
 }
 
 .chart-title-group {
@@ -645,7 +640,7 @@
 .recent-runs-section .section-header {
   padding: var(--space-6);
   border-bottom: 1px solid var(--border-light);
-  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  background: var(--surface-secondary);
 }
 
 .recent-runs-section .section-title {
