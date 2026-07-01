@@ -98,6 +98,48 @@ export const sendBugAssignmentEmail = async (bug, assignedUser, createdByUser) =
   }
 };
 
+export const sendBugCreatedConfirmationEmail = async (bug, createdByUser) => {
+  try {
+    const transporter = createTransporter();
+    if (!process.env.SMTP_USER) {
+      console.log('⚠️ SMTP not configured. Bug creation confirmation email skipped');
+      return { success: false, error: 'SMTP not configured' };
+    }
+
+    const mailOptions = {
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: createdByUser.email,
+      subject: `Bug Created: ${bug.title}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #4f46e5;">Bug Created Successfully</h2>
+          <p>Hi ${createdByUser.firstName},</p>
+          <p>Your bug report has been created and ${bug.assignedTo ? `assigned to <strong>${bug.assignedTo}</strong>` : 'is awaiting assignment'}.</p>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4f46e5;">
+            <h3 style="margin: 0 0 10px 0; color: #4f46e5;">${bug.title}</h3>
+            <p style="margin: 5px 0;"><strong>Severity:</strong> ${bug.severity}</p>
+            <p style="margin: 5px 0;"><strong>Status:</strong> ${bug.status}</p>
+            ${bug.description ? `<p style="margin: 10px 0 0 0;"><strong>Description:</strong> ${bug.description}</p>` : ''}
+          </div>
+          <p style="margin-top: 20px;">
+            <a href="${process.env.APP_URL || 'http://localhost:3000'}/bugs" 
+               style="background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+              View Bug
+            </a>
+          </p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Bug creation confirmation email sent to: ${createdByUser.email}`);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Bug creation confirmation email error:', error.message);
+    return { success: false, error: error.message };
+  }
+};
+
 export const sendProjectAssignmentEmail = async (user, project, assignedBy) => {
   try {
     const transporter = createTransporter();

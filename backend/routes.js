@@ -17,7 +17,7 @@ import {
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
 import { analyzeTestResults } from './services/grokService.js';
-import { sendBugAssignmentEmail } from './services/emailService.js';
+import { sendBugAssignmentEmail, sendBugCreatedConfirmationEmail } from './services/emailService.js';
 import { authenticateToken } from './middleware/auth.js';
 
 // ============================================
@@ -109,6 +109,17 @@ router.post('/bugs', upload.single('attachment'), async (req, res, next) => {
     }
     const bug = await createBug(bugData);
     
+    if (bugData.createdBy) {
+      try {
+        const createdByUser = await import('./database.js').then(m => m.getUserById(bugData.createdBy));
+        if (createdByUser) {
+          await sendBugCreatedConfirmationEmail(bug, createdByUser);
+        }
+      } catch (emailErr) {
+        console.error('Bug creation confirmation email error:', emailErr);
+      }
+    }
+
     if (bugData.assignedTo && bugData.createdBy) {
       try {
         const assignedUser = await searchUsers(bugData.assignedTo).then(users => users[0]);
