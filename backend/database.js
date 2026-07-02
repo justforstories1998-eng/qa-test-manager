@@ -89,6 +89,14 @@ export async function initializeDatabase() {
         mustChangePassword: true
       }).save();
       console.log(`✅ Default admin created: ${adminEmail}`);
+    } else {
+      const bcrypt = await import('bcrypt');
+      const passwordMatch = await bcrypt.default.compare(adminPassword, adminExists.password);
+      if (!passwordMatch) {
+        adminExists.password = adminPassword;
+        await adminExists.save();
+        console.log(`✅ Admin password updated for ${adminEmail}`);
+      }
     }
   } catch (e) { console.error('❌ Database initialization failed:', e.message); process.exit(1); }
 }
