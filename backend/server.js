@@ -33,7 +33,18 @@ const reportUploadDir = join(uploadDir, 'reports');
 // ============================================
 // MIDDLEWARE
 // ============================================
-app.use(cors({ origin: '*' }));
+// Explicit CORS config to ensure preflight (OPTIONS) is handled correctly
+const corsOptions = {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+  optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
