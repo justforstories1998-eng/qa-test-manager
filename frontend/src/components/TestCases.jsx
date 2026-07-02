@@ -598,7 +598,7 @@ function TestCases({
                 justifyContent: sidebarCollapsed ? "center" : "flex-start",
                 padding: sidebarCollapsed ? "10px 0" : "9px 12px",
                 borderRadius: "8px",
-                border: "none",
+                border: !selectedSuiteId ? "1px solid rgba(99,102,241,0.15)" : "1px solid transparent",
                 cursor: "pointer",
                 fontSize: "13px",
                 fontWeight: !selectedSuiteId ? 600 : 500,
@@ -606,7 +606,6 @@ function TestCases({
                 background: !selectedSuiteId
                   ? "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08))"
                   : "transparent",
-                border: !selectedSuiteId ? "1px solid rgba(99,102,241,0.15)" : "1px solid transparent",
                 transition: "all 0.2s",
                 marginBottom: "4px",
                 position: "relative",
