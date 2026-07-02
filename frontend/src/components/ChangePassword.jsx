@@ -29,15 +29,17 @@ function ChangePassword({ user, onPasswordChanged }) {
     setIsLoading(true);
     try {
       const res = await api.changePassword({ currentPassword, newPassword });
-      if (res.success) {
+      if (res?.success) {
         toast.success('Password changed successfully!');
         const updatedUser = { ...user, mustChangePassword: false };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         onPasswordChanged(updatedUser);
         navigate('/');
+      } else {
+        toast.error(res?.error || 'Failed to change password');
       }
     } catch (err) {
-      toast.error(err.error || 'Failed to change password');
+      toast.error(err?.error || err?.message || 'Failed to change password');
     } finally {
       setIsLoading(false);
     }

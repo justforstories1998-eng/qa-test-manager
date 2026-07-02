@@ -9,93 +9,74 @@ import routes from './routes.js';
 import authRouter from './routes/authRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
 
-// Configuration
 dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ============================================
-// DIRECTORY SETUP (Important for Render)
-// ============================================
 const uploadDir = resolve(__dirname, 'uploads');
 const bugUploadDir = join(uploadDir, 'bugs');
 const reportUploadDir = join(uploadDir, 'reports');
 
-// Ensure all required folders exist
 [uploadDir, bugUploadDir, reportUploadDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
-    console.log(`📁 Created directory: ${dir}`);
   }
 });
 
 // ============================================
-// MIDDLEWARE
+// CORS - Handle ALL preflight OPTIONS first
 // ============================================
-// Explicit CORS config to ensure preflight (OPTIONS) is handled correctly
-const corsOptions = {
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false,
-  optionsSuccessStatus: 204
-};
-
-// Handle CORS preflight OPTIONS requests BEFORE any other middleware
 app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Max-Age', '86400');
     return res.sendStatus(204);
   }
   next();
 });
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: false,
+  optionsSuccessStatus: 204
+}));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// STATIC FILE SERVING
-// This allows: https://your-app.onrender.com/uploads/bugs/filename.mp4
 app.use('/uploads', express.static(uploadDir));
 
 // ============================================
-// ROUTES
+// HEALTH CHECK (no auth required)
 // ============================================
-
-// Health Check for Deployment
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-// Auth Routes
+// Root route
+app.get('/', (req, res) => {
+  res.status(200).json({ name: 'QA Test Manager API', version: '1.0.0', status: 'running' });
+});
+
+// ============================================
+// API ROUTES (auth routes MUST come before main router)
+// ============================================
 app.use('/api/auth', authRouter);
-
-// Admin Routes
 app.use('/api/admin', adminRouter);
-
-// API Routes
 app.use('/api', routes);
 
-// Catch-all 404 for undefined API routes
-app.all('/api/*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    error: `Route not found: ${req.method} ${req.originalUrl}`
-  });
+// Catch-all for unmatched API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ success: false, error: `Route not found: ${req.method} ${req.originalUrl}` });
 });
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error('❌ Server Error:', err.message);
-  res.status(err.status || 500).json({
-    success: false,
-    error: err.message || 'Internal server error'
-  });
+  console.error('Server Error:', err.message);
+  res.status(err.status || 500).json({ success: false, error: err.message || 'Internal server error' });
 });
 
 // ============================================
@@ -105,11 +86,10 @@ async function startServer() {
   try {
     await initializeDatabase();
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`🌐 Static files served from: ${uploadDir}`);
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }

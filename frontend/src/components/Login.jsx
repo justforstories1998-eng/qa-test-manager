@@ -171,15 +171,18 @@ function Login({ onLogin }) {
 
     try {
       const res = await api.login({ email, password });
-      if (res.success) {
+      if (res?.success && res?.data?.token && res?.data?.user) {
         localStorage.setItem('token', res.data.token);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         toast.success(`Welcome back, ${res.data.user.firstName}!`);
         onLogin(res.data.user);
         navigate('/');
+      } else {
+        toast.error(res?.error || 'Login failed. Please try again.');
       }
     } catch (err) {
-      toast.error(err.error || 'Login failed. Please check your credentials.');
+      const message = err?.error || err?.message || 'Login failed. Please check your credentials.';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
