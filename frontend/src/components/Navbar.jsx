@@ -158,7 +158,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       top: 0,
       left: 0,
       height: '100vh',
-      width: collapsed ? '80px' : '272px',
+        width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
       background: isDarkMode
         ? 'linear-gradient(180deg, #0f0f23 0%, #1a1a3e 100%)'
         : 'linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
