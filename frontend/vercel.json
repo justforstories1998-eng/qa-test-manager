@@ -3,9 +3,7 @@
   "outputDirectory": "build",
   "framework": null,
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://qa-test-manager-backend.onrender.com/api/:path*" }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "source": "/api/:path*", "destination": "https://qa-test-manager-backend.onrender.com/api/:path*" },
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }
