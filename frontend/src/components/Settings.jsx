@@ -123,8 +123,8 @@ function Settings({ settings, onUpdateSettings }) {
         ))}
       </div>
 
-      <div style={{ padding: '28px', maxWidth: '800px', background: '#ffffff', borderRadius: '12px', border: '1px solid #e7e8ed' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingBottom: '20px', borderBottom: '1px solid #e7e8ed' }}>
+      <div style={{ padding: '28px', maxWidth: '800px', background: 'var(--surface-primary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingBottom: '20px', borderBottom: '1px solid var(--border-color)' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {activeTabData && <activeTabData.icon size={20} style={{ color: 'var(--dg-accent)' }} />}
           </div>
@@ -148,7 +148,7 @@ function Settings({ settings, onUpdateSettings }) {
                 <span className="dg-setting-desc">Upload your organization's logo (Max 500KB)</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '80px', height: '80px', borderRadius: '12px', border: '2px solid #e7e8ed', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: '#f5f5f9' }}>
+                <div style={{ width: '80px', height: '80px', borderRadius: '12px', border: '2px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--surface-secondary)' }}>
                   {formData.general?.logo ? (
                     <img src={formData.general.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   ) : (
@@ -345,7 +345,7 @@ function Settings({ settings, onUpdateSettings }) {
         {/* AI Integration Settings */}
         {activeTab === 'grokAI' && (
           <div>
-            <div style={{ padding: '20px', marginBottom: '24px', border: '1px solid rgba(99,102,241,0.2)', background: 'rgba(99,102,241,0.06)', borderRadius: '12px' }}>
+            <div style={{ padding: '20px', marginBottom: '24px', border: '1px solid rgba(99,102,241,0.2)', background: 'var(--surface-interaction)', borderRadius: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <FiZap size={22} style={{ color: 'var(--dg-accent)' }} />
@@ -381,8 +381,8 @@ function Settings({ settings, onUpdateSettings }) {
                         key={p.id}
                         style={{ 
                           padding: '14px', cursor: 'pointer', textAlign: 'center',
-                          border: formData.grokAI?.provider === p.id ? '2px solid var(--dg-accent)' : '2px solid #e7e8ed',
-                          background: formData.grokAI?.provider === p.id ? 'rgba(99,102,241,0.08)' : '#f5f5f9',
+                          border: formData.grokAI?.provider === p.id ? '2px solid var(--dg-accent)' : '2px solid var(--border-color)',
+                          background: formData.grokAI?.provider === p.id ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
                           transition: 'all 0.2s',
                           borderRadius: '12px'
                         }}
@@ -470,8 +470,8 @@ function Settings({ settings, onUpdateSettings }) {
                     key={f.id}
                     style={{ 
                       padding: '16px', cursor: 'pointer', textAlign: 'center',
-                      border: formData.export?.defaultFormat === f.id ? '2px solid var(--dg-accent)' : '2px solid #e7e8ed',
-                      background: formData.export?.defaultFormat === f.id ? 'rgba(99,102,241,0.08)' : '#f5f5f9',
+                      border: formData.export?.defaultFormat === f.id ? '2px solid var(--dg-accent)' : '2px solid var(--border-color)',
+                      background: formData.export?.defaultFormat === f.id ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
                       transition: 'all 0.2s',
                       borderRadius: '12px'
                     }}
@@ -560,8 +560,8 @@ function Settings({ settings, onUpdateSettings }) {
                     key={t.id}
                     style={{ 
                       padding: '14px', cursor: 'pointer', textAlign: 'center',
-                      border: formData.display?.theme === t.id ? '2px solid var(--dg-accent)' : '2px solid #e7e8ed',
-                      background: formData.display?.theme === t.id ? 'rgba(99,102,241,0.08)' : '#f5f5f9',
+                      border: formData.display?.theme === t.id ? '2px solid var(--dg-accent)' : '2px solid var(--border-color)',
+                      background: formData.display?.theme === t.id ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
                       transition: 'all 0.2s',
                       borderRadius: '12px'
                     }}
@@ -570,7 +570,7 @@ function Settings({ settings, onUpdateSettings }) {
                     <div style={{ 
                       width: '100%', height: '50px', borderRadius: '8px', marginBottom: '8px',
                       background: t.id === 'dark' ? '#0f172a' : t.id === 'light' ? '#f1f5f9' : 'linear-gradient(135deg, #f1f5f9 50%, #0f172a 50%)',
-                      border: '1px solid #e7e8ed'
+                      border: '1px solid var(--border-color)'
                     }}></div>
                     <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>{t.name}</span>
                     {formData.display?.theme === t.id && (
@@ -609,7 +609,7 @@ function Settings({ settings, onUpdateSettings }) {
         )}
 
         {/* Save Actions */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid #e7e8ed' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
           <div>
             {hasChanges ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontSize: '13px' }}>

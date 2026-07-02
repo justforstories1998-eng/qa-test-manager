@@ -73,7 +73,7 @@ const ProgressRing = ({ pct, size = 48, stroke = 4, color = '#6366f1' }) => {
   const dash = (pct / 100) * circ;
   return (
     <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', flexShrink: 0 }}>
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--border-light)" strokeWidth={stroke} />
       <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color}
         strokeWidth={stroke} strokeLinecap="round"
         strokeDasharray={`${dash} ${circ}`} style={{ transition: 'stroke-dasharray 0.6s ease' }} />
@@ -246,7 +246,7 @@ function Execution({
                 border: '1px solid rgba(99,102,241,0.15)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <FiZap size={19} style={{ color: '#818cf8' }} />
+                <FiZap size={19} style={{ color: 'var(--primary-400)' }} />
               </div>
               <div>
                 <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
@@ -262,7 +262,7 @@ function Execution({
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7,
                 padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: 'linear-gradient(135deg, #6366f1, #7c3aed)',
+                background: 'var(--gradient-primary)',
                 border: 'none', color: '#fff', cursor: 'pointer',
                 boxShadow: '0 2px 12px rgba(99,102,241,0.3)', transition: 'all 0.2s',
               }}
@@ -278,7 +278,7 @@ function Execution({
 
           {/* ── Metric cards ── */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14 }}>
-            <MetricCard icon={FiTarget}       label="Total Tests" value={globalStats.total}   color="#818cf8" />
+            <MetricCard icon={FiTarget}       label="Total Tests" value={globalStats.total}   color="var(--primary-400)" />
             <MetricCard icon={FiCheckCircle}  label="Passed"      value={globalStats.passed}  color="#22c55e" />
             <MetricCard icon={FiXCircle}      label="Failed"      value={globalStats.failed}  color="#ef4444" />
             <MetricCard icon={FiAlertCircle}  label="Blocked"     value={globalStats.blocked} color="#f59e0b" />
@@ -296,7 +296,7 @@ function Execution({
                 background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.15)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <FiShield size={18} style={{ color: '#818cf8' }} />
+                <FiShield size={18} style={{ color: 'var(--primary-400)' }} />
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -306,7 +306,7 @@ function Execution({
                     color: passRate >= 80 ? '#22c55e' : passRate >= 50 ? '#f59e0b' : '#ef4444',
                   }}>{passRate}%</span>
                 </div>
-                <div style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.04)', overflow: 'hidden', display: 'flex' }}>
+                <div style={{ height: 8, borderRadius: 4, background: 'var(--surface-tertiary)', overflow: 'hidden', display: 'flex' }}>
                   {[
                     { val: globalStats.passed,  color: '#22c55e' },
                     { val: globalStats.failed,  color: '#ef4444' },
@@ -359,7 +359,7 @@ function Execution({
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 7,
                   padding: '10px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                  background: 'linear-gradient(135deg, #6366f1, #7c3aed)',
+                  background: 'var(--gradient-primary)',
                   border: 'none', color: '#fff', cursor: 'pointer',
                   boxShadow: '0 2px 12px rgba(99,102,241,0.3)',
                 }}
@@ -437,7 +437,7 @@ function Execution({
                               cursor: 'pointer', padding: 5, borderRadius: 6, display: 'flex',
                               alignItems: 'center', transition: 'all 0.15s',
                             }}
-                            onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
+                            onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger-light)'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
                             onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.background = 'none'; }}
                           >
                             <FiTrash2 size={13} />
@@ -473,7 +473,7 @@ function Execution({
                           <span>{run.totalTests || 0} total cases</span>
                           <span style={{ fontWeight: 600, color: passClr }}>{pct}%</span>
                         </div>
-                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.04)', overflow: 'hidden', display: 'flex' }}>
+                        <div style={{ height: 6, borderRadius: 3, background: 'var(--surface-tertiary)', overflow: 'hidden', display: 'flex' }}>
                           <div style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${passClr}80, ${passClr})`, transition: 'width 0.5s ease', borderRadius: 3 }} />
                         </div>
                       </div>
@@ -485,7 +485,7 @@ function Execution({
                           style={{
                             flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                             padding: '9px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                            background: 'linear-gradient(135deg, #6366f1, #7c3aed)',
+                            background: 'var(--gradient-primary)',
                             border: 'none', color: '#fff', cursor: 'pointer',
                             boxShadow: '0 2px 10px rgba(99,102,241,0.25)', transition: 'all 0.15s',
                           }}
@@ -541,7 +541,7 @@ function Execution({
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                  background: 'linear-gradient(135deg, #6366f1, #7c3aed)',
+                  background: 'var(--gradient-primary)',
                   border: 'none', color: '#fff', cursor: 'pointer',
                   boxShadow: '0 2px 12px rgba(99,102,241,0.3)',
                 }}
@@ -565,7 +565,7 @@ function Execution({
                 ].map(f => (
                   <div key={f.name}>
                     <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                      {f.label} {f.required && <span style={{ color: '#f87171' }}>*</span>}
+                      {f.label} {f.required && <span style={{ color: 'var(--danger-light)' }}>*</span>}
                     </label>
                     <input
                       value={f.value}
@@ -577,7 +577,7 @@ function Execution({
                         border: '1px solid var(--border-color)', background: 'var(--surface-glass)',
                         color: 'var(--text-primary)', fontSize: 14, outline: 'none', boxSizing: 'border-box', transition: 'all 0.2s',
                       }}
-                      onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
+                      onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px var(--surface-interaction)'; }}
                       onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                     />
                   </div>
@@ -605,7 +605,7 @@ function Execution({
               {/* Suite picker */}
               <div>
                 <label style={{ display: 'block', marginBottom: 8, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                  Test Suite <span style={{ color: '#f87171' }}>*</span>
+                  Test Suite <span style={{ color: 'var(--danger-light)' }}>*</span>
                 </label>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 220, overflowY: 'auto' }}>
                   {testSuites.map(s => {
@@ -629,17 +629,17 @@ function Execution({
                           background: isSelected ? 'rgba(99,102,241,0.15)' : 'var(--surface-secondary)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                          <FiFolder size={14} style={{ color: isSelected ? '#818cf8' : 'var(--text-muted)' }} />
+                          <FiFolder size={14} style={{ color: isSelected ? 'var(--primary-400)' : 'var(--text-muted)' }} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 500, color: isSelected ? '#c7d2fe' : 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <div style={{ fontSize: 13, fontWeight: 500, color: isSelected ? 'var(--primary-200)' : 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {s.name}
                           </div>
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
                             {count} test case{count !== 1 ? 's' : ''}
                           </div>
                         </div>
-                        {isSelected && <FiCheck size={14} style={{ color: '#818cf8', flexShrink: 0 }} />}
+                        {isSelected && <FiCheck size={14} style={{ color: 'var(--primary-400)', flexShrink: 0 }} />}
                       </button>
                     );
                   })}
@@ -663,8 +663,8 @@ function Execution({
                 display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px',
                 background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 8,
               }}>
-                <FiAlertTriangle size={14} style={{ color: '#f87171', flexShrink: 0, marginTop: 1 }} />
-                <span style={{ color: '#f87171', fontSize: 13, lineHeight: 1.5 }}>
+                <FiAlertTriangle size={14} style={{ color: 'var(--danger-light)', flexShrink: 0, marginTop: 1 }} />
+                <span style={{ color: 'var(--danger-light)', fontSize: 13, lineHeight: 1.5 }}>
                   All execution results will be permanently removed.
                 </span>
               </div>
@@ -740,7 +740,7 @@ function Execution({
 
         {/* Center progress */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 180, height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+          <div style={{ width: 180, height: 5, borderRadius: 3, background: 'var(--border-light)', overflow: 'hidden' }}>
             <div style={{
               height: '100%', borderRadius: 3,
               width: `${overallPct}%`,
@@ -748,7 +748,7 @@ function Execution({
               transition: 'width 0.4s ease',
             }} />
           </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#818cf8', minWidth: 32 }}>{overallPct}%</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--primary-400)', minWidth: 32 }}>{overallPct}%</span>
         </div>
 
         {/* Right actions */}
@@ -770,7 +770,7 @@ function Execution({
               background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.12)',
               color: 'rgba(248,113,113,0.6)', cursor: 'pointer', transition: 'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.background = 'rgba(248,113,113,0.1)'; }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--danger-light)'; e.currentTarget.style.background = 'rgba(248,113,113,0.1)'; }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(248,113,113,0.6)'; e.currentTarget.style.background = 'rgba(248,113,113,0.06)'; }}
           >
             <FiTrash2 size={13} />
@@ -798,7 +798,7 @@ function Execution({
                 <FiList size={12} /> Queue
               </span>
               <span style={{
-                background: 'rgba(99,102,241,0.12)', color: '#818cf8',
+                background: 'rgba(99,102,241,0.12)', color: 'var(--primary-400)',
                 padding: '2px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700,
               }}>
                 {executionResults.length}
@@ -814,7 +814,7 @@ function Execution({
                     flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 10, fontWeight: 600,
                     border: 'none', cursor: 'pointer', textTransform: 'capitalize',
                     background: sidebarFilter === f ? 'rgba(99,102,241,0.15)' : 'transparent',
-                    color: sidebarFilter === f ? '#a5b4fc' : 'var(--text-muted)',
+                    color: sidebarFilter === f ? 'var(--primary-300)' : 'var(--text-muted)',
                     transition: 'all 0.15s',
                   }}
                 >
@@ -852,7 +852,7 @@ function Execution({
                     background: isCurrent ? 'rgba(99,102,241,0.15)' : `${cfg.color}12`,
                     border: `1px solid ${isCurrent ? 'rgba(99,102,241,0.2)' : cfg.border}`,
                     fontSize: 10, fontWeight: 700,
-                    color: isCurrent ? '#818cf8' : cfg.color,
+                    color: isCurrent ? 'var(--primary-400)' : cfg.color,
                   }}>
                     {globalIdx + 1}
                   </div>
@@ -868,7 +868,7 @@ function Execution({
                       <StatusPill status={res.status} size="xs" />
                     </div>
                   </div>
-                  {isCurrent && <FiArrowRight size={12} style={{ color: '#818cf8', flexShrink: 0 }} />}
+                  {isCurrent && <FiArrowRight size={12} style={{ color: 'var(--primary-400)', flexShrink: 0 }} />}
                 </button>
               );
             })}
@@ -894,7 +894,7 @@ function Execution({
                     {tc.priority && (
                       <span style={{
                         fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 5,
-                        color: tc.priority === 'Critical' ? '#ef4444' : tc.priority === 'High' ? '#f59e0b' : '#818cf8',
+                        color: tc.priority === 'Critical' ? '#ef4444' : tc.priority === 'High' ? '#f59e0b' : 'var(--primary-400)',
                         background: tc.priority === 'Critical' ? 'rgba(239,68,68,0.1)' : tc.priority === 'High' ? 'rgba(245,158,11,0.1)' : 'rgba(99,102,241,0.1)',
                         border: tc.priority === 'Critical' ? '1px solid rgba(239,68,68,0.2)' : tc.priority === 'High' ? '1px solid rgba(245,158,11,0.2)' : '1px solid rgba(99,102,241,0.2)',
                       }}>
@@ -919,11 +919,11 @@ function Execution({
                       display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14,
                     }}>
                       <h3 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: 7 }}>
-                        <FiList size={13} style={{ color: '#818cf8' }} />
+                        <FiList size={13} style={{ color: 'var(--primary-400)' }} />
                         Test Steps
                       </h3>
                       <span style={{
-                        background: 'rgba(99,102,241,0.12)', color: '#818cf8',
+                        background: 'rgba(99,102,241,0.12)', color: 'var(--primary-400)',
                         padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 700,
                       }}>
                         {tc.steps.length}
@@ -945,7 +945,7 @@ function Execution({
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))',
                             border: '1px solid rgba(99,102,241,0.15)',
-                            color: '#a5b4fc', fontSize: 12, fontWeight: 700,
+                            color: 'var(--primary-300)', fontSize: 12, fontWeight: 700,
                           }}>
                             {s.stepNumber || i + 1}
                           </div>
@@ -976,7 +976,7 @@ function Execution({
                     fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
                     textTransform: 'uppercase', letterSpacing: '0.8px',
                   }}>
-                    <FiMessageSquare size={13} style={{ color: '#818cf8' }} />
+                    <FiMessageSquare size={13} style={{ color: 'var(--primary-400)' }} />
                     Tester Notes
                   </label>
                   <textarea
@@ -987,7 +987,7 @@ function Execution({
                     style={{
                       ...inputStyle, resize: 'vertical', lineHeight: 1.6,
                     }}
-                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
+                    onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px var(--surface-interaction)'; }}
                     onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                   />
                 </div>
@@ -1041,7 +1041,7 @@ function Execution({
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
                   background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-                  color: '#f87171', cursor: 'pointer', transition: 'all 0.15s',
+                  color: 'var(--danger-light)', cursor: 'pointer', transition: 'all 0.15s',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.14)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -1068,7 +1068,7 @@ function Execution({
               <span style={{
                 padding: '6px 12px', borderRadius: 7, fontSize: 12, fontWeight: 600,
                 background: 'var(--surface-glass)', border: '1px solid var(--border-color)',
-                color: '#818cf8', minWidth: 56, textAlign: 'center',
+                color: 'var(--primary-400)', minWidth: 56, textAlign: 'center',
               }}>
                 {currentTestIndex + 1} / {executionResults.length}
               </span>
@@ -1125,13 +1125,13 @@ function Execution({
                   padding: '7px 10px', borderRadius: 7, fontSize: 12, fontWeight: isActive ? 600 : 500,
                   border: 'none', cursor: 'pointer', transition: 'all 0.15s',
                   background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                  color: isActive ? '#a5b4fc' : 'var(--text-muted)',
+                  color: isActive ? 'var(--primary-300)' : 'var(--text-muted)',
                 }}
               >
                 {f}
                 <span style={{
                   background: isActive ? 'rgba(99,102,241,0.2)' : 'var(--surface-secondary)',
-                  color: isActive ? '#818cf8' : 'var(--text-muted)',
+                  color: isActive ? 'var(--primary-400)' : 'var(--text-muted)',
                   padding: '1px 6px', borderRadius: 4, fontSize: 10, fontWeight: 700,
                 }}>
                   {count}
@@ -1221,7 +1221,7 @@ function Execution({
                 background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <FiFlag size={16} style={{ color: '#f87171' }} />
+                <FiFlag size={16} style={{ color: 'var(--danger-light)' }} />
               </div>
               <div>
                 <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>Report Bug</h2>
@@ -1235,14 +1235,14 @@ function Execution({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                Title <span style={{ color: '#f87171' }}>*</span>
+                Title <span style={{ color: 'var(--danger-light)' }}>*</span>
               </label>
               <input
                 name="title"
                 defaultValue={`Bug: ${tc?.title}`}
                 required
                 style={inputStyle}
-                onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
+                onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px var(--surface-interaction)'; }}
                 onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
               />
             </div>
@@ -1255,7 +1255,7 @@ function Execution({
                 rows={4}
                 defaultValue={tc?.steps?.map(s => `Step ${s.stepNumber}: ${s.action}`).join('\n')}
                 style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
-                onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
+                onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px var(--surface-interaction)'; }}
                 onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
               />
             </div>
@@ -1275,7 +1275,7 @@ function Execution({
                   name="assignedTo"
                   placeholder="Developer name"
                   style={inputStyle}
-                  onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; }}
+                  onFocus={e => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px var(--surface-interaction)'; }}
                   onBlur={e => { e.target.style.borderColor = 'var(--border-color)'; e.target.style.boxShadow = 'none'; }}
                 />
               </div>

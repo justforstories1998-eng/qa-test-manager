@@ -145,7 +145,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       left: 0,
       right: 0,
       bottom: 0,
-      background: 'rgba(0, 0, 0, 0.6)',
+      background: 'var(--surface-overlay)',
       backdropFilter: 'blur(4px)',
       WebkitBackdropFilter: 'blur(4px)',
       zIndex: 1050,
@@ -159,14 +159,12 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       left: 0,
       height: '100vh',
         width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
-      background: isDarkMode
-        ? 'linear-gradient(180deg, #0f0f23 0%, #1a1a3e 100%)'
-        : 'linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
+      background: 'var(--sidebar-bg)',
       display: 'flex',
       flexDirection: 'column',
       zIndex: 1060,
       transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-      borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+      borderRight: '1px solid var(--sidebar-border)',
       overflow: 'hidden',
     },
     header: {
@@ -175,7 +173,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       alignItems: 'center',
       justifyContent: collapsed ? 'center' : 'flex-start',
       gap: '14px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+      borderBottom: '1px solid var(--sidebar-border)',
       minHeight: '80px',
       flexShrink: 0,
     },
@@ -230,7 +228,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     },
     logoSubtext: {
       fontSize: '10px',
-      color: 'rgba(148, 163, 184, 0.7)',
+      color: 'var(--sidebar-text-muted)',
       letterSpacing: '2px',
       textTransform: 'uppercase',
       fontWeight: '500',
@@ -246,9 +244,9 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       width: '36px',
       height: '36px',
       borderRadius: '10px',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
-      background: isActive ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-      color: isActive ? '#818cf8' : 'rgba(148, 163, 184, 0.8)',
+      border: '1px solid var(--sidebar-border)',
+      background: isActive ? 'rgba(99, 102, 241, 0.15)' : 'var(--sidebar-hover)',
+      color: isActive ? '#818cf8' : 'var(--sidebar-text)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -264,7 +262,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       height: '8px',
       borderRadius: '50%',
       background: '#ef4444',
-      border: '2px solid #1e293b',
+      border: '2.5px solid var(--surface-elevated)',
     },
     scrollArea: {
       flex: 1,
@@ -272,12 +270,12 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       overflowX: 'hidden',
       padding: '8px 0',
       scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(255,255,255,0.1) transparent',
+      scrollbarColor: 'var(--sidebar-border) transparent',
     },
     sectionTitle: {
       fontSize: '10px',
       fontWeight: '600',
-      color: 'rgba(148, 163, 184, 0.5)',
+      color: 'var(--sidebar-text-muted)',
       letterSpacing: '1.5px',
       textTransform: 'uppercase',
       padding: collapsed ? '20px 0 8px' : '20px 28px 8px',
@@ -293,11 +291,11 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       margin: collapsed ? '2px 12px' : '2px 12px',
       borderRadius: '12px',
       textDecoration: 'none',
-      color: isActive ? '#fff' : isHovered ? '#e2e8f0' : 'rgba(148, 163, 184, 0.85)',
+      color: isActive ? '#fff' : isHovered ? 'var(--sidebar-text-bright)' : 'var(--sidebar-text)',
       background: isActive
         ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%)'
         : isHovered
-          ? 'rgba(255, 255, 255, 0.04)'
+          ? 'var(--sidebar-hover)'
           : 'transparent',
       transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
       position: 'relative',
@@ -326,7 +324,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       justifyContent: 'center',
       background: isActive
         ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
-        : 'rgba(255, 255, 255, 0.04)',
+        : 'var(--sidebar-hover)',
       transition: 'all 0.25s ease',
       flexShrink: 0,
       boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.35)' : 'none',
@@ -358,7 +356,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       transform: 'translateY(-50%)',
       marginLeft: '16px',
       padding: '8px 14px',
-      background: '#1e293b',
+      background: 'var(--surface-elevated)',
       color: '#fff',
       borderRadius: '8px',
       fontSize: '13px',
@@ -376,13 +374,13 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       transform: 'translateY(-50%) rotate(45deg)',
       width: '10px',
       height: '10px',
-      background: '#1e293b',
+      background: 'var(--surface-elevated)',
       borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
       borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
     },
     userSection: {
       padding: collapsed ? '16px 12px' : '16px 16px',
-      borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+      borderTop: '1px solid var(--sidebar-border)',
       position: 'relative',
       flexShrink: 0,
     },
@@ -395,7 +393,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       cursor: 'pointer',
       transition: 'all 0.2s ease',
       justifyContent: collapsed ? 'center' : 'flex-start',
-      background: showUserMenu ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+      background: showUserMenu ? 'var(--sidebar-hover)' : 'transparent',
     },
     avatar: {
       width: '40px',
@@ -420,7 +418,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       height: '12px',
       borderRadius: '50%',
       background: '#22c55e',
-      border: '2.5px solid #1e293b',
+      border: '2.5px solid var(--surface-elevated)',
     },
     userInfo: {
       flex: 1,
@@ -432,7 +430,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     userName: {
       fontSize: '14px',
       fontWeight: '600',
-      color: '#f1f5f9',
+      color: 'var(--sidebar-text-bright)',
       lineHeight: 1.3,
       whiteSpace: 'nowrap',
       overflow: 'hidden',
@@ -440,7 +438,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     },
     userRole: {
       fontSize: '11px',
-      color: 'rgba(148, 163, 184, 0.7)',
+      color: 'var(--sidebar-text-muted)',
       fontWeight: '500',
       whiteSpace: 'nowrap',
     },
@@ -450,9 +448,9 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       left: '12px',
       right: '12px',
       marginBottom: '8px',
-      background: '#1e293b',
+      background: 'var(--surface-elevated)',
       borderRadius: '14px',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      border: '1px solid var(--sidebar-border)',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
       overflow: 'hidden',
       opacity: showUserMenu ? 1 : 0,
@@ -463,22 +461,22 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     },
     userMenuHeader: {
       padding: '16px 16px 12px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+      borderBottom: '1px solid var(--sidebar-border)',
     },
     userMenuGreeting: {
       fontSize: '11px',
-      color: 'rgba(148, 163, 184, 0.6)',
+      color: 'var(--sidebar-text-muted)',
       fontWeight: '500',
       marginBottom: '2px',
     },
     userMenuName: {
       fontSize: '15px',
       fontWeight: '700',
-      color: '#f1f5f9',
+      color: 'var(--sidebar-text-bright)',
     },
     userMenuEmail: {
       fontSize: '12px',
-      color: 'rgba(148, 163, 184, 0.6)',
+      color: 'var(--sidebar-text-muted)',
       marginTop: '4px',
     },
     userMenuItem: (isDestructive) => ({
@@ -504,9 +502,9 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       height: '40px',
       margin: collapsed ? '8px auto 16px' : '8px 16px 16px',
       borderRadius: '10px',
-      border: '1px solid rgba(255, 255, 255, 0.06)',
-      background: 'rgba(255, 255, 255, 0.03)',
-      color: 'rgba(148, 163, 184, 0.7)',
+      border: '1px solid var(--sidebar-border)',
+      background: 'var(--sidebar-hover)',
+      color: 'var(--sidebar-text-muted)',
       cursor: 'pointer',
       transition: 'all 0.2s ease',
       gap: '8px',
@@ -520,9 +518,9 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       right: '0',
       marginBottom: '8px',
       width: '320px',
-      background: '#1e293b',
+      background: 'var(--surface-elevated)',
       borderRadius: '14px',
-      border: '1px solid rgba(255, 255, 255, 0.08)',
+      border: '1px solid var(--sidebar-border)',
       boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
       overflow: 'hidden',
       opacity: showNotifications ? 1 : 0,
@@ -533,7 +531,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     },
     notificationHeader: {
       padding: '14px 16px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+      borderBottom: '1px solid var(--sidebar-border)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -541,7 +539,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     notificationTitle: {
       fontSize: '14px',
       fontWeight: '700',
-      color: '#f1f5f9',
+      color: 'var(--sidebar-text-bright)',
     },
     notificationBadge: {
       padding: '2px 8px',
@@ -556,7 +554,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
       alignItems: 'flex-start',
       gap: '12px',
       padding: '12px 16px',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+      borderBottom: '1px solid var(--sidebar-border)',
       cursor: 'pointer',
       transition: 'background 0.15s ease',
     },
@@ -578,7 +576,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     notificationItemTitle: {
       fontSize: '13px',
       fontWeight: '600',
-      color: '#e2e8f0',
+      color: 'var(--sidebar-text-bright)',
       lineHeight: 1.3,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
@@ -586,13 +584,13 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
     },
     notificationItemTime: {
       fontSize: '11px',
-      color: 'rgba(148, 163, 184, 0.6)',
+      color: 'var(--sidebar-text-muted)',
       marginTop: '2px',
     },
     notificationEmpty: {
       padding: '30px 16px',
       textAlign: 'center',
-      color: 'rgba(148, 163, 184, 0.5)',
+      color: 'var(--sidebar-text-muted)',
       fontSize: '13px',
     },
   };
@@ -643,8 +641,8 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
                   style={styles.quickActionBtn(notifications.length > 0)}
                   onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false); }}
                   title="Notifications"
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = '#fff'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = notifications.length > 0 ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = notifications.length > 0 ? '#818cf8' : 'rgba(148, 163, 184, 0.8)'; }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-border)'; e.currentTarget.style.color = '#fff'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = notifications.length > 0 ? 'rgba(99,102,241,0.15)' : 'var(--sidebar-hover)'; e.currentTarget.style.color = notifications.length > 0 ? '#818cf8' : 'var(--sidebar-text)'; }}
                 >
                   <FiBell size={16} />
                   {notifications.length > 0 && <div style={styles.notificationDot} />}
@@ -661,7 +659,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
                       <div
                         key={n.id || i}
                         style={styles.notificationItem}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                       >
                         <div style={styles.notificationIcon(n.type)}>
@@ -681,7 +679,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 title="Toggle theme"
                 onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'var(--sidebar-hover)'; }}
               >
                 {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
               </button>
@@ -754,7 +752,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
               </div>
               <div style={{ padding: '6px 0' }}>
               </div>
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '6px 0' }}>
+              <div style={{ borderTop: '1px solid var(--sidebar-border)', padding: '6px 0' }}>
                 <button
                   style={styles.userMenuItem(true)}
                   onClick={onLogout}
@@ -770,7 +768,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
             <div
               style={styles.userCard}
               onClick={() => !collapsed && setShowUserMenu(!showUserMenu)}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
               onMouseLeave={e => { if (!showUserMenu) e.currentTarget.style.background = 'transparent'; }}
             >
               <div style={styles.avatar}>
@@ -788,7 +786,7 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
                   <FiChevronDown
                     size={14}
                     style={{
-                      color: 'rgba(148, 163, 184, 0.5)',
+      color: 'var(--sidebar-text-muted)',
                       transition: 'transform 0.2s ease',
                       transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)',
                       flexShrink: 0,
@@ -805,14 +803,14 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
           style={styles.collapseBtn}
           onClick={onToggleCollapse}
           onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
+            e.currentTarget.style.background = 'var(--sidebar-border)';
             e.currentTarget.style.color = '#fff';
             e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
           }}
           onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-            e.currentTarget.style.color = 'rgba(148, 163, 184, 0.7)';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+            e.currentTarget.style.background = 'var(--sidebar-hover)';
+            e.currentTarget.style.color = 'var(--sidebar-text-muted)';
+            e.currentTarget.style.borderColor = 'var(--sidebar-border)';
           }}
         >
           {collapsed ? <FiChevronRight size={16} /> : (
@@ -850,11 +848,11 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
           background: transparent;
         }
         .navbar-scroll-area::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.08);
+          background: var(--sidebar-border);
           border-radius: 4px;
         }
         .navbar-scroll-area::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.15);
+          background: var(--sidebar-border);
         }
         
         @keyframes navbarSlideIn {

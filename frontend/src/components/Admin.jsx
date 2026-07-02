@@ -452,7 +452,7 @@ function Admin({ projects }) {
           {!selectedUser && (
             <div style={{ 
               padding: '12px 16px', borderRadius: '10px', 
-              background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)',
+              background: 'var(--surface-interaction)', border: '1px solid rgba(139,92,246,0.15)',
               display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '13px', color: 'var(--text-secondary)'
             }}>
               <FiAlertCircle size={16} style={{ color: 'var(--dg-accent)', flexShrink: 0, marginTop: '2px' }} />
@@ -502,15 +502,15 @@ function Admin({ projects }) {
             <label className="dg-input-label">Select Users to Assign *</label>
             <div style={{ 
               maxHeight: '300px', overflowY: 'auto', borderRadius: '10px', 
-              border: '1px solid #e7e8ed', background: '#f5f5f9'
+              border: '1px solid var(--border-color)', background: 'var(--surface-secondary)'
             }}>
               {users.filter(u => u.role === 'user').map(user => (
                 <div 
                   key={user._id || user.id}
                   style={{ 
                     display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px',
-                    cursor: 'pointer', borderBottom: '1px solid #e7e8ed',
-                    background: assignForm.userIds.includes(user._id || user.id) ? 'rgba(139,92,246,0.06)' : 'transparent',
+                    cursor: 'pointer',                     borderBottom: '1px solid var(--border-color)',
+                    background: assignForm.userIds.includes(user._id || user.id) ? 'var(--surface-interaction)' : 'transparent',
                     transition: 'all 0.15s'
                   }}
                   onClick={() => toggleUserSelection(user._id || user.id)}
@@ -538,7 +538,7 @@ function Admin({ projects }) {
                     ) : (
                       <div style={{ 
                         width: '22px', height: '22px', borderRadius: '6px', 
-                        border: '2px solid #e7e8ed'
+                        border: '2px solid var(--border-color)'
                       }}></div>
                     )}
                   </div>
@@ -549,7 +549,7 @@ function Admin({ projects }) {
           {assignForm.userIds.length > 0 && (
             <div style={{ 
               marginTop: '14px', padding: '12px 16px', borderRadius: '10px', 
-              background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)',
+              background: 'var(--surface-interaction)', border: '1px solid rgba(59,130,246,0.15)',
               display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'var(--text-secondary)'
             }}>
               <FiMail size={16} style={{ color: '#3b82f6' }} />

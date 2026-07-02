@@ -30,7 +30,7 @@ export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, conf
         </>
       }
     >
-      <p style={{ color: '#6c7a89', margin: 0, lineHeight: 1.6 }}>{message}</p>
+      <p style={{ color: 'var(--text-muted)', margin: 0, lineHeight: 1.6 }}>{message}</p>
     </Modal>
   );
 }

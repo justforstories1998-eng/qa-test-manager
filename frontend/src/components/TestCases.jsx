@@ -152,15 +152,15 @@ const StateBadge = ({ state }) => {
   );
 };
 
-const MetricPill = ({ icon: Icon, label, value, color = "#818cf8" }) => (
+const MetricPill = ({ icon: Icon, label, value, color = "var(--primary-400)" }) => (
   <div
     style={{
       display: "flex",
       alignItems: "center",
       gap: "10px",
       padding: "10px 16px",
-      background: "rgba(255,255,255,0.02)",
-      border: "1px solid rgba(255,255,255,0.06)",
+      background: "var(--surface-secondary)",
+      border: "1px solid var(--border-light)",
       borderRadius: "10px",
       minWidth: "120px",
     }}
@@ -180,8 +180,8 @@ const MetricPill = ({ icon: Icon, label, value, color = "#818cf8" }) => (
       <Icon size={16} style={{ color }} />
     </div>
     <div>
-      <div style={{ fontSize: "18px", fontWeight: 700, color: "#f1f5f9", lineHeight: 1.1 }}>{value}</div>
-      <div style={{ fontSize: "11px", color: "rgba(148,163,184,0.6)", marginTop: "2px" }}>{label}</div>
+      <div style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.1 }}>{value}</div>
+      <div style={{ fontSize: "11px", color: "var(--text-tertiary)", marginTop: "2px" }}>{label}</div>
     </div>
   </div>
 );
@@ -413,7 +413,7 @@ function TestCases({
                   border: "1px solid rgba(99,102,241,0.15)",
                 }}
               >
-                <FiDatabase size={18} style={{ color: "#818cf8" }} />
+                <FiDatabase size={18} style={{ color: "var(--primary-400)" }} />
               </div>
               <div>
                 <h1
@@ -498,7 +498,7 @@ function TestCases({
 
         {/* Metric pills */}
         <div style={{ display: "flex", gap: "12px", marginTop: "20px", flexWrap: "wrap" }}>
-          <MetricPill icon={FiLayers} label="Total Cases" value={filteredTestCases.length} color="#818cf8" />
+          <MetricPill icon={FiLayers} label="Total Cases" value={filteredTestCases.length} color="var(--primary-400)" />
           <MetricPill icon={FiAlertTriangle} label="Critical" value={priorityCounts.Critical} color="#ef4444" />
           <MetricPill icon={FiZap} label="High" value={priorityCounts.High} color="#f59e0b" />
           <MetricPill icon={FiTarget} label="Medium" value={priorityCounts.Medium} color="#6366f1" />
@@ -550,7 +550,7 @@ function TestCases({
                 <span
                   style={{
                     background: "rgba(99,102,241,0.15)",
-                    color: "#818cf8",
+                    color: "var(--primary-400)",
                     padding: "1px 7px",
                     borderRadius: "4px",
                     fontSize: "10px",
@@ -639,7 +639,7 @@ function TestCases({
                       fontSize: "11px",
                       fontWeight: 700,
                       color: "var(--text-muted)",
-                      background: "rgba(255,255,255,0.05)",
+                      background: "var(--border-light)",
                       padding: "2px 7px",
                       borderRadius: "4px",
                     }}
@@ -740,7 +740,7 @@ function TestCases({
                             fontSize: "11px",
                             fontWeight: 700,
                             color: "var(--text-muted)",
-                            background: "rgba(255,255,255,0.05)",
+                            background: "var(--border-light)",
                             padding: "2px 7px",
                             borderRadius: "4px",
                             flexShrink: 0,
@@ -774,7 +774,7 @@ function TestCases({
                         opacity: 0.6,
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.color = "#f87171";
+                        e.currentTarget.style.color = "var(--danger-light)";
                         e.currentTarget.style.background = "rgba(248,113,113,0.08)";
                         e.currentTarget.style.opacity = "1";
                       }}
@@ -861,7 +861,7 @@ function TestCases({
                 onFocus={(e) => {
                   e.target.style.borderColor = "rgba(99,102,241,0.4)";
                   e.target.style.background = "var(--surface-glass-hover)";
-                  e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.08)";
+                  e.target.style.boxShadow = "0 0 0 3px var(--surface-interaction)";
                 }}
                 onBlur={(e) => {
                   e.target.style.borderColor = "var(--border-color)";
@@ -878,7 +878,7 @@ function TestCases({
                     right: "10px",
                     top: "50%",
                     transform: "translateY(-50%)",
-                    background: "rgba(255,255,255,0.06)",
+                    background: "var(--border-light)",
                     border: "none",
                     color: "var(--text-muted)",
                     cursor: "pointer",
@@ -901,7 +901,7 @@ function TestCases({
                     transform: "translateY(-50%)",
                     fontSize: "10px",
                     color: "var(--text-muted)",
-                    background: "rgba(255,255,255,0.04)",
+                    background: "var(--surface-tertiary)",
                     padding: "2px 6px",
                     borderRadius: "4px",
                     border: "1px solid var(--border-color)",
@@ -924,7 +924,7 @@ function TestCases({
                   left: "10px",
                   top: "50%",
                   transform: "translateY(-50%)",
-                  color: priorityFilter !== "all" ? "#818cf8" : "var(--text-muted)",
+                  color: priorityFilter !== "all" ? "var(--primary-400)" : "var(--text-muted)",
                   pointerEvents: "none",
                   zIndex: 1,
                 }}
@@ -941,7 +941,7 @@ function TestCases({
                       : "1px solid var(--border-color)",
                   background:
                     priorityFilter !== "all"
-                      ? "rgba(99,102,241,0.08)"
+                      ? "var(--surface-interaction)"
                       : "var(--surface-glass)",
                   color: "var(--text-primary)",
                   fontSize: "13px",
@@ -982,7 +982,7 @@ function TestCases({
                 border: "1px solid var(--border-color)",
               }}
             >
-              <span style={{ color: "#818cf8", fontWeight: 600 }}>{filteredTestCases.length}</span> results
+              <span style={{ color: "var(--primary-400)", fontWeight: 600 }}>{filteredTestCases.length}</span> results
             </div>
           </div>
 
@@ -1118,7 +1118,7 @@ function TestCases({
                                   justifyContent: "center",
                                   fontSize: "10px",
                                   fontWeight: 700,
-                                  color: "#a5b4fc",
+                                  color: "var(--primary-300)",
                                   flexShrink: 0,
                                 }}
                               >
@@ -1172,9 +1172,9 @@ function TestCases({
                                 transition: "all 0.15s",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.color = "#818cf8";
+                                e.currentTarget.style.color = "var(--primary-400)";
                                 e.currentTarget.style.borderColor = "rgba(99,102,241,0.3)";
-                                e.currentTarget.style.background = "rgba(99,102,241,0.08)";
+                                e.currentTarget.style.background = "var(--surface-interaction)";
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.color = "var(--text-muted)";
@@ -1206,7 +1206,7 @@ function TestCases({
                                 transition: "all 0.15s",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.color = "#f87171";
+                                e.currentTarget.style.color = "var(--danger-light)";
                                 e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)";
                                 e.currentTarget.style.background = "rgba(248,113,113,0.08)";
                               }}
@@ -1514,7 +1514,7 @@ function TestCases({
                   letterSpacing: "0.8px",
                 }}
               >
-                <FiFileText size={13} style={{ color: "#818cf8" }} />
+                <FiFileText size={13} style={{ color: "var(--primary-400)" }} />
                 Description
               </h4>
               <div
@@ -1549,12 +1549,12 @@ function TestCases({
                     letterSpacing: "0.8px",
                   }}
                 >
-                  <FiList size={13} style={{ color: "#818cf8" }} />
+                  <FiList size={13} style={{ color: "var(--primary-400)" }} />
                   Test Steps
                   <span
                     style={{
                       background: "rgba(99,102,241,0.12)",
-                      color: "#818cf8",
+                      color: "var(--primary-400)",
                       padding: "2px 7px",
                       borderRadius: "4px",
                       fontSize: "10px",
@@ -1585,7 +1585,7 @@ function TestCases({
                           borderRadius: "8px",
                           background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))",
                           border: "1px solid rgba(99,102,241,0.15)",
-                          color: "#a5b4fc",
+                          color: "var(--primary-300)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -1739,7 +1739,7 @@ function TestCases({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  Title <span style={{ color: "#f87171" }}>*</span>
+                  Title <span style={{ color: "var(--danger-light)" }}>*</span>
                 </label>
                 <input
                   value={tcFormData.title}
@@ -1760,7 +1760,7 @@ function TestCases({
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = "rgba(99,102,241,0.4)";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.08)";
+                    e.target.style.boxShadow = "0 0 0 3px var(--surface-interaction)";
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = "var(--border-color)";
@@ -1780,7 +1780,7 @@ function TestCases({
                     color: "var(--text-secondary)",
                   }}
                 >
-                  Test Suite <span style={{ color: "#f87171" }}>*</span>
+                  Test Suite <span style={{ color: "var(--danger-light)" }}>*</span>
                 </label>
                 <select
                   value={tcFormData.suiteId}
@@ -1879,7 +1879,7 @@ function TestCases({
                   }}
                   onFocus={(e) => {
                     e.target.style.borderColor = "rgba(99,102,241,0.4)";
-                    e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.08)";
+                    e.target.style.boxShadow = "0 0 0 3px var(--surface-interaction)";
                   }}
                   onBlur={(e) => {
                     e.target.style.borderColor = "var(--border-color)";
@@ -1917,7 +1917,7 @@ function TestCases({
                 <span
                   style={{
                     background: "rgba(99,102,241,0.12)",
-                    color: "#818cf8",
+                    color: "var(--primary-400)",
                     padding: "2px 7px",
                     borderRadius: "4px",
                     fontSize: "10px",
@@ -1940,7 +1940,7 @@ function TestCases({
                   fontWeight: 500,
                   background: "rgba(99,102,241,0.1)",
                   border: "1px solid rgba(99,102,241,0.2)",
-                  color: "#a5b4fc",
+                  color: "var(--primary-300)",
                   cursor: "pointer",
                   transition: "all 0.15s",
                 }}
@@ -1988,7 +1988,7 @@ function TestCases({
                           borderRadius: "7px",
                           background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))",
                           border: "1px solid rgba(99,102,241,0.15)",
-                          color: "#a5b4fc",
+                          color: "var(--primary-300)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -2019,7 +2019,7 @@ function TestCases({
                           transition: "all 0.15s",
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.color = "#f87171";
+                          e.currentTarget.style.color = "var(--danger-light)";
                           e.currentTarget.style.background = "rgba(248,113,113,0.08)";
                         }}
                         onMouseLeave={(e) => {
@@ -2287,7 +2287,7 @@ function TestCases({
                 margin: "0 auto 14px",
               }}
             >
-              <FiUpload size={22} style={{ color: "#818cf8" }} />
+              <FiUpload size={22} style={{ color: "var(--primary-400)" }} />
             </div>
             <p style={{ color: "var(--text-secondary)", margin: "0 0 4px", fontSize: "14px", fontWeight: 500 }}>
               Drag & drop your CSV file here
@@ -2353,7 +2353,7 @@ function TestCases({
                 color: "var(--text-secondary)",
               }}
             >
-              New Suite Name <span style={{ color: "#f87171" }}>*</span>
+              New Suite Name <span style={{ color: "var(--danger-light)" }}>*</span>
             </label>
             <input
               value={uploadSuiteName}
@@ -2374,7 +2374,7 @@ function TestCases({
               }}
               onFocus={(e) => {
                 e.target.style.borderColor = "rgba(99,102,241,0.4)";
-                e.target.style.boxShadow = "0 0 0 3px rgba(99,102,241,0.08)";
+                e.target.style.boxShadow = "0 0 0 3px var(--surface-interaction)";
               }}
               onBlur={(e) => {
                 e.target.style.borderColor = "var(--border-color)";

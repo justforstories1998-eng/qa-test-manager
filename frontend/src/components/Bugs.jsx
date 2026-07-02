@@ -64,11 +64,11 @@ const StatusBadge = ({ status }) => {
 const MetricCard = ({ icon: Icon, label, value, color }) => (
   <div style={{
     position: 'relative', padding: '16px 18px', borderRadius: 12,
-    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+    background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
     overflow: 'hidden', transition: 'all 0.2s', flex: 1, minWidth: 0,
   }}
-    onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}30`; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+    onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}30`; e.currentTarget.style.background = 'var(--surface-input)'; }}
+    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--surface-secondary)'; }}
   >
     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${color}, ${color}00)` }} />
     <div style={{
@@ -78,20 +78,20 @@ const MetricCard = ({ icon: Icon, label, value, color }) => (
     }}>
       <Icon size={15} style={{ color }} />
     </div>
-    <div style={{ fontSize: 22, fontWeight: 700, color: '#f1f5f9', lineHeight: 1, letterSpacing: '-0.5px' }}>{value}</div>
-    <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.5)', marginTop: 3, fontWeight: 500 }}>{label}</div>
+    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.5px' }}>{value}</div>
+    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, fontWeight: 500 }}>{label}</div>
   </div>
 );
 
 const inputStyle = {
   width: '100%', padding: '10px 14px', borderRadius: 9, boxSizing: 'border-box',
-  border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)',
-  color: '#e2e8f0', fontSize: 14, outline: 'none', fontFamily: 'inherit',
+  border: '1px solid var(--border-input)', background: 'var(--surface-glass)',
+  color: 'var(--text-main)', fontSize: 14, outline: 'none', fontFamily: 'inherit',
   transition: 'all 0.2s',
 };
 
 const focusInput = (e) => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; };
-const blurInput = (e) => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; e.target.style.boxShadow = 'none'; };
+const blurInput = (e) => { e.target.style.borderColor = 'var(--border-input)'; e.target.style.boxShadow = 'none'; };
 
 /* ═══════════════ main component ═══════════════ */
 
@@ -245,7 +245,7 @@ function Bugs({ projectId, user }) {
     <div className="dg-page" style={{ display: 'flex', flexDirection: 'column', gap: 0, height: '100%', overflow: 'auto' }}>
 
       {/* ── Header ── */}
-      <div style={{ padding: '28px 32px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ padding: '28px 32px 24px', borderBottom: '1px solid var(--border-light)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{
@@ -257,10 +257,10 @@ function Bugs({ projectId, user }) {
               <FiFlag size={19} style={{ color: '#f87171' }} />
             </div>
             <div>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#f1f5f9', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
                 Bug Tracker
               </h1>
-              <p style={{ margin: '3px 0 0', fontSize: 13, color: 'rgba(148,163,184,0.5)' }}>
+              <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
                 Track, assign, and resolve defects across your project
               </p>
             </div>
@@ -274,7 +274,7 @@ function Bugs({ projectId, user }) {
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 7,
               padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-              background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+              background: 'var(--gradient-danger)',
               border: 'none', color: '#fff', cursor: 'pointer',
               boxShadow: '0 2px 12px rgba(239,68,68,0.3)', transition: 'all 0.2s',
             }}
@@ -300,7 +300,7 @@ function Bugs({ projectId, user }) {
         {/* ── Status tabs ── */}
         <div style={{
           display: 'flex', gap: 4, padding: 4, borderRadius: 10,
-          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
+          background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
         }}>
           {tabOptions.map(opt => {
             const isActive = statusFilter === opt;
@@ -313,16 +313,16 @@ function Bugs({ projectId, user }) {
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '8px 14px', borderRadius: 7, fontSize: 12, fontWeight: isActive ? 600 : 500,
                   border: 'none', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                  background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                  color: isActive ? '#a5b4fc' : 'rgba(148,163,184,0.5)',
+                  background: isActive ? 'var(--primary-soft)' : 'transparent',
+                  color: isActive ? 'var(--primary-300)' : 'var(--text-muted)',
                 }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--surface-input)'; }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
               >
                 {opt}
                 <span style={{
-                  background: isActive ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                  color: isActive ? '#818cf8' : 'rgba(148,163,184,0.4)',
+                  background: isActive ? 'rgba(99,102,241,0.2)' : 'var(--border-light)',
+                  color: isActive ? 'var(--primary-400)' : 'rgba(148,163,184,0.4)',
                   padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700,
                 }}>
                   {count}
@@ -336,7 +336,7 @@ function Bugs({ projectId, user }) {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '10px 16px', borderRadius: 10,
-          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+          background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
         }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <FiSearch size={14} style={{
@@ -360,8 +360,8 @@ function Bugs({ projectId, user }) {
                 onClick={() => setSearchTerm('')}
                 style={{
                   position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                  background: 'rgba(255,255,255,0.06)', border: 'none',
-                  color: 'rgba(148,163,184,0.6)', cursor: 'pointer',
+                  background: 'var(--border-light)', border: 'none',
+                  color: 'var(--text-tertiary)', cursor: 'pointer',
                   padding: '2px 5px', borderRadius: 4, fontSize: 11,
                   display: 'flex', alignItems: 'center',
                 }}
@@ -373,16 +373,16 @@ function Bugs({ projectId, user }) {
           <div style={{
             fontSize: 12, color: 'rgba(148,163,184,0.4)', whiteSpace: 'nowrap',
             padding: '6px 12px', borderRadius: 6,
-            background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
+            background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
           }}>
-            <span style={{ color: '#818cf8', fontWeight: 600 }}>{filteredBugs.length}</span> results
+            <span style={{ color: 'var(--primary-400)', fontWeight: 600 }}>{filteredBugs.length}</span> results
           </div>
         </div>
 
         {/* ── Table ── */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
           {filteredBugs.length > 0 ? (
-            <div style={{ overflow: 'auto', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div style={{ overflow: 'auto', borderRadius: 12, border: '1px solid var(--border-light)' }}>
               <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: 13 }}>
                 <thead>
                   <tr>
@@ -399,8 +399,8 @@ function Bugs({ projectId, user }) {
                         padding: '11px 16px', textAlign: col.label ? 'left' : 'right',
                         width: col.width, fontSize: 10, fontWeight: 600,
                         color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase',
-                        letterSpacing: '0.8px', borderBottom: '1px solid rgba(255,255,255,0.04)',
-                        background: 'rgba(255,255,255,0.01)', position: 'sticky', top: 0, zIndex: 5,
+                        letterSpacing: '0.8px', borderBottom: '1px solid var(--border-light)',
+                        background: 'var(--surface-secondary)', position: 'sticky', top: 0, zIndex: 5,
                         backdropFilter: 'blur(12px)',
                       }}>
                         {col.label}
@@ -420,42 +420,42 @@ function Bugs({ projectId, user }) {
                         onMouseEnter={() => setHoveredRow(bugId)}
                         onMouseLeave={() => setHoveredRow(null)}
                         style={{
-                          background: isHovered ? 'rgba(99,102,241,0.04)' : 'transparent',
+                          background: isHovered ? 'var(--surface-interaction)' : 'transparent',
                           transition: 'background 0.15s', cursor: 'pointer',
                         }}
                         onClick={() => { setViewingBug(bug); setShowViewModal(true); }}
                       >
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
                           <SeverityBadge severity={bug.severity || 'Medium'} />
                         </td>
                         <td style={{
-                          padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)',
-                          fontWeight: 500, color: '#e2e8f0',
+                          padding: '13px 16px', borderBottom: '1px solid var(--border-light)',
+                          fontWeight: 500, color: 'var(--text-main)',
                           maxWidth: 350, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {bug.title}
                         </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
                           <StatusBadge status={bug.status || 'Active'} />
                         </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
                           {bug.assignedTo ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               <div style={{
                                 width: 26, height: 26, borderRadius: 8,
                                 background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 10, fontWeight: 700, color: '#a5b4fc', flexShrink: 0,
+                                fontSize: 10, fontWeight: 700, color: 'var(--primary-300)', flexShrink: 0,
                               }}>
                                 {bug.assignedTo.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                               </div>
-                              <span style={{ color: 'rgba(203,213,225,0.8)', fontSize: 13 }}>{bug.assignedTo}</span>
+                              <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{bug.assignedTo}</span>
                             </div>
                           ) : (
-                            <span style={{ color: 'rgba(148,163,184,0.3)', fontSize: 12, fontStyle: 'italic' }}>Unassigned</span>
+                            <span style={{ color: 'var(--text-light)', fontSize: 12, fontStyle: 'italic' }}>Unassigned</span>
                           )}
                         </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
                           {fileUrl ? (
                             <a
                               href={api.getFileUrl(fileUrl)}
@@ -465,7 +465,7 @@ function Bugs({ projectId, user }) {
                               style={{
                                 display: 'inline-flex', alignItems: 'center', gap: 5,
                                 padding: '3px 8px', borderRadius: 5, fontSize: 11, fontWeight: 500,
-                                color: '#818cf8', background: 'rgba(99,102,241,0.08)',
+                                color: 'var(--primary-400)', background: 'var(--surface-interaction)',
                                 border: '1px solid rgba(99,102,241,0.15)',
                                 textDecoration: 'none', transition: 'all 0.15s',
                               }}
@@ -477,12 +477,12 @@ function Bugs({ projectId, user }) {
                             <span style={{ color: 'rgba(148,163,184,0.25)', fontSize: 11 }}>—</span>
                           )}
                         </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)', fontSize: 12, color: 'rgba(148,163,184,0.5)' }}>
+                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)', fontSize: 12, color: 'var(--text-muted)' }}>
                           {bug.createdBy?.firstName
                             ? `${bug.createdBy.firstName} ${bug.createdBy.lastName}`
                             : <span style={{ opacity: 0.4 }}>—</span>}
                         </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.03)', textAlign: 'right' }}>
+                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)', textAlign: 'right' }}>
                           <div
                             style={{
                               display: 'flex', gap: 4, justifyContent: 'flex-end',
@@ -499,13 +499,13 @@ function Bugs({ projectId, user }) {
                                 setShowModal(true);
                               }}
                               style={{
-                                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                                background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
                                 borderRadius: 6, padding: '5px 7px', cursor: 'pointer',
-                                color: 'rgba(148,163,184,0.6)', display: 'flex', alignItems: 'center',
+                                color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center',
                                 transition: 'all 0.15s',
                               }}
-                              onMouseEnter={e => { e.currentTarget.style.color = '#818cf8'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(148,163,184,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                              onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary-400)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; e.currentTarget.style.background = 'var(--surface-interaction)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--surface-secondary)'; }}
                             >
                               <FiEdit2 size={13} />
                             </button>
@@ -513,13 +513,13 @@ function Bugs({ projectId, user }) {
                               title="Delete"
                               onClick={() => setShowDeleteConfirm(bug)}
                               style={{
-                                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                                background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
                                 borderRadius: 6, padding: '5px 7px', cursor: 'pointer',
-                                color: 'rgba(148,163,184,0.6)', display: 'flex', alignItems: 'center',
+                                color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center',
                                 transition: 'all 0.15s',
                               }}
                               onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.3)'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(148,163,184,0.6)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--surface-secondary)'; }}
                             >
                               <FiTrash2 size={13} />
                             </button>
@@ -545,7 +545,7 @@ function Bugs({ projectId, user }) {
               }}>
                 <FiFlag size={30} style={{ color: 'rgba(248,113,113,0.4)' }} />
               </div>
-              <h3 style={{ color: 'rgba(226,232,240,0.8)', margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}>
+              <h3 style={{ color: 'var(--text-secondary)', margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}>
                 No bugs found
               </h3>
               <p style={{ color: 'rgba(148,163,184,0.4)', margin: '0 0 24px', fontSize: 14, maxWidth: 360, lineHeight: 1.6 }}>
@@ -560,8 +560,8 @@ function Bugs({ projectId, user }) {
                     style={{
                       display: 'inline-flex', alignItems: 'center', gap: 6,
                       padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                      background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                      color: '#cbd5e1', cursor: 'pointer',
+                      background: 'var(--surface-secondary)', border: '1px solid var(--border-input)',
+                      color: 'var(--text-secondary)', cursor: 'pointer',
                     }}
                   >
                     <FiX size={14} /> Clear Filters
@@ -572,7 +572,7 @@ function Bugs({ projectId, user }) {
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                     padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    background: 'var(--gradient-danger)',
                     border: 'none', color: '#fff', cursor: 'pointer',
                     boxShadow: '0 2px 12px rgba(239,68,68,0.3)',
                   }}
@@ -597,8 +597,8 @@ function Bugs({ projectId, user }) {
               onClick={() => setShowViewModal(false)}
               style={{
                 padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                color: '#cbd5e1', cursor: 'pointer',
+                background: 'var(--surface-secondary)', border: '1px solid var(--border-input)',
+                color: 'var(--text-secondary)', cursor: 'pointer',
               }}
             >Close</button>
             <button
@@ -612,7 +612,7 @@ function Bugs({ projectId, user }) {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: 'linear-gradient(135deg, #6366f1, #7c3aed)',
+                background: 'var(--gradient-primary)',
                 border: 'none', color: '#fff', cursor: 'pointer',
               }}
             >
@@ -628,52 +628,52 @@ function Bugs({ projectId, user }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                 <span style={{
                   fontFamily: 'monospace', fontSize: 11, padding: '3px 9px', borderRadius: 5,
-                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-                  color: 'rgba(148,163,184,0.5)',
+                  background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
+                  color: 'var(--text-muted)',
                 }}>
                   BUG-{String(bugs.indexOf(viewingBug) + 1).padStart(3, '0')}
                 </span>
-                <FiChevronRight size={12} style={{ color: 'rgba(148,163,184,0.3)' }} />
-                <span style={{ fontSize: 12, color: 'rgba(148,163,184,0.5)' }}>Bug Details</span>
+                <FiChevronRight size={12} style={{ color: 'var(--text-light)' }} />
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Bug Details</span>
               </div>
-              <h2 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.3, letterSpacing: '-0.3px' }}>
+              <h2 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, letterSpacing: '-0.3px' }}>
                 {viewingBug.title}
               </h2>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
                   borderRadius: 8,
                 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Severity</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Severity</span>
                   <SeverityBadge severity={viewingBug.severity || 'Medium'} />
                 </div>
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
                   borderRadius: 8,
                 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Status</span>
+                  <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Status</span>
                   <StatusBadge status={viewingBug.status || 'Active'} />
                 </div>
                 {viewingBug.assignedTo && (
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
                     borderRadius: 8,
                   }}>
-                    <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Assigned</span>
-                    <span style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>{viewingBug.assignedTo}</span>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Assigned</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>{viewingBug.assignedTo}</span>
                   </div>
                 )}
                 {viewingBug.createdBy?.firstName && (
                   <div style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
                     borderRadius: 8,
                   }}>
-                    <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Reporter</span>
-                    <span style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                    <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Reporter</span>
+                    <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                       {viewingBug.createdBy.firstName} {viewingBug.createdBy.lastName}
                     </span>
                   </div>
@@ -685,16 +685,16 @@ function Bugs({ projectId, user }) {
             <div style={{ marginBottom: 24 }}>
               <h4 style={{
                 display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 10px',
-                fontSize: 12, fontWeight: 600, color: 'rgba(148,163,184,0.5)',
+                fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
                 textTransform: 'uppercase', letterSpacing: '0.8px',
               }}>
-                <FiFileText size={13} style={{ color: '#818cf8' }} />
+                <FiFileText size={13} style={{ color: 'var(--primary-400)' }} />
                 Description
               </h4>
               <div style={{
-                padding: 16, background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10,
-                color: 'rgba(203,213,225,0.8)', fontSize: 14, lineHeight: 1.7,
+                padding: 16, background: 'var(--surface-secondary)',
+                border: '1px solid var(--border-light)', borderRadius: 10,
+                color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7,
                 whiteSpace: 'pre-wrap',
               }}>
                 {viewingBug.description || 'No description provided.'}
@@ -706,16 +706,16 @@ function Bugs({ projectId, user }) {
               <div>
                 <h4 style={{
                   display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 10px',
-                  fontSize: 12, fontWeight: 600, color: 'rgba(148,163,184,0.5)',
+                  fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
                   textTransform: 'uppercase', letterSpacing: '0.8px',
                 }}>
-                  <FiPaperclip size={13} style={{ color: '#818cf8' }} />
+                  <FiPaperclip size={13} style={{ color: 'var(--primary-400)' }} />
                   Evidence
                 </h4>
                 {isVideoFile(getFileMimeType(viewingBug)) ? (
                   <div style={{
                     borderRadius: 10, overflow: 'hidden',
-                    border: '1px solid rgba(255,255,255,0.05)',
+                    border: '1px solid var(--border-light)',
                   }}>
                     <video
                       controls
@@ -723,13 +723,13 @@ function Bugs({ projectId, user }) {
                       src={api.getFileUrl(getSafeUrl(viewingBug))}
                     />
                     <div style={{
-                      padding: '10px 14px', background: 'rgba(255,255,255,0.02)',
-                      borderTop: '1px solid rgba(255,255,255,0.05)',
+                      padding: '10px 14px', background: 'var(--surface-secondary)',
+                      borderTop: '1px solid var(--border-light)',
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <FiVideo size={14} style={{ color: '#818cf8' }} />
-                        <span style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                        <FiVideo size={14} style={{ color: 'var(--primary-400)' }} />
+                        <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                           {getFileName(viewingBug) || 'Video Evidence'}
                         </span>
                       </div>
@@ -739,7 +739,7 @@ function Bugs({ projectId, user }) {
                         rel="noopener noreferrer"
                         style={{
                           display: 'inline-flex', alignItems: 'center', gap: 5,
-                          fontSize: 12, color: '#818cf8', textDecoration: 'none',
+                          fontSize: 12, color: 'var(--primary-400)', textDecoration: 'none',
                         }}
                       >
                         <FiExternalLink size={12} /> Open
@@ -753,29 +753,29 @@ function Bugs({ projectId, user }) {
                     rel="noopener noreferrer"
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14, padding: 16,
-                      border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10,
-                      textDecoration: 'none', background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid var(--border-light)', borderRadius: 10,
+                      textDecoration: 'none', background: 'var(--surface-secondary)',
                       transition: 'all 0.15s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-tertiary)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.borderColor = 'var(--border-light)'; }}
                   >
                     <div style={{
                       width: 42, height: 42, borderRadius: 10,
                       background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.15)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                     }}>
-                      <FiFileText size={18} style={{ color: '#818cf8' }} />
+                      <FiFileText size={18} style={{ color: 'var(--primary-400)' }} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: '#e2e8f0' }}>
+                      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-main)' }}>
                         {getFileName(viewingBug) || 'View Attachment'}
                       </div>
                       <div style={{ fontSize: 12, color: 'rgba(148,163,184,0.4)', marginTop: 2 }}>
                         Open in new tab
                       </div>
                     </div>
-                    <FiExternalLink size={16} style={{ color: 'rgba(148,163,184,0.3)', flexShrink: 0 }} />
+                    <FiExternalLink size={16} style={{ color: 'var(--text-light)', flexShrink: 0 }} />
                   </a>
                 )}
               </div>
@@ -797,8 +797,8 @@ function Bugs({ projectId, user }) {
               onClick={() => setShowModal(false)}
               style={{
                 padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                color: '#cbd5e1', cursor: 'pointer',
+                background: 'var(--surface-secondary)', border: '1px solid var(--border-input)',
+                color: 'var(--text-secondary)', cursor: 'pointer',
               }}
             >Cancel</button>
             <button
@@ -808,7 +808,7 @@ function Bugs({ projectId, user }) {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: isSaving ? 'rgba(239,68,68,0.5)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                background: isSaving ? 'rgba(239,68,68,0.5)' : 'var(--gradient-danger)',
                 border: 'none', color: '#fff',
                 cursor: isSaving ? 'not-allowed' : 'pointer',
                 boxShadow: isSaving ? 'none' : '0 2px 12px rgba(239,68,68,0.3)',
@@ -844,10 +844,10 @@ function Bugs({ projectId, user }) {
                 <FiFlag size={16} style={{ color: '#f87171' }} />
               </div>
               <div>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
+                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
                   {editingBug ? 'Update Bug' : 'Report New Bug'}
                 </h2>
-                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(148,163,184,0.5)' }}>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
                   {editingBug ? 'Modify the details below.' : 'Fill in the details to log a new defect.'}
                 </p>
               </div>
@@ -857,7 +857,7 @@ function Bugs({ projectId, user }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Title */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'rgba(203,213,225,0.7)' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 Title <span style={{ color: '#f87171' }}>*</span>
               </label>
               <input
@@ -873,7 +873,7 @@ function Bugs({ projectId, user }) {
 
             {/* Description */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'rgba(203,213,225,0.7)' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 Description
               </label>
               <textarea
@@ -890,7 +890,7 @@ function Bugs({ projectId, user }) {
             {/* Severity + Status */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <div>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'rgba(203,213,225,0.7)' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
                   Severity
                 </label>
                 <select
@@ -902,7 +902,7 @@ function Bugs({ projectId, user }) {
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'rgba(203,213,225,0.7)' }}>
+                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
                   Status
                 </label>
                 <select
@@ -917,7 +917,7 @@ function Bugs({ projectId, user }) {
 
             {/* Assignee */}
             <div style={{ position: 'relative' }}>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'rgba(203,213,225,0.7)' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 Assigned To
               </label>
               <div style={{ position: 'relative' }}>
@@ -942,8 +942,8 @@ function Bugs({ projectId, user }) {
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
                   marginTop: 4, borderRadius: 10, overflow: 'hidden',
-                  background: 'rgba(15,23,42,0.95)', backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'var(--surface-elevated)', backdropFilter: 'blur(20px)',
+                  border: '1px solid var(--border-input)',
                   boxShadow: '0 12px 40px rgba(0,0,0,0.4)', maxHeight: 200, overflowY: 'auto',
                 }}>
                   {assignedToResults.map(u => (
@@ -953,22 +953,22 @@ function Bugs({ projectId, user }) {
                       style={{
                         display: 'flex', alignItems: 'center', gap: 10,
                         padding: '10px 14px', cursor: 'pointer',
-                        borderBottom: '1px solid rgba(255,255,255,0.04)',
+                        borderBottom: '1px solid var(--border-light)',
                         transition: 'background 0.15s',
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.08)'; }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-interaction)'; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                     >
                       <div style={{
                         width: 30, height: 30, borderRadius: 8,
                         background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 11, fontWeight: 700, color: '#a5b4fc', flexShrink: 0,
+                        fontSize: 11, fontWeight: 700, color: 'var(--primary-300)', flexShrink: 0,
                       }}>
                         {u.firstName?.charAt(0)}{u.lastName?.charAt(0)}
                       </div>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-main)' }}>
                           {u.firstName} {u.lastName}
                         </div>
                         <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.4)' }}>{u.email}</div>
@@ -981,19 +981,19 @@ function Bugs({ projectId, user }) {
 
             {/* File upload */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'rgba(203,213,225,0.7)' }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
                 Attachment
-                <span style={{ color: 'rgba(148,163,184,0.3)', fontWeight: 400, marginLeft: 4 }}>Max 50MB</span>
+                <span style={{ color: 'var(--text-light)', fontWeight: 400, marginLeft: 4 }}>Max 50MB</span>
               </label>
               <div
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleFileDrop}
                 style={{
-                  border: `2px dashed ${dragOver ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                  border: `2px dashed ${dragOver ? 'rgba(99,102,241,0.5)' : 'var(--border-input)'}`,
                   borderRadius: 12, padding: '28px 20px', textAlign: 'center',
                   position: 'relative',
-                  background: dragOver ? 'rgba(99,102,241,0.04)' : 'rgba(255,255,255,0.01)',
+                  background: dragOver ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
                   transition: 'all 0.2s',
                 }}
               >
@@ -1024,7 +1024,7 @@ function Bugs({ projectId, user }) {
                         type="button"
                         onClick={e => { e.stopPropagation(); setSelectedFile(null); }}
                         style={{
-                          background: 'none', border: 'none', color: 'rgba(148,163,184,0.5)',
+                          background: 'none', border: 'none', color: 'var(--text-muted)',
                           cursor: 'pointer', padding: 2, marginLeft: 4, display: 'flex',
                         }}
                       >
@@ -1040,12 +1040,12 @@ function Bugs({ projectId, user }) {
                       border: '1px solid rgba(99,102,241,0.12)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <FiUpload size={18} style={{ color: '#818cf8' }} />
+                      <FiUpload size={18} style={{ color: 'var(--primary-400)' }} />
                     </div>
-                    <p style={{ color: 'rgba(203,213,225,0.6)', margin: '0 0 3px', fontSize: 13, fontWeight: 500 }}>
+                    <p style={{ color: 'var(--text-secondary)', margin: '0 0 3px', fontSize: 13, fontWeight: 500 }}>
                       Drag & drop or click to upload
                     </p>
-                    <p style={{ color: 'rgba(148,163,184,0.3)', margin: 0, fontSize: 11 }}>
+                    <p style={{ color: 'var(--text-light)', margin: 0, fontSize: 11 }}>
                       JPG, PNG, PDF, MP4, MOV, WebM, DOCX
                     </p>
                   </>
@@ -1064,13 +1064,13 @@ function Bugs({ projectId, user }) {
                   width: 28, height: 28, borderRadius: 7,
                   background: 'rgba(99,102,241,0.15)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700, color: '#a5b4fc', flexShrink: 0,
+                  fontSize: 10, fontWeight: 700, color: 'var(--primary-300)', flexShrink: 0,
                 }}>
                   {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, color: 'rgba(148,163,184,0.5)' }}>Reported by</div>
-                  <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>
+                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Reported by</div>
+                  <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
                     {user.firstName} {user.lastName}
                   </div>
                 </div>
@@ -1087,8 +1087,8 @@ function Bugs({ projectId, user }) {
         title="Delete Bug"
         message={
           <div>
-            <p style={{ color: 'rgba(203,213,225,0.8)', margin: '0 0 10px', fontSize: 14 }}>
-              Are you sure you want to delete <strong style={{ color: '#f1f5f9' }}>"{showDeleteConfirm?.title}"</strong>?
+            <p style={{ color: 'var(--text-secondary)', margin: '0 0 10px', fontSize: 14 }}>
+              Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>"{showDeleteConfirm?.title}"</strong>?
             </p>
             <div style={{
               display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px',

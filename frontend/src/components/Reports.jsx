@@ -148,10 +148,10 @@ function Reports({ testRuns, settings, projectId }) {
                     padding: '12px 14px', borderRadius: 8, cursor: 'pointer',
                     border: reportOptions.format === 'pdf'
                       ? '1px solid var(--dg-accent)'
-                      : '1px solid #e7e8ed',
-                    background: reportOptions.format === 'pdf'
-                      ? 'rgba(99,102,241,0.12)'
-                      : '#f5f5f9',
+                      : '1px solid var(--border-color)',
+                      background: reportOptions.format === 'pdf'
+                        ? 'rgba(99,102,241,0.12)'
+                        : 'var(--surface-secondary)',
                     display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.2s'
                   }}
                 >
@@ -170,10 +170,10 @@ function Reports({ testRuns, settings, projectId }) {
                     padding: '12px 14px', borderRadius: 8, cursor: 'pointer',
                     border: reportOptions.format === 'word'
                       ? '1px solid var(--dg-accent)'
-                      : '1px solid #e7e8ed',
-                    background: reportOptions.format === 'word'
-                      ? 'rgba(99,102,241,0.12)'
-                      : '#f5f5f9',
+                      : '1px solid var(--border-color)',
+                      background: reportOptions.format === 'word'
+                        ? 'rgba(99,102,241,0.12)'
+                        : 'var(--surface-secondary)',
                     display: 'flex', alignItems: 'center', gap: 10, transition: 'all 0.2s'
                   }}
                 >
@@ -229,7 +229,7 @@ function Reports({ testRuns, settings, projectId }) {
                   <div style={{
                     width: 28, height: 28, borderRadius: 6,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(99,102,241,0.08)', color: '#6366f1', fontSize: '0.8rem'
+                    background: 'var(--surface-interaction)', color: '#6366f1', fontSize: '0.8rem'
                   }}>
                     {f.icon}
                   </div>
@@ -296,7 +296,7 @@ function Reports({ testRuns, settings, projectId }) {
           <div style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             padding: '16px 20px',
-            borderBottom: '1px solid #e7e8ed'
+            borderBottom: '1px solid var(--border-color)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <FiArchive size={16} color="var(--text-muted)" />
@@ -328,7 +328,7 @@ function Reports({ testRuns, settings, projectId }) {
                             <div style={{
                               width: 32, height: 32, borderRadius: 8,
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              background: 'rgba(99,102,241,0.08)', color: '#6366f1'
+                              background: 'var(--surface-interaction)', color: '#6366f1'
                             }}>
                               {getFormatIcon(rep.format)}
                             </div>

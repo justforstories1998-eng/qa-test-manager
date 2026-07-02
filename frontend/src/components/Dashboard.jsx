@@ -68,10 +68,10 @@ const chartColors = {
   high: '#f97316',
   medium: '#6366f1',
   low: '#22c55e',
-  accent: '#818cf8',
+  accent: 'var(--primary-400)',
   accentFaded: 'rgba(129,140,248,0.10)',
-  grid: 'rgba(255,255,255,0.04)',
-  tick: 'rgba(148,163,184,0.45)',
+  grid: 'var(--surface-tertiary)',
+  tick: 'var(--text-muted)',
 };
 
 /* ═══════════ sub-components ═══════════ */
@@ -105,7 +105,7 @@ const AnimatedNumber = ({ value, suffix = '', duration = 900 }) => {
   );
 };
 
-const SparkLine = ({ data = [], color = '#818cf8', width = 80, height = 28 }) => {
+const SparkLine = ({ data = [], color = 'var(--primary-400)', width = 80, height = 28 }) => {
   if (data.length < 2) return null;
   const min = Math.min(...data);
   const max = Math.max(...data) || 1;
@@ -312,10 +312,10 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(15,23,42,0.95)',
-        titleColor: '#f1f5f9',
-        bodyColor: '#cbd5e1',
-        borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: 'var(--surface-elevated)',
+        titleColor: 'var(--text-primary)',
+        bodyColor: 'var(--text-secondary)',
+        borderColor: 'var(--border-input)',
         borderWidth: 1,
         padding: 10,
         cornerRadius: 8,
@@ -348,10 +348,10 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(15,23,42,0.95)',
-        titleColor: '#f1f5f9',
-        bodyColor: '#cbd5e1',
-        borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: 'var(--surface-elevated)',
+        titleColor: 'var(--text-primary)',
+        bodyColor: 'var(--text-secondary)',
+        borderColor: 'var(--border-input)',
         borderWidth: 1,
         padding: 10,
         cornerRadius: 8,
@@ -535,7 +535,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
     progressOuter: {
       height: '6px',
       borderRadius: '3px',
-      background: 'rgba(255,255,255,0.04)',
+      background: 'var(--surface-tertiary)',
       overflow: 'hidden',
       flex: 1,
     },
@@ -631,7 +631,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
                   justifyContent: 'center',
                 }}
               >
-                <FiActivity size={19} style={{ color: '#818cf8' }} />
+                <FiActivity size={19} style={{ color: 'var(--primary-400)' }} />
               </div>
               <div>
                 <h1 style={s.title}>Dashboard</h1>
@@ -698,7 +698,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
               icon: FiFileText,
               label: 'Total Test Cases',
               value: stats.totalTestCases,
-              color: '#818cf8',
+              color: 'var(--primary-400)',
               spark: trendData,
             },
             {
@@ -899,7 +899,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
               flexShrink: 0,
             }}
           >
-            <FiShield size={17} style={{ color: '#818cf8' }} />
+            <FiShield size={17} style={{ color: 'var(--primary-400)' }} />
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
@@ -913,7 +913,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
               <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)' }}>
                 Execution Coverage
               </span>
-              <span style={{ fontSize: '13px', fontWeight: 700, color: '#818cf8' }}>
+              <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary-400)' }}>
                 {executionRate}%
               </span>
             </div>
@@ -922,7 +922,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
               style={{
                 height: '10px',
                 borderRadius: '5px',
-                background: 'rgba(255,255,255,0.04)',
+                background: 'var(--surface-tertiary)',
                 overflow: 'hidden',
                 display: 'flex',
               }}
@@ -992,7 +992,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
           <div style={s.chartCard}>
             <div style={s.chartHeader}>
               <h3 style={s.chartTitle}>
-                <FiPieChart size={15} style={{ color: '#818cf8' }} />
+                <FiPieChart size={15} style={{ color: 'var(--primary-400)' }} />
                 Execution Health
               </h3>
               <span
@@ -1037,7 +1037,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
           <div style={s.chartCard}>
             <div style={s.chartHeader}>
               <h3 style={s.chartTitle}>
-                <FiBarChart2 size={15} style={{ color: '#818cf8' }} />
+                <FiBarChart2 size={15} style={{ color: 'var(--primary-400)' }} />
                 Priority Distribution
               </h3>
               <span
@@ -1065,7 +1065,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
           <div style={s.chartCard}>
             <div style={s.chartHeader}>
               <h3 style={s.chartTitle}>
-                <FiTrendingUp size={15} style={{ color: '#818cf8' }} />
+                <FiTrendingUp size={15} style={{ color: 'var(--primary-400)' }} />
                 Reliability Trend
               </h3>
               {trendData.length >= 2 && (
@@ -1109,14 +1109,14 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
           <div style={s.runCard}>
             <div style={s.chartHeader}>
               <h3 style={s.chartTitle}>
-                <FiPlay size={15} style={{ color: '#818cf8' }} />
+                <FiPlay size={15} style={{ color: 'var(--primary-400)' }} />
                 Recent Runs
               </h3>
               <span
                 style={{
                   fontSize: '11px',
                   background: 'rgba(99,102,241,0.12)',
-                  color: '#818cf8',
+                  color: 'var(--primary-400)',
                   padding: '3px 8px',
                   borderRadius: '5px',
                   fontWeight: 600,
@@ -1260,14 +1260,14 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
           <div style={s.chartCard}>
             <div style={s.chartHeader}>
               <h3 style={s.chartTitle}>
-                <FiLayers size={15} style={{ color: '#818cf8' }} />
+                <FiLayers size={15} style={{ color: 'var(--primary-400)' }} />
                 Test Suites Overview
               </h3>
               <span
                 style={{
                   fontSize: '11px',
                   background: 'rgba(99,102,241,0.12)',
-                  color: '#818cf8',
+                  color: 'var(--primary-400)',
                   padding: '3px 8px',
                   borderRadius: '5px',
                   fontWeight: 600,
@@ -1320,7 +1320,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
                         flexShrink: 0,
                       }}
                     >
-                      <FiFolder size={14} style={{ color: '#818cf8' }} />
+                      <FiFolder size={14} style={{ color: 'var(--primary-400)' }} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
@@ -1339,7 +1339,7 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
                       <div style={s.progressOuter}>
                         <div
                           style={{
-                            ...s.progressInner(barPct, '#818cf8'),
+                            ...s.progressInner(barPct, 'var(--primary-400)'),
                             background:
                               'linear-gradient(90deg, rgba(99,102,241,0.5), rgba(129,140,248,0.3))',
                           }}
