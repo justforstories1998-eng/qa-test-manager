@@ -3,7 +3,11 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL
   || (import.meta.env.PROD ? 'https://qa-test-manager-backend.onrender.com/api' : '/api');
 
-const apiClient = axios.create({ baseURL: API_BASE_URL, headers: { 'Content-Type': 'application/json' } });
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 30000
+});
 
 apiClient.interceptors.request.use(
   (config) => {
@@ -18,7 +22,9 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
     if (error.response?.status === 401 || error.response?.status === 403) {
       if (!error.config?.url?.includes('/auth/login')) {
         localStorage.removeItem('token');
@@ -26,6 +32,15 @@ apiClient.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+
+    if (error.response?.status === 0 || (error.message && error.message.includes('Network Error'))) {
+      if (!originalRequest._retry) {
+        originalRequest._retry = true;
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return apiClient(originalRequest);
+      }
+    }
+
     if (error.response?.data instanceof Blob) return Promise.resolve(error.response.data);
     return Promise.reject({ success: false, error: error.response?.data?.error || error.message });
   }

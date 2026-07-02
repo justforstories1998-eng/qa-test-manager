@@ -42,8 +42,19 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 
+// Handle CORS preflight OPTIONS requests BEFORE any other middleware
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Max-Age', '86400');
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
@@ -69,6 +80,14 @@ app.use('/api/admin', adminRouter);
 
 // API Routes
 app.use('/api', routes);
+
+// Catch-all 404 for undefined API routes
+app.all('/api/*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: `Route not found: ${req.method} ${req.originalUrl}`
+  });
+});
 
 // Global Error Handler
 app.use((err, req, res, next) => {
