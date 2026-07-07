@@ -37,7 +37,6 @@ function App() {
   const [testRuns, setTestRuns] = useState([]);
   const [statistics, setStatistics] = useState(null);
   const [settings, setSettings] = useState(null);
-  const [appLogo, setAppLogo] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1100);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -187,7 +186,6 @@ function App() {
       <Navbar
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-        logo={appLogo}
         user={user}
         onLogout={handleLogout}
         isAdmin={user?.role === 'admin'}
