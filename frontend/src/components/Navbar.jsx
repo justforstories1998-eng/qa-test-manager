@@ -1,735 +1,454 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  FiHome,
-  FiFileText,
-  FiPlay,
-  FiBarChart2,
-  FiSettings,
-  FiChevronLeft,
-  FiChevronRight,
-  FiAlertTriangle,
-  FiLogOut,
-  FiShield,
-  FiMenu,
-  FiX,
-  FiSun,
-  FiMoon,
-  FiBell,
-  FiChevronDown,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiInfo
+  FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings,
+  FiChevronLeft, FiChevronRight, FiAlertTriangle, FiLogOut,
+  FiShield, FiMenu, FiX, FiSun, FiMoon, FiBell, FiChevronDown,
+  FiAlertCircle, FiInfo, FiHelpCircle
 } from 'react-icons/fi';
 import api from '../api';
 
-function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, isMobileOpen, onToggleMobile }) {
+function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobileOpen, onToggleMobile }) {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
   const [notifications, setNotifications] = useState([]);
-  const location = useLocation();
+  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
 
+  const location = useLocation();
+  const userMenuRef = useRef(null);
+  const notifRef = useRef(null);
+
+  /* ── theme ── */
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
-    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+    const theme = isDarkMode ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
   }, [isDarkMode]);
 
+  /* ── notifications ── */
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
         const res = await api.getBugs();
         if (res.success && res.data) {
-          const recent = res.data.slice(0, 10).map(bug => ({
-            id: bug._id,
-            title: bug.title,
-            type: bug.severity === 'Critical' ? 'critical' : bug.severity === 'High' ? 'warning' : 'info',
-            time: new Date(bug.createdAt || bug.updatedAt).toLocaleDateString(),
-            read: false,
-          }));
-          setNotifications(recent);
+          setNotifications(
+            res.data.slice(0, 8).map(bug => ({
+              id: bug._id,
+              title: bug.title,
+              type: bug.severity === 'Critical' ? 'critical' : bug.severity === 'High' ? 'warning' : 'info',
+              time: new Date(bug.createdAt || bug.updatedAt).toLocaleDateString(),
+            }))
+          );
         }
-      } catch (e) {
-        setNotifications([]);
-      }
+      } catch { setNotifications([]); }
     };
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   }, []);
 
+  /* ── click-outside ── */
+  useEffect(() => {
+    const handler = (e) => {
+      if (showUserMenu && userMenuRef.current && !userMenuRef.current.contains(e.target)) setShowUserMenu(false);
+      if (showNotifications && notifRef.current && !notifRef.current.contains(e.target)) setShowNotifications(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showUserMenu, showNotifications]);
+
+  /* ── body scroll lock on mobile ── */
+  useEffect(() => {
+    document.body.style.overflow = isMobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileOpen]);
+
+  /* ── close menus on route change ── */
+  useEffect(() => {
+    setShowUserMenu(false);
+    setShowNotifications(false);
+  }, [location.pathname]);
+
+  /* ── helpers ── */
+  const getInitials = useCallback((u) => {
+    if (!u) return '??';
+    return `${u.firstName?.charAt(0) || ''}${u.lastName?.charAt(0) || ''}`.toUpperCase();
+  }, []);
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  };
+
   const navSections = [
     {
       title: 'Main',
       items: [
-        { path: '/', label: 'Dashboard', icon: FiHome, badge: null },
-        { path: '/test-cases', label: 'Test Cases', icon: FiFileText, badge: null },
-        { path: '/execution', label: 'Execution', icon: FiPlay, badge: null },
-      ]
+        { path: '/', label: 'Dashboard', icon: FiHome },
+        { path: '/test-cases', label: 'Test Cases', icon: FiFileText },
+        { path: '/execution', label: 'Execution', icon: FiPlay },
+      ],
     },
     {
       title: 'Analysis',
       items: [
-        { path: '/bugs', label: 'Bugs', icon: FiAlertTriangle, badge: 5, badgeColor: '#ef4444' },
-        { path: '/reports', label: 'Reports', icon: FiBarChart2, badge: null },
-      ]
+        { path: '/bugs', label: 'Bugs', icon: FiAlertTriangle, badge: notifications.length || null, badgeColor: '#ef4444' },
+        { path: '/reports', label: 'Reports', icon: FiBarChart2 },
+      ],
     },
     {
       title: 'System',
       items: [
-        { path: '/settings', label: 'Settings', icon: FiSettings, badge: null },
-        ...(isAdmin ? [{ path: '/admin', label: 'Admin Panel', icon: FiShield, badge: null }] : [])
-      ]
-    }
+        { path: '/settings', label: 'Settings', icon: FiSettings },
+        ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: FiShield }] : []),
+      ],
+    },
   ];
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (showUserMenu && !e.target.closest('.navbar-user-section')) {
-        setShowUserMenu(false);
-      }
-      if (showNotifications && !e.target.closest('.navbar-notifications')) {
-        setShowNotifications(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showUserMenu, showNotifications]);
+  /* ── computed widths ── */
+  const sidebarWidth = collapsed ? 72 : 260;
 
-  useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isMobileOpen]);
-
-  const getInitials = (u) => {
-    if (!u) return '??';
-    return `${u.firstName?.charAt(0) || ''}${u.lastName?.charAt(0) || ''}`.toUpperCase();
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  const styles = {
-    mobileMenuBtn: {
-      position: 'fixed',
-      top: '16px',
-      left: '16px',
-      zIndex: 1100,
-      width: '44px',
-      height: '44px',
-      borderRadius: '12px',
-      border: 'none',
-      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-      color: '#fff',
-      display: 'none',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    },
-    overlay: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'var(--surface-overlay)',
-      backdropFilter: 'blur(4px)',
-      WebkitBackdropFilter: 'blur(4px)',
-      zIndex: 1050,
-      opacity: isMobileOpen ? 1 : 0,
-      visibility: isMobileOpen ? 'visible' : 'hidden',
-      transition: 'all 0.3s ease',
-    },
-    sidebar: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      height: '100vh',
-        width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
-      background: 'var(--sidebar-bg)',
-      display: 'flex',
-      flexDirection: 'column',
-      zIndex: 1060,
-      transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-      borderRight: '1px solid var(--sidebar-border)',
-      overflow: 'hidden',
-    },
-    header: {
-      padding: collapsed ? '24px 16px 20px' : '24px 24px 20px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: collapsed ? 'center' : 'flex-start',
-      gap: '14px',
-      borderBottom: '1px solid var(--sidebar-border)',
-      minHeight: '80px',
-      flexShrink: 0,
-    },
-    logoWrapper: {
-      width: collapsed ? '42px' : 'auto',
-      height: '42px',
-      borderRadius: '12px',
-      background: 'transparent',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    logoShine: {
-      display: 'none',
-    },
-    logoImg: {
-      height: '36px',
-      width: 'auto',
-      objectFit: 'contain',
-      position: 'relative',
-      zIndex: 1,
-    },
-    logoImgCollapsed: {
-      height: '36px',
-      width: '36px',
-      objectFit: 'cover',
-      objectPosition: 'left center',
-      position: 'relative',
-      zIndex: 1,
-      borderRadius: '8px',
-    },
-    logoTextContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      opacity: collapsed ? 0 : 1,
-      transform: collapsed ? 'translateX(-10px)' : 'translateX(0)',
-      transition: 'all 0.3s ease',
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-    },
-    logoText: {
-      fontSize: '20px',
-      fontWeight: '800',
-      background: 'linear-gradient(135deg, #fff 0%, #c7d2fe 100%)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      letterSpacing: '-0.5px',
-      lineHeight: 1.2,
-    },
-    logoSubtext: {
-      fontSize: '10px',
-      color: 'var(--sidebar-text-muted)',
-      letterSpacing: '2px',
-      textTransform: 'uppercase',
-      fontWeight: '500',
-    },
-    quickActions: {
-      padding: collapsed ? '16px 12px' : '16px 20px',
-      display: 'flex',
-      gap: '8px',
-      justifyContent: collapsed ? 'center' : 'flex-start',
-      flexShrink: 0,
-    },
-    quickActionBtn: (isActive) => ({
-      width: '36px',
-      height: '36px',
-      borderRadius: '10px',
-      border: '1px solid var(--sidebar-border)',
-      background: isActive ? 'rgba(99, 102, 241, 0.15)' : 'var(--sidebar-hover)',
-      color: isActive ? '#818cf8' : 'var(--sidebar-text)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      position: 'relative',
-    }),
-    notificationDot: {
-      position: 'absolute',
-      top: '6px',
-      right: '6px',
-      width: '8px',
-      height: '8px',
-      borderRadius: '50%',
-      background: '#ef4444',
-      border: '2.5px solid var(--surface-elevated)',
-    },
-    scrollArea: {
-      flex: 1,
-      overflowY: 'auto',
-      overflowX: 'hidden',
-      padding: '8px 0',
-      scrollbarWidth: 'thin',
-      scrollbarColor: 'var(--sidebar-border) transparent',
-    },
-    sectionTitle: {
-      fontSize: '10px',
-      fontWeight: '600',
-      color: 'var(--sidebar-text-muted)',
-      letterSpacing: '1.5px',
-      textTransform: 'uppercase',
-      padding: collapsed ? '20px 0 8px' : '20px 28px 8px',
-      opacity: collapsed ? 0 : 1,
-      height: collapsed ? '12px' : 'auto',
-      transition: 'opacity 0.3s ease',
-    },
-    navLink: (isActive, isHovered) => ({
-      display: 'flex',
-      alignItems: 'center',
-      gap: '14px',
-      padding: collapsed ? '12px 0' : '11px 24px',
-      margin: collapsed ? '2px 12px' : '2px 12px',
-      borderRadius: '12px',
-      textDecoration: 'none',
-      color: isActive ? '#fff' : isHovered ? 'var(--sidebar-text-bright)' : 'var(--sidebar-text)',
-      background: isActive
-        ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%)'
-        : isHovered
-          ? 'var(--sidebar-hover)'
-          : 'transparent',
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-      position: 'relative',
-      justifyContent: collapsed ? 'center' : 'flex-start',
-      cursor: 'pointer',
-      borderLeft: isActive ? 'none' : 'none',
-      overflow: 'hidden',
-    }),
-    activeIndicator: {
-      position: 'absolute',
-      left: 0,
-      top: '50%',
-      transform: 'translateY(-50%)',
-      width: '3px',
-      height: '60%',
-      borderRadius: '0 4px 4px 0',
-      background: 'linear-gradient(180deg, #6366f1, #8b5cf6)',
-      boxShadow: '0 0 12px rgba(99, 102, 241, 0.5)',
-    },
-    navIconWrapper: (isActive) => ({
-      width: '38px',
-      height: '38px',
-      borderRadius: '10px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: isActive
-        ? 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)'
-        : 'var(--sidebar-hover)',
-      transition: 'all 0.25s ease',
-      flexShrink: 0,
-      boxShadow: isActive ? '0 4px 12px rgba(99, 102, 241, 0.35)' : 'none',
-    }),
-    navLabel: {
-      fontSize: '14px',
-      fontWeight: '500',
-      opacity: collapsed ? 0 : 1,
-      transform: collapsed ? 'translateX(-10px)' : 'translateX(0)',
-      transition: 'all 0.3s ease',
-      whiteSpace: 'nowrap',
-      flex: 1,
-    },
-    badge: (color) => ({
-      padding: '2px 8px',
-      borderRadius: '10px',
-      fontSize: '11px',
-      fontWeight: '700',
-      background: `${color}20`,
-      color: color,
-      opacity: collapsed ? 0 : 1,
-      transition: 'opacity 0.3s ease',
-      letterSpacing: '0.5px',
-    }),
-    tooltip: {
-      position: 'absolute',
-      left: '100%',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      marginLeft: '16px',
-      padding: '8px 14px',
-      background: 'var(--surface-elevated)',
-      color: '#fff',
-      borderRadius: '8px',
-      fontSize: '13px',
-      fontWeight: '500',
-      whiteSpace: 'nowrap',
-      boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
-      zIndex: 1100,
-      pointerEvents: 'none',
-      border: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    tooltipArrow: {
-      position: 'absolute',
-      left: '-5px',
-      top: '50%',
-      transform: 'translateY(-50%) rotate(45deg)',
-      width: '10px',
-      height: '10px',
-      background: 'var(--surface-elevated)',
-      borderLeft: '1px solid rgba(255, 255, 255, 0.1)',
-      borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-    },
-    userSection: {
-      padding: collapsed ? '16px 12px' : '16px 16px',
-      borderTop: '1px solid var(--sidebar-border)',
-      position: 'relative',
-      flexShrink: 0,
-    },
-    userCard: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      padding: collapsed ? '10px 0' : '10px 12px',
-      borderRadius: '14px',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      justifyContent: collapsed ? 'center' : 'flex-start',
-      background: showUserMenu ? 'var(--sidebar-hover)' : 'transparent',
-    },
-    avatar: {
-      width: '40px',
-      height: '40px',
-      borderRadius: '12px',
-      background: 'linear-gradient(135deg, #6366f1 0%, #a78bfa 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '14px',
-      fontWeight: '700',
-      color: '#fff',
-      flexShrink: 0,
-      position: 'relative',
-      boxShadow: '0 2px 10px rgba(99, 102, 241, 0.3)',
-    },
-    onlineDot: {
-      position: 'absolute',
-      bottom: '-1px',
-      right: '-1px',
-      width: '12px',
-      height: '12px',
-      borderRadius: '50%',
-      background: '#22c55e',
-      border: '2.5px solid var(--surface-elevated)',
-    },
-    userInfo: {
-      flex: 1,
-      opacity: collapsed ? 0 : 1,
-      transition: 'opacity 0.3s ease',
-      overflow: 'hidden',
-      minWidth: 0,
-    },
-    userName: {
-      fontSize: '14px',
-      fontWeight: '600',
-      color: 'var(--sidebar-text-bright)',
-      lineHeight: 1.3,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-    },
-    userRole: {
-      fontSize: '11px',
-      color: 'var(--sidebar-text-muted)',
-      fontWeight: '500',
-      whiteSpace: 'nowrap',
-    },
-    userMenuDropdown: {
-      position: 'absolute',
-      bottom: '100%',
-      left: '12px',
-      right: '12px',
-      marginBottom: '8px',
-      background: 'var(--surface-elevated)',
-      borderRadius: '14px',
-      border: '1px solid var(--sidebar-border)',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-      overflow: 'hidden',
-      opacity: showUserMenu ? 1 : 0,
-      transform: showUserMenu ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.97)',
-      visibility: showUserMenu ? 'visible' : 'hidden',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      zIndex: 1200,
-    },
-    userMenuHeader: {
-      padding: '16px 16px 12px',
-      borderBottom: '1px solid var(--sidebar-border)',
-    },
-    userMenuGreeting: {
-      fontSize: '11px',
-      color: 'var(--sidebar-text-muted)',
-      fontWeight: '500',
-      marginBottom: '2px',
-    },
-    userMenuName: {
-      fontSize: '15px',
-      fontWeight: '700',
-      color: 'var(--sidebar-text-bright)',
-    },
-    userMenuEmail: {
-      fontSize: '12px',
-      color: 'var(--sidebar-text-muted)',
-      marginTop: '4px',
-    },
-    userMenuItem: (isDestructive) => ({
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px',
-      padding: '11px 16px',
-      color: isDestructive ? '#f87171' : 'rgba(203, 213, 225, 0.9)',
-      cursor: 'pointer',
-      transition: 'all 0.15s ease',
-      fontSize: '13px',
-      fontWeight: '500',
-      background: 'transparent',
-      border: 'none',
-      width: '100%',
-      textAlign: 'left',
-    }),
-    collapseBtn: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: collapsed ? '40px' : '100%',
-      height: '40px',
-      margin: collapsed ? '8px auto 16px' : '8px 16px 16px',
-      borderRadius: '10px',
-      border: '1px solid var(--sidebar-border)',
-      background: 'var(--sidebar-hover)',
-      color: 'var(--sidebar-text-muted)',
-      cursor: 'pointer',
-      transition: 'all 0.2s ease',
-      gap: '8px',
-      fontSize: '12px',
-      fontWeight: '500',
-      flexShrink: 0,
-    },
-    notificationDropdown: {
-      position: 'absolute',
-      bottom: '100%',
-      right: '0',
-      marginBottom: '8px',
-      width: '320px',
-      background: 'var(--surface-elevated)',
-      borderRadius: '14px',
-      border: '1px solid var(--sidebar-border)',
-      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.4)',
-      overflow: 'hidden',
-      opacity: showNotifications ? 1 : 0,
-      transform: showNotifications ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.97)',
-      visibility: showNotifications ? 'visible' : 'hidden',
-      transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-      zIndex: 1200,
-    },
-    notificationHeader: {
-      padding: '14px 16px',
-      borderBottom: '1px solid var(--sidebar-border)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    },
-    notificationTitle: {
-      fontSize: '14px',
-      fontWeight: '700',
-      color: 'var(--sidebar-text-bright)',
-    },
-    notificationBadge: {
-      padding: '2px 8px',
-      borderRadius: '10px',
-      fontSize: '11px',
-      fontWeight: '700',
-      background: 'rgba(239, 68, 68, 0.15)',
-      color: '#f87171',
-    },
-    notificationItem: {
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: '12px',
-      padding: '12px 16px',
-      borderBottom: '1px solid var(--sidebar-border)',
-      cursor: 'pointer',
-      transition: 'background 0.15s ease',
-    },
-    notificationIcon: (type) => ({
-      width: '32px',
-      height: '32px',
-      borderRadius: '8px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: 0,
-      background: type === 'critical' ? 'rgba(239, 68, 68, 0.15)' : type === 'warning' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(99, 102, 241, 0.15)',
-      color: type === 'critical' ? '#f87171' : type === 'warning' ? '#fbbf24' : '#818cf8',
-    }),
-    notificationText: {
-      flex: 1,
-      minWidth: 0,
-    },
-    notificationItemTitle: {
-      fontSize: '13px',
-      fontWeight: '600',
-      color: 'var(--sidebar-text-bright)',
-      lineHeight: 1.3,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-    },
-    notificationItemTime: {
-      fontSize: '11px',
-      color: 'var(--sidebar-text-muted)',
-      marginTop: '2px',
-    },
-    notificationEmpty: {
-      padding: '30px 16px',
-      textAlign: 'center',
-      color: 'var(--sidebar-text-muted)',
-      fontSize: '13px',
-    },
-  };
-
+  /* ═══════════════════ RENDER ═══════════════════ */
   return (
     <>
-      {/* Mobile hamburger */}
+      {/* ── Mobile hamburger ── */}
       <button
-        style={styles.mobileMenuBtn}
         className="navbar-mobile-btn"
         onClick={onToggleMobile}
         aria-label="Toggle menu"
+        style={{
+          position: 'fixed', top: 14, left: 14, zIndex: 1100,
+          width: 42, height: 42, borderRadius: 11, border: 'none',
+          background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+          color: '#fff', cursor: 'pointer',
+          boxShadow: '0 4px 15px rgba(99,102,241,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          transition: 'all 0.2s',
+        }}
       >
-        {isMobileOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+        {isMobileOpen ? <FiX size={18} /> : <FiMenu size={18} />}
       </button>
 
-      {/* Overlay */}
-      <div style={styles.overlay} onClick={onToggleMobile} />
+      {/* ── Overlay ── */}
+      <div
+        onClick={onToggleMobile}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 1050,
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+          opacity: isMobileOpen ? 1 : 0,
+          visibility: isMobileOpen ? 'visible' : 'hidden',
+          transition: 'all 0.3s ease',
+        }}
+      />
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <nav
-        style={styles.sidebar}
         className={`navbar-sidebar ${isMobileOpen ? 'navbar-mobile-open' : ''}`}
+        style={{
+          position: 'fixed', top: 0, left: 0, height: '100vh',
+          width: sidebarWidth,
+          background: 'var(--sidebar-bg, linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%))',
+          display: 'flex', flexDirection: 'column',
+          zIndex: 1060,
+          transition: 'width 0.3s cubic-bezier(0.4,0,0.2,1)',
+          borderRight: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+          overflow: 'hidden',
+        }}
       >
-        {/* Header */}
-        <div style={styles.header}>
-          <div style={styles.logoWrapper}>
+        {/* ──── Logo header ──── */}
+        <div style={{
+          padding: collapsed ? '20px 0' : '20px 20px',
+          display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start',
+          gap: 12, minHeight: 72, flexShrink: 0,
+          borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+        }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
             <img
               src="/logo.jpg"
               alt="QALogs"
-              style={collapsed ? styles.logoImgCollapsed : styles.logoImg}
+              style={{
+                width: collapsed ? 38 : 'auto',
+                height: 38,
+                objectFit: collapsed ? 'cover' : 'contain',
+                objectPosition: 'center',
+                borderRadius: 10,
+              }}
             />
           </div>
-          {!collapsed && (
-            <div style={styles.logoTextContainer}>
-              <span style={styles.logoText}>QALogs</span>
-              <span style={styles.logoSubtext}>Test Management</span>
+          <div style={{
+            opacity: collapsed ? 0 : 1,
+            width: collapsed ? 0 : 'auto',
+            overflow: 'hidden',
+            transition: 'opacity 0.25s ease, width 0.3s ease',
+            whiteSpace: 'nowrap',
+          }}>
+            <div style={{
+              fontSize: 18, fontWeight: 800, letterSpacing: '-0.5px', lineHeight: 1.2,
+              background: 'linear-gradient(135deg, #fff, #c7d2fe)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>
+              QALogs
             </div>
-          )}
+            <div style={{
+              fontSize: 9, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: 500,
+              color: 'var(--sidebar-text-muted, rgba(148,163,184,0.5))',
+            }}>
+              Test Management
+            </div>
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div style={styles.quickActions}>
-          {!collapsed && (
-            <>
-              <div style={{ position: 'relative' }} className="navbar-notifications">
-                <button
-                  style={styles.quickActionBtn(notifications.length > 0)}
-                  onClick={() => { setShowNotifications(!showNotifications); setShowUserMenu(false); }}
-                  title="Notifications"
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-border)'; e.currentTarget.style.color = '#fff'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = notifications.length > 0 ? 'rgba(99,102,241,0.15)' : 'var(--sidebar-hover)'; e.currentTarget.style.color = notifications.length > 0 ? '#818cf8' : 'var(--sidebar-text)'; }}
-                >
-                  <FiBell size={16} />
-                  {notifications.length > 0 && <div style={styles.notificationDot} />}
-                </button>
-                <div style={styles.notificationDropdown}>
-                  <div style={styles.notificationHeader}>
-                    <span style={styles.notificationTitle}>Notifications</span>
-                    {notifications.length > 0 && <span style={styles.notificationBadge}>{notifications.length}</span>}
-                  </div>
-                  {notifications.length === 0 ? (
-                    <div style={styles.notificationEmpty}>No new notifications</div>
-                  ) : (
-                    notifications.map((n, i) => (
-                      <div
-                        key={n.id || i}
-                        style={styles.notificationItem}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
-                      >
-                        <div style={styles.notificationIcon(n.type)}>
-                          {n.type === 'critical' ? <FiAlertCircle size={16} /> : n.type === 'warning' ? <FiAlertTriangle size={16} /> : <FiInfo size={16} />}
-                        </div>
-                        <div style={styles.notificationText}>
-                          <div style={styles.notificationItemTitle}>{n.title}</div>
-                          <div style={styles.notificationItemTime}>{n.time}</div>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+        {/* ──── Quick actions ──── */}
+        <div style={{
+          padding: collapsed ? '12px 0' : '12px 16px',
+          display: 'flex', gap: 6,
+          justifyContent: 'center',
+          flexShrink: 0,
+          borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+        }}>
+          {/* Notifications */}
+          <div ref={notifRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => { setShowNotifications(p => !p); setShowUserMenu(false); }}
+              title="Notifications"
+              style={{
+                width: 34, height: 34, borderRadius: 8, border: 'none',
+                background: showNotifications ? 'rgba(99,102,241,0.2)' : 'var(--sidebar-hover, rgba(255,255,255,0.04))',
+                color: showNotifications ? '#818cf8' : 'var(--sidebar-text, rgba(148,163,184,0.7))',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative', transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { if (!showNotifications) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#e2e8f0'; } }}
+              onMouseLeave={e => { if (!showNotifications) { e.currentTarget.style.background = 'var(--sidebar-hover, rgba(255,255,255,0.04))'; e.currentTarget.style.color = 'var(--sidebar-text, rgba(148,163,184,0.7))'; } }}
+            >
+              <FiBell size={15} />
+              {notifications.length > 0 && (
+                <span style={{
+                  position: 'absolute', top: 4, right: 4,
+                  width: 7, height: 7, borderRadius: '50%',
+                  background: '#ef4444', border: '2px solid var(--sidebar-bg, #0f172a)',
+                }} />
+              )}
+            </button>
+
+            {/* Notification dropdown */}
+            <div style={{
+              position: 'absolute',
+              [collapsed ? 'left' : 'left']: collapsed ? '100%' : 0,
+              bottom: collapsed ? 'auto' : '100%',
+              top: collapsed ? 0 : 'auto',
+              marginLeft: collapsed ? 12 : 0,
+              marginBottom: collapsed ? 0 : 8,
+              width: 300, maxHeight: 400, overflowY: 'auto',
+              background: 'var(--surface-elevated, #1e293b)',
+              borderRadius: 12, border: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
+              opacity: showNotifications ? 1 : 0,
+              transform: showNotifications ? 'scale(1)' : 'scale(0.95)',
+              visibility: showNotifications ? 'visible' : 'hidden',
+              transition: 'all 0.2s cubic-bezier(0.4,0,0.2,1)',
+              zIndex: 1200,
+            }}>
+              <div style={{
+                padding: '12px 14px', borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--sidebar-text-bright, #f1f5f9)' }}>Notifications</span>
+                {notifications.length > 0 && (
+                  <span style={{
+                    padding: '2px 7px', borderRadius: 8, fontSize: 10, fontWeight: 700,
+                    background: 'rgba(239,68,68,0.15)', color: '#f87171',
+                  }}>
+                    {notifications.length}
+                  </span>
+                )}
               </div>
-              <button
-                style={styles.quickActionBtn(isDarkMode)}
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                title="Toggle theme"
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99, 102, 241, 0.2)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = isDarkMode ? 'rgba(99, 102, 241, 0.15)' : 'var(--sidebar-hover)'; }}
-              >
-                {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-              </button>
-            </>
-          )}
+              {notifications.length === 0 ? (
+                <div style={{ padding: '30px 14px', textAlign: 'center', color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))', fontSize: 12 }}>
+                  No new notifications
+                </div>
+              ) : (
+                notifications.map((n, i) => (
+                  <div
+                    key={n.id || i}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                      padding: '10px 14px', cursor: 'pointer',
+                      borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.04))',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                  >
+                    <div style={{
+                      width: 28, height: 28, borderRadius: 7, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: n.type === 'critical' ? 'rgba(239,68,68,0.12)' : n.type === 'warning' ? 'rgba(245,158,11,0.12)' : 'rgba(99,102,241,0.12)',
+                      color: n.type === 'critical' ? '#f87171' : n.type === 'warning' ? '#fbbf24' : '#818cf8',
+                    }}>
+                      {n.type === 'critical' ? <FiAlertCircle size={14} /> : n.type === 'warning' ? <FiAlertTriangle size={14} /> : <FiInfo size={14} />}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 12, fontWeight: 500, color: 'var(--sidebar-text-bright, #f1f5f9)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3,
+                      }}>{n.title}</div>
+                      <div style={{ fontSize: 10, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))', marginTop: 2 }}>{n.time}</div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Theme toggle */}
+          <button
+            onClick={() => setIsDarkMode(p => !p)}
+            title={isDarkMode ? 'Light mode' : 'Dark mode'}
+            style={{
+              width: 34, height: 34, borderRadius: 8, border: 'none',
+              background: isDarkMode ? 'rgba(99,102,241,0.15)' : 'var(--sidebar-hover, rgba(255,255,255,0.04))',
+              color: isDarkMode ? '#818cf8' : 'var(--sidebar-text, rgba(148,163,184,0.7))',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.2)'; e.currentTarget.style.color = '#a5b4fc'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = isDarkMode ? 'rgba(99,102,241,0.15)' : 'var(--sidebar-hover, rgba(255,255,255,0.04))'; e.currentTarget.style.color = isDarkMode ? '#818cf8' : 'var(--sidebar-text, rgba(148,163,184,0.7))'; }}
+          >
+            {isDarkMode ? <FiSun size={15} /> : <FiMoon size={15} />}
+          </button>
         </div>
 
-        {/* Navigation */}
-        <div style={styles.scrollArea} className="navbar-scroll-area">
+        {/* ──── Navigation ──── */}
+        <div className="navbar-scroll-area" style={{
+          flex: 1, overflowY: 'auto', overflowX: 'hidden',
+          padding: '6px 0',
+        }}>
           {navSections.map((section, sIdx) => (
             <div key={sIdx}>
               {section.items.length > 0 && (
-                <div style={styles.sectionTitle}>{section.title}</div>
+                <div style={{
+                  fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase',
+                  color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
+                  padding: collapsed ? '16px 0 6px' : '16px 24px 6px',
+                  textAlign: collapsed ? 'center' : 'left',
+                  opacity: collapsed ? 0 : 1,
+                  height: collapsed ? 8 : 'auto',
+                  transition: 'opacity 0.25s ease',
+                  overflow: 'hidden',
+                }}>
+                  {section.title}
+                </div>
               )}
               {section.items.map((item) => {
                 const isActive = location.pathname === item.path ||
                   (item.path !== '/' && location.pathname.startsWith(item.path));
                 const isHovered = hoveredItem === item.path;
-                const itemKey = item.path;
 
                 return (
-                  <div key={itemKey} style={{ position: 'relative' }}>
+                  <div key={item.path} style={{ position: 'relative' }}>
                     <NavLink
                       to={item.path}
-                      style={styles.navLink(isActive, isHovered)}
+                      style={{
+                        display: 'flex', alignItems: 'center',
+                        gap: collapsed ? 0 : 12,
+                        padding: collapsed ? '10px 0' : '10px 16px',
+                        margin: collapsed ? '2px 8px' : '2px 10px',
+                        borderRadius: 10,
+                        textDecoration: 'none',
+                        justifyContent: 'center',
+                        color: isActive ? '#fff' : isHovered ? 'var(--sidebar-text-bright, #e2e8f0)' : 'var(--sidebar-text, rgba(148,163,184,0.7))',
+                        background: isActive
+                          ? 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12))'
+                          : isHovered ? 'var(--sidebar-hover, rgba(255,255,255,0.04))' : 'transparent',
+                        transition: 'all 0.2s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
+                      }}
                       onMouseEnter={() => setHoveredItem(item.path)}
                       onMouseLeave={() => setHoveredItem(null)}
-                      onClick={() => {
-                        if (window.innerWidth < 768 && onToggleMobile) onToggleMobile();
-                      }}
+                      onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
                     >
-                      {isActive && <div style={styles.activeIndicator} />}
-                      <div style={styles.navIconWrapper(isActive)}>
-                        <item.icon size={18} color={isActive ? '#fff' : undefined} />
+                      {/* Active indicator */}
+                      {isActive && (
+                        <div style={{
+                          position: 'absolute', left: 0, top: '18%', bottom: '18%',
+                          width: 3, borderRadius: '0 3px 3px 0',
+                          background: 'linear-gradient(180deg, #6366f1, #8b5cf6)',
+                          boxShadow: '0 0 10px rgba(99,102,241,0.5)',
+                        }} />
+                      )}
+
+                      {/* Icon */}
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: isActive
+                          ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                          : 'var(--sidebar-hover, rgba(255,255,255,0.04))',
+                        boxShadow: isActive ? '0 3px 10px rgba(99,102,241,0.35)' : 'none',
+                        transition: 'all 0.25s ease',
+                      }}>
+                        <item.icon size={17} color={isActive ? '#fff' : undefined} />
                       </div>
-                      <span style={styles.navLabel}>{item.label}</span>
+
+                      {/* Label */}
+                      <span style={{
+                        fontSize: 13, fontWeight: 500,
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : 'auto',
+                        overflow: 'hidden',
+                        transition: 'opacity 0.25s ease, width 0.3s ease',
+                        whiteSpace: 'nowrap', flex: collapsed ? 'none' : 1,
+                      }}>
+                        {item.label}
+                      </span>
+
+                      {/* Badge */}
                       {item.badge && !collapsed && (
-                        <span style={styles.badge(item.badgeColor || '#6366f1')}>{item.badge}</span>
+                        <span style={{
+                          padding: '2px 7px', borderRadius: 8, fontSize: 10, fontWeight: 700,
+                          background: `${item.badgeColor || '#6366f1'}20`,
+                          color: item.badgeColor || '#6366f1',
+                          transition: 'opacity 0.25s ease',
+                        }}>
+                          {item.badge}
+                        </span>
                       )}
                     </NavLink>
 
-                    {/* Tooltip for collapsed state */}
+                    {/* Tooltip (collapsed only) */}
                     {collapsed && isHovered && (
-                      <div style={styles.tooltip}>
-                        <div style={styles.tooltipArrow} />
+                      <div style={{
+                        position: 'absolute', left: '100%', top: '50%',
+                        transform: 'translateY(-50%)', marginLeft: 12,
+                        padding: '7px 12px', borderRadius: 8,
+                        background: 'var(--surface-elevated, #1e293b)',
+                        border: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                        fontSize: 12, fontWeight: 500, color: '#fff',
+                        whiteSpace: 'nowrap', zIndex: 1100, pointerEvents: 'none',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}>
+                        <div style={{
+                          position: 'absolute', left: -4, top: '50%',
+                          transform: 'translateY(-50%) rotate(45deg)',
+                          width: 8, height: 8,
+                          background: 'var(--surface-elevated, #1e293b)',
+                          borderLeft: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                          borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                        }} />
                         {item.label}
                         {item.badge && (
-                          <span style={{ ...styles.badge(item.badgeColor || '#6366f1'), marginLeft: '8px', opacity: 1 }}>
-                            {item.badge}
-                          </span>
+                          <span style={{
+                            padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
+                            background: `${item.badgeColor || '#6366f1'}20`,
+                            color: item.badgeColor || '#6366f1',
+                          }}>{item.badge}</span>
                         )}
                       </div>
                     )}
@@ -740,124 +459,210 @@ function Navbar({ collapsed, onToggleCollapse, logo, user, onLogout, isAdmin, is
           ))}
         </div>
 
-        {/* User Section */}
+        {/* ──── User section ──── */}
         {user && (
-          <div style={styles.userSection} className="navbar-user-section">
-            {/* User Menu Dropdown */}
-            <div style={styles.userMenuDropdown}>
-              <div style={styles.userMenuHeader}>
-                <div style={styles.userMenuGreeting}>{getGreeting()}</div>
-                <div style={styles.userMenuName}>{user.firstName} {user.lastName}</div>
-                {user.email && <div style={styles.userMenuEmail}>{user.email}</div>}
+          <div ref={userMenuRef} style={{
+            padding: collapsed ? '12px 8px' : '12px 12px',
+            borderTop: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+            flexShrink: 0, position: 'relative',
+          }}>
+            {/* User menu dropdown */}
+            <div style={{
+              position: 'absolute',
+              bottom: '100%', left: collapsed ? '100%' : 8, right: collapsed ? 'auto' : 8,
+              marginBottom: collapsed ? 0 : 8,
+              marginLeft: collapsed ? 8 : 0,
+              width: collapsed ? 220 : 'auto',
+              background: 'var(--surface-elevated, #1e293b)',
+              borderRadius: 12, border: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+              boxShadow: '0 16px 40px rgba(0,0,0,0.35)',
+              overflow: 'hidden',
+              opacity: showUserMenu ? 1 : 0,
+              transform: showUserMenu ? 'translateY(0) scale(1)' : 'translateY(6px) scale(0.97)',
+              visibility: showUserMenu ? 'visible' : 'hidden',
+              transition: 'all 0.2s cubic-bezier(0.4,0,0.2,1)',
+              zIndex: 1200,
+            }}>
+              <div style={{
+                padding: '14px 14px 10px',
+                borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+              }}>
+                <div style={{ fontSize: 10, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))', fontWeight: 500, marginBottom: 2 }}>
+                  {getGreeting()}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--sidebar-text-bright, #f1f5f9)' }}>
+                  {user.firstName} {user.lastName}
+                </div>
+                {user.email && (
+                  <div style={{ fontSize: 11, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))', marginTop: 2 }}>
+                    {user.email}
+                  </div>
+                )}
               </div>
-              <div style={{ padding: '6px 0' }}>
-              </div>
-              <div style={{ borderTop: '1px solid var(--sidebar-border)', padding: '6px 0' }}>
+              <div style={{ padding: '4px 0' }}>
                 <button
-                  style={styles.userMenuItem(true)}
                   onClick={onLogout}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px', border: 'none', background: 'transparent',
+                    color: '#f87171', fontSize: 13, fontWeight: 500,
+                    cursor: 'pointer', textAlign: 'left', transition: 'background 0.15s',
+                  }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
                 >
-                  <FiLogOut size={15} /> Sign Out
+                  <FiLogOut size={14} /> Sign Out
                 </button>
               </div>
             </div>
 
-            {/* User Card */}
+            {/* User card */}
             <div
-              style={styles.userCard}
-              onClick={() => !collapsed && setShowUserMenu(!showUserMenu)}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; }}
+              onClick={() => { setShowUserMenu(p => !p); setShowNotifications(false); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: collapsed ? '8px 0' : '8px 10px',
+                borderRadius: 10, cursor: 'pointer',
+                justifyContent: collapsed ? 'center' : 'flex-start',
+                background: showUserMenu ? 'var(--sidebar-hover, rgba(255,255,255,0.04))' : 'transparent',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover, rgba(255,255,255,0.04))'; }}
               onMouseLeave={e => { if (!showUserMenu) e.currentTarget.style.background = 'transparent'; }}
             >
-              <div style={styles.avatar}>
+              {/* Avatar */}
+              <div style={{
+                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                background: 'linear-gradient(135deg, #6366f1, #a78bfa)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 13, fontWeight: 700, color: '#fff', position: 'relative',
+                boxShadow: '0 2px 8px rgba(99,102,241,0.3)',
+              }}>
                 {getInitials(user)}
-                <div style={styles.onlineDot} />
+                <span style={{
+                  position: 'absolute', bottom: -1, right: -1,
+                  width: 10, height: 10, borderRadius: '50%',
+                  background: '#22c55e',
+                  border: '2px solid var(--sidebar-bg, #0f172a)',
+                }} />
               </div>
+
+              {/* Name / role */}
+              <div style={{
+                opacity: collapsed ? 0 : 1,
+                width: collapsed ? 0 : 'auto',
+                overflow: 'hidden', flex: collapsed ? 'none' : 1,
+                transition: 'opacity 0.25s ease, width 0.3s ease',
+                minWidth: 0,
+              }}>
+                <div style={{
+                  fontSize: 13, fontWeight: 600, lineHeight: 1.3,
+                  color: 'var(--sidebar-text-bright, #f1f5f9)',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                }}>
+                  {user.firstName} {user.lastName}
+                </div>
+                <div style={{
+                  fontSize: 10, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
+                  fontWeight: 500, whiteSpace: 'nowrap',
+                }}>
+                  {user.role === 'admin' ? '🛡️ Admin' : '👤 Member'}
+                </div>
+              </div>
+
+              {/* Chevron */}
               {!collapsed && (
-                <>
-                  <div style={styles.userInfo}>
-                    <div style={styles.userName}>{user.firstName} {user.lastName}</div>
-                    <div style={styles.userRole}>
-                      {user.role === 'admin' ? '🛡️ Administrator' : '👤 Team Member'}
-                    </div>
-                  </div>
-                  <FiChevronDown
-                    size={14}
-                    style={{
-      color: 'var(--sidebar-text-muted)',
-                      transition: 'transform 0.2s ease',
-                      transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)',
-                      flexShrink: 0,
-                    }}
-                  />
-                </>
+                <FiChevronDown
+                  size={13}
+                  style={{
+                    color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
+                    transition: 'transform 0.2s ease',
+                    transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)',
+                    flexShrink: 0,
+                  }}
+                />
               )}
             </div>
           </div>
         )}
 
-        {/* Collapse Toggle */}
-        <button
-          style={styles.collapseBtn}
-          onClick={onToggleCollapse}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'var(--sidebar-border)';
-            e.currentTarget.style.color = '#fff';
-            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'var(--sidebar-hover)';
-            e.currentTarget.style.color = 'var(--sidebar-text-muted)';
-            e.currentTarget.style.borderColor = 'var(--sidebar-border)';
-          }}
-        >
-          {collapsed ? <FiChevronRight size={16} /> : (
-            <>
-              <FiChevronLeft size={16} />
-              <span>Collapse</span>
-            </>
-          )}
-        </button>
+        {/* ──── Collapse toggle ──── */}
+        <div style={{
+          padding: collapsed ? '8px' : '8px 12px',
+          flexShrink: 0,
+          borderTop: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+        }}>
+          <button
+            onClick={onToggleCollapse}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: collapsed ? 0 : 8,
+              width: '100%', height: 38,
+              borderRadius: 9,
+              border: '1px solid var(--sidebar-border, rgba(255,255,255,0.06))',
+              background: 'var(--sidebar-hover, rgba(255,255,255,0.03))',
+              color: 'var(--sidebar-text-muted, rgba(148,163,184,0.5))',
+              cursor: 'pointer',
+              fontSize: 11, fontWeight: 500,
+              transition: 'all 0.2s ease',
+              overflow: 'hidden',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+              e.currentTarget.style.color = 'var(--sidebar-text-bright, #e2e8f0)';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'var(--sidebar-hover, rgba(255,255,255,0.03))';
+              e.currentTarget.style.color = 'var(--sidebar-text-muted, rgba(148,163,184,0.5))';
+              e.currentTarget.style.borderColor = 'var(--sidebar-border, rgba(255,255,255,0.06))';
+            }}
+          >
+            {collapsed ? (
+              <FiChevronRight size={15} />
+            ) : (
+              <>
+                <FiChevronLeft size={15} />
+                <span style={{
+                  whiteSpace: 'nowrap',
+                  opacity: collapsed ? 0 : 1,
+                  transition: 'opacity 0.25s ease',
+                }}>Collapse</span>
+              </>
+            )}
+          </button>
+        </div>
       </nav>
 
-      {/* Dynamic CSS */}
+      {/* ── Dynamic CSS ── */}
       <style>{`
         .navbar-mobile-btn {
           display: none !important;
         }
-        
         @media (max-width: 768px) {
           .navbar-mobile-btn {
             display: flex !important;
           }
           .navbar-sidebar {
             transform: translateX(-100%);
-            width: 280px !important;
+            width: 272px !important;
           }
           .navbar-sidebar.navbar-mobile-open {
             transform: translateX(0) !important;
           }
         }
-        
         .navbar-scroll-area::-webkit-scrollbar {
-          width: 4px;
+          width: 3px;
         }
         .navbar-scroll-area::-webkit-scrollbar-track {
           background: transparent;
         }
         .navbar-scroll-area::-webkit-scrollbar-thumb {
-          background: var(--sidebar-border);
-          border-radius: 4px;
+          background: var(--sidebar-border, rgba(255,255,255,0.08));
+          border-radius: 3px;
         }
         .navbar-scroll-area::-webkit-scrollbar-thumb:hover {
-          background: var(--sidebar-border);
-        }
-        
-        @keyframes navbarSlideIn {
-          from { opacity: 0; transform: translateX(-12px); }
-          to { opacity: 1; transform: translateX(0); }
+          background: rgba(255,255,255,0.15);
         }
       `}</style>
     </>
