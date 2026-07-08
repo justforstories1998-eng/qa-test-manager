@@ -683,8 +683,8 @@ button[style*="gradient"] {
    GLOBAL VISIBILITY — Force readable colors
    ══════════════════════════════════════════════ */
 
-/* Force visibility on all common elements */
-body, div, p, span, label, input, select, textarea {
+/* Force visibility on common elements (skip div/span — components manage their own text colors) */
+body, p, label, input, select, textarea {
   background-color: var(--bg-color);
   color: var(--text-color) !important;
 }
