@@ -189,7 +189,7 @@ function Login({ onLogin }) {
             <div className="login-brand-logo">
               <img src="/logo.jpg" alt="QALogs" />
             </div>
-            <h2 className="login-brand-title">QALogs</h2>
+            <h2 className="login-brand-title" style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, letterSpacing: '1.5px' }}>QALogs</h2>
             <p className="login-brand-tagline">Enterprise Test Management Platform</p>
 
             <div className="login-features">
@@ -215,7 +215,7 @@ function Login({ onLogin }) {
           <div className="login-form-wrapper">
             <div className="login-mobile-logo">
               <img src="/logo.jpg" alt="QALogs" />
-              <span>QALogs</span>
+              <span style={{ color: '#ffffff', WebkitTextFillColor: '#ffffff', fontFamily: "'Outfit', sans-serif", fontWeight: 700, letterSpacing: '1px' }}>QALogs</span>
             </div>
 
             <div className="login-form-header">
@@ -411,7 +411,7 @@ function Login({ onLogin }) {
           color: #ffffff !important;
           letter-spacing: 1.5px;
           line-height: 1.1;
-          font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+          font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif !important;
         }
         .login-brand-tagline {
           margin: 8px 0 0 !important;
