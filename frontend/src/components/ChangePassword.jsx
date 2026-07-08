@@ -51,9 +51,7 @@ function ChangePassword({ user, onPasswordChanged }) {
         <div className="login-card">
           <div className="login-header">
             <div className="login-logo">
-              <div className="logo-icon-large warning">
-                <FiAlertTriangle size={32} />
-              </div>
+              <img src="/logo.jpg" alt="QALogs" className="login-logo-img" />
             </div>
             <h1>Change Password</h1>
             <p>You must change your password before continuing</p>

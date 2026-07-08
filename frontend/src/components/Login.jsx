@@ -196,7 +196,7 @@ function Login({ onLogin }) {
         <div className="login-card">
           <div className="login-header">
             <div className="login-logo">
-              <img src="/logo.svg" alt="QALogs" className="login-logo-img" />
+              <img src="/logo.jpg" alt="QALogs" className="login-logo-img" />
             </div>
             <h1>QALogs</h1>
             <p>Sign in to your account</p>

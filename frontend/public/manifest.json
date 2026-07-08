@@ -3,15 +3,15 @@
   "name": "QALogs - Quality Assurance Management",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/logo.jpg",
       "sizes": "any",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any"
     },
     {
-      "src": "/logo.svg",
+      "src": "/logo.jpg",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/jpeg",
       "purpose": "any maskable"
     }
   ],
