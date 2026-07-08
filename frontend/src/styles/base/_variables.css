@@ -197,6 +197,11 @@
   --border-input: rgba(0, 0, 0, 0.08);
   --text-on-primary: #ffffff;
 
+  /* ── Global Visibility Aliases ── */
+  --bg-color: #f5f5f9;
+  --text-color: #1e293b;
+  --dropdown-border: #e7e8ed;
+
   /* ── Status Semantic Tokens ── */
   --color-pass: #10b981;
   --color-fail: #f43f5e;
@@ -309,4 +314,9 @@
 
   /* ── Overlay (Dark) ── */
   --overlay-bg: rgba(0, 0, 0, 0.6);
+
+  /* ── Global Visibility Aliases (Dark) ── */
+  --bg-color: #181a20;
+  --text-color: #e2e8f0;
+  --dropdown-border: #33344a;
 }

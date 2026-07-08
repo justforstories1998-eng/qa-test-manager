@@ -266,22 +266,6 @@
   padding: 8px;
 }
 
-/* Force select option visibility across all browsers/themes */
-select option {
-  background-color: var(--bg-card) !important;
-  color: var(--text-primary) !important;
-}
-
-select {
-  color: var(--text-primary) !important;
-  background-color: var(--bg-card) !important;
-}
-
-select:focus,
-select:active {
-  color: var(--text-primary) !important;
-}
-
 .dg-textarea {
   width: 100%;
   padding: 10px 14px;
@@ -693,4 +677,31 @@ button[style*="gradient"] {
   color: var(--text-secondary);
   gap: 12px;
   font-size: 14px;
+}
+
+/* ══════════════════════════════════════════════
+   GLOBAL VISIBILITY — Force readable colors
+   ══════════════════════════════════════════════ */
+
+/* Force visibility on all common elements */
+body, div, p, span, label, input, select, textarea {
+  background-color: var(--bg-color);
+  color: var(--text-color) !important;
+}
+
+/* Ensure borders are visible in dark mode */
+input, select {
+  border-color: var(--dropdown-border) !important;
+}
+
+/* Fix for standard dropdown arrows in dark mode */
+select {
+  appearance: auto;
+}
+
+/* Force select option visibility across all browsers/themes */
+select option {
+  background-color: var(--bg-color) !important;
+  color: var(--text-color) !important;
+  padding: 8px;
 }
