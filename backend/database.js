@@ -104,6 +104,7 @@ export async function initializeDatabase() {
 export const getAllProjects = () => Project.find().sort({ name: 1 });
 export const getProjectById = (id) => Project.findById(id);
 export const createProject = (data) => new Project(data).save();
+export const deleteProject = (id) => Project.findByIdAndDelete(id);
 export const getAllBugs = (projectId) => Bug.find({ projectId }).sort({ createdAt: -1 });
 export const createBug = (data) => new Bug(data).save();
 export const updateBug = (id, data) => Bug.findByIdAndUpdate(id, data, { new: true });

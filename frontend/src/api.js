@@ -78,6 +78,7 @@ const api = {
 
   getProjects: () => apiClient.get('/projects'),
   createProject: (data) => apiClient.post('/projects', data),
+  deleteProject: (id) => apiClient.delete(`/projects/${id}`),
 
   getBugs: (projectId) => apiClient.get('/bugs', { params: { projectId } }),
   createBug: (formData) => apiClient.post('/bugs', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),

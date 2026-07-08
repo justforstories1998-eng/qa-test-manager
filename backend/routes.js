@@ -4,7 +4,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import multerStorageCloudinary from 'multer-storage-cloudinary'; 
 import fs from 'fs';
 import {
-  getAllProjects, getProjectById, createProject,
+  getAllProjects, getProjectById, createProject, deleteProject,
   getAllBugs, createBug, updateBug, deleteBug,
   getAllTestSuites, createTestSuite, deleteTestSuite,
   getAllTestCases, getTestCasesBySuiteId, createTestCase, createTestCases, updateTestCase, deleteTestCase,
@@ -65,6 +65,7 @@ const csvUpload = multer({ dest: 'uploads/' });
 // ============================================
 router.get('/projects', async (req, res, next) => { try { res.json({ success: true, data: await getAllProjects() }); } catch (e) { next(e); } });
 router.post('/projects', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createProject(req.body) }); } catch (e) { next(e); } });
+router.delete('/projects/:id', async (req, res, next) => { try { await deleteProject(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // ============================================
 // USER SEARCH (For Bug Assignment Dropdown)

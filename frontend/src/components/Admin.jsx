@@ -93,6 +93,7 @@ function Admin({ projects = [] }) {
   const [projectSearchQuery, setProjectSearchQuery] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [confirmReset, setConfirmReset] = useState(null);
+  const [confirmDeleteProject, setConfirmDeleteProject] = useState(null);
   const [hoveredRow, setHoveredRow] = useState(null);
 
   const [userForm, setUserForm] = useState({ firstName: '', lastName: '', email: '', role: 'user', isActive: true });
@@ -146,6 +147,15 @@ function Admin({ projects = [] }) {
       setConfirmDelete(null);
       loadUsers();
     } catch (err) { toast.error(err.error || 'Failed to delete'); }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    try {
+      await api.deleteProject(projectId);
+      toast.success('Project deleted');
+      setConfirmDeleteProject(null);
+      window.location.reload();
+    } catch (err) { toast.error(err.error || 'Failed to delete project'); }
   };
 
   const handleResetPassword = async (userId) => {
@@ -605,19 +615,35 @@ function Admin({ projects = [] }) {
                             </div>
                           </td>
                           <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--table-border)', textAlign: 'right' }}>
-                            <button
-                              onClick={() => { setAssignForm({ projectId: pid, userIds: [] }); setShowAssignModal(true); }}
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 5,
-                                padding: '6px 12px', borderRadius: 7, fontSize: 12, fontWeight: 500,
-                                background: 'var(--accent-glow)', border: '1px solid var(--accent-badge-border)',
-                                color: 'var(--accent-color)', cursor: 'pointer', transition: 'all 0.15s',
-                              }}
-                              onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-badge-bg)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.background = 'var(--accent-glow)'; }}
-                            >
-                              <FiUserPlus size={12} /> Assign
-                            </button>
+                            <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                              <button
+                                onClick={() => { setAssignForm({ projectId: pid, userIds: [] }); setShowAssignModal(true); }}
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                                  padding: '6px 12px', borderRadius: 7, fontSize: 12, fontWeight: 500,
+                                  background: 'var(--accent-glow)', border: '1px solid var(--accent-badge-border)',
+                                  color: 'var(--accent-color)', cursor: 'pointer', transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-badge-bg)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.background = 'var(--accent-glow)'; }}
+                              >
+                                <FiUserPlus size={12} /> Assign
+                              </button>
+                              <button
+                                onClick={() => setConfirmDeleteProject(project)}
+                                title="Delete project"
+                                style={{
+                                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                  padding: '6px 8px', borderRadius: 7, fontSize: 12,
+                                  background: 'var(--btn-ghost-bg)', border: '1px solid var(--btn-ghost-border)',
+                                  color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.15s',
+                                }}
+                                onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.3)'; e.currentTarget.style.background = 'rgba(239,68,68,0.06)'; }}
+                                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--btn-ghost-border)'; e.currentTarget.style.background = 'var(--btn-ghost-bg)'; }}
+                              >
+                                <FiTrash2 size={13} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -998,6 +1024,31 @@ function Admin({ projects = [] }) {
         confirmLabel="Reset Password"
         danger={false}
         onConfirm={() => handleResetPassword(confirmReset?.id || confirmReset?._id)}
+      />
+
+      <ConfirmDialog
+        isOpen={!!confirmDeleteProject}
+        onClose={() => setConfirmDeleteProject(null)}
+        title="Delete Project"
+        message={
+          <div>
+            <p style={{ color: 'var(--text-secondary)', margin: '0 0 10px', fontSize: 14 }}>
+              Delete project <strong style={{ color: 'var(--text-primary)' }}>{confirmDeleteProject?.name}</strong>?
+            </p>
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px',
+              background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 8,
+            }}>
+              <FiAlertTriangle size={14} style={{ color: '#f87171', flexShrink: 0, marginTop: 1 }} />
+              <span style={{ color: '#f87171', fontSize: 13, lineHeight: 1.5 }}>
+                This will permanently delete the project and cannot be undone. All associated data will be removed.
+              </span>
+            </div>
+          </div>
+        }
+        confirmLabel="Delete Project"
+        danger
+        onConfirm={() => handleDeleteProject(confirmDeleteProject?._id || confirmDeleteProject?.id)}
       />
 
       {/* ── Theme-aware CSS variables ── */}
