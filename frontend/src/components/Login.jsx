@@ -297,6 +297,8 @@ function Login({ onLogin }) {
       </div>
 
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
         /* ═══════ RESET AGGRESSIVELY - override any global styles ═══════ */
         .login-page,
         .login-page * {
@@ -400,17 +402,16 @@ function Login({ onLogin }) {
         }
 
         .login-brand-title {
-          font-size: 30px !important;
-          font-weight: 800 !important;
+          font-size: 32px !important;
+          font-weight: 700 !important;
           margin: 0 !important;
           padding: 0 !important;
-          background: linear-gradient(135deg, #ffffff 0%, #c7d2fe 60%, #a5b4fc 100%) !important;
-          -webkit-background-clip: text !important;
-          background-clip: text !important;
-          -webkit-text-fill-color: transparent !important;
-          color: transparent !important;
-          letter-spacing: -0.6px;
+          background: none !important;
+          -webkit-text-fill-color: #ffffff !important;
+          color: #ffffff !important;
+          letter-spacing: 1.5px;
           line-height: 1.1;
+          font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
         }
         .login-brand-tagline {
           margin: 8px 0 0 !important;
@@ -482,11 +483,12 @@ function Login({ onLogin }) {
         }
         .login-mobile-logo span {
           font-size: 20px !important;
-          font-weight: 800 !important;
-          background: linear-gradient(135deg, #fff, #c7d2fe) !important;
-          -webkit-background-clip: text !important;
-          background-clip: text !important;
-          -webkit-text-fill-color: transparent !important;
+          font-weight: 700 !important;
+          background: none !important;
+          -webkit-text-fill-color: #ffffff !important;
+          color: #ffffff !important;
+          letter-spacing: 1px;
+          font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
         }
 
         .login-form-header {
