@@ -1,36 +1,27 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-const createTransporter = () => {
-  const isSendGrid = process.env.SMTP_HOST?.includes('sendgrid') || 
-                     (!process.env.SMTP_HOST && process.env.SMTP_USER);
-  
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
-    auth: {
-      user: isSendGrid ? 'apikey' : (process.env.SMTP_USER || ''),
-      pass: process.env.SMTP_PASS || ''
-    },
-    connectionTimeout: 30000,
-    greetingTimeout: 15000,
-    socketTimeout: 30000,
-  });
+const isConfigured = () => {
+  const key = process.env.SENDGRID_API_KEY || process.env.SMTP_PASS;
+  if (!key) {
+    console.log('⚠️ SendGrid not configured (no API key found)');
+    return false;
+  }
+  sgMail.setApiKey(key);
+  return true;
 };
 
+const getFromEmail = () => process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@example.com';
+const getAppUrl = () => process.env.APP_URL || 'http://localhost:3000';
+
 export const sendWelcomeEmail = async (user, tempPassword) => {
+  if (!isConfigured()) return { success: false, error: 'SendGrid not configured' };
+
   try {
-    const transporter = createTransporter();
-    if (!process.env.SMTP_PASS) {
-      console.log('⚠️ SMTP not configured (SMTP_PASS missing). Welcome email skipped for:', user.email);
-      return { success: false, error: 'SMTP not configured' };
-    }
+    console.log(`📧 Sending welcome email to ${user.email} via SendGrid API...`);
 
-    console.log(`📧 Sending welcome email to ${user.email} via ${process.env.SMTP_HOST || 'smtp.sendgrid.net'}...`);
-
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    await sgMail.send({
       to: user.email,
+      from: getFromEmail(),
       subject: 'Welcome to QALogs - Your Account Details',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -43,7 +34,7 @@ export const sendWelcomeEmail = async (user, tempPassword) => {
           </div>
           <p><strong>Important:</strong> Please log in and change your password immediately for security purposes.</p>
           <p style="margin-top: 20px;">
-            <a href="${process.env.APP_URL || 'http://localhost:3000'}" 
+            <a href="${getAppUrl()}" 
                style="background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Login Now
             </a>
@@ -53,28 +44,28 @@ export const sendWelcomeEmail = async (user, tempPassword) => {
           </p>
         </div>
       `
-    };
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`✅ Welcome email sent to: ${user.email}`, info.messageId);
+    console.log(`✅ Welcome email sent to: ${user.email}`);
     return { success: true };
   } catch (error) {
-    console.error('❌ Welcome email error:', error.message, error.code || '');
+    console.error('❌ Welcome email error:', error.message);
+    if (error.response?.body) {
+      console.error('SendGrid response:', JSON.stringify(error.response.body));
+    }
     return { success: false, error: error.message };
   }
 };
 
 export const sendBugAssignmentEmail = async (bug, assignedUser, createdByUser) => {
-  try {
-    const transporter = createTransporter();
-    if (!process.env.SMTP_PASS) {
-      console.log('⚠️ SMTP not configured. Bug assignment email skipped');
-      return { success: false, error: 'SMTP not configured' };
-    }
+  if (!isConfigured()) return { success: false, error: 'SendGrid not configured' };
 
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  try {
+    console.log(`📧 Sending bug assignment email to ${assignedUser.email}...`);
+
+    await sgMail.send({
       to: assignedUser.email,
+      from: getFromEmail(),
       subject: `Bug Assigned: ${bug.title}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -88,16 +79,15 @@ export const sendBugAssignmentEmail = async (bug, assignedUser, createdByUser) =
             ${bug.description ? `<p style="margin: 10px 0 0 0;"><strong>Description:</strong> ${bug.description}</p>` : ''}
           </div>
           <p style="margin-top: 20px;">
-            <a href="${process.env.APP_URL || 'http://localhost:3000'}/bugs" 
+            <a href="${getAppUrl()}/bugs" 
                style="background: #dc2626; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               View Bug
             </a>
           </p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
     console.log(`✅ Bug assignment email sent to: ${assignedUser.email}`);
     return { success: true };
   } catch (error) {
@@ -107,16 +97,14 @@ export const sendBugAssignmentEmail = async (bug, assignedUser, createdByUser) =
 };
 
 export const sendBugCreatedConfirmationEmail = async (bug, createdByUser) => {
-  try {
-    const transporter = createTransporter();
-    if (!process.env.SMTP_PASS) {
-      console.log('⚠️ SMTP not configured. Bug creation confirmation email skipped');
-      return { success: false, error: 'SMTP not configured' };
-    }
+  if (!isConfigured()) return { success: false, error: 'SendGrid not configured' };
 
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  try {
+    console.log(`📧 Sending bug creation confirmation to ${createdByUser.email}...`);
+
+    await sgMail.send({
       to: createdByUser.email,
+      from: getFromEmail(),
       subject: `Bug Created: ${bug.title}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -130,35 +118,32 @@ export const sendBugCreatedConfirmationEmail = async (bug, createdByUser) => {
             ${bug.description ? `<p style="margin: 10px 0 0 0;"><strong>Description:</strong> ${bug.description}</p>` : ''}
           </div>
           <p style="margin-top: 20px;">
-            <a href="${process.env.APP_URL || 'http://localhost:3000'}/bugs" 
+            <a href="${getAppUrl()}/bugs" 
                style="background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               View Bug
             </a>
           </p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Bug creation confirmation email sent to: ${createdByUser.email}`);
+    console.log(`✅ Bug creation confirmation sent to: ${createdByUser.email}`);
     return { success: true };
   } catch (error) {
-    console.error('❌ Bug creation confirmation email error:', error.message);
+    console.error('❌ Bug creation confirmation error:', error.message);
     return { success: false, error: error.message };
   }
 };
 
 export const sendProjectAssignmentEmail = async (user, project, assignedBy) => {
-  try {
-    const transporter = createTransporter();
-    if (!process.env.SMTP_PASS) {
-      console.log('⚠️ SMTP not configured. Project assignment email skipped');
-      return { success: false, error: 'SMTP not configured' };
-    }
+  if (!isConfigured()) return { success: false, error: 'SendGrid not configured' };
 
-    const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  try {
+    console.log(`📧 Sending project assignment email to ${user.email}...`);
+
+    await sgMail.send({
       to: user.email,
+      from: getFromEmail(),
       subject: `Project Assigned: ${project.name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -170,16 +155,15 @@ export const sendProjectAssignmentEmail = async (user, project, assignedBy) => {
             ${project.description ? `<p style="margin: 5px 0;">${project.description}</p>` : ''}
           </div>
           <p style="margin-top: 20px;">
-            <a href="${process.env.APP_URL || 'http://localhost:3000'}" 
+            <a href="${getAppUrl()}" 
                style="background: #059669; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
               Open QALogs
             </a>
           </p>
         </div>
       `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
     console.log(`✅ Project assignment email sent to: ${user.email}`);
     return { success: true };
   } catch (error) {

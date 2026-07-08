@@ -56,32 +56,36 @@ app.use('/uploads', express.static(uploadDir));
 // ============================================
 app.get('/api/test-smtp', async (req, res) => {
   try {
-    const nodemailer = await import('nodemailer');
-    const port = parseInt(process.env.SMTP_PORT || '587');
-    const transporter = nodemailer.default.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
-      port: port,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_HOST?.includes('sendgrid') ? 'apikey' : (process.env.SMTP_USER || ''),
-        pass: process.env.SMTP_PASS || ''
-      },
-      connectionTimeout: 30000,
-      greetingTimeout: 15000,
-      socketTimeout: 30000,
-    });
+    const sgMail = (await import('@sendgrid/mail')).default;
+    const apiKey = process.env.SENDGRID_API_KEY || process.env.SMTP_PASS;
+    const fromEmail = process.env.SMTP_FROM || process.env.SMTP_USER;
 
-    const info = await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: process.env.SMTP_FROM || process.env.SMTP_USER,
+    if (!apiKey) {
+      return res.json({ success: false, error: 'No API key found (SENDGRID_API_KEY or SMTP_PASS)' });
+    }
+    if (!fromEmail) {
+      return res.json({ success: false, error: 'No from email found (SMTP_FROM or SMTP_USER)' });
+    }
+
+    sgMail.setApiKey(apiKey);
+
+    console.log(`📧 Sending test email to ${fromEmail} via SendGrid API...`);
+
+    await sgMail.send({
+      to: fromEmail,
+      from: fromEmail,
       subject: 'QALogs SMTP Test',
       html: '<h3>SMTP is working!</h3><p>If you received this, email sending is configured correctly.</p>'
     });
 
-    res.json({ success: true, messageId: info.messageId, message: 'Test email sent successfully' });
+    console.log(`✅ Test email sent successfully to ${fromEmail}`);
+    res.json({ success: true, message: 'Test email sent to ' + fromEmail });
   } catch (error) {
-    console.error('SMTP Test Error:', error);
-    res.json({ success: false, error: error.message, code: error.code, command: error.command });
+    console.error('SMTP Test Error:', error.message);
+    if (error.response?.body) {
+      console.error('SendGrid response:', JSON.stringify(error.response.body));
+    }
+    res.json({ success: false, error: error.message, details: error.response?.body || null });
   }
 });
 
