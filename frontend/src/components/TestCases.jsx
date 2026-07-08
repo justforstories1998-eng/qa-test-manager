@@ -607,7 +607,7 @@ function TestCases({
                 cursor: "pointer",
                 fontSize: "13px",
                 fontWeight: !selectedSuiteId ? 600 : 500,
-                color: !selectedSuiteId ? "var(--text-on-dark)" : "var(--text-secondary)",
+                color: !selectedSuiteId ? "var(--text-active)" : "var(--text-secondary)",
                 background: !selectedSuiteId
                   ? "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08))"
                   : "transparent",
@@ -712,7 +712,7 @@ function TestCases({
                       cursor: "pointer",
                       fontSize: "13px",
                       fontWeight: isActive ? 600 : 400,
-                      color: isActive ? "var(--text-on-dark)" : "var(--text-secondary)",
+                      color: isActive ? "var(--text-active)" : "var(--text-secondary)",
                       background: isActive
                         ? "linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08))"
                         : "transparent",

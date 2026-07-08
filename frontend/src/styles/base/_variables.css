@@ -202,6 +202,9 @@
   --text-color: #1e293b;
   --dropdown-border: #e7e8ed;
 
+  /* ── Active/Selected Item Text ── */
+  --text-active: #111827;
+
   /* ── Status Semantic Tokens ── */
   --color-pass: #10b981;
   --color-fail: #f43f5e;
@@ -319,4 +322,7 @@
   --bg-color: #181a20;
   --text-color: #e2e8f0;
   --dropdown-border: #33344a;
+
+  /* ── Active/Selected Item Text (Dark) ── */
+  --text-active: #ffffff;
 }
