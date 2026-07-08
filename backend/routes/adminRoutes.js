@@ -61,7 +61,7 @@ adminRouter.post('/users', async (req, res) => {
     try {
       const emailResult = await Promise.race([
         sendWelcomeEmail(newUser, tempPassword),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 10000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 30000))
       ]);
       emailSent = emailResult?.success || false;
     } catch (emailErr) {
@@ -158,7 +158,7 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
     try {
       const emailResult = await Promise.race([
         sendWelcomeEmail(user, tempPassword),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 10000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 30000))
       ]);
       emailSent = emailResult?.success || false;
     } catch (emailErr) {

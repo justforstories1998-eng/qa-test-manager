@@ -57,18 +57,18 @@ app.use('/uploads', express.static(uploadDir));
 app.get('/api/test-smtp', async (req, res) => {
   try {
     const nodemailer = await import('nodemailer');
-    const port = parseInt(process.env.SMTP_PORT || '465');
+    const port = parseInt(process.env.SMTP_PORT || '587');
     const transporter = nodemailer.default.createTransport({
       host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
       port: port,
-      secure: port === 465,
+      secure: false,
       auth: {
         user: process.env.SMTP_HOST?.includes('sendgrid') ? 'apikey' : (process.env.SMTP_USER || ''),
         pass: process.env.SMTP_PASS || ''
       },
-      connectionTimeout: 15000,
-      greetingTimeout: 10000,
-      socketTimeout: 15000,
+      connectionTimeout: 30000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000,
     });
 
     const info = await transporter.sendMail({
