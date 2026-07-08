@@ -73,7 +73,6 @@ function App() {
     api.getSettings().then(res => {
       if (res.success) {
         setSettings(res.data);
-        setAppLogo(res.data.general?.logo);
       }
     }).catch(err => console.error("Settings fetch error", err));
 
@@ -124,15 +123,11 @@ function App() {
   };
 
   const handleUpdateSettings = async (category, data) => {
-    try {
-      const res = await api.updateSettings(category, data);
-      if (res.success) {
-        setSettings(res.data);
-        if (category === 'general') setAppLogo(res.data.general?.logo);
-        toast.success("Settings Updated");
-      }
-    } catch (err) {
-      toast.error("Settings update failed");
+    const res = await api.updateSettings(category, data);
+    if (res.success) {
+      setSettings(res.data);
+    } else {
+      throw new Error(res.error || 'Settings update failed');
     }
   };
 

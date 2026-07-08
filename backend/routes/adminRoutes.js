@@ -57,7 +57,16 @@ adminRouter.post('/users', async (req, res) => {
       mustChangePassword: true
     });
 
-    const emailResult = await sendWelcomeEmail(newUser, tempPassword);
+    let emailSent = false;
+    try {
+      const emailResult = await Promise.race([
+        sendWelcomeEmail(newUser, tempPassword),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 10000))
+      ]);
+      emailSent = emailResult?.success || false;
+    } catch (emailErr) {
+      console.error('Welcome email failed (non-blocking):', emailErr.message);
+    }
 
     res.status(201).json({ 
       success: true, 
@@ -71,7 +80,7 @@ adminRouter.post('/users', async (req, res) => {
         mustChangePassword: newUser.mustChangePassword
       },
       tempPassword: tempPassword,
-      emailSent: emailResult.success
+      emailSent: emailSent
     });
   } catch (error) {
     console.error('Create user error:', error);
@@ -145,13 +154,22 @@ adminRouter.post('/users/:id/reset-password', async (req, res) => {
       mustChangePassword: true 
     });
 
-    const emailResult = await sendWelcomeEmail(user, tempPassword);
+    let emailSent = false;
+    try {
+      const emailResult = await Promise.race([
+        sendWelcomeEmail(user, tempPassword),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Email timeout')), 10000))
+      ]);
+      emailSent = emailResult?.success || false;
+    } catch (emailErr) {
+      console.error('Reset email failed (non-blocking):', emailErr.message);
+    }
 
     res.json({ 
       success: true, 
       message: 'Password reset successfully',
       tempPassword: tempPassword,
-      emailSent: emailResult.success
+      emailSent: emailSent
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to reset password' });
@@ -176,7 +194,9 @@ adminRouter.post('/projects/:projectId/assign', async (req, res) => {
           $push: { assignedProjects: projectId } 
         });
         assignedUsers.push(user);
-        await sendProjectAssignmentEmail(user, project, req.user);
+        sendProjectAssignmentEmail(user, project, req.user).catch(err => 
+          console.error('Assignment email failed (non-blocking):', err.message)
+        );
       }
     }
 

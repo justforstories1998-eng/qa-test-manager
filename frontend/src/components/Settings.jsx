@@ -1,652 +1,926 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FiSettings, FiSave, FiRefreshCw, FiPlay, FiFileText, FiCpu, 
-  FiDownload, FiMonitor, FiEye, FiEyeOff, FiInfo, FiImage, FiTrash2, FiBell,
-  FiCheck, FiChevronRight, FiShield, FiZap, FiGlobe, FiClock, FiLock,
-  FiUpload, FiAlertTriangle, FiCheckCircle
+import {
+  FiSettings, FiSave, FiRefreshCw, FiPlay, FiFileText,
+  FiDownload, FiMonitor, FiBell, FiCheck, FiClock,
+  FiAlertTriangle, FiCheckCircle, FiSun, FiMoon, FiSmartphone,
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
+/* ═══════════════════ theme detection ═══════════════════ */
+const useTheme = () => {
+  const [theme, setTheme] = useState(
+    () => document.documentElement.getAttribute('data-theme') || 'dark'
+  );
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+  return theme;
+};
+
+/* ═══════════════════ default settings ═══════════════════ */
+const DEFAULT_SETTINGS = {
+  general: {
+    language: 'en',
+    autoBackup: true,
+    telemetry: false,
+  },
+  execution: {
+    autoSave: true,
+    autoAdvance: false,
+    requireCommentsOnFail: true,
+    sessionTimeout: 30,
+  },
+  reporting: {
+    includePassedTests: true,
+    includeFailedTests: true,
+    includeCharts: true,
+    reportHeader: 'QA Report',
+    reportFooter: 'Confidential',
+  },
+  export: {
+    defaultFormat: 'pdf',
+    pdfPageSize: 'A4',
+  },
+  notifications: {
+    showSuccess: true,
+    showErrors: true,
+    duration: 3000,
+  },
+  display: {
+    theme: 'dark',
+    itemsPerPage: 20,
+    showIds: true,
+  },
+};
+
+/* ═══════════════════ main ═══════════════════ */
 function Settings({ settings, onUpdateSettings }) {
   const [activeTab, setActiveTab] = useState('general');
   const [formData, setFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
-    if (settings) {
-      setFormData(JSON.parse(JSON.stringify(settings)));
-    } else {
-      setFormData({
-        general: { organization: '', projectName: 'Default', dateFormat: 'YYYY-MM-DD', timeZone: 'UTC', logo: '' },
-        execution: { autoSave: true, autoAdvance: false, requireCommentsOnFail: true, sessionTimeout: 30 },
-        reporting: { includePassedTests: true, includeFailedTests: true, includeCharts: true, reportHeader: 'QA Report', reportFooter: 'Confidential' },
-        grokAI: { enabled: false, provider: 'gemini', apiKey: '', model: 'grok-beta', maxTokens: 2048 },
-        export: { defaultFormat: 'pdf', pdfPageSize: 'A4', wordTemplate: 'professional' },
-        notifications: { showSuccess: true, showErrors: true, duration: 3000 },
-        display: { theme: 'light', itemsPerPage: 20, showIds: true }
-      });
-    }
+    setFormData(settings ? JSON.parse(JSON.stringify(settings)) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
     setHasChanges(false);
   }, [settings]);
 
   const handleInputChange = (category, field, value) => {
     setFormData(prev => ({
       ...prev,
-      [category]: { ...prev[category] || {}, [field]: value }
+      [category]: { ...(prev[category] || {}), [field]: value },
     }));
     setHasChanges(true);
-  };
-
-  const handleLogoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 500000) return toast.error("Image too large (Max 500kb)");
-      const reader = new FileReader();
-      reader.onloadend = () => handleInputChange('general', 'logo', reader.result);
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onUpdateSettings(activeTab, formData[activeTab]);
+      await onUpdateSettings?.(activeTab, formData[activeTab]);
       setHasChanges(false);
-    } catch { toast.error("Failed to save"); }
-    finally { setIsSaving(false); }
+      toast.success('Settings saved');
+    } catch {
+      toast.error('Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const renderToggle = (category, field, label, description) => (
-    <div className="dg-setting-item">
-      <div className="dg-setting-info">
-        <label className="dg-input-label">{label}</label>
-        {description && <span className="dg-setting-desc">{description}</span>}
+  const handleReset = () => {
+    setFormData(settings ? JSON.parse(JSON.stringify(settings)) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+    setHasChanges(false);
+  };
+
+  /* ── Reusable Toggle ── */
+  const Toggle = ({ category, field, label, description }) => {
+    const value = formData[category]?.[field] ?? false;
+    return (
+      <div className="set-row set-toggle-row" onClick={() => handleInputChange(category, field, !value)}>
+        <div className="set-row-info">
+          <div className="set-row-label">{label}</div>
+          {description && <div className="set-row-desc">{description}</div>}
+        </div>
+        <button
+          type="button"
+          className={`set-toggle ${value ? 'set-toggle-on' : ''}`}
+          onClick={(e) => { e.stopPropagation(); handleInputChange(category, field, !value); }}
+          aria-pressed={value}
+        >
+          <span className="set-toggle-thumb" />
+        </button>
       </div>
-      <label className="dg-toggle">
-        <input 
-          type="checkbox" 
-          checked={formData[category]?.[field] || false} 
-          onChange={e => handleInputChange(category, field, e.target.checked)} 
-        />
-        <span className="dg-toggle-slider"></span>
-      </label>
-    </div>
-  );
+    );
+  };
 
   const tabs = [
-    { id: 'general', label: 'General', icon: FiSettings, description: 'Basic app configuration' },
+    { id: 'general', label: 'General', icon: FiSettings, description: 'Application preferences' },
     { id: 'execution', label: 'Execution', icon: FiPlay, description: 'Test run behavior' },
     { id: 'reporting', label: 'Reporting', icon: FiFileText, description: 'Report preferences' },
-    { id: 'grokAI', label: 'AI Integration', icon: FiCpu, badge: 'Pro', description: 'AI-powered features' },
-    { id: 'export', label: 'Export', icon: FiDownload, description: 'Export settings' },
+    { id: 'export', label: 'Export', icon: FiDownload, description: 'Export defaults' },
     { id: 'notifications', label: 'Notifications', icon: FiBell, description: 'Alert preferences' },
-    { id: 'display', label: 'Display', icon: FiMonitor, description: 'Visual settings' },
+    { id: 'display', label: 'Display', icon: FiMonitor, description: 'Appearance & tables' },
   ];
 
   const activeTabData = tabs.find(t => t.id === activeTab);
 
   return (
-    <div className="dg-page">
-      <div className="dg-page-header" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-            <FiSettings size={20} style={{ color: 'var(--dg-accent)' }} />
-            <span style={{ fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.2px', color: 'var(--dg-accent)' }}>Configuration</span>
+    <div className="set-page">
+      {/* ── Header ── */}
+      <div className="set-header">
+        <div className="set-header-left">
+          <div className="set-header-icon">
+            <FiSettings size={19} />
           </div>
-          <h2 className="dg-page-title">Settings</h2>
-          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Manage your application preferences and configurations</p>
+          <div>
+            <h1 className="set-title">Settings</h1>
+            <p className="set-subtitle">Manage your application preferences</p>
+          </div>
         </div>
         {hasChanges && (
-          <div className="dg-badge dg-badge-amber" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}>
-            <FiAlertTriangle size={14} />
-            <span>Unsaved changes</span>
+          <div className="set-changes-pill">
+            <span className="set-pulse-dot" />
+            Unsaved changes
           </div>
         )}
       </div>
 
-      <div className="dg-tabs" style={{ marginBottom: '24px' }}>
-        {tabs.map(t => (
-          <button 
-            key={t.id} 
-            className={`dg-tab ${activeTab === t.id ? 'active' : ''}`} 
-            onClick={() => setActiveTab(t.id)}
-            style={{ position: 'relative' }}
-          >
-            <t.icon size={16} />
-            <span>{t.label}</span>
-            {t.badge && (
-              <span className="dg-badge dg-badge-purple" style={{ marginLeft: '6px', fontSize: '10px', padding: '1px 6px' }}>{t.badge}</span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      <div style={{ padding: '28px', maxWidth: '800px', background: 'var(--surface-primary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '28px', paddingBottom: '20px', borderBottom: '1px solid var(--border-color)' }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {activeTabData && <activeTabData.icon size={20} style={{ color: 'var(--dg-accent)' }} />}
-          </div>
-          <div>
-            <h3 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>{activeTabData?.label} Settings</h3>
-            <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '13px' }}>{activeTabData?.description}</p>
-          </div>
-        </div>
-
-        {/* General Settings */}
-        {activeTab === 'general' && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiImage size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Branding</span>
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">App Logo</label>
-                <span className="dg-setting-desc">Upload your organization's logo (Max 500KB)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ width: '80px', height: '80px', borderRadius: '12px', border: '2px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'var(--surface-secondary)' }}>
-                  {formData.general?.logo ? (
-                    <img src={formData.general.logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                  ) : (
-                    <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                      <FiImage size={24} />
-                    </div>
-                  )}
+      {/* ── Body: two-column layout ── */}
+      <div className="set-body">
+        {/* Sidebar tabs */}
+        <aside className="set-sidebar">
+          <div className="set-sidebar-title">Categories</div>
+          {tabs.map(t => {
+            const Icon = t.icon;
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                className={`set-tab ${isActive ? 'set-tab-active' : ''}`}
+                onClick={() => setActiveTab(t.id)}
+              >
+                {isActive && <div className="set-tab-indicator" />}
+                <div className={`set-tab-icon ${isActive ? 'set-tab-icon-active' : ''}`}>
+                  <Icon size={15} />
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <input type="file" id="logo-upload" hidden accept="image/*" onChange={handleLogoUpload} />
-                  <label htmlFor="logo-upload" className="dg-btn dg-btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}>
-                    <FiUpload size={14} />
-                    Upload
-                  </label>
-                  {formData.general?.logo && (
-                    <button 
-                      className="dg-btn dg-btn-ghost" style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 14px', fontSize: '13px' }}
-                      onClick={() => handleInputChange('general', 'logo', '')}
-                    >
-                      <FiTrash2 size={14} />
-                      Remove
-                    </button>
-                  )}
+                <div className="set-tab-content">
+                  <div className="set-tab-label">{t.label}</div>
+                  <div className="set-tab-desc">{t.description}</div>
                 </div>
-              </div>
+              </button>
+            );
+          })}
+        </aside>
+
+        {/* Content panel */}
+        <main className="set-panel">
+          {/* Panel header */}
+          <div className="set-panel-header">
+            <div className="set-panel-icon">
+              {activeTabData && <activeTabData.icon size={18} />}
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiGlobe size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Organization</span>
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Organization Name</label>
-                <span className="dg-setting-desc">Your company or team name</span>
-              </div>
-              <input 
-                type="text" 
-                className="dg-input"
-                placeholder="Enter organization name..."
-                value={formData.general?.organization || ''} 
-                onChange={e => handleInputChange('general', 'organization', e.target.value)} 
-                style={{ width: '100%', maxWidth: '400px' }}
-              />
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Project Name</label>
-                <span className="dg-setting-desc">Current project identifier</span>
-              </div>
-              <input 
-                type="text" 
-                className="dg-input"
-                placeholder="Enter project name..."
-                value={formData.general?.projectName || ''} 
-                onChange={e => handleInputChange('general', 'projectName', e.target.value)} 
-                style={{ width: '100%', maxWidth: '400px' }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiClock size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Localization</span>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                <div className="dg-setting-info">
-                  <label className="dg-input-label">Date Format</label>
-                  <span className="dg-setting-desc">How dates are displayed</span>
-                </div>
-                <select 
-                  className="dg-select"
-                  value={formData.general?.dateFormat} 
-                  onChange={e => handleInputChange('general', 'dateFormat', e.target.value)}
-                  style={{ width: '100%' }}
-                >
-                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-                  <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                  <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-                </select>
-              </div>
-
-              <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                <div className="dg-setting-info">
-                  <label className="dg-input-label">Time Zone</label>
-                  <span className="dg-setting-desc">Default timezone for reports</span>
-                </div>
-                <select 
-                  className="dg-select"
-                  value={formData.general?.timeZone} 
-                  onChange={e => handleInputChange('general', 'timeZone', e.target.value)}
-                  style={{ width: '100%' }}
-                >
-                  <option value="UTC">UTC</option>
-                  <option value="EST">EST (Eastern)</option>
-                  <option value="PST">PST (Pacific)</option>
-                  <option value="CST">CST (Central)</option>
-                </select>
-              </div>
+            <div>
+              <h2 className="set-panel-title">{activeTabData?.label}</h2>
+              <p className="set-panel-desc">{activeTabData?.description}</p>
             </div>
           </div>
-        )}
 
-        {/* Execution Settings */}
-        {activeTab === 'execution' && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiPlay size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Test Run Behavior</span>
-            </div>
-            
-            {renderToggle('execution', 'autoSave', 'Auto-Save Results', 'Automatically save test results as you progress')}
-            {renderToggle('execution', 'autoAdvance', 'Auto-Advance on Pass', 'Move to next test case when current passes')}
-            {renderToggle('execution', 'requireCommentsOnFail', 'Require Comments on Fail', 'Force testers to add comments for failed tests')}
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiClock size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Session</span>
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Session Timeout</label>
-                <span className="dg-setting-desc">Auto-logout after inactivity (minutes)</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input 
-                  type="number" 
-                  className="dg-input"
-                  min="5"
-                  max="120"
-                  value={formData.execution?.sessionTimeout || 30} 
-                   onChange={e => handleInputChange('execution', 'sessionTimeout', parseInt(e.target.value) || 30)} 
-                  style={{ width: '120px' }}
-                />
-                <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>minutes</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Reporting Settings */}
-        {activeTab === 'reporting' && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiFileText size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Report Content</span>
-            </div>
-            
-            {renderToggle('reporting', 'includePassedTests', 'Include Passed Tests', 'Show passed test cases in reports')}
-            {renderToggle('reporting', 'includeFailedTests', 'Include Failed Tests', 'Show failed test cases in reports')}
-            {renderToggle('reporting', 'includeCharts', 'Include Charts', 'Add visual charts and graphs')}
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiFileText size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Report Branding</span>
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Report Header</label>
-                <span className="dg-setting-desc">Text displayed at the top of reports</span>
-              </div>
-              <input 
-                type="text" 
-                className="dg-input"
-                placeholder="Enter header text..."
-                value={formData.reporting?.reportHeader || ''} 
-                onChange={e => handleInputChange('reporting', 'reportHeader', e.target.value)} 
-                style={{ width: '100%', maxWidth: '500px' }}
-              />
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Report Footer</label>
-                <span className="dg-setting-desc">Text displayed at the bottom of reports</span>
-              </div>
-              <input 
-                type="text" 
-                className="dg-input"
-                placeholder="Enter footer text..."
-                value={formData.reporting?.reportFooter || ''} 
-                onChange={e => handleInputChange('reporting', 'reportFooter', e.target.value)} 
-                style={{ width: '100%', maxWidth: '500px' }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* AI Integration Settings */}
-        {activeTab === 'grokAI' && (
-          <div>
-            <div style={{ padding: '20px', marginBottom: '24px', border: '1px solid rgba(99,102,241,0.2)', background: 'var(--surface-interaction)', borderRadius: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(99,102,241,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <FiZap size={22} style={{ color: 'var(--dg-accent)' }} />
-                </div>
-                <div>
-                  <h4 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>AI-Powered Analysis</h4>
-                  <p style={{ margin: '2px 0 0 0', color: 'var(--text-muted)', fontSize: '13px' }}>Enable intelligent test analysis, automatic summaries, and smart recommendations</p>
-                </div>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiCpu size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Configuration</span>
-            </div>
-            
-            {renderToggle('grokAI', 'enabled', 'Enable AI Analysis', 'Use AI to analyze test results and generate insights')}
-            
-            {formData.grokAI?.enabled && (
+          {/* Content */}
+          <div className="set-panel-content">
+            {/* ══ GENERAL ══ */}
+            {activeTab === 'general' && (
               <>
-                <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
-                  <div className="dg-setting-info">
-                    <label className="dg-input-label">AI Provider</label>
-                    <span className="dg-setting-desc">Select your preferred AI service</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', width: '100%' }}>
-                    {[
-                      { id: 'gemini', name: 'Google Gemini', tier: 'Free', icon: 'G', color: '#4285f4' },
-                      { id: 'groq_cloud', name: 'Groq Cloud', tier: 'Free', icon: '⚡', color: '#f97316' },
-                      { id: 'openai', name: 'OpenAI', tier: 'Paid', icon: '◯', color: '#10a37f' }
-                    ].map(p => (
-                      <div 
-                        key={p.id}
-                        style={{ 
-                          padding: '14px', cursor: 'pointer', textAlign: 'center',
-                          border: formData.grokAI?.provider === p.id ? '2px solid var(--dg-accent)' : '2px solid var(--border-color)',
-                          background: formData.grokAI?.provider === p.id ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
-                          transition: 'all 0.2s',
-                          borderRadius: '12px'
-                        }}
-                        onClick={() => handleInputChange('grokAI', 'provider', p.id)}
-                      >
-                        <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `${p.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 8px', color: p.color, fontWeight: 700, fontSize: '16px' }}>
-                          {p.icon}
-                        </div>
-                        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>{p.name}</div>
-                        <div className={`dg-badge dg-badge-${p.tier === 'Free' ? 'green' : 'amber'}`} style={{ marginTop: '4px', fontSize: '10px' }}>{p.tier}</div>
-                        {formData.grokAI?.provider === p.id && (
-                          <FiCheckCircle size={16} style={{ color: 'var(--dg-accent)', marginTop: '6px' }} />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-                  <FiLock size={16} style={{ color: 'var(--dg-accent)' }} />
-                  <span>Authentication</span>
-                </div>
-
-                <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px' }}>
-                  <div className="dg-setting-info">
-                    <label className="dg-input-label">API Key</label>
-                    <span className="dg-setting-desc">Your provider's API key (stored securely)</span>
-                  </div>
-                  <div style={{ width: '100%', maxWidth: '500px' }}>
-                    <div style={{ position: 'relative' }}>
-                      <input 
-                        type={showApiKey ? "text" : "password"} 
-                        className="dg-input"
-                        placeholder="Enter your API key..."
-                        value={formData.grokAI?.apiKey || ''} 
-                        onChange={e => handleInputChange('grokAI', 'apiKey', e.target.value)} 
-                        style={{ width: '100%', paddingRight: '44px' }}
-                      />
-                      <button 
-                        type="button" 
-                        style={{ position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-                        onClick={() => setShowApiKey(!showApiKey)}
-                        title={showApiKey ? "Hide API Key" : "Show API Key"}
-                      >
-                        {showApiKey ? <FiEyeOff size={18} /> : <FiEye size={18} />}
-                      </button>
+                <div className="set-section">
+                  <h3 className="set-section-title">Language & Region</h3>
+                  <div className="set-row">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Interface Language</div>
+                      <div className="set-row-desc">Choose your preferred language</div>
                     </div>
-                    <div style={{ marginTop: '8px', fontSize: '12px' }}>
-                      {formData.grokAI?.apiKey ? (
-                        <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <FiCheckCircle size={14} /> API key configured
-                        </span>
-                      ) : (
-                        <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <FiAlertTriangle size={14} /> API key required
-                        </span>
-                      )}
+                    <select
+                      className="set-select"
+                      value={formData.general?.language || 'en'}
+                      onChange={e => handleInputChange('general', 'language', e.target.value)}
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                      <option value="fr">Français</option>
+                      <option value="de">Deutsch</option>
+                      <option value="ja">日本語</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="set-section">
+                  <h3 className="set-section-title">Data & Privacy</h3>
+                  <Toggle
+                    category="general" field="autoBackup"
+                    label="Automatic Backup"
+                    description="Periodically back up your test data locally"
+                  />
+                  <Toggle
+                    category="general" field="telemetry"
+                    label="Usage Analytics"
+                    description="Share anonymous usage data to help improve the product"
+                  />
+                </div>
+              </>
+            )}
+
+            {/* ══ EXECUTION ══ */}
+            {activeTab === 'execution' && (
+              <>
+                <div className="set-section">
+                  <h3 className="set-section-title">Test Run Behavior</h3>
+                  <Toggle category="execution" field="autoSave" label="Auto-Save Results" description="Save results automatically as you progress" />
+                  <Toggle category="execution" field="autoAdvance" label="Auto-Advance on Pass" description="Move to the next case when the current one passes" />
+                  <Toggle category="execution" field="requireCommentsOnFail" label="Require Comments on Fail" description="Force testers to add a comment for failed tests" />
+                </div>
+
+                <div className="set-section">
+                  <h3 className="set-section-title">Session</h3>
+                  <div className="set-row">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Session Timeout</div>
+                      <div className="set-row-desc">Auto-logout after inactivity</div>
+                    </div>
+                    <div className="set-input-group">
+                      <input
+                        type="number" min="5" max="120"
+                        className="set-input set-input-narrow"
+                        value={formData.execution?.sessionTimeout || 30}
+                        onChange={e => handleInputChange('execution', 'sessionTimeout', parseInt(e.target.value) || 30)}
+                      />
+                      <span className="set-input-suffix">min</span>
                     </div>
                   </div>
                 </div>
               </>
             )}
-          </div>
-        )}
 
-        {/* Export Settings */}
-        {activeTab === 'export' && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiDownload size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Export Preferences</span>
-            </div>
+            {/* ══ REPORTING ══ */}
+            {activeTab === 'reporting' && (
+              <>
+                <div className="set-section">
+                  <h3 className="set-section-title">Report Content</h3>
+                  <Toggle category="reporting" field="includePassedTests" label="Include Passed Tests" description="Show passed cases in reports" />
+                  <Toggle category="reporting" field="includeFailedTests" label="Include Failed Tests" description="Show failed cases in reports" />
+                  <Toggle category="reporting" field="includeCharts" label="Include Charts" description="Add visual charts and graphs" />
+                </div>
 
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Default Format</label>
-                <span className="dg-setting-desc">Preferred export file format</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', maxWidth: '400px' }}>
-                {[
-                  { id: 'pdf', name: 'PDF', desc: 'Best for sharing' },
-                  { id: 'word', name: 'Word', desc: 'Editable document' }
-                ].map(f => (
-                  <div 
-                    key={f.id}
-                    style={{ 
-                      padding: '16px', cursor: 'pointer', textAlign: 'center',
-                      border: formData.export?.defaultFormat === f.id ? '2px solid var(--dg-accent)' : '2px solid var(--border-color)',
-                      background: formData.export?.defaultFormat === f.id ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
-                      transition: 'all 0.2s',
-                      borderRadius: '12px'
-                    }}
-                    onClick={() => handleInputChange('export', 'defaultFormat', f.id)}
-                  >
-                    <FiFileText size={20} style={{ color: 'var(--dg-accent)', marginBottom: '6px' }} />
-                    <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px' }}>{f.name}</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '12px', marginTop: '2px' }}>{f.desc}</div>
+                <div className="set-section">
+                  <h3 className="set-section-title">Branding</h3>
+                  <div className="set-row set-row-column">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Report Header</div>
+                      <div className="set-row-desc">Text displayed at the top of every report</div>
+                    </div>
+                    <input
+                      type="text" className="set-input"
+                      placeholder="e.g. QA Report — Sprint 24"
+                      value={formData.reporting?.reportHeader || ''}
+                      onChange={e => handleInputChange('reporting', 'reportHeader', e.target.value)}
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginTop: '20px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Page Size</label>
-                <span className="dg-setting-desc">PDF document page size</span>
-              </div>
-              <select 
-                className="dg-select"
-                value={formData.export?.pdfPageSize || 'A4'} 
-                onChange={e => handleInputChange('export', 'pdfPageSize', e.target.value)}
-                style={{ width: '100%', maxWidth: '300px' }}
-              >
-                <option value="A4">A4 (210 × 297 mm)</option>
-                <option value="Letter">Letter (8.5 × 11 in)</option>
-                <option value="Legal">Legal (8.5 × 14 in)</option>
-              </select>
-            </div>
-          </div>
-        )}
-
-        {/* Notifications Settings */}
-        {activeTab === 'notifications' && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiBell size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Notification Preferences</span>
-            </div>
-            
-            {renderToggle('notifications', 'showSuccess', 'Success Notifications', 'Show success messages after actions')}
-            {renderToggle('notifications', 'showErrors', 'Error Notifications', 'Show error messages when issues occur')}
-            
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginTop: '20px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Notification Duration</label>
-                <span className="dg-setting-desc">How long notifications stay visible</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <input 
-                  type="number" 
-                  className="dg-input"
-                  min="1000"
-                  max="10000"
-                  step="500"
-                  value={formData.notifications?.duration || 3000} 
-                  onChange={e => handleInputChange('notifications', 'duration', parseInt(e.target.value))} 
-                  style={{ width: '120px' }}
-                />
-                <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>ms</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Display Settings */}
-        {activeTab === 'display' && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiMonitor size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Appearance</span>
-            </div>
-
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Theme</label>
-                <span className="dg-setting-desc">Choose your preferred color scheme</span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', width: '100%' }}>
-                {[
-                  { id: 'light', name: 'Light' },
-                  { id: 'dark', name: 'Dark' },
-                  { id: 'system', name: 'System' }
-                ].map(t => (
-                  <div 
-                    key={t.id}
-                    style={{ 
-                      padding: '14px', cursor: 'pointer', textAlign: 'center',
-                      border: formData.display?.theme === t.id ? '2px solid var(--dg-accent)' : '2px solid var(--border-color)',
-                      background: formData.display?.theme === t.id ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
-                      transition: 'all 0.2s',
-                      borderRadius: '12px'
-                    }}
-                    onClick={() => handleInputChange('display', 'theme', t.id)}
-                  >
-                    <div style={{ 
-                      width: '100%', height: '50px', borderRadius: '8px', marginBottom: '8px',
-                      background: t.id === 'dark' ? '#0f172a' : t.id === 'light' ? '#f1f5f9' : 'linear-gradient(135deg, #f1f5f9 50%, #0f172a 50%)',
-                      border: '1px solid var(--border-color)'
-                    }}></div>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '13px' }}>{t.name}</span>
-                    {formData.display?.theme === t.id && (
-                      <FiCheck size={16} style={{ color: 'var(--dg-accent)', marginTop: '4px', display: 'block', margin: '4px auto 0' }} />
-                    )}
+                  <div className="set-row set-row-column">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Report Footer</div>
+                      <div className="set-row-desc">Text displayed at the bottom of every report</div>
+                    </div>
+                    <input
+                      type="text" className="set-input"
+                      placeholder="e.g. Confidential — Internal Use Only"
+                      value={formData.reporting?.reportFooter || ''}
+                      onChange={e => handleInputChange('reporting', 'reportFooter', e.target.value)}
+                    />
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              </>
+            )}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', marginTop: '28px', color: 'var(--text-primary)', fontWeight: 600, fontSize: '14px' }}>
-              <FiSettings size={16} style={{ color: 'var(--dg-accent)' }} />
-              <span>Table Settings</span>
-            </div>
+            {/* ══ EXPORT ══ */}
+            {activeTab === 'export' && (
+              <>
+                <div className="set-section">
+                  <h3 className="set-section-title">Default Format</h3>
+                  <div className="set-row set-row-column">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Preferred Export Type</div>
+                      <div className="set-row-desc">Used when exporting reports</div>
+                    </div>
+                    <div className="set-option-grid set-option-grid-2">
+                      {[
+                        { id: 'pdf', name: 'PDF Document', desc: 'Best for sharing & printing' },
+                        { id: 'word', name: 'Word Document', desc: 'Editable format' },
+                      ].map(f => {
+                        const active = formData.export?.defaultFormat === f.id;
+                        return (
+                          <button
+                            key={f.id}
+                            type="button"
+                            className={`set-option-card ${active ? 'set-option-card-active' : ''}`}
+                            onClick={() => handleInputChange('export', 'defaultFormat', f.id)}
+                          >
+                            <div className="set-option-icon">
+                              <FiFileText size={18} />
+                            </div>
+                            <div className="set-option-name">{f.name}</div>
+                            <div className="set-option-desc">{f.desc}</div>
+                            {active && (
+                              <div className="set-option-check">
+                                <FiCheck size={12} />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
-            {renderToggle('display', 'showIds', 'Show Test Case IDs', 'Display ADO IDs in test case lists')}
+                <div className="set-section">
+                  <h3 className="set-section-title">Page Setup</h3>
+                  <div className="set-row">
+                    <div className="set-row-info">
+                      <div className="set-row-label">PDF Page Size</div>
+                      <div className="set-row-desc">Page dimensions for PDF exports</div>
+                    </div>
+                    <select
+                      className="set-select"
+                      value={formData.export?.pdfPageSize || 'A4'}
+                      onChange={e => handleInputChange('export', 'pdfPageSize', e.target.value)}
+                    >
+                      <option value="A4">A4 (210 × 297 mm)</option>
+                      <option value="Letter">Letter (8.5 × 11 in)</option>
+                      <option value="Legal">Legal (8.5 × 14 in)</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            )}
 
-            <div className="dg-setting-item" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '8px', marginTop: '20px' }}>
-              <div className="dg-setting-info">
-                <label className="dg-input-label">Items Per Page</label>
-                <span className="dg-setting-desc">Number of items shown in tables</span>
-              </div>
-              <select 
-                className="dg-select"
-                value={formData.display?.itemsPerPage || 20} 
-                onChange={e => handleInputChange('display', 'itemsPerPage', parseInt(e.target.value))}
-                style={{ width: '100%', maxWidth: '300px' }}
-              >
-                <option value="10">10 items</option>
-                <option value="20">20 items</option>
-                <option value="50">50 items</option>
-                <option value="100">100 items</option>
-              </select>
-            </div>
-          </div>
-        )}
+            {/* ══ NOTIFICATIONS ══ */}
+            {activeTab === 'notifications' && (
+              <>
+                <div className="set-section">
+                  <h3 className="set-section-title">Alert Preferences</h3>
+                  <Toggle category="notifications" field="showSuccess" label="Success Notifications" description="Show a toast after successful actions" />
+                  <Toggle category="notifications" field="showErrors" label="Error Notifications" description="Show a toast when something fails" />
+                </div>
 
-        {/* Save Actions */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '32px', paddingTop: '20px', borderTop: '1px solid var(--border-color)' }}>
-          <div>
-            {hasChanges ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', fontSize: '13px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#f59e0b', animation: 'pulse 2s infinite' }}></span>
-                You have unsaved changes
-              </span>
-            ) : (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontSize: '13px' }}>
-                <FiCheckCircle size={16} />
-                All changes saved
-              </span>
+                <div className="set-section">
+                  <h3 className="set-section-title">Timing</h3>
+                  <div className="set-row">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Display Duration</div>
+                      <div className="set-row-desc">How long each notification stays visible</div>
+                    </div>
+                    <div className="set-input-group">
+                      <input
+                        type="number" min="1000" max="10000" step="500"
+                        className="set-input set-input-narrow"
+                        value={formData.notifications?.duration || 3000}
+                        onChange={e => handleInputChange('notifications', 'duration', parseInt(e.target.value) || 3000)}
+                      />
+                      <span className="set-input-suffix">ms</span>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ══ DISPLAY ══ */}
+            {activeTab === 'display' && (
+              <>
+                <div className="set-section">
+                  <h3 className="set-section-title">Appearance</h3>
+                  <div className="set-row set-row-column">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Theme</div>
+                      <div className="set-row-desc">Choose your preferred color scheme</div>
+                    </div>
+                    <div className="set-option-grid set-option-grid-3">
+                      {[
+                        { id: 'light', name: 'Light', icon: FiSun, preview: '#f1f5f9' },
+                        { id: 'dark', name: 'Dark', icon: FiMoon, preview: '#0f172a' },
+                        { id: 'system', name: 'System', icon: FiSmartphone, preview: 'linear-gradient(135deg, #f1f5f9 50%, #0f172a 50%)' },
+                      ].map(t => {
+                        const active = formData.display?.theme === t.id;
+                        const Icon = t.icon;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            className={`set-option-card ${active ? 'set-option-card-active' : ''}`}
+                            onClick={() => handleInputChange('display', 'theme', t.id)}
+                          >
+                            <div className="set-theme-preview" style={{ background: t.preview }}>
+                              <Icon size={16} className="set-theme-preview-icon" />
+                            </div>
+                            <div className="set-option-name">{t.name}</div>
+                            {active && (
+                              <div className="set-option-check">
+                                <FiCheck size={12} />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="set-section">
+                  <h3 className="set-section-title">Tables & Lists</h3>
+                  <Toggle category="display" field="showIds" label="Show Test Case IDs" description="Display ADO IDs alongside test cases" />
+
+                  <div className="set-row">
+                    <div className="set-row-info">
+                      <div className="set-row-label">Items Per Page</div>
+                      <div className="set-row-desc">Rows shown in tables and lists</div>
+                    </div>
+                    <select
+                      className="set-select"
+                      value={formData.display?.itemsPerPage || 20}
+                      onChange={e => handleInputChange('display', 'itemsPerPage', parseInt(e.target.value))}
+                    >
+                      <option value="10">10 items</option>
+                      <option value="20">20 items</option>
+                      <option value="50">50 items</option>
+                      <option value="100">100 items</option>
+                    </select>
+                  </div>
+                </div>
+              </>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              className="dg-btn dg-btn-secondary" 
-              onClick={() => setFormData(JSON.parse(JSON.stringify(settings)))}
-              disabled={!hasChanges}
-            >
-              <FiRefreshCw size={16} />
-              Reset
-            </button>
-            <button 
-              className="dg-btn dg-btn-primary" 
-              onClick={handleSave} 
-              disabled={isSaving || !hasChanges}
-            >
-              {isSaving ? (
-                <span className="dg-spinner" style={{ width: '16px', height: '16px' }}></span>
+
+          {/* Footer actions */}
+          <div className="set-panel-footer">
+            <div className="set-footer-status">
+              {hasChanges ? (
+                <>
+                  <span className="set-pulse-dot" />
+                  <span style={{ color: 'var(--set-warning)' }}>You have unsaved changes</span>
+                </>
               ) : (
-                <FiSave size={16} />
+                <>
+                  <FiCheckCircle size={14} style={{ color: 'var(--set-success)' }} />
+                  <span style={{ color: 'var(--set-success)' }}>All changes saved</span>
+                </>
               )}
-              {isSaving ? 'Saving...' : 'Save Changes'}
-            </button>
+            </div>
+            <div className="set-footer-actions">
+              <button
+                className="set-btn set-btn-secondary"
+                onClick={handleReset}
+                disabled={!hasChanges}
+              >
+                <FiRefreshCw size={14} />
+                Reset
+              </button>
+              <button
+                className="set-btn set-btn-primary"
+                onClick={handleSave}
+                disabled={isSaving || !hasChanges}
+              >
+                {isSaving ? (
+                  <><span className="set-spinner" /> Saving…</>
+                ) : (
+                  <><FiSave size={14} /> Save Changes</>
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        </main>
       </div>
+
+      {/* ═══════ Theme-aware styles ═══════ */}
+      <style>{`
+        /* ── Dark tokens (default) ── */
+        .set-page {
+          --set-bg: transparent;
+          --set-card: rgba(255,255,255,0.02);
+          --set-card-hover: rgba(255,255,255,0.04);
+          --set-card-elevated: rgba(255,255,255,0.03);
+          --set-border: rgba(255,255,255,0.06);
+          --set-border-hover: rgba(255,255,255,0.1);
+          --set-input-bg: rgba(255,255,255,0.03);
+          --set-text: #f1f5f9;
+          --set-text-secondary: rgba(203,213,225,0.85);
+          --set-text-muted: rgba(148,163,184,0.55);
+          --set-accent: #818cf8;
+          --set-accent-strong: #6366f1;
+          --set-accent-bg: rgba(99,102,241,0.12);
+          --set-accent-border: rgba(99,102,241,0.22);
+          --set-accent-glow: rgba(99,102,241,0.08);
+          --set-warning: #fbbf24;
+          --set-success: #4ade80;
+          --set-danger: #f87171;
+          --set-hover-bg: rgba(99,102,241,0.06);
+          --set-toggle-off: rgba(255,255,255,0.1);
+        }
+
+        /* ── Light overrides ── */
+        [data-theme="light"] .set-page {
+          --set-card: #ffffff;
+          --set-card-hover: #fafbfd;
+          --set-card-elevated: #ffffff;
+          --set-border: #e5e7eb;
+          --set-border-hover: #d1d5db;
+          --set-input-bg: #ffffff;
+          --set-text: #0f172a;
+          --set-text-secondary: #475569;
+          --set-text-muted: #94a3b8;
+          --set-accent: #6366f1;
+          --set-accent-strong: #4f46e5;
+          --set-accent-bg: rgba(99,102,241,0.08);
+          --set-accent-border: rgba(99,102,241,0.2);
+          --set-accent-glow: rgba(99,102,241,0.12);
+          --set-warning: #d97706;
+          --set-success: #16a34a;
+          --set-danger: #dc2626;
+          --set-hover-bg: rgba(99,102,241,0.04);
+          --set-toggle-off: #cbd5e1;
+        }
+
+        /* ── Page layout ── */
+        .set-page {
+          display: flex; flex-direction: column;
+          height: 100%; overflow: hidden;
+          background: var(--set-bg);
+        }
+
+        /* ── Header ── */
+        .set-header {
+          padding: 28px 32px 24px;
+          border-bottom: 1px solid var(--set-border);
+          display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
+          flex-shrink: 0;
+        }
+        .set-header-left {
+          display: flex; align-items: center; gap: 12px;
+        }
+        .set-header-icon {
+          width: 40px; height: 40px; border-radius: 11px;
+          background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+          border: 1px solid var(--set-accent-border);
+          color: var(--set-accent);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .set-title {
+          margin: 0; font-size: 22px; font-weight: 700;
+          color: var(--set-text); letter-spacing: -0.3px; line-height: 1.2;
+        }
+        .set-subtitle {
+          margin: 3px 0 0; font-size: 13px; color: var(--set-text-muted);
+        }
+        .set-changes-pill {
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 6px 12px; border-radius: 8px;
+          background: rgba(251,191,36,0.1);
+          border: 1px solid rgba(251,191,36,0.25);
+          color: var(--set-warning);
+          font-size: 12px; font-weight: 600;
+        }
+        .set-pulse-dot {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: var(--set-warning);
+          animation: setPulse 1.6s ease-in-out infinite;
+          box-shadow: 0 0 0 0 rgba(251,191,36,0.5);
+        }
+        @keyframes setPulse {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251,191,36,0.5); }
+          50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(251,191,36,0); }
+        }
+
+        /* ── Body (2-column) ── */
+        .set-body {
+          flex: 1; display: flex; gap: 24px;
+          padding: 24px 32px 32px; overflow: hidden;
+        }
+
+        /* ── Sidebar ── */
+        .set-sidebar {
+          width: 240px; flex-shrink: 0;
+          display: flex; flex-direction: column; gap: 3px;
+          overflow-y: auto;
+        }
+        .set-sidebar-title {
+          font-size: 10px; font-weight: 600;
+          text-transform: uppercase; letter-spacing: 1px;
+          color: var(--set-text-muted);
+          padding: 4px 12px 10px;
+        }
+        .set-tab {
+          position: relative;
+          display: flex; align-items: center; gap: 11px;
+          padding: 10px 12px;
+          background: transparent; border: 1px solid transparent;
+          border-radius: 9px; cursor: pointer;
+          font-family: inherit; text-align: left;
+          transition: all 0.15s;
+        }
+        .set-tab:hover { background: var(--set-card-hover); }
+        .set-tab-active {
+          background: var(--set-accent-bg) !important;
+          border-color: var(--set-accent-border) !important;
+        }
+        .set-tab-indicator {
+          position: absolute; left: -1px; top: 22%; bottom: 22%;
+          width: 3px; border-radius: 0 3px 3px 0;
+          background: linear-gradient(180deg, #6366f1, #8b5cf6);
+        }
+        .set-tab-icon {
+          width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0;
+          background: var(--set-card);
+          border: 1px solid var(--set-border);
+          display: flex; align-items: center; justify-content: center;
+          color: var(--set-text-secondary);
+          transition: all 0.15s;
+        }
+        .set-tab-icon-active {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
+          border-color: transparent !important;
+          color: #fff !important;
+          box-shadow: 0 3px 10px rgba(99,102,241,0.3);
+        }
+        .set-tab-content { flex: 1; min-width: 0; }
+        .set-tab-label {
+          font-size: 13px; font-weight: 600;
+          color: var(--set-text);
+          line-height: 1.2;
+        }
+        .set-tab-desc {
+          font-size: 11px; color: var(--set-text-muted);
+          margin-top: 2px;
+        }
+
+        /* ── Panel ── */
+        .set-panel {
+          flex: 1; min-width: 0;
+          display: flex; flex-direction: column;
+          background: var(--set-card);
+          border: 1px solid var(--set-border);
+          border-radius: 14px; overflow: hidden;
+        }
+        .set-panel-header {
+          display: flex; align-items: center; gap: 12px;
+          padding: 20px 24px;
+          border-bottom: 1px solid var(--set-border);
+          flex-shrink: 0;
+        }
+        .set-panel-icon {
+          width: 36px; height: 36px; border-radius: 10px;
+          background: var(--set-accent-bg);
+          border: 1px solid var(--set-accent-border);
+          color: var(--set-accent);
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .set-panel-title {
+          margin: 0; font-size: 16px; font-weight: 700;
+          color: var(--set-text); line-height: 1.2;
+        }
+        .set-panel-desc {
+          margin: 2px 0 0; font-size: 12px; color: var(--set-text-muted);
+        }
+        .set-panel-content {
+          flex: 1; overflow-y: auto;
+          padding: 20px 24px;
+        }
+
+        /* ── Section ── */
+        .set-section {
+          margin-bottom: 28px;
+        }
+        .set-section:last-child { margin-bottom: 0; }
+        .set-section-title {
+          font-size: 11px; font-weight: 600;
+          text-transform: uppercase; letter-spacing: 0.8px;
+          color: var(--set-text-muted);
+          margin: 0 0 12px;
+        }
+
+        /* ── Row ── */
+        .set-row {
+          display: flex; align-items: center; justify-content: space-between;
+          gap: 16px;
+          padding: 14px 0;
+          border-bottom: 1px solid var(--set-border);
+        }
+        .set-row:last-child { border-bottom: none; }
+        .set-row-column {
+          flex-direction: column; align-items: stretch; gap: 10px;
+        }
+        .set-toggle-row { cursor: pointer; }
+        .set-toggle-row:hover .set-row-label { color: var(--set-accent); }
+
+        .set-row-info { flex: 1; min-width: 0; }
+        .set-row-label {
+          font-size: 13px; font-weight: 500;
+          color: var(--set-text);
+          transition: color 0.15s;
+        }
+        .set-row-desc {
+          font-size: 12px; color: var(--set-text-muted);
+          margin-top: 3px; line-height: 1.4;
+        }
+
+        /* ── Toggle switch ── */
+        .set-toggle {
+          position: relative; flex-shrink: 0;
+          width: 40px; height: 22px; border-radius: 999px;
+          background: var(--set-toggle-off);
+          border: none; cursor: pointer;
+          transition: background 0.2s;
+          padding: 0;
+        }
+        .set-toggle-on {
+          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          box-shadow: 0 2px 8px rgba(99,102,241,0.35);
+        }
+        .set-toggle-thumb {
+          position: absolute; top: 2px; left: 2px;
+          width: 18px; height: 18px; border-radius: 50%;
+          background: #fff;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+          transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+        }
+        .set-toggle-on .set-toggle-thumb {
+          transform: translateX(18px);
+        }
+
+        /* ── Inputs ── */
+        .set-input, .set-select {
+          width: 100%; padding: 9px 13px;
+          border-radius: 8px;
+          border: 1px solid var(--set-border);
+          background: var(--set-input-bg);
+          color: var(--set-text);
+          font-family: inherit; font-size: 13px;
+          outline: none; transition: all 0.15s;
+          box-sizing: border-box;
+        }
+        .set-input:focus, .set-select:focus {
+          border-color: var(--set-accent);
+          box-shadow: 0 0 0 3px var(--set-accent-glow);
+        }
+        .set-select { cursor: pointer; }
+        .set-input-narrow { width: 90px; }
+        .set-input-group {
+          display: flex; align-items: center; gap: 8px;
+        }
+        .set-input-suffix {
+          font-size: 12px; color: var(--set-text-muted); font-weight: 500;
+        }
+
+        /* ── Option cards ── */
+        .set-option-grid {
+          display: grid; gap: 10px;
+        }
+        .set-option-grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .set-option-grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .set-option-card {
+          position: relative;
+          padding: 14px;
+          border: 1.5px solid var(--set-border);
+          background: var(--set-input-bg);
+          border-radius: 10px; cursor: pointer;
+          transition: all 0.15s;
+          font-family: inherit; text-align: left;
+          display: flex; flex-direction: column; align-items: center; gap: 6px;
+        }
+        .set-option-card:hover {
+          border-color: var(--set-border-hover);
+          background: var(--set-card-hover);
+        }
+        .set-option-card-active {
+          border-color: var(--set-accent) !important;
+          background: var(--set-accent-glow) !important;
+        }
+        .set-option-icon {
+          width: 36px; height: 36px; border-radius: 9px;
+          background: var(--set-accent-bg);
+          color: var(--set-accent);
+          display: flex; align-items: center; justify-content: center;
+          margin-bottom: 2px;
+        }
+        .set-option-name {
+          font-size: 13px; font-weight: 600; color: var(--set-text);
+        }
+        .set-option-desc {
+          font-size: 11px; color: var(--set-text-muted); text-align: center;
+        }
+        .set-option-check {
+          position: absolute; top: 8px; right: 8px;
+          width: 18px; height: 18px; border-radius: 50%;
+          background: var(--set-accent);
+          color: #fff;
+          display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ── Theme preview ── */
+        .set-theme-preview {
+          position: relative;
+          width: 100%; height: 52px; border-radius: 8px;
+          border: 1px solid var(--set-border);
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+        }
+        .set-theme-preview-icon {
+          color: #fff;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+          mix-blend-mode: difference;
+        }
+
+        /* ── Footer ── */
+        .set-panel-footer {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 16px 24px;
+          border-top: 1px solid var(--set-border);
+          background: var(--set-card-elevated);
+          flex-shrink: 0;
+        }
+        .set-footer-status {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 12px; font-weight: 500;
+        }
+        .set-footer-actions {
+          display: flex; gap: 8px;
+        }
+
+        /* ── Buttons ── */
+        .set-btn {
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 9px 16px; border-radius: 8px;
+          font-family: inherit; font-size: 13px; font-weight: 500;
+          border: none; cursor: pointer;
+          transition: all 0.15s;
+        }
+        .set-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .set-btn-secondary {
+          background: var(--set-card);
+          border: 1px solid var(--set-border);
+          color: var(--set-text-secondary);
+        }
+        .set-btn-secondary:hover:not(:disabled) {
+          background: var(--set-card-hover);
+          border-color: var(--set-border-hover);
+          color: var(--set-text);
+        }
+        .set-btn-primary {
+          background: linear-gradient(135deg, #6366f1, #7c3aed);
+          color: #fff; font-weight: 600;
+          box-shadow: 0 2px 10px rgba(99,102,241,0.3);
+        }
+        .set-btn-primary:hover:not(:disabled) {
+          box-shadow: 0 4px 16px rgba(99,102,241,0.45);
+          transform: translateY(-1px);
+        }
+
+        /* ── Spinner ── */
+        .set-spinner {
+          display: inline-block; width: 13px; height: 13px;
+          border: 2px solid rgba(255,255,255,0.3);
+          border-top-color: #fff;
+          border-radius: 50%;
+          animation: setSpin 0.75s linear infinite;
+        }
+        @keyframes setSpin { to { transform: rotate(360deg); } }
+
+        /* ── Scrollbars ── */
+        .set-panel-content::-webkit-scrollbar,
+        .set-sidebar::-webkit-scrollbar { width: 4px; }
+        .set-panel-content::-webkit-scrollbar-track,
+        .set-sidebar::-webkit-scrollbar-track { background: transparent; }
+        .set-panel-content::-webkit-scrollbar-thumb,
+        .set-sidebar::-webkit-scrollbar-thumb {
+          background: var(--set-border); border-radius: 4px;
+        }
+        .set-panel-content::-webkit-scrollbar-thumb:hover,
+        .set-sidebar::-webkit-scrollbar-thumb:hover {
+          background: var(--set-border-hover);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+          .set-body { flex-direction: column; gap: 16px; padding: 16px 20px; }
+          .set-sidebar { width: 100%; flex-direction: row; overflow-x: auto; gap: 6px; }
+          .set-sidebar-title { display: none; }
+          .set-tab { flex-shrink: 0; min-width: 200px; }
+        }
+        @media (max-width: 640px) {
+          .set-header { padding: 20px; }
+          .set-option-grid-3 { grid-template-columns: repeat(2, 1fr); }
+          .set-panel-footer { flex-direction: column; gap: 12px; align-items: stretch; }
+          .set-footer-actions { justify-content: flex-end; }
+        }
+      `}</style>
     </div>
   );
 }

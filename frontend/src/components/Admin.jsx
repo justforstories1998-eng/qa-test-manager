@@ -111,6 +111,7 @@ function Admin({ projects = [] }) {
   /* ── CRUD ── */
   const handleCreateUser = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
     setIsSaving(true);
     try {
       const res = await api.createUser(userForm);
@@ -118,15 +119,20 @@ function Admin({ projects = [] }) {
         toast.success(`User created${res.emailSent ? ' — welcome email sent' : ''}`);
         if (res.tempPassword) toast.info(`Temp password: ${res.tempPassword}`, { autoClose: 10000 });
         setShowUserModal(false);
+        setSelectedUser(null);
         setUserForm({ firstName: '', lastName: '', email: '', role: 'user', isActive: true });
         loadUsers();
       }
-    } catch (err) { toast.error(err.error || 'Failed to create user'); }
-    finally { setIsSaving(false); }
+    } catch (err) {
+      toast.error(err.error || 'Failed to create user');
+      setShowUserModal(false);
+      setSelectedUser(null);
+    } finally { setIsSaving(false); }
   };
 
   const handleUpdateUser = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
     setIsSaving(true);
     try {
       const res = await api.updateUser(selectedUser.id || selectedUser._id, userForm);
@@ -171,6 +177,7 @@ function Admin({ projects = [] }) {
 
   const handleAssignProject = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
     setIsSaving(true);
     try {
       const res = await api.assignProject(assignForm.projectId, assignForm.userIds);
@@ -180,8 +187,10 @@ function Admin({ projects = [] }) {
         setAssignForm({ projectId: '', userIds: [] });
         loadUsers();
       }
-    } catch (err) { toast.error(err.error || 'Failed to assign'); }
-    finally { setIsSaving(false); }
+    } catch (err) {
+      toast.error(err.error || 'Failed to assign');
+      setShowAssignModal(false);
+    } finally { setIsSaving(false); }
   };
 
   const toggleUserSelection = (userId) => {
@@ -914,9 +923,9 @@ function Admin({ projects = [] }) {
             </label>
             <div style={{
               maxHeight: 260, overflowY: 'auto', borderRadius: 10,
-              border: '1px solid var(--card-border)', background: 'var(--tab-bg)',
+              border: '1px solid var(--accent-badge-border)', background: 'var(--card-bg)',
             }}>
-              {users.filter(u => u.role === 'user').map(u => {
+              {users.map(u => {
                 const uid = u._id || u.id;
                 const isSelected = assignForm.userIds.includes(uid);
                 return (
@@ -945,6 +954,7 @@ function Admin({ projects = [] }) {
                       <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>{u.firstName} {u.lastName}</div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{u.email}</div>
                     </div>
+                    <RoleBadge role={u.role} />
                     <div style={{
                       width: 22, height: 22, borderRadius: 6, flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -957,6 +967,11 @@ function Admin({ projects = [] }) {
                   </div>
                 );
               })}
+              {users.length === 0 && (
+                <div style={{ padding: '24px 16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
+                  No users available
+                </div>
+              )}
             </div>
           </div>
 

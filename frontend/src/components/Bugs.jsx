@@ -1,101 +1,90 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   FiAlertTriangle, FiPlus, FiSearch, FiEdit2, FiTrash2, FiX,
-  FiPaperclip, FiEye, FiUser, FiInfo, FiFileText, FiClock, FiVideo,
-  FiFlag, FiChevronRight, FiCheckCircle, FiAlertCircle, FiXCircle,
-  FiFilter, FiArrowRight, FiExternalLink, FiUpload, FiShield,
-  FiActivity, FiHash, FiBox, FiTarget, FiZap, FiLayers,
-  FiCalendar, FiMessageSquare, FiImage, FiDownload, FiCornerDownRight,
-  FiChevronDown, FiRefreshCw, FiMinusCircle
+  FiPaperclip, FiUser, FiFileText, FiVideo, FiFlag, FiChevronRight,
+  FiCheckCircle, FiArrowRight, FiExternalLink, FiUpload, FiTarget,
+  FiZap, FiImage, FiMinusCircle,
 } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
 import { Modal, ConfirmDialog } from './shared/Modal';
-import Badge from './shared/Badge';
 
-/* ═══════════════ helpers & micro-components ═══════════════ */
+/* ══════════════ theme hook ══════════════ */
+const useTheme = () => {
+  const [theme, setTheme] = useState(
+    () => document.documentElement.getAttribute('data-theme') || 'dark'
+  );
+  useEffect(() => {
+    const obs = new MutationObserver(() => {
+      setTheme(document.documentElement.getAttribute('data-theme') || 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+  return theme;
+};
 
+/* ══════════════ badge configs ══════════════ */
 const severityConfig = {
-  Critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.20)', icon: FiAlertTriangle, glow: '0 0 12px rgba(239,68,68,0.15)' },
-  High:     { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.20)', icon: FiZap,           glow: '0 0 12px rgba(245,158,11,0.12)' },
-  Medium:   { color: '#6366f1', bg: 'rgba(99,102,241,0.10)',  border: 'rgba(99,102,241,0.20)', icon: FiTarget,        glow: '0 0 12px rgba(99,102,241,0.12)' },
-  Low:      { color: '#22c55e', bg: 'rgba(34,197,94,0.10)',   border: 'rgba(34,197,94,0.20)', icon: FiArrowRight,    glow: '0 0 12px rgba(34,197,94,0.10)' },
+  Critical: { color: '#ef4444', bg: 'rgba(239,68,68,0.10)', border: 'rgba(239,68,68,0.22)', icon: FiAlertTriangle },
+  High:     { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.22)', icon: FiZap },
+  Medium:   { color: '#6366f1', bg: 'rgba(99,102,241,0.10)', border: 'rgba(99,102,241,0.22)', icon: FiTarget },
+  Low:      { color: '#22c55e', bg: 'rgba(34,197,94,0.10)',  border: 'rgba(34,197,94,0.22)', icon: FiArrowRight },
 };
-
 const statusConfig = {
-  Active:              { color: '#ef4444', bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.20)',   dot: '#ef4444' },
-  'Under development': { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.20)',  dot: '#f59e0b' },
-  'In Progress':       { color: '#3b82f6', bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.20)',  dot: '#3b82f6' },
-  Resolved:            { color: '#22c55e', bg: 'rgba(34,197,94,0.10)',   border: 'rgba(34,197,94,0.20)',   dot: '#22c55e' },
-  Closed:              { color: '#64748b', bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.20)', dot: '#64748b' },
+  Active:              { color: '#ef4444', bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.20)' },
+  'Under development': { color: '#f59e0b', bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.20)' },
+  'In Progress':       { color: '#3b82f6', bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.20)' },
+  Resolved:            { color: '#22c55e', bg: 'rgba(34,197,94,0.10)',   border: 'rgba(34,197,94,0.20)' },
+  Closed:              { color: '#64748b', bg: 'rgba(100,116,139,0.10)', border: 'rgba(100,116,139,0.20)' },
 };
 
-const SeverityBadge = ({ severity }) => {
+const SeverityBadge = ({ severity, compact = false }) => {
   const cfg = severityConfig[severity] || severityConfig.Medium;
   const Icon = cfg.icon;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-      padding: '4px 10px 4px 8px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+    <span className="bug-badge" style={{
       color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
-      whiteSpace: 'nowrap', lineHeight: 1,
+      padding: compact ? '3px 7px 3px 6px' : '4px 10px 4px 8px',
+      fontSize: compact ? 11 : 12,
     }}>
-      <Icon size={12} />
-      {severity}
+      <Icon size={compact ? 10 : 12} />
+      {compact ? severity.charAt(0) : severity}
     </span>
   );
 };
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, compact = false }) => {
   const cfg = statusConfig[status] || statusConfig.Active;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+    <span className="bug-badge" style={{
       color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.border}`,
-      whiteSpace: 'nowrap', lineHeight: 1,
+      padding: compact ? '3px 8px' : '4px 10px',
+      fontSize: compact ? 11 : 12,
     }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: cfg.dot, flexShrink: 0 }} />
+      <span style={{
+        width: 6, height: 6, borderRadius: '50%',
+        background: cfg.color, flexShrink: 0,
+      }} />
       {status}
     </span>
   );
 };
 
 const MetricCard = ({ icon: Icon, label, value, color }) => (
-  <div style={{
-    position: 'relative', padding: '16px 18px', borderRadius: 12,
-    background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-    overflow: 'hidden', transition: 'all 0.2s', flex: 1, minWidth: 0,
-  }}
-    onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}30`; e.currentTarget.style.background = 'var(--surface-input)'; }}
-    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-  >
-    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${color}, ${color}00)` }} />
-    <div style={{
-      width: 32, height: 32, borderRadius: 8, marginBottom: 10,
-      background: `${color}15`, border: `1px solid ${color}20`,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <Icon size={15} style={{ color }} />
+  <div className="bug-metric" style={{ '--metric-color': color }}>
+    <div className="bug-metric-accent" style={{ background: `linear-gradient(90deg, ${color}, ${color}00)` }} />
+    <div className="bug-metric-icon" style={{ background: `${color}15`, borderColor: `${color}25`, color }}>
+      <Icon size={15} />
     </div>
-    <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1, letterSpacing: '-0.5px' }}>{value}</div>
-    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3, fontWeight: 500 }}>{label}</div>
+    <div className="bug-metric-value">{value}</div>
+    <div className="bug-metric-label">{label}</div>
   </div>
 );
 
-const inputStyle = {
-  width: '100%', padding: '10px 14px', borderRadius: 9, boxSizing: 'border-box',
-  border: '1px solid var(--border-input)', background: 'var(--surface-glass)',
-  color: 'var(--text-main)', fontSize: 14, outline: 'none', fontFamily: 'inherit',
-  transition: 'all 0.2s',
-};
-
-const focusInput = (e) => { e.target.style.borderColor = 'rgba(99,102,241,0.4)'; e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.08)'; };
-const blurInput = (e) => { e.target.style.borderColor = 'var(--border-input)'; e.target.style.boxShadow = 'none'; };
-
-/* ═══════════════ main component ═══════════════ */
-
+/* ══════════════ main component ══════════════ */
 function Bugs({ projectId, user }) {
+  const theme = useTheme();
   const [bugs, setBugs] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
@@ -108,7 +97,6 @@ function Bugs({ projectId, user }) {
   const [isSaving, setIsSaving] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
   const [dragOver, setDragOver] = useState(false);
-
   const [assignedToQuery, setAssignedToQuery] = useState('');
   const [assignedToResults, setAssignedToResults] = useState([]);
   const [showAssignedDropdown, setShowAssignedDropdown] = useState(false);
@@ -123,67 +111,48 @@ function Bugs({ projectId, user }) {
     } catch { toast.error('Failed to load bugs'); }
   };
 
-  /* ── file handling ── */
   const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf', 'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-
   const validateFile = (file) => {
     if (!file) return false;
-    if (file.size > 50 * 1024 * 1024) { toast.error('File exceeds 50MB limit'); return false; }
+    if (file.size > 50 * 1024 * 1024) { toast.error('File exceeds 50MB'); return false; }
     if (!allowedTypes.includes(file.type)) { toast.error('Unsupported file type'); return false; }
     return true;
   };
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file && validateFile(file)) setSelectedFile(file);
     else { e.target.value = null; setSelectedFile(null); }
   };
-
   const handleFileDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
+    e.preventDefault(); setDragOver(false);
     const file = e.dataTransfer?.files?.[0];
     if (file && validateFile(file)) setSelectedFile(file);
     else toast.error('Invalid file');
   };
 
-  const isVideoFile = (mimeType) => mimeType && mimeType.startsWith('video/');
-
+  const isVideoFile = (m) => m && m.startsWith('video/');
   const getSafeUrl = (bug) => {
     if (bug.attachments?.length > 0) return bug.attachments[0].url;
     if (!bug.attachment) return null;
     return typeof bug.attachment === 'string' ? bug.attachment : bug.attachment.url;
   };
+  const getFileMimeType = (bug) => bug.attachments?.length > 0 ? bug.attachments[0].mimeType : bug.attachment?.mimeType;
+  const getFileName = (bug) => bug.attachments?.length > 0 ? bug.attachments[0].originalName : bug.attachment?.originalName;
 
-  const getFileMimeType = (bug) => {
-    if (bug.attachments?.length > 0) return bug.attachments[0].mimeType;
-    return bug.attachment?.mimeType;
-  };
-
-  const getFileName = (bug) => {
-    if (bug.attachments?.length > 0) return bug.attachments[0].originalName;
-    return bug.attachment?.originalName;
-  };
-
-  /* ── assignee search ── */
   const handleAssigneeSearch = async (query) => {
     setAssignedToQuery(query);
     if (query.length >= 2) {
       try {
         const res = await api.searchUsers(query);
         if (res.success) { setAssignedToResults(res.data); setShowAssignedDropdown(true); }
-      } catch (err) { console.error(err); }
+      } catch { }
     } else { setAssignedToResults([]); setShowAssignedDropdown(false); }
   };
-
   const selectAssignee = (u) => {
     const name = `${u.firstName} ${u.lastName}`;
-    setSelectedAssignee(name);
-    setAssignedToQuery(name);
-    setShowAssignedDropdown(false);
+    setSelectedAssignee(name); setAssignedToQuery(name); setShowAssignedDropdown(false);
   };
 
-  /* ── save / delete ── */
   const handleSave = async (e) => {
     e.preventDefault();
     setIsSaving(true);
@@ -199,10 +168,8 @@ function Bugs({ projectId, user }) {
         await api.createBug(formData);
         toast.success('Bug reported');
       }
-      setShowModal(false);
-      setSelectedFile(null);
-      setSelectedAssignee('');
-      setAssignedToQuery('');
+      setShowModal(false); setSelectedFile(null);
+      setSelectedAssignee(''); setAssignedToQuery('');
       loadBugs();
     } catch { toast.error('Failed to save'); }
     finally { setIsSaving(false); }
@@ -211,378 +178,235 @@ function Bugs({ projectId, user }) {
   const handleDelete = async (id) => {
     try {
       await api.deleteBug(id);
-      loadBugs();
-      setShowDeleteConfirm(null);
+      loadBugs(); setShowDeleteConfirm(null);
       toast.success('Bug deleted');
     } catch { toast.error('Failed to delete'); }
   };
 
-  /* ── derived data ── */
-  const filteredBugs = useMemo(() => {
-    return bugs.filter(b => {
-      const matchSearch = !searchTerm.trim() || b.title?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchStatus = statusFilter === 'All' || b.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [bugs, searchTerm, statusFilter]);
+  const filteredBugs = useMemo(() => bugs.filter(b => {
+    const matchSearch = !searchTerm.trim() || b.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchStatus = statusFilter === 'All' || b.status === statusFilter;
+    return matchSearch && matchStatus;
+  }), [bugs, searchTerm, statusFilter]);
 
   const statusCounts = useMemo(() => {
-    const counts = {};
-    bugs.forEach(b => { counts[b.status] = (counts[b.status] || 0) + 1; });
-    return counts;
+    const c = {}; bugs.forEach(b => { c[b.status] = (c[b.status] || 0) + 1; });
+    return c;
   }, [bugs]);
-
   const severityCounts = useMemo(() => {
-    const counts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
-    bugs.forEach(b => { if (counts.hasOwnProperty(b.severity)) counts[b.severity]++; });
-    return counts;
+    const c = { Critical: 0, High: 0, Medium: 0, Low: 0 };
+    bugs.forEach(b => { if (c.hasOwnProperty(b.severity)) c[b.severity]++; });
+    return c;
   }, [bugs]);
 
   const tabOptions = ['All', 'Active', 'Under development', 'In Progress', 'Resolved', 'Closed'];
 
-  /* ═══════════════════ render ═══════════════════ */
   return (
-    <div className="dg-page" style={{ display: 'flex', flexDirection: 'column', gap: 0, height: '100%', overflow: 'auto' }}>
-
+    <div className="bug-page">
       {/* ── Header ── */}
-      <div style={{ padding: '28px 32px 24px', borderBottom: '1px solid var(--border-light)' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 11,
-              background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(245,158,11,0.15))',
-              border: '1px solid rgba(239,68,68,0.12)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <FiFlag size={19} style={{ color: '#f87171' }} />
-            </div>
-            <div>
-              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
-                Bug Tracker
-              </h1>
-              <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>
-                Track, assign, and resolve defects across your project
-              </p>
-            </div>
+      <div className="bug-header">
+        <div className="bug-header-left">
+          <div className="bug-header-icon">
+            <FiFlag size={19} />
           </div>
-          <button
-            onClick={() => {
-              setEditingBug(null); setSelectedFile(null);
-              setSelectedAssignee(''); setAssignedToQuery('');
-              setShowModal(true);
-            }}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7,
-              padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-              background: 'var(--gradient-danger)',
-              border: 'none', color: '#fff', cursor: 'pointer',
-              boxShadow: '0 2px 12px rgba(239,68,68,0.3)', transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(239,68,68,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(239,68,68,0.3)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
-            <FiPlus size={15} /> Report Bug
-          </button>
+          <div>
+            <h1 className="bug-title">Bug Tracker</h1>
+            <p className="bug-subtitle">Track, assign, and resolve defects across your project</p>
+          </div>
         </div>
+        <button
+          className="bug-btn bug-btn-primary"
+          onClick={() => {
+            setEditingBug(null); setSelectedFile(null);
+            setSelectedAssignee(''); setAssignedToQuery('');
+            setShowModal(true);
+          }}
+        >
+          <FiPlus size={15} /> Report Bug
+        </button>
       </div>
 
-      <div style={{ padding: '24px 32px 40px', display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-        {/* ── Metric cards ── */}
-        <div style={{ display: 'flex', gap: 14 }}>
-          <MetricCard icon={FiFlag}           label="Total Bugs"   value={bugs.length}             color="#818cf8" />
-          <MetricCard icon={FiAlertTriangle}  label="Critical"     value={severityCounts.Critical} color="#ef4444" />
-          <MetricCard icon={FiZap}            label="High"         value={severityCounts.High}     color="#f59e0b" />
-          <MetricCard icon={FiCheckCircle}    label="Resolved"     value={statusCounts.Resolved || 0} color="#22c55e" />
-          <MetricCard icon={FiMinusCircle}    label="Closed"       value={statusCounts.Closed || 0}   color="#64748b" />
+      <div className="bug-body">
+        {/* ── Metrics ── */}
+        <div className="bug-metrics-row">
+          <MetricCard icon={FiFlag} label="Total Bugs" value={bugs.length} color="#818cf8" />
+          <MetricCard icon={FiAlertTriangle} label="Critical" value={severityCounts.Critical} color="#ef4444" />
+          <MetricCard icon={FiZap} label="High" value={severityCounts.High} color="#f59e0b" />
+          <MetricCard icon={FiCheckCircle} label="Resolved" value={statusCounts.Resolved || 0} color="#22c55e" />
+          <MetricCard icon={FiMinusCircle} label="Closed" value={statusCounts.Closed || 0} color="#64748b" />
         </div>
 
         {/* ── Status tabs ── */}
-        <div style={{
-          display: 'flex', gap: 4, padding: 4, borderRadius: 10,
-          background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-        }}>
+        <div className="bug-tabs">
           {tabOptions.map(opt => {
             const isActive = statusFilter === opt;
             const count = opt === 'All' ? bugs.length : (statusCounts[opt] || 0);
             return (
               <button
                 key={opt}
+                className={`bug-tab ${isActive ? 'bug-tab-active' : ''}`}
                 onClick={() => setStatusFilter(opt)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 14px', borderRadius: 7, fontSize: 12, fontWeight: isActive ? 600 : 500,
-                  border: 'none', cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-                  background: isActive ? 'var(--primary-soft)' : 'transparent',
-                  color: isActive ? 'var(--primary-300)' : 'var(--text-muted)',
-                }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--surface-input)'; }}
-                onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
               >
                 {opt}
-                <span style={{
-                  background: isActive ? 'rgba(99,102,241,0.2)' : 'var(--border-light)',
-                  color: isActive ? 'var(--primary-400)' : 'rgba(148,163,184,0.4)',
-                  padding: '1px 7px', borderRadius: 4, fontSize: 10, fontWeight: 700,
-                }}>
-                  {count}
-                </span>
+                <span className={`bug-tab-count ${isActive ? 'bug-tab-count-active' : ''}`}>{count}</span>
               </button>
             );
           })}
         </div>
 
         {/* ── Search bar ── */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '10px 16px', borderRadius: 10,
-          background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-        }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <FiSearch size={14} style={{
-              position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)',
-              color: 'rgba(148,163,184,0.4)', pointerEvents: 'none',
-            }} />
+        <div className="bug-search-row">
+          <div className="bug-search-wrap">
+            <FiSearch size={14} className="bug-search-icon" />
             <input
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               placeholder="Search bugs by title…"
               type="text"
-              style={{
-                ...inputStyle, paddingLeft: 34, paddingRight: searchTerm ? 34 : 14,
-              }}
-              onFocus={focusInput}
-              onBlur={blurInput}
+              className="bug-input bug-search-input"
             />
             {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                style={{
-                  position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                  background: 'var(--border-light)', border: 'none',
-                  color: 'var(--text-tertiary)', cursor: 'pointer',
-                  padding: '2px 5px', borderRadius: 4, fontSize: 11,
-                  display: 'flex', alignItems: 'center',
-                }}
-              >
+              <button type="button" onClick={() => setSearchTerm('')} className="bug-search-clear">
                 <FiX size={12} />
               </button>
             )}
           </div>
-          <div style={{
-            fontSize: 12, color: 'rgba(148,163,184,0.4)', whiteSpace: 'nowrap',
-            padding: '6px 12px', borderRadius: 6,
-            background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-          }}>
-            <span style={{ color: 'var(--primary-400)', fontWeight: 600 }}>{filteredBugs.length}</span> results
+          <div className="bug-result-count">
+            <span>{filteredBugs.length}</span> results
           </div>
         </div>
 
         {/* ── Table ── */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
-          {filteredBugs.length > 0 ? (
-            <div style={{ overflow: 'auto', borderRadius: 12, border: '1px solid var(--border-light)' }}>
-              <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: 13 }}>
-                <thead>
-                  <tr>
-                    {[
-                      { label: 'Severity', width: '110px' },
-                      { label: 'Title' },
-                      { label: 'Status', width: '150px' },
-                      { label: 'Assigned To', width: '160px' },
-                      { label: 'Evidence', width: '100px' },
-                      { label: 'Reporter', width: '120px' },
-                      { label: '', width: '90px' },
-                    ].map((col, i) => (
-                      <th key={i} style={{
-                        padding: '11px 16px', textAlign: col.label ? 'left' : 'right',
-                        width: col.width, fontSize: 10, fontWeight: 600,
-                        color: 'rgba(148,163,184,0.4)', textTransform: 'uppercase',
-                        letterSpacing: '0.8px', borderBottom: '1px solid var(--border-light)',
-                        background: 'var(--surface-secondary)', position: 'sticky', top: 0, zIndex: 5,
-                        backdropFilter: 'blur(12px)',
-                      }}>
-                        {col.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBugs.map((bug, idx) => {
-                    const bugId = bug._id || bug.id;
-                    const isHovered = hoveredRow === bugId;
-                    const fileUrl = getSafeUrl(bug);
-                    const mime = getFileMimeType(bug);
-                    return (
-                      <tr
-                        key={bugId}
-                        onMouseEnter={() => setHoveredRow(bugId)}
-                        onMouseLeave={() => setHoveredRow(null)}
-                        style={{
-                          background: isHovered ? 'var(--surface-interaction)' : 'transparent',
-                          transition: 'background 0.15s', cursor: 'pointer',
-                        }}
-                        onClick={() => { setViewingBug(bug); setShowViewModal(true); }}
-                      >
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
-                          <SeverityBadge severity={bug.severity || 'Medium'} />
-                        </td>
-                        <td style={{
-                          padding: '13px 16px', borderBottom: '1px solid var(--border-light)',
-                          fontWeight: 500, color: 'var(--text-main)',
-                          maxWidth: 350, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {bug.title}
-                        </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
-                          <StatusBadge status={bug.status || 'Active'} />
-                        </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
-                          {bug.assignedTo ? (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <div style={{
-                                width: 26, height: 26, borderRadius: 8,
-                                background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 10, fontWeight: 700, color: 'var(--primary-300)', flexShrink: 0,
-                              }}>
-                                {bug.assignedTo.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
-                              </div>
-                              <span style={{ color: 'var(--text-secondary)', fontSize: 13 }}>{bug.assignedTo}</span>
-                            </div>
-                          ) : (
-                            <span style={{ color: 'var(--text-light)', fontSize: 12, fontStyle: 'italic' }}>Unassigned</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)' }}>
-                          {fileUrl ? (
-                            <a
-                              href={api.getFileUrl(fileUrl)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={e => e.stopPropagation()}
-                              style={{
-                                display: 'inline-flex', alignItems: 'center', gap: 5,
-                                padding: '3px 8px', borderRadius: 5, fontSize: 11, fontWeight: 500,
-                                color: 'var(--primary-400)', background: 'var(--surface-interaction)',
-                                border: '1px solid rgba(99,102,241,0.15)',
-                                textDecoration: 'none', transition: 'all 0.15s',
-                              }}
-                            >
-                              {isVideoFile(mime) ? <FiVideo size={11} /> : <FiImage size={11} />}
-                              View
-                            </a>
-                          ) : (
-                            <span style={{ color: 'rgba(148,163,184,0.25)', fontSize: 11 }}>—</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)', fontSize: 12, color: 'var(--text-muted)' }}>
-                          {bug.createdBy?.firstName
-                            ? `${bug.createdBy.firstName} ${bug.createdBy.lastName}`
-                            : <span style={{ opacity: 0.4 }}>—</span>}
-                        </td>
-                        <td style={{ padding: '13px 16px', borderBottom: '1px solid var(--border-light)', textAlign: 'right' }}>
-                          <div
-                            style={{
-                              display: 'flex', gap: 4, justifyContent: 'flex-end',
-                              opacity: isHovered ? 1 : 0, transition: 'opacity 0.15s',
-                            }}
-                            onClick={e => e.stopPropagation()}
-                          >
-                            <button
-                              title="Edit"
-                              onClick={() => {
-                                setEditingBug(bug); setSelectedFile(null);
-                                setSelectedAssignee(bug.assignedTo || '');
-                                setAssignedToQuery(bug.assignedTo || '');
-                                setShowModal(true);
-                              }}
-                              style={{
-                                background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                                borderRadius: 6, padding: '5px 7px', cursor: 'pointer',
-                                color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center',
-                                transition: 'all 0.15s',
-                              }}
-                              onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary-400)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'; e.currentTarget.style.background = 'var(--surface-interaction)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                            >
-                              <FiEdit2 size={13} />
-                            </button>
-                            <button
-                              title="Delete"
-                              onClick={() => setShowDeleteConfirm(bug)}
-                              style={{
-                                background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                                borderRadius: 6, padding: '5px 7px', cursor: 'pointer',
-                                color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center',
-                                transition: 'all 0.15s',
-                              }}
-                              onMouseEnter={e => { e.currentTarget.style.color = '#f87171'; e.currentTarget.style.borderColor = 'rgba(248,113,113,0.3)'; e.currentTarget.style.background = 'rgba(248,113,113,0.08)'; }}
-                              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; e.currentTarget.style.borderColor = 'var(--border-light)'; e.currentTarget.style.background = 'var(--surface-secondary)'; }}
-                            >
-                              <FiTrash2 size={13} />
-                            </button>
+        {filteredBugs.length > 0 ? (
+          <div className="bug-table-wrap">
+            <table className="bug-table">
+              <colgroup>
+                <col style={{ width: '96px' }} />
+                <col />
+                <col style={{ width: '130px' }} />
+                <col style={{ width: '160px' }} />
+                <col style={{ width: '80px' }} />
+                <col style={{ width: '80px' }} />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Severity</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th style={{ textAlign: 'center' }}>File</th>
+                  <th style={{ textAlign: 'right' }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredBugs.map((bug) => {
+                  const bugId = bug._id || bug.id;
+                  const isHovered = hoveredRow === bugId;
+                  const fileUrl = getSafeUrl(bug);
+                  const mime = getFileMimeType(bug);
+                  return (
+                    <tr
+                      key={bugId}
+                      className={isHovered ? 'bug-row-hover' : ''}
+                      onMouseEnter={() => setHoveredRow(bugId)}
+                      onMouseLeave={() => setHoveredRow(null)}
+                      onClick={() => { setViewingBug(bug); setShowViewModal(true); }}
+                    >
+                      <td>
+                        <SeverityBadge severity={bug.severity || 'Medium'} />
+                      </td>
+                      <td className="bug-title-cell">
+                        <div className="bug-title-text">{bug.title}</div>
+                        {bug.createdBy?.firstName && (
+                          <div className="bug-title-meta">
+                            by {bug.createdBy.firstName} {bug.createdBy.lastName}
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                        )}
+                      </td>
+                      <td>
+                        <StatusBadge status={bug.status || 'Active'} />
+                      </td>
+                      <td>
+                        {bug.assignedTo ? (
+                          <div className="bug-assignee-cell">
+                            <div className="bug-avatar">
+                              {bug.assignedTo.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
+                            </div>
+                            <span className="bug-assignee-name">{bug.assignedTo}</span>
+                          </div>
+                        ) : (
+                          <span className="bug-unassigned">Unassigned</span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        {fileUrl ? (
+                          <a
+                            href={api.getFileUrl(fileUrl)}
+                            target="_blank" rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            className="bug-file-link"
+                            title="View attachment"
+                          >
+                            {isVideoFile(mime) ? <FiVideo size={13} /> : <FiImage size={13} />}
+                          </a>
+                        ) : (
+                          <span className="bug-file-none">—</span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div className={`bug-row-actions ${isHovered ? 'visible' : ''}`} onClick={e => e.stopPropagation()}>
+                          <button
+                            title="Edit"
+                            className="bug-action-btn"
+                            onClick={() => {
+                              setEditingBug(bug); setSelectedFile(null);
+                              setSelectedAssignee(bug.assignedTo || '');
+                              setAssignedToQuery(bug.assignedTo || '');
+                              setShowModal(true);
+                            }}
+                          >
+                            <FiEdit2 size={13} />
+                          </button>
+                          <button
+                            title="Delete"
+                            className="bug-action-btn bug-action-btn-danger"
+                            onClick={() => setShowDeleteConfirm(bug)}
+                          >
+                            <FiTrash2 size={13} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="bug-empty">
+            <div className="bug-empty-icon">
+              <FiFlag size={30} />
             </div>
-          ) : (
-            /* Empty state */
-            <div style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              padding: '80px 40px', textAlign: 'center',
-            }}>
-              <div style={{
-                width: 72, height: 72, borderRadius: 20, marginBottom: 20,
-                background: 'linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.08))',
-                border: '1px solid rgba(239,68,68,0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <FiFlag size={30} style={{ color: 'rgba(248,113,113,0.4)' }} />
-              </div>
-              <h3 style={{ color: 'var(--text-secondary)', margin: '0 0 8px', fontSize: 16, fontWeight: 600 }}>
-                No bugs found
-              </h3>
-              <p style={{ color: 'rgba(148,163,184,0.4)', margin: '0 0 24px', fontSize: 14, maxWidth: 360, lineHeight: 1.6 }}>
-                {searchTerm || statusFilter !== 'All'
-                  ? 'Try adjusting your search or filter criteria.'
-                  : 'No defects have been reported yet. Click below to report one.'}
-              </p>
-              <div style={{ display: 'flex', gap: 10 }}>
-                {(searchTerm || statusFilter !== 'All') && (
-                  <button
-                    onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}
-                    style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 6,
-                      padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                      background: 'var(--surface-secondary)', border: '1px solid var(--border-input)',
-                      color: 'var(--text-secondary)', cursor: 'pointer',
-                    }}
-                  >
-                    <FiX size={14} /> Clear Filters
-                  </button>
-                )}
-                <button
-                  onClick={() => { setEditingBug(null); setSelectedFile(null); setSelectedAssignee(''); setAssignedToQuery(''); setShowModal(true); }}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                    background: 'var(--gradient-danger)',
-                    border: 'none', color: '#fff', cursor: 'pointer',
-                    boxShadow: '0 2px 12px rgba(239,68,68,0.3)',
-                  }}
-                >
-                  <FiPlus size={14} /> Report Bug
+            <h3>No bugs found</h3>
+            <p>{searchTerm || statusFilter !== 'All'
+              ? 'Try adjusting your search or filter criteria.'
+              : 'No defects have been reported yet. Click below to report one.'}
+            </p>
+            <div className="bug-empty-actions">
+              {(searchTerm || statusFilter !== 'All') && (
+                <button className="bug-btn bug-btn-secondary" onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}>
+                  <FiX size={14} /> Clear Filters
                 </button>
-              </div>
+              )}
+              <button
+                className="bug-btn bug-btn-primary"
+                onClick={() => { setEditingBug(null); setSelectedFile(null); setSelectedAssignee(''); setAssignedToQuery(''); setShowModal(true); }}
+              >
+                <FiPlus size={14} /> Report Bug
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ═══════════ VIEW MODAL ═══════════ */}
@@ -592,28 +416,16 @@ function Bugs({ projectId, user }) {
         title={null}
         size="lg"
         footer={
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
+          <div className="bug-modal-footer">
+            <button className="bug-btn bug-btn-secondary" onClick={() => setShowViewModal(false)}>Close</button>
             <button
-              onClick={() => setShowViewModal(false)}
-              style={{
-                padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                background: 'var(--surface-secondary)', border: '1px solid var(--border-input)',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-              }}
-            >Close</button>
-            <button
+              className="bug-btn bug-btn-primary-purple"
               onClick={() => {
                 setShowViewModal(false);
                 setEditingBug(viewingBug); setSelectedFile(null);
                 setSelectedAssignee(viewingBug.assignedTo || '');
                 setAssignedToQuery(viewingBug.assignedTo || '');
                 setShowModal(true);
-              }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: 'var(--gradient-primary)',
-                border: 'none', color: '#fff', cursor: 'pointer',
               }}
             >
               <FiEdit2 size={14} /> Edit
@@ -623,57 +435,32 @@ function Bugs({ projectId, user }) {
       >
         {viewingBug && (
           <div>
-            {/* Bug title & meta */}
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                <span style={{
-                  fontFamily: 'monospace', fontSize: 11, padding: '3px 9px', borderRadius: 5,
-                  background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                  color: 'var(--text-muted)',
-                }}>
-                  BUG-{String(bugs.indexOf(viewingBug) + 1).padStart(3, '0')}
-                </span>
-                <FiChevronRight size={12} style={{ color: 'var(--text-light)' }} />
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Bug Details</span>
+            <div className="bug-view-header">
+              <div className="bug-breadcrumb">
+                <span className="bug-code">BUG-{String(bugs.indexOf(viewingBug) + 1).padStart(3, '0')}</span>
+                <FiChevronRight size={12} />
+                <span>Bug Details</span>
               </div>
-              <h2 style={{ margin: '0 0 12px', fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.3, letterSpacing: '-0.3px' }}>
-                {viewingBug.title}
-              </h2>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                  background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                  borderRadius: 8,
-                }}>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Severity</span>
+              <h2 className="bug-view-title">{viewingBug.title}</h2>
+              <div className="bug-view-meta">
+                <div className="bug-meta-card">
+                  <span className="bug-meta-label">Severity</span>
                   <SeverityBadge severity={viewingBug.severity || 'Medium'} />
                 </div>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                  background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                  borderRadius: 8,
-                }}>
-                  <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Status</span>
+                <div className="bug-meta-card">
+                  <span className="bug-meta-label">Status</span>
                   <StatusBadge status={viewingBug.status || 'Active'} />
                 </div>
                 {viewingBug.assignedTo && (
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                    background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                    borderRadius: 8,
-                  }}>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Assigned</span>
-                    <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>{viewingBug.assignedTo}</span>
+                  <div className="bug-meta-card">
+                    <span className="bug-meta-label">Assigned</span>
+                    <span className="bug-meta-value">{viewingBug.assignedTo}</span>
                   </div>
                 )}
                 {viewingBug.createdBy?.firstName && (
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
-                    background: 'var(--surface-secondary)', border: '1px solid var(--border-light)',
-                    borderRadius: 8,
-                  }}>
-                    <span style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Reporter</span>
-                    <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
+                  <div className="bug-meta-card">
+                    <span className="bug-meta-label">Reporter</span>
+                    <span className="bug-meta-value">
                       {viewingBug.createdBy.firstName} {viewingBug.createdBy.lastName}
                     </span>
                   </div>
@@ -681,66 +468,32 @@ function Bugs({ projectId, user }) {
               </div>
             </div>
 
-            {/* Description */}
-            <div style={{ marginBottom: 24 }}>
-              <h4 style={{
-                display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 10px',
-                fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
-                textTransform: 'uppercase', letterSpacing: '0.8px',
-              }}>
-                <FiFileText size={13} style={{ color: 'var(--primary-400)' }} />
-                Description
+            <div className="bug-view-section">
+              <h4 className="bug-section-heading">
+                <FiFileText size={13} /> Description
               </h4>
-              <div style={{
-                padding: 16, background: 'var(--surface-secondary)',
-                border: '1px solid var(--border-light)', borderRadius: 10,
-                color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7,
-                whiteSpace: 'pre-wrap',
-              }}>
+              <div className="bug-description">
                 {viewingBug.description || 'No description provided.'}
               </div>
             </div>
 
-            {/* Evidence */}
             {getSafeUrl(viewingBug) && (
-              <div>
-                <h4 style={{
-                  display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 10px',
-                  fontSize: 12, fontWeight: 600, color: 'var(--text-muted)',
-                  textTransform: 'uppercase', letterSpacing: '0.8px',
-                }}>
-                  <FiPaperclip size={13} style={{ color: 'var(--primary-400)' }} />
-                  Evidence
+              <div className="bug-view-section">
+                <h4 className="bug-section-heading">
+                  <FiPaperclip size={13} /> Evidence
                 </h4>
                 {isVideoFile(getFileMimeType(viewingBug)) ? (
-                  <div style={{
-                    borderRadius: 10, overflow: 'hidden',
-                    border: '1px solid var(--border-light)',
-                  }}>
-                    <video
-                      controls
-                      style={{ width: '100%', maxHeight: 400, background: '#000', display: 'block' }}
-                      src={api.getFileUrl(getSafeUrl(viewingBug))}
-                    />
-                    <div style={{
-                      padding: '10px 14px', background: 'var(--surface-secondary)',
-                      borderTop: '1px solid var(--border-light)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <FiVideo size={14} style={{ color: 'var(--primary-400)' }} />
-                        <span style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
-                          {getFileName(viewingBug) || 'Video Evidence'}
-                        </span>
+                  <div className="bug-video-wrap">
+                    <video controls className="bug-video" src={api.getFileUrl(getSafeUrl(viewingBug))} />
+                    <div className="bug-video-info">
+                      <div className="bug-video-info-left">
+                        <FiVideo size={14} />
+                        <span>{getFileName(viewingBug) || 'Video Evidence'}</span>
                       </div>
                       <a
                         href={api.getFileUrl(getSafeUrl(viewingBug))}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 5,
-                          fontSize: 12, color: 'var(--primary-400)', textDecoration: 'none',
-                        }}
+                        target="_blank" rel="noopener noreferrer"
+                        className="bug-video-link"
                       >
                         <FiExternalLink size={12} /> Open
                       </a>
@@ -749,33 +502,17 @@ function Bugs({ projectId, user }) {
                 ) : (
                   <a
                     href={api.getFileUrl(getSafeUrl(viewingBug))}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 14, padding: 16,
-                      border: '1px solid var(--border-light)', borderRadius: 10,
-                      textDecoration: 'none', background: 'var(--surface-secondary)',
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-tertiary)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.borderColor = 'var(--border-light)'; }}
+                    target="_blank" rel="noopener noreferrer"
+                    className="bug-file-card"
                   >
-                    <div style={{
-                      width: 42, height: 42, borderRadius: 10,
-                      background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.15)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}>
-                      <FiFileText size={18} style={{ color: 'var(--primary-400)' }} />
+                    <div className="bug-file-icon">
+                      <FiFileText size={18} />
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-main)' }}>
-                        {getFileName(viewingBug) || 'View Attachment'}
-                      </div>
-                      <div style={{ fontSize: 12, color: 'rgba(148,163,184,0.4)', marginTop: 2 }}>
-                        Open in new tab
-                      </div>
+                    <div className="bug-file-info">
+                      <div className="bug-file-name">{getFileName(viewingBug) || 'View Attachment'}</div>
+                      <div className="bug-file-hint">Open in new tab</div>
                     </div>
-                    <FiExternalLink size={16} style={{ color: 'var(--text-light)', flexShrink: 0 }} />
+                    <FiExternalLink size={16} className="bug-file-external" />
                   </a>
                 )}
               </div>
@@ -791,140 +528,74 @@ function Bugs({ projectId, user }) {
         title={null}
         size="lg"
         footer={
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
+          <div className="bug-modal-footer">
+            <button className="bug-btn bug-btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
             <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              style={{
-                padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                background: 'var(--surface-secondary)', border: '1px solid var(--border-input)',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-              }}
-            >Cancel</button>
-            <button
-              type="submit"
-              form="bug-form"
-              disabled={isSaving}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: isSaving ? 'rgba(239,68,68,0.5)' : 'var(--gradient-danger)',
-                border: 'none', color: '#fff',
-                cursor: isSaving ? 'not-allowed' : 'pointer',
-                boxShadow: isSaving ? 'none' : '0 2px 12px rgba(239,68,68,0.3)',
-              }}
+              type="submit" form="bug-form" disabled={isSaving}
+              className={`bug-btn bug-btn-primary ${isSaving ? 'bug-btn-disabled' : ''}`}
             >
               {isSaving ? (
-                <>
-                  <span style={{
-                    width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)',
-                    borderTopColor: '#fff', borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite',
-                  }} />
-                  Saving…
-                </>
+                <><span className="bug-spinner" /> Saving…</>
               ) : (
-                <>
-                  <FiFlag size={14} /> {editingBug ? 'Update Bug' : 'Submit Bug'}
-                </>
+                <><FiFlag size={14} /> {editingBug ? 'Update Bug' : 'Submit Bug'}</>
               )}
             </button>
           </div>
         }
       >
         <form id="bug-form" onSubmit={handleSave}>
-          {/* Form header */}
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 8, flexShrink: 0,
-                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <FiFlag size={16} style={{ color: '#f87171' }} />
-              </div>
-              <div>
-                <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {editingBug ? 'Update Bug' : 'Report New Bug'}
-                </h2>
-                <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>
-                  {editingBug ? 'Modify the details below.' : 'Fill in the details to log a new defect.'}
-                </p>
-              </div>
+          <div className="bug-form-header">
+            <div className="bug-form-header-icon">
+              <FiFlag size={16} />
+            </div>
+            <div>
+              <h2>{editingBug ? 'Update Bug' : 'Report New Bug'}</h2>
+              <p>{editingBug ? 'Modify the details below.' : 'Fill in the details to log a new defect.'}</p>
             </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* Title */}
+          <div className="bug-form-fields">
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                Title <span style={{ color: '#f87171' }}>*</span>
-              </label>
+              <label className="bug-label">Title <span className="bug-required">*</span></label>
               <input
                 name="title"
                 defaultValue={editingBug?.title}
                 required
                 placeholder="Brief description of the defect…"
-                style={inputStyle}
-                onFocus={focusInput}
-                onBlur={blurInput}
+                className="bug-input"
               />
             </div>
 
-            {/* Description */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                Description
-              </label>
+              <label className="bug-label">Description</label>
               <textarea
                 name="description"
                 defaultValue={editingBug?.description}
                 rows={5}
                 placeholder="Detailed steps to reproduce the issue…"
-                style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
-                onFocus={focusInput}
-                onBlur={blurInput}
+                className="bug-input bug-textarea"
               />
             </div>
 
-            {/* Severity + Status */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div className="bug-form-grid-2">
               <div>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                  Severity
-                </label>
-                <select
-                  name="severity"
-                  defaultValue={editingBug?.severity || 'Medium'}
-                  style={{ ...inputStyle, cursor: 'pointer', appearance: 'none' }}
-                >
+                <label className="bug-label">Severity</label>
+                <select name="severity" defaultValue={editingBug?.severity || 'Medium'} className="bug-input bug-select">
                   {['Critical', 'High', 'Medium', 'Low'].map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                  Status
-                </label>
-                <select
-                  name="status"
-                  defaultValue={editingBug?.status || 'Active'}
-                  style={{ ...inputStyle, cursor: 'pointer', appearance: 'none' }}
-                >
+                <label className="bug-label">Status</label>
+                <select name="status" defaultValue={editingBug?.status || 'Active'} className="bug-input bug-select">
                   {['Active', 'Under development', 'In Progress', 'Resolved', 'Closed'].map(s => <option key={s}>{s}</option>)}
                 </select>
               </div>
             </div>
 
-            {/* Assignee */}
             <div style={{ position: 'relative' }}>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                Assigned To
-              </label>
+              <label className="bug-label">Assigned To</label>
               <div style={{ position: 'relative' }}>
-                <FiUser size={14} style={{
-                  position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
-                  color: 'rgba(148,163,184,0.4)', pointerEvents: 'none',
-                }} />
+                <FiUser size={14} className="bug-input-icon" />
                 <input
                   type="text"
                   value={assignedToQuery}
@@ -932,46 +603,26 @@ function Bugs({ projectId, user }) {
                   onFocus={() => assignedToResults.length > 0 && setShowAssignedDropdown(true)}
                   onBlur={() => setTimeout(() => setShowAssignedDropdown(false), 200)}
                   placeholder="Search by name or email…"
-                  style={{ ...inputStyle, paddingLeft: 34 }}
+                  className="bug-input"
+                  style={{ paddingLeft: 34 }}
                 />
               </div>
               <input type="hidden" name="assignedTo" value={selectedAssignee} />
 
-              {/* Dropdown */}
               {showAssignedDropdown && assignedToResults.length > 0 && (
-                <div style={{
-                  position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
-                  marginTop: 4, borderRadius: 10, overflow: 'hidden',
-                  background: 'var(--surface-elevated)', backdropFilter: 'blur(20px)',
-                  border: '1px solid var(--border-input)',
-                  boxShadow: '0 12px 40px rgba(0,0,0,0.4)', maxHeight: 200, overflowY: 'auto',
-                }}>
+                <div className="bug-dropdown">
                   {assignedToResults.map(u => (
                     <div
                       key={u._id || u.id}
                       onMouseDown={() => selectAssignee(u)}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '10px 14px', cursor: 'pointer',
-                        borderBottom: '1px solid var(--border-light)',
-                        transition: 'background 0.15s',
-                      }}
-                      onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-interaction)'; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                      className="bug-dropdown-item"
                     >
-                      <div style={{
-                        width: 30, height: 30, borderRadius: 8,
-                        background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 11, fontWeight: 700, color: 'var(--primary-300)', flexShrink: 0,
-                      }}>
+                      <div className="bug-avatar-lg">
                         {u.firstName?.charAt(0)}{u.lastName?.charAt(0)}
                       </div>
                       <div>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-main)' }}>
-                          {u.firstName} {u.lastName}
-                        </div>
-                        <div style={{ fontSize: 11, color: 'rgba(148,163,184,0.4)' }}>{u.email}</div>
+                        <div className="bug-dropdown-name">{u.firstName} {u.lastName}</div>
+                        <div className="bug-dropdown-email">{u.email}</div>
                       </div>
                     </div>
                   ))}
@@ -979,100 +630,55 @@ function Bugs({ projectId, user }) {
               )}
             </div>
 
-            {/* File upload */}
             <div>
-              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
-                Attachment
-                <span style={{ color: 'var(--text-light)', fontWeight: 400, marginLeft: 4 }}>Max 50MB</span>
+              <label className="bug-label">
+                Attachment <span className="bug-label-hint">Max 50MB</span>
               </label>
               <div
                 onDragOver={e => { e.preventDefault(); setDragOver(true); }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleFileDrop}
-                style={{
-                  border: `2px dashed ${dragOver ? 'rgba(99,102,241,0.5)' : 'var(--border-input)'}`,
-                  borderRadius: 12, padding: '28px 20px', textAlign: 'center',
-                  position: 'relative',
-                  background: dragOver ? 'var(--surface-interaction)' : 'var(--surface-secondary)',
-                  transition: 'all 0.2s',
-                }}
+                className={`bug-dropzone ${dragOver ? 'bug-dropzone-active' : ''}`}
               >
                 <input
                   type="file"
                   onChange={handleFileChange}
                   accept=".jpg,.jpeg,.png,.pdf,.mp4,.mov,.avi,.webm,.docx"
-                  style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
+                  className="bug-dropzone-input"
                 />
                 {selectedFile ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                    <div style={{
-                      width: 42, height: 42, borderRadius: 10,
-                      background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.15)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <FiCheckCircle size={18} style={{ color: '#4ade80' }} />
+                  <div className="bug-dropzone-selected">
+                    <div className="bug-dropzone-check">
+                      <FiCheckCircle size={18} />
                     </div>
-                    <div style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 8,
-                      padding: '6px 14px', borderRadius: 8,
-                      background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.15)',
-                      color: '#4ade80', fontSize: 13, fontWeight: 500,
-                    }}>
+                    <div className="bug-dropzone-file">
                       {isVideoFile(selectedFile.type) ? <FiVideo size={14} /> : <FiImage size={14} />}
                       {selectedFile.name}
-                      <button
-                        type="button"
-                        onClick={e => { e.stopPropagation(); setSelectedFile(null); }}
-                        style={{
-                          background: 'none', border: 'none', color: 'var(--text-muted)',
-                          cursor: 'pointer', padding: 2, marginLeft: 4, display: 'flex',
-                        }}
-                      >
+                      <button type="button" onClick={e => { e.stopPropagation(); setSelectedFile(null); }} className="bug-dropzone-remove">
                         <FiX size={13} />
                       </button>
                     </div>
                   </div>
                 ) : (
                   <>
-                    <div style={{
-                      width: 42, height: 42, borderRadius: 10, margin: '0 auto 10px',
-                      background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08))',
-                      border: '1px solid rgba(99,102,241,0.12)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <FiUpload size={18} style={{ color: 'var(--primary-400)' }} />
+                    <div className="bug-dropzone-icon">
+                      <FiUpload size={18} />
                     </div>
-                    <p style={{ color: 'var(--text-secondary)', margin: '0 0 3px', fontSize: 13, fontWeight: 500 }}>
-                      Drag & drop or click to upload
-                    </p>
-                    <p style={{ color: 'var(--text-light)', margin: 0, fontSize: 11 }}>
-                      JPG, PNG, PDF, MP4, MOV, WebM, DOCX
-                    </p>
+                    <p className="bug-dropzone-title">Drag & drop or click to upload</p>
+                    <p className="bug-dropzone-hint">JPG, PNG, PDF, MP4, MOV, WebM, DOCX</p>
                   </>
                 )}
               </div>
             </div>
 
-            {/* Reporter info */}
             {user && (
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '10px 14px', borderRadius: 9,
-                background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.12)',
-              }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: 7,
-                  background: 'rgba(99,102,241,0.15)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 10, fontWeight: 700, color: 'var(--primary-300)', flexShrink: 0,
-                }}>
+              <div className="bug-reporter-card">
+                <div className="bug-avatar-lg">
                   {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                 </div>
                 <div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Reported by</div>
-                  <div style={{ fontSize: 13, color: 'var(--text-main)', fontWeight: 500 }}>
-                    {user.firstName} {user.lastName}
-                  </div>
+                  <div className="bug-reporter-label">Reported by</div>
+                  <div className="bug-reporter-name">{user.firstName} {user.lastName}</div>
                 </div>
               </div>
             )}
@@ -1087,18 +693,12 @@ function Bugs({ projectId, user }) {
         title="Delete Bug"
         message={
           <div>
-            <p style={{ color: 'var(--text-secondary)', margin: '0 0 10px', fontSize: 14 }}>
-              Are you sure you want to delete <strong style={{ color: 'var(--text-primary)' }}>"{showDeleteConfirm?.title}"</strong>?
+            <p style={{ color: 'var(--bug-text-secondary)', margin: '0 0 10px', fontSize: 14 }}>
+              Delete <strong style={{ color: 'var(--bug-text)' }}>"{showDeleteConfirm?.title}"</strong>?
             </p>
-            <div style={{
-              display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 14px',
-              background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)',
-              borderRadius: 8,
-            }}>
-              <FiAlertTriangle size={14} style={{ color: '#f87171', flexShrink: 0, marginTop: 1 }} />
-              <span style={{ color: '#f87171', fontSize: 13, lineHeight: 1.5 }}>
-                This action cannot be undone. All associated data will be permanently removed.
-              </span>
+            <div className="bug-warning-banner">
+              <FiAlertTriangle size={14} />
+              <span>This action cannot be undone.</span>
             </div>
           </div>
         }
@@ -1107,7 +707,592 @@ function Bugs({ projectId, user }) {
         onConfirm={() => handleDelete(showDeleteConfirm._id || showDeleteConfirm.id)}
       />
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      {/* ═══════ Theme-aware styles ═══════ */}
+      <style>{`
+        /* ── Dark tokens (default) ── */
+        .bug-page {
+          --bug-bg: transparent;
+          --bug-card: rgba(255,255,255,0.02);
+          --bug-card-hover: rgba(255,255,255,0.04);
+          --bug-card-elevated: rgba(255,255,255,0.03);
+          --bug-border: rgba(255,255,255,0.06);
+          --bug-border-hover: rgba(255,255,255,0.1);
+          --bug-input-bg: rgba(255,255,255,0.03);
+          --bug-text: #f1f5f9;
+          --bug-text-secondary: rgba(203,213,225,0.85);
+          --bug-text-muted: rgba(148,163,184,0.55);
+          --bug-text-faint: rgba(148,163,184,0.35);
+          --bug-accent: #818cf8;
+          --bug-accent-strong: #6366f1;
+          --bug-accent-bg: rgba(99,102,241,0.12);
+          --bug-accent-border: rgba(99,102,241,0.2);
+          --bug-accent-glow: rgba(99,102,241,0.08);
+          --bug-danger: #f87171;
+          --bug-danger-bg: rgba(248,113,113,0.08);
+          --bug-danger-border: rgba(248,113,113,0.15);
+          --bug-hover-bg: rgba(99,102,241,0.06);
+        }
+
+        /* ── Light overrides ── */
+        [data-theme="light"] .bug-page {
+          --bug-card: #ffffff;
+          --bug-card-hover: #fafbfd;
+          --bug-card-elevated: #ffffff;
+          --bug-border: #e5e7eb;
+          --bug-border-hover: #d1d5db;
+          --bug-input-bg: #ffffff;
+          --bug-text: #0f172a;
+          --bug-text-secondary: #475569;
+          --bug-text-muted: #94a3b8;
+          --bug-text-faint: #cbd5e1;
+          --bug-accent: #6366f1;
+          --bug-accent-strong: #4f46e5;
+          --bug-accent-bg: rgba(99,102,241,0.08);
+          --bug-accent-border: rgba(99,102,241,0.18);
+          --bug-accent-glow: rgba(99,102,241,0.06);
+          --bug-danger: #ef4444;
+          --bug-danger-bg: rgba(239,68,68,0.06);
+          --bug-danger-border: rgba(239,68,68,0.15);
+          --bug-hover-bg: rgba(99,102,241,0.04);
+        }
+
+        /* ── Page layout ── */
+        .bug-page {
+          display: flex; flex-direction: column;
+          height: 100%; overflow: auto;
+          background: var(--bug-bg);
+        }
+
+        /* ── Header ── */
+        .bug-header {
+          padding: 28px 32px 24px;
+          border-bottom: 1px solid var(--bug-border);
+          display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
+          flex-wrap: wrap;
+        }
+        .bug-header-left { display: flex; align-items: center; gap: 12px; }
+        .bug-header-icon {
+          width: 40px; height: 40px; border-radius: 11px;
+          background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(245,158,11,0.15));
+          border: 1px solid rgba(239,68,68,0.15);
+          color: #f87171;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .bug-title {
+          margin: 0; font-size: 22px; font-weight: 700;
+          color: var(--bug-text); letter-spacing: -0.3px; line-height: 1.2;
+        }
+        .bug-subtitle {
+          margin: 3px 0 0; font-size: 13px; color: var(--bug-text-muted);
+        }
+
+        /* ── Body ── */
+        .bug-body {
+          padding: 24px 32px 32px;
+          display: flex; flex-direction: column; gap: 18px;
+        }
+
+        /* ── Metrics ── */
+        .bug-metrics-row {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 12px;
+        }
+        .bug-metric {
+          position: relative;
+          padding: 14px 16px; border-radius: 11px;
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+          overflow: hidden; transition: all 0.2s;
+        }
+        .bug-metric:hover {
+          border-color: var(--metric-color)40;
+          background: var(--bug-card-hover);
+        }
+        .bug-metric-accent {
+          position: absolute; top: 0; left: 0; right: 0; height: 2px;
+        }
+        .bug-metric-icon {
+          width: 30px; height: 30px; border-radius: 8px; margin-bottom: 10px;
+          border: 1px solid;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .bug-metric-value {
+          font-size: 22px; font-weight: 700; color: var(--bug-text);
+          line-height: 1; letter-spacing: -0.5px;
+        }
+        .bug-metric-label {
+          font-size: 11px; color: var(--bug-text-muted);
+          margin-top: 3px; font-weight: 500;
+        }
+
+        /* ── Tabs ── */
+        .bug-tabs {
+          display: flex; gap: 3px; padding: 4px; border-radius: 10px;
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+          overflow-x: auto;
+        }
+        .bug-tab {
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 8px 13px; border-radius: 7px;
+          font-size: 12px; font-weight: 500; font-family: inherit;
+          border: none; cursor: pointer;
+          background: transparent; color: var(--bug-text-muted);
+          transition: all 0.15s; white-space: nowrap;
+        }
+        .bug-tab:hover { background: var(--bug-card-hover); color: var(--bug-text-secondary); }
+        .bug-tab-active {
+          background: var(--bug-accent-bg) !important;
+          color: var(--bug-accent) !important;
+          font-weight: 600 !important;
+        }
+        .bug-tab-count {
+          padding: 1px 7px; border-radius: 4px;
+          font-size: 10px; font-weight: 700;
+          background: var(--bug-border); color: var(--bug-text-faint);
+        }
+        .bug-tab-count-active {
+          background: rgba(99,102,241,0.2) !important;
+          color: var(--bug-accent) !important;
+        }
+
+        /* ── Search row ── */
+        .bug-search-row {
+          display: flex; align-items: center; gap: 12px;
+          padding: 10px 14px; border-radius: 10px;
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+        }
+        .bug-search-wrap { position: relative; flex: 1; }
+        .bug-search-icon {
+          position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+          color: var(--bug-text-muted); pointer-events: none;
+        }
+        .bug-search-input {
+          padding-left: 34px !important; padding-right: 34px !important;
+        }
+        .bug-search-clear {
+          position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+          background: var(--bug-border); border: none;
+          color: var(--bug-text-muted); cursor: pointer;
+          padding: 3px 5px; border-radius: 4px;
+          display: flex; align-items: center;
+        }
+        .bug-result-count {
+          font-size: 12px; color: var(--bug-text-muted); white-space: nowrap;
+          padding: 6px 12px; border-radius: 6px;
+          background: var(--bug-input-bg); border: 1px solid var(--bug-border);
+        }
+        .bug-result-count span { color: var(--bug-accent); font-weight: 600; }
+
+        /* ── Inputs ── */
+        .bug-input {
+          width: 100%; padding: 10px 14px; border-radius: 9px;
+          border: 1px solid var(--bug-border);
+          background: var(--bug-input-bg); color: var(--bug-text);
+          font-size: 14px; outline: none; font-family: inherit;
+          transition: all 0.15s; box-sizing: border-box;
+        }
+        .bug-input:focus {
+          border-color: var(--bug-accent);
+          box-shadow: 0 0 0 3px var(--bug-accent-glow);
+        }
+        .bug-select { cursor: pointer; appearance: none; }
+        .bug-textarea { resize: vertical; line-height: 1.6; }
+
+        /* ── Table ── */
+        .bug-table-wrap {
+          border-radius: 12px; overflow: hidden;
+          border: 1px solid var(--bug-border);
+          background: var(--bug-card);
+        }
+        .bug-table {
+          width: 100%; border-collapse: separate; border-spacing: 0;
+          font-size: 13px; table-layout: fixed;
+        }
+        .bug-table th {
+          padding: 11px 14px; text-align: left;
+          font-size: 10px; font-weight: 600;
+          color: var(--bug-text-muted); text-transform: uppercase; letter-spacing: 0.8px;
+          border-bottom: 1px solid var(--bug-border);
+          background: var(--bug-card-elevated);
+          position: sticky; top: 0; z-index: 5;
+        }
+        .bug-table td {
+          padding: 12px 14px;
+          border-bottom: 1px solid var(--bug-border);
+          vertical-align: middle;
+          overflow: hidden;
+        }
+        .bug-table tbody tr {
+          transition: background 0.15s; cursor: pointer;
+        }
+        .bug-row-hover { background: var(--bug-hover-bg) !important; }
+        .bug-table tbody tr:last-child td { border-bottom: none; }
+
+        .bug-title-cell { min-width: 0; }
+        .bug-title-text {
+          font-weight: 500; color: var(--bug-text);
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .bug-title-meta {
+          font-size: 11px; color: var(--bug-text-muted); margin-top: 2px;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        .bug-assignee-cell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .bug-avatar {
+          width: 24px; height: 24px; border-radius: 7px;
+          background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+          display: flex; align-items: center; justify-content: center;
+          font-size: 10px; font-weight: 700; color: var(--bug-accent);
+          flex-shrink: 0;
+        }
+        .bug-avatar-lg {
+          width: 30px; height: 30px; border-radius: 8px;
+          background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+          display: flex; align-items: center; justify-content: center;
+          font-size: 11px; font-weight: 700; color: var(--bug-accent);
+          flex-shrink: 0;
+        }
+        .bug-assignee-name {
+          color: var(--bug-text-secondary); font-size: 13px;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .bug-unassigned {
+          color: var(--bug-text-faint); font-size: 12px; font-style: italic;
+        }
+
+        .bug-file-link {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 26px; height: 26px; border-radius: 6px;
+          color: var(--bug-accent); background: var(--bug-accent-bg);
+          border: 1px solid var(--bug-accent-border);
+          text-decoration: none; transition: all 0.15s;
+        }
+        .bug-file-link:hover {
+          background: rgba(99,102,241,0.18);
+          transform: scale(1.05);
+        }
+        .bug-file-none { color: var(--bug-text-faint); font-size: 11px; }
+
+        .bug-row-actions {
+          display: flex; gap: 4px; justify-content: flex-end;
+          opacity: 0; transition: opacity 0.15s;
+        }
+        .bug-row-actions.visible { opacity: 1; }
+        .bug-action-btn {
+          background: var(--bug-input-bg); border: 1px solid var(--bug-border);
+          border-radius: 6px; padding: 5px 7px; cursor: pointer;
+          color: var(--bug-text-muted);
+          display: flex; align-items: center; transition: all 0.15s;
+        }
+        .bug-action-btn:hover {
+          color: var(--bug-accent); border-color: var(--bug-accent-border);
+          background: var(--bug-accent-glow);
+        }
+        .bug-action-btn-danger:hover {
+          color: var(--bug-danger); border-color: var(--bug-danger-border);
+          background: var(--bug-danger-bg);
+        }
+
+        /* ── Badge shared ── */
+        .bug-badge {
+          display: inline-flex; align-items: center; gap: 5px;
+          border-radius: 6px; font-weight: 600;
+          white-space: nowrap; line-height: 1;
+        }
+
+        /* ── Empty ── */
+        .bug-empty {
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          padding: 60px 40px; text-align: center;
+          border-radius: 12px;
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+        }
+        .bug-empty-icon {
+          width: 66px; height: 66px; border-radius: 18px; margin-bottom: 16px;
+          background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(245,158,11,0.08));
+          border: 1px solid rgba(239,68,68,0.12);
+          color: var(--bug-danger); opacity: 0.5;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .bug-empty h3 {
+          color: var(--bug-text); margin: 0 0 6px;
+          font-size: 15px; font-weight: 600;
+        }
+        .bug-empty p {
+          color: var(--bug-text-muted); margin: 0 0 20px;
+          font-size: 13px; max-width: 340px; line-height: 1.6;
+        }
+        .bug-empty-actions { display: flex; gap: 8px; }
+
+        /* ── Buttons ── */
+        .bug-btn {
+          display: inline-flex; align-items: center; gap: 7px;
+          padding: 9px 16px; border-radius: 9px;
+          font-size: 13px; font-weight: 500; font-family: inherit;
+          border: none; cursor: pointer; transition: all 0.15s;
+        }
+        .bug-btn-primary {
+          background: linear-gradient(135deg, #ef4444, #dc2626);
+          color: #fff; font-weight: 600;
+          box-shadow: 0 2px 12px rgba(239,68,68,0.3);
+        }
+        .bug-btn-primary:hover:not(.bug-btn-disabled) {
+          box-shadow: 0 4px 20px rgba(239,68,68,0.45);
+          transform: translateY(-1px);
+        }
+        .bug-btn-primary-purple {
+          background: linear-gradient(135deg, #6366f1, #7c3aed);
+          color: #fff; font-weight: 600;
+        }
+        .bug-btn-primary-purple:hover {
+          box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+          transform: translateY(-1px);
+        }
+        .bug-btn-secondary {
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+          color: var(--bug-text-secondary);
+        }
+        .bug-btn-secondary:hover {
+          background: var(--bug-card-hover);
+          border-color: var(--bug-border-hover);
+          color: var(--bug-text);
+        }
+        .bug-btn-disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+        .bug-spinner {
+          width: 13px; height: 13px;
+          border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+          border-radius: 50%; animation: bugSpin 0.8s linear infinite;
+        }
+        @keyframes bugSpin { to { transform: rotate(360deg); } }
+
+        /* ── Modal footers ── */
+        .bug-modal-footer { display: flex; gap: 8px; justify-content: flex-end; width: 100%; }
+
+        /* ── View modal ── */
+        .bug-view-header { margin-bottom: 24px; }
+        .bug-breadcrumb {
+          display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+          font-size: 12px; color: var(--bug-text-muted);
+        }
+        .bug-code {
+          font-family: monospace; padding: 3px 9px; border-radius: 5px;
+          background: var(--bug-card-elevated); border: 1px solid var(--bug-border);
+          color: var(--bug-text-muted);
+        }
+        .bug-view-title {
+          margin: 0 0 12px; font-size: 20px; font-weight: 700;
+          color: var(--bug-text); line-height: 1.3; letter-spacing: -0.3px;
+        }
+        .bug-view-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+        .bug-meta-card {
+          display: flex; align-items: center; gap: 8px;
+          padding: 8px 14px; border-radius: 8px;
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+        }
+        .bug-meta-label {
+          font-size: 10px; color: var(--bug-text-muted);
+          text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;
+        }
+        .bug-meta-value { font-size: 13px; color: var(--bug-text); font-weight: 500; }
+
+        .bug-view-section { margin-bottom: 24px; }
+        .bug-view-section:last-child { margin-bottom: 0; }
+        .bug-section-heading {
+          display: flex; align-items: center; gap: 7px; margin: 0 0 10px;
+          font-size: 12px; font-weight: 600; color: var(--bug-text-muted);
+          text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .bug-section-heading svg { color: var(--bug-accent); }
+        .bug-description {
+          padding: 16px; border-radius: 10px;
+          background: var(--bug-card); border: 1px solid var(--bug-border);
+          color: var(--bug-text-secondary); font-size: 14px; line-height: 1.7;
+          white-space: pre-wrap;
+        }
+
+        /* ── Video/File ── */
+        .bug-video-wrap {
+          border-radius: 10px; overflow: hidden;
+          border: 1px solid var(--bug-border);
+        }
+        .bug-video {
+          width: 100%; max-height: 400px; background: #000; display: block;
+        }
+        .bug-video-info {
+          padding: 10px 14px; background: var(--bug-card);
+          border-top: 1px solid var(--bug-border);
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .bug-video-info-left {
+          display: flex; align-items: center; gap: 8px;
+          color: var(--bug-text); font-size: 13px; font-weight: 500;
+        }
+        .bug-video-info-left svg { color: var(--bug-accent); }
+        .bug-video-link {
+          display: inline-flex; align-items: center; gap: 5px;
+          font-size: 12px; color: var(--bug-accent); text-decoration: none;
+        }
+        .bug-file-card {
+          display: flex; align-items: center; gap: 14px; padding: 16px;
+          border: 1px solid var(--bug-border); border-radius: 10px;
+          text-decoration: none; background: var(--bug-card);
+          transition: all 0.15s;
+        }
+        .bug-file-card:hover {
+          background: var(--bug-card-hover);
+          border-color: var(--bug-accent-border);
+        }
+        .bug-file-icon {
+          width: 42px; height: 42px; border-radius: 10px;
+          background: var(--bug-accent-bg);
+          border: 1px solid var(--bug-accent-border);
+          color: var(--bug-accent);
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .bug-file-info { flex: 1; }
+        .bug-file-name { font-size: 14px; font-weight: 500; color: var(--bug-text); }
+        .bug-file-hint { font-size: 12px; color: var(--bug-text-muted); margin-top: 2px; }
+        .bug-file-external { color: var(--bug-text-faint); flex-shrink: 0; }
+
+        /* ── Form modal ── */
+        .bug-form-header {
+          display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+        }
+        .bug-form-header-icon {
+          width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+          background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);
+          color: var(--bug-danger);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .bug-form-header h2 {
+          margin: 0; font-size: 18px; font-weight: 700; color: var(--bug-text);
+        }
+        .bug-form-header p {
+          margin: 2px 0 0; font-size: 12px; color: var(--bug-text-muted);
+        }
+
+        .bug-form-fields { display: flex; flex-direction: column; gap: 16px; }
+        .bug-form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .bug-label {
+          display: block; margin-bottom: 6px;
+          font-size: 12px; font-weight: 500; color: var(--bug-text-secondary);
+        }
+        .bug-label-hint { color: var(--bug-text-faint); font-weight: 400; margin-left: 4px; }
+        .bug-required { color: var(--bug-danger); }
+        .bug-input-icon {
+          position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+          color: var(--bug-text-muted); pointer-events: none;
+        }
+
+        /* ── Dropdown ── */
+        .bug-dropdown {
+          position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+          margin-top: 4px; border-radius: 10px; overflow: hidden;
+          background: var(--bug-card-elevated); backdrop-filter: blur(20px);
+          border: 1px solid var(--bug-border);
+          box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+          max-height: 200px; overflow-y: auto;
+        }
+        [data-theme="light"] .bug-dropdown {
+          box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+        }
+        .bug-dropdown-item {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 14px; cursor: pointer;
+          border-bottom: 1px solid var(--bug-border);
+          transition: background 0.15s;
+        }
+        .bug-dropdown-item:hover { background: var(--bug-hover-bg); }
+        .bug-dropdown-name { font-size: 13px; font-weight: 500; color: var(--bug-text); }
+        .bug-dropdown-email { font-size: 11px; color: var(--bug-text-muted); }
+
+        /* ── Dropzone ── */
+        .bug-dropzone {
+          border: 2px dashed var(--bug-border); border-radius: 12px;
+          padding: 28px 20px; text-align: center; position: relative;
+          background: var(--bug-card); transition: all 0.2s;
+        }
+        .bug-dropzone-active {
+          border-color: var(--bug-accent) !important;
+          background: var(--bug-accent-glow) !important;
+        }
+        .bug-dropzone-input {
+          position: absolute; inset: 0; opacity: 0; cursor: pointer;
+        }
+        .bug-dropzone-icon {
+          width: 42px; height: 42px; border-radius: 10px; margin: 0 auto 10px;
+          background: var(--bug-accent-bg);
+          border: 1px solid var(--bug-accent-border);
+          color: var(--bug-accent);
+          display: flex; align-items: center; justify-content: center;
+        }
+        .bug-dropzone-title {
+          color: var(--bug-text-secondary); margin: 0 0 3px;
+          font-size: 13px; font-weight: 500;
+        }
+        .bug-dropzone-hint {
+          color: var(--bug-text-muted); margin: 0; font-size: 11px;
+        }
+        .bug-dropzone-selected {
+          display: flex; flex-direction: column; align-items: center; gap: 8px;
+        }
+        .bug-dropzone-check {
+          width: 42px; height: 42px; border-radius: 10px;
+          background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
+          color: #22c55e;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .bug-dropzone-file {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 6px 14px; border-radius: 8px;
+          background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.15);
+          color: #22c55e; font-size: 13px; font-weight: 500;
+        }
+        .bug-dropzone-remove {
+          background: none; border: none; color: var(--bug-text-muted);
+          cursor: pointer; padding: 2px; margin-left: 4px; display: flex;
+        }
+
+        /* ── Reporter card ── */
+        .bug-reporter-card {
+          display: flex; align-items: center; gap: 10px;
+          padding: 10px 14px; border-radius: 9px;
+          background: var(--bug-accent-glow); border: 1px solid var(--bug-accent-border);
+        }
+        .bug-reporter-label { font-size: 12px; color: var(--bug-text-muted); }
+        .bug-reporter-name { font-size: 13px; color: var(--bug-text); font-weight: 500; }
+
+        /* ── Warning banner ── */
+        .bug-warning-banner {
+          display: flex; align-items: flex-start; gap: 8px;
+          padding: 10px 14px; border-radius: 8px;
+          background: var(--bug-danger-bg); border: 1px solid var(--bug-danger-border);
+        }
+        .bug-warning-banner svg {
+          color: var(--bug-danger); flex-shrink: 0; margin-top: 1px;
+        }
+        .bug-warning-banner span {
+          color: var(--bug-danger); font-size: 13px; line-height: 1.5;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1200px) {
+          .bug-metrics-row { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 900px) {
+          .bug-body { padding: 20px; }
+          .bug-header { padding: 20px; }
+          .bug-metrics-row { grid-template-columns: repeat(2, 1fr); }
+          .bug-table { min-width: 700px; }
+        }
+        @media (max-width: 640px) {
+          .bug-form-grid-2 { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </div>
   );
 }
