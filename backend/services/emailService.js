@@ -1,12 +1,15 @@
 import nodemailer from 'nodemailer';
 
 const createTransporter = () => {
+  const isSendGrid = process.env.SMTP_HOST?.includes('sendgrid') || 
+                     (!process.env.SMTP_HOST && process.env.SMTP_USER);
+  
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: process.env.SMTP_PORT || 587,
+    host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
+    port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false,
     auth: {
-      user: process.env.SMTP_USER || '',
+      user: isSendGrid ? 'apikey' : (process.env.SMTP_USER || ''),
       pass: process.env.SMTP_PASS || ''
     }
   });
@@ -15,10 +18,12 @@ const createTransporter = () => {
 export const sendWelcomeEmail = async (user, tempPassword) => {
   try {
     const transporter = createTransporter();
-    if (!process.env.SMTP_USER) {
-      console.log('⚠️ SMTP not configured. Welcome email skipped for:', user.email);
+    if (!process.env.SMTP_PASS) {
+      console.log('⚠️ SMTP not configured (SMTP_PASS missing). Welcome email skipped for:', user.email);
       return { success: false, error: 'SMTP not configured' };
     }
+
+    console.log(`📧 Sending welcome email to ${user.email} via ${process.env.SMTP_HOST || 'smtp.sendgrid.net'}...`);
 
     const mailOptions = {
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
@@ -47,11 +52,11 @@ export const sendWelcomeEmail = async (user, tempPassword) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Welcome email sent to: ${user.email}`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ Welcome email sent to: ${user.email}`, info.messageId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Email send error:', error.message);
+    console.error('❌ Welcome email error:', error.message, error.code || '');
     return { success: false, error: error.message };
   }
 };
@@ -59,7 +64,7 @@ export const sendWelcomeEmail = async (user, tempPassword) => {
 export const sendBugAssignmentEmail = async (bug, assignedUser, createdByUser) => {
   try {
     const transporter = createTransporter();
-    if (!process.env.SMTP_USER) {
+    if (!process.env.SMTP_PASS) {
       console.log('⚠️ SMTP not configured. Bug assignment email skipped');
       return { success: false, error: 'SMTP not configured' };
     }
@@ -101,7 +106,7 @@ export const sendBugAssignmentEmail = async (bug, assignedUser, createdByUser) =
 export const sendBugCreatedConfirmationEmail = async (bug, createdByUser) => {
   try {
     const transporter = createTransporter();
-    if (!process.env.SMTP_USER) {
+    if (!process.env.SMTP_PASS) {
       console.log('⚠️ SMTP not configured. Bug creation confirmation email skipped');
       return { success: false, error: 'SMTP not configured' };
     }
@@ -143,7 +148,7 @@ export const sendBugCreatedConfirmationEmail = async (bug, createdByUser) => {
 export const sendProjectAssignmentEmail = async (user, project, assignedBy) => {
   try {
     const transporter = createTransporter();
-    if (!process.env.SMTP_USER) {
+    if (!process.env.SMTP_PASS) {
       console.log('⚠️ SMTP not configured. Project assignment email skipped');
       return { success: false, error: 'SMTP not configured' };
     }
