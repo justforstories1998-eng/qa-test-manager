@@ -196,6 +196,34 @@
   --surface-input: rgba(255, 255, 255, 0.03);
   --border-input: rgba(0, 0, 0, 0.08);
   --text-on-primary: #ffffff;
+
+  /* ── Status Semantic Tokens ── */
+  --color-pass: #10b981;
+  --color-fail: #f43f5e;
+  --color-block: #f59e0b;
+  --color-na: #6c7a89;
+  --color-pass-bg: rgba(16, 185, 129, 0.10);
+  --color-pass-border: rgba(16, 185, 129, 0.20);
+  --color-fail-bg: rgba(244, 63, 94, 0.10);
+  --color-fail-border: rgba(244, 63, 94, 0.20);
+  --color-block-bg: rgba(245, 158, 11, 0.10);
+  --color-block-border: rgba(245, 158, 11, 0.20);
+  --color-na-bg: rgba(100, 116, 139, 0.10);
+  --color-na-border: rgba(100, 116, 139, 0.20);
+  --color-info-bg: rgba(99, 102, 241, 0.10);
+  --color-info-border: rgba(99, 102, 241, 0.15);
+  --color-success-bg: rgba(34, 197, 94, 0.08);
+  --color-success-border: rgba(34, 197, 94, 0.15);
+  --color-error-bg: rgba(239, 68, 68, 0.08);
+  --color-error-border: rgba(239, 68, 68, 0.15);
+  --color-warning-bg: rgba(245, 158, 11, 0.08);
+  --color-warning-border: rgba(245, 158, 11, 0.15);
+
+  /* ── Button Text ── */
+  --btn-text-on-primary: #ffffff;
+
+  /* ── Overlay ── */
+  --overlay-bg: rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================
@@ -257,4 +285,28 @@
   --surface-input: rgba(255, 255, 255, 0.03);
   --border-input: rgba(255, 255, 255, 0.08);
   --text-on-primary: #ffffff;
+
+  /* ── Status Semantic Tokens (Dark) ── */
+  --color-pass-bg: rgba(16, 185, 129, 0.15);
+  --color-pass-border: rgba(16, 185, 129, 0.25);
+  --color-fail-bg: rgba(244, 63, 94, 0.15);
+  --color-fail-border: rgba(244, 63, 94, 0.25);
+  --color-block-bg: rgba(245, 158, 11, 0.15);
+  --color-block-border: rgba(245, 158, 11, 0.25);
+  --color-na-bg: rgba(100, 116, 139, 0.12);
+  --color-na-border: rgba(100, 116, 139, 0.20);
+  --color-info-bg: rgba(99, 102, 241, 0.12);
+  --color-info-border: rgba(99, 102, 241, 0.20);
+  --color-success-bg: rgba(34, 197, 94, 0.10);
+  --color-success-border: rgba(34, 197, 94, 0.20);
+  --color-error-bg: rgba(239, 68, 68, 0.10);
+  --color-error-border: rgba(239, 68, 68, 0.20);
+  --color-warning-bg: rgba(245, 158, 11, 0.10);
+  --color-warning-border: rgba(245, 158, 11, 0.20);
+
+  /* ── Button Text (Dark) ── */
+  --btn-text-on-primary: #ffffff;
+
+  /* ── Overlay (Dark) ── */
+  --overlay-bg: rgba(0, 0, 0, 0.6);
 }

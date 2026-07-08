@@ -199,6 +199,8 @@ function Execution({
 
   const handleReportBug = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
+    setIsSaving(true);
     const formData = new FormData(e.target);
     formData.append('projectId', activeRun?.projectId);
     if (tc?._id || tc?.id) formData.append('testCaseId', tc._id || tc.id);
@@ -206,11 +208,14 @@ function Execution({
       const res = await api.createBug(formData);
       if (res.success) { toast.success('Bug reported'); setShowBugModal(false); }
     } catch { toast.error('Failed to report bug'); }
+    finally { setIsSaving(false); }
   };
 
   const handleCreateRun = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
     if (!newRunData.name || !selectedSuiteId) return toast.error('Name and suite are required');
+    setIsSaving(true);
     const cases = testCases.filter(tc => String(tc.suiteId) === String(selectedSuiteId));
     try {
       const newRun = await onCreateTestRun({
@@ -226,6 +231,7 @@ function Execution({
         toast.success('Test run created');
       }
     } catch { toast.error('Failed to create run'); }
+    finally { setIsSaving(false); }
   };
 
   /* ═══════════════════ LIST VIEW ═══════════════════ */
@@ -538,15 +544,16 @@ function Execution({
               <button
                 type="submit"
                 form="new-run-form"
+                disabled={isSaving}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                  background: 'var(--gradient-primary)',
-                  border: 'none', color: '#fff', cursor: 'pointer',
-                  boxShadow: '0 2px 12px rgba(99,102,241,0.3)',
+                  background: isSaving ? 'rgba(99,102,241,0.5)' : 'var(--gradient-primary)',
+                  border: 'none', color: '#fff', cursor: isSaving ? 'not-allowed' : 'pointer',
+                  boxShadow: isSaving ? 'none' : '0 2px 12px rgba(99,102,241,0.3)',
                 }}
               >
-                <FiPlay size={14} /> Create Run
+                <FiPlay size={14} /> {isSaving ? 'Creating...' : 'Create Run'}
               </button>
             </div>
           }
@@ -1200,12 +1207,13 @@ function Execution({
             <button
               type="submit"
               form="bug-form"
+              disabled={isSaving}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                border: 'none', color: '#fff', cursor: 'pointer',
-                boxShadow: '0 2px 10px rgba(239,68,68,0.3)',
+                background: isSaving ? 'rgba(239,68,68,0.5)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                border: 'none', color: '#fff', cursor: isSaving ? 'not-allowed' : 'pointer',
+                boxShadow: isSaving ? 'none' : '0 2px 10px rgba(239,68,68,0.3)',
               }}
             >
               <FiFlag size={14} /> Submit Bug

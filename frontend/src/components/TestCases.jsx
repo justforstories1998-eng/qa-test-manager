@@ -216,6 +216,7 @@ function TestCases({
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadSuiteName, setUploadSuiteName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
   const [tcFormData, setTcFormData] = useState({
@@ -334,6 +335,8 @@ function TestCases({
 
   const handleTestCaseSubmit = async (e) => {
     e.preventDefault();
+    if (isSaving) return;
+    setIsSaving(true);
     try {
       if (editingTestCase) {
         await onUpdateTestCase?.(editingTestCase._id || editingTestCase.id, tcFormData);
@@ -344,6 +347,8 @@ function TestCases({
       toast.success(editingTestCase ? "Test case updated successfully" : "Test case created successfully");
     } catch {
       toast.error("Error saving test case");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1668,6 +1673,7 @@ function TestCases({
             <button
               type="submit"
               form="tc-form"
+              disabled={isSaving}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -1676,15 +1682,15 @@ function TestCases({
                 borderRadius: "9px",
                 fontSize: "13px",
                 fontWeight: 600,
-                background: "linear-gradient(135deg, #6366f1, #7c3aed)",
+                background: isSaving ? "rgba(99,102,241,0.5)" : "linear-gradient(135deg, #6366f1, #7c3aed)",
                 border: "none",
                 color: "#fff",
-                cursor: "pointer",
-                boxShadow: "0 2px 12px rgba(99,102,241,0.3)",
+                cursor: isSaving ? "not-allowed" : "pointer",
+                boxShadow: isSaving ? "none" : "0 2px 12px rgba(99,102,241,0.3)",
               }}
             >
               <FiCheck size={14} />
-              {editingTestCase ? "Save Changes" : "Create Test Case"}
+              {isSaving ? "Saving..." : (editingTestCase ? "Save Changes" : "Create Test Case")}
             </button>
           </div>
         }

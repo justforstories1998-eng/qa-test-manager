@@ -263,6 +263,23 @@
 .dg-select option {
   background: var(--bg-card);
   color: var(--text-primary);
+  padding: 8px;
+}
+
+/* Force select option visibility across all browsers/themes */
+select option {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary) !important;
+}
+
+select {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-card) !important;
+}
+
+select:focus,
+select:active {
+  color: var(--text-primary) !important;
 }
 
 .dg-textarea {
@@ -646,6 +663,26 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* ── Global form element visibility ── */
+input, select, textarea {
+  color: var(--text-primary) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted) !important;
+}
+
+input:disabled, select:disabled, textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Button text on primary backgrounds ── */
+.dg-btn-primary,
+button[style*="gradient"] {
+  color: var(--btn-text-on-primary) !important;
 }
 
 .dg-loading-page {

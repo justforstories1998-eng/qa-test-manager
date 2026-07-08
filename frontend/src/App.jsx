@@ -39,6 +39,7 @@ function App() {
   const [settings, setSettings] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1100);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -103,6 +104,8 @@ function App() {
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
+    if (isCreatingProject) return;
+    setIsCreatingProject(true);
     try {
       const res = await api.createProject({ name: newProjectName });
       if (res.success) {
@@ -115,6 +118,8 @@ function App() {
       }
     } catch (err) {
       toast.error("Error creating project");
+    } finally {
+      setIsCreatingProject(false);
     }
   };
 
@@ -281,7 +286,9 @@ function App() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowProjectModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Create</button>
+                <button type="submit" className="btn btn-primary" disabled={isCreatingProject}>
+                  {isCreatingProject ? 'Creating...' : 'Create'}
+                </button>
               </div>
             </form>
           </div>
