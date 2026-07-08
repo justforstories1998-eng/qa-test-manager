@@ -417,7 +417,7 @@ function Login({ onLogin }) {
           padding: 0 !important;
           font-size: 13px !important;
           font-weight: 400 !important;
-          color: rgba(148, 163, 184, 0.65) !important;
+          color: #d1d5db !important;
           letter-spacing: 0.2px;
           line-height: 1.4;
           background: transparent !important;
@@ -433,7 +433,7 @@ function Login({ onLogin }) {
           border-radius: 10px !important;
           background: rgba(255, 255, 255, 0.035) !important;
           border: 1px solid rgba(255, 255, 255, 0.05);
-          color: rgba(203, 213, 225, 0.75) !important;
+          color: #e5e7eb !important;
           font-size: 12.5px;
           opacity: 0;
           animation: loginFeatureFade 0.5s ease forwards;
@@ -443,7 +443,7 @@ function Login({ onLogin }) {
           flex-shrink: 0;
         }
         .login-feature span {
-          color: rgba(203, 213, 225, 0.75) !important;
+          color: #e5e7eb !important;
           background: transparent !important;
         }
         @keyframes loginFeatureFade {
@@ -456,7 +456,7 @@ function Login({ onLogin }) {
         }
         .login-branding-footer span {
           font-size: 11px !important;
-          color: rgba(148, 163, 184, 0.35) !important;
+          color: #9ca3af !important;
           background: transparent !important;
         }
 
@@ -497,7 +497,7 @@ function Login({ onLogin }) {
           padding: 0 !important;
           font-size: 26px !important;
           font-weight: 700 !important;
-          color: #f1f5f9 !important;
+          color: #ffffff !important;
           letter-spacing: -0.5px;
           line-height: 1.2;
           background: transparent !important;
@@ -506,7 +506,7 @@ function Login({ onLogin }) {
           margin: 8px 0 0 !important;
           padding: 0 !important;
           font-size: 14px !important;
-          color: rgba(148, 163, 184, 0.55) !important;
+          color: #d1d5db !important;
           font-weight: 400 !important;
           line-height: 1.5;
           background: transparent !important;
@@ -525,7 +525,7 @@ function Login({ onLogin }) {
           padding: 0 !important;
           font-size: 11px !important;
           font-weight: 600 !important;
-          color: rgba(203, 213, 225, 0.6) !important;
+          color: #e5e7eb !important;
           letter-spacing: 0.5px;
           text-transform: uppercase;
           background: transparent !important;
@@ -559,7 +559,7 @@ function Login({ onLogin }) {
         .login-input-icon {
           display: flex; align-items: center; justify-content: center;
           width: 44px; flex-shrink: 0;
-          color: rgba(148, 163, 184, 0.4) !important;
+          color: #9ca3af !important;
           transition: color 0.2s;
           background: transparent !important;
         }
@@ -574,7 +574,7 @@ function Login({ onLogin }) {
           background-color: transparent !important;
           border: none !important;
           outline: none !important;
-          color: #f1f5f9 !important;
+          color: #ffffff !important;
           font-size: 14px !important;
           font-family: inherit !important;
           box-shadow: none !important;
@@ -583,7 +583,7 @@ function Login({ onLogin }) {
           appearance: none;
         }
         .login-field input::placeholder {
-          color: rgba(148, 163, 184, 0.35) !important;
+          color: #9ca3af !important;
         }
         .login-field input:focus {
           outline: none !important;
@@ -594,10 +594,10 @@ function Login({ onLogin }) {
         .login-field input:-webkit-autofill:hover,
         .login-field input:-webkit-autofill:focus,
         .login-field input:-webkit-autofill:active {
-          -webkit-text-fill-color: #f1f5f9 !important;
+          -webkit-text-fill-color: #ffffff !important;
           -webkit-box-shadow: 0 0 0 1000px rgba(15, 15, 30, 0.99) inset !important;
           box-shadow: 0 0 0 1000px rgba(15, 15, 30, 0.99) inset !important;
-          caret-color: #f1f5f9 !important;
+          caret-color: #ffffff !important;
           transition: background-color 5000s ease-in-out 0s;
         }
 
@@ -607,7 +607,7 @@ function Login({ onLogin }) {
           background: transparent !important;
           border: none !important;
           cursor: pointer;
-          color: rgba(148, 163, 184, 0.4) !important;
+          color: #9ca3af !important;
           transition: color 0.15s;
           padding: 0 !important;
         }
@@ -703,7 +703,7 @@ function Login({ onLogin }) {
           padding: 0 14px !important;
           font-size: 10px !important;
           font-weight: 600 !important;
-          color: rgba(148, 163, 184, 0.4) !important;
+          color: #9ca3af !important;
           text-transform: uppercase;
           letter-spacing: 0.8px;
           background: transparent !important;
@@ -712,7 +712,7 @@ function Login({ onLogin }) {
           margin: 0 !important;
           padding: 0 !important;
           font-size: 12px !important;
-          color: rgba(148, 163, 184, 0.4) !important;
+          color: #9ca3af !important;
           line-height: 1.6;
           background: transparent !important;
           font-weight: 400 !important;
