@@ -116,7 +116,12 @@ function Admin({ projects = [] }) {
     try {
       const res = await api.createUser(userForm);
       if (res.success) {
-        toast.success(`User created${res.emailSent ? ' — welcome email sent' : ''}`);
+        if (res.emailSent) {
+          toast.success('User created — welcome email sent');
+        } else {
+          toast.success('User created');
+          toast.warning('Email not sent — check SMTP config on server', { autoClose: 8000 });
+        }
         if (res.tempPassword) toast.info(`Temp password: ${res.tempPassword}`, { autoClose: 10000 });
         setShowUserModal(false);
         setSelectedUser(null);

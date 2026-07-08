@@ -52,6 +52,36 @@ app.use('/uploads', express.static(uploadDir));
 // ============================================
 // HEALTH CHECK (no auth required)
 // ============================================
+// SMTP TEST (no auth required - for debugging)
+// ============================================
+app.get('/api/test-smtp', async (req, res) => {
+  try {
+    const nodemailer = await import('nodemailer');
+    const transporter = nodemailer.default.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
+      port: parseInt(process.env.SMTP_PORT || '587'),
+      secure: false,
+      auth: {
+        user: process.env.SMTP_HOST?.includes('sendgrid') ? 'apikey' : (process.env.SMTP_USER || ''),
+        pass: process.env.SMTP_PASS || ''
+      }
+    });
+
+    const info = await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: process.env.SMTP_FROM || process.env.SMTP_USER,
+      subject: 'QALogs SMTP Test',
+      html: '<h3>SMTP is working!</h3><p>If you received this, email sending is configured correctly.</p>'
+    });
+
+    res.json({ success: true, messageId: info.messageId, message: 'Test email sent successfully' });
+  } catch (error) {
+    console.error('SMTP Test Error:', error);
+    res.json({ success: false, error: error.message, code: error.code, command: error.command });
+  }
+});
+
+// Health check
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
