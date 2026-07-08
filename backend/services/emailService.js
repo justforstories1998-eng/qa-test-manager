@@ -73,16 +73,20 @@ export const sendWelcomeEmail = async (user, tempPassword) => {
             <tr>
               <td>
                 <p style="margin:0 0 8px 0;font-size:13px;color:#94a3b8;">EMAIL</p>
-                <p style="margin:0 0 18px 0;font-size:15px;color:#e2e8f0;font-weight:600;">${user.email}</p>
+                <p style="margin:0 0 18px 0;font-size:15px;color:#ffffff;font-weight:600;">${user.email}</p>
                 <p style="margin:0 0 8px 0;font-size:13px;color:#94a3b8;">TEMPORARY PASSWORD</p>
                 <p style="margin:0;font-size:15px;color:#e2e8f0;font-weight:600;letter-spacing:1px;">${tempPassword}</p>
               </td>
             </tr>
           </table>
           <p style="color:#f59e0b;font-size:14px;line-height:1.6;margin:0 0 25px 0;">⚠️ Please log in and change your password immediately for security.</p>
-          <p style="margin:0 0 10px 0;">
-            <a href="${getAppUrl()}" style="${btnStyle('#7c3aed')}">Login to QALogs →</a>
-          </p>
+          <table cellpadding="0" cellspacing="0" style="margin:0 0 10px 0;">
+            <tr>
+              <td style="background-color:#7c3aed;border-radius:8px;">
+                <a href="${getAppUrl()}" target="_blank" style="display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-weight:600;font-size:14px;">Login to QALogs →</a>
+              </td>
+            </tr>
+          </table>
           <p style="color:#475569;font-size:12px;margin:25px 0 0 0;">If you didn't request this account, please ignore this email.</p>
         `
       ),
