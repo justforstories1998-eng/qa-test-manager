@@ -4,14 +4,19 @@ const createTransporter = () => {
   const isSendGrid = process.env.SMTP_HOST?.includes('sendgrid') || 
                      (!process.env.SMTP_HOST && process.env.SMTP_USER);
   
+  const port = parseInt(process.env.SMTP_PORT || '465');
+
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.sendgrid.net',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: false,
+    port: port,
+    secure: port === 465,
     auth: {
       user: isSendGrid ? 'apikey' : (process.env.SMTP_USER || ''),
       pass: process.env.SMTP_PASS || ''
-    }
+    },
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
 };
 
