@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import { setToastSettings } from './toast';
+import { canAccessModule } from './permissions';
 import './styles/main.css';
 
 import Navbar from './components/Navbar';
@@ -14,6 +15,11 @@ import Bugs from './components/Bugs';
 import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
 import Admin from './components/Admin';
+import Board from './components/Board';
+import WorkItems from './components/WorkItems';
+import Boards from './components/Boards';
+import Backlogs from './components/Backlogs';
+import Sprints from './components/Sprints';
 
 import api from './api';
 
@@ -225,39 +231,64 @@ function App() {
         {activeProjectId ? (
           <Routes>
             <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} onRefresh={refreshData} />} />
-            <Route path="/test-cases" element={
-              <TestCases
-                testSuites={testSuites}
-                testCases={testCases}
-                settings={settings}
-                onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)}
-                onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)}
-              />
-            } />
-            <Route path="/execution" element={
-              <Execution
-                testSuites={testSuites}
-                testCases={testCases}
-                testRuns={testRuns}
-                settings={settings}
-                onCreateTestRun={handleCreateRun}
-                onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)}
-                onUpdateExecutionResult={handleUpdateExecutionResult}
-                onRefresh={refreshData}
-              />
-            } />
-            <Route path="/bugs" element={<Bugs projectId={activeProjectId} user={user} />} />
-            <Route path="/reports" element={
-              <Reports
-                testRuns={testRuns}
-                settings={settings}
-                projectId={activeProjectId}
-                onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)}
-              />
-            } />
-            <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
-            {user?.role === 'admin' && (
+            {canAccessModule(user?.role, 'test-cases') && (
+              <Route path="/test-cases" element={
+                <TestCases
+                  testSuites={testSuites}
+                  testCases={testCases}
+                  settings={settings}
+                  onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)}
+                  onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)}
+                />
+              } />
+            )}
+            {canAccessModule(user?.role, 'execution') && (
+              <Route path="/execution" element={
+                <Execution
+                  testSuites={testSuites}
+                  testCases={testCases}
+                  testRuns={testRuns}
+                  settings={settings}
+                  onCreateTestRun={handleCreateRun}
+                  onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)}
+                  onUpdateExecutionResult={handleUpdateExecutionResult}
+                  onRefresh={refreshData}
+                />
+              } />
+            )}
+            {canAccessModule(user?.role, 'bugs') && (
+              <Route path="/bugs" element={<Bugs projectId={activeProjectId} user={user} />} />
+            )}
+            {canAccessModule(user?.role, 'reports') && (
+              <Route path="/reports" element={
+                <Reports
+                  testRuns={testRuns}
+                  settings={settings}
+                  projectId={activeProjectId}
+                  onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)}
+                />
+              } />
+            )}
+            {canAccessModule(user?.role, 'settings') && (
+              <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
+            )}
+            {canAccessModule(user?.role, 'admin') && (
               <Route path="/admin" element={<Admin projects={projects} />} />
+            )}
+            {canAccessModule(user?.role, 'board') && (
+              <Route path="/board" element={<Board />} />
+            )}
+            {canAccessModule(user?.role, 'work-items') && (
+              <Route path="/work-items" element={<WorkItems projectId={activeProjectId} />} />
+            )}
+            {canAccessModule(user?.role, 'boards') && (
+              <Route path="/boards" element={<Boards projectId={activeProjectId} />} />
+            )}
+            {canAccessModule(user?.role, 'backlogs') && (
+              <Route path="/backlogs" element={<Backlogs projectId={activeProjectId} />} />
+            )}
+            {canAccessModule(user?.role, 'sprints') && (
+              <Route path="/sprints" element={<Sprints projectId={activeProjectId} />} />
             )}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

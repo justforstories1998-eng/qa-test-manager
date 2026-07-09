@@ -4,9 +4,11 @@ import {
   FiHome, FiFileText, FiPlay, FiBarChart2, FiSettings,
   FiChevronLeft, FiChevronRight, FiAlertTriangle, FiLogOut,
   FiShield, FiMenu, FiX, FiSun, FiMoon, FiBell, FiChevronDown,
-  FiAlertCircle, FiInfo, FiHelpCircle
+  FiAlertCircle, FiInfo, FiHelpCircle, FiTrello, FiClipboard,
+  FiList, FiLayers, FiClock
 } from 'react-icons/fi';
 import api from '../api';
+import { canAccessModule } from '../permissions';
 
 function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobileOpen, onToggleMobile }) {
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -81,30 +83,42 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
     return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   };
 
+  const role = user?.role || 'user';
+
   const navSections = [
     {
       title: 'Main',
       items: [
-        { path: '/', label: 'Dashboard', icon: FiHome },
-        { path: '/test-cases', label: 'Test Cases', icon: FiFileText },
-        { path: '/execution', label: 'Execution', icon: FiPlay },
-      ],
+        { path: '/', label: 'Dashboard', icon: FiHome, module: 'dashboard' },
+        { path: '/test-cases', label: 'Test Cases', icon: FiFileText, module: 'test-cases' },
+        { path: '/execution', label: 'Execution', icon: FiPlay, module: 'execution' },
+      ].filter(item => canAccessModule(role, item.module)),
+    },
+    {
+      title: 'Board',
+      items: [
+        { path: '/board', label: 'Board', icon: FiTrello, module: 'board' },
+        { path: '/work-items', label: 'Work Items', icon: FiClipboard, module: 'work-items' },
+        { path: '/boards', label: 'Boards', icon: FiLayers, module: 'boards' },
+        { path: '/backlogs', label: 'Backlogs', icon: FiList, module: 'backlogs' },
+        { path: '/sprints', label: 'Sprints', icon: FiClock, module: 'sprints' },
+      ].filter(item => canAccessModule(role, item.module)),
     },
     {
       title: 'Analysis',
       items: [
-        { path: '/bugs', label: 'Bugs', icon: FiAlertTriangle, badge: notifications.length || null, badgeColor: '#ef4444' },
-        { path: '/reports', label: 'Reports', icon: FiBarChart2 },
-      ],
+        { path: '/bugs', label: 'Bugs', icon: FiAlertTriangle, badge: notifications.length || null, badgeColor: '#ef4444', module: 'bugs' },
+        { path: '/reports', label: 'Reports', icon: FiBarChart2, module: 'reports' },
+      ].filter(item => canAccessModule(role, item.module)),
     },
     {
       title: 'System',
       items: [
-        { path: '/settings', label: 'Settings', icon: FiSettings },
-        ...(isAdmin ? [{ path: '/admin', label: 'Admin', icon: FiShield }] : []),
-      ],
+        { path: '/settings', label: 'Settings', icon: FiSettings, module: 'settings' },
+        ...(canAccessModule(role, 'admin') ? [{ path: '/admin', label: 'Admin', icon: FiShield, module: 'admin' }] : []),
+      ].filter(item => canAccessModule(role, item.module)),
     },
-  ];
+  ].filter(section => section.items.length > 0);
 
   /* ── computed widths ── */
   const sidebarWidth = collapsed ? 72 : 260;
