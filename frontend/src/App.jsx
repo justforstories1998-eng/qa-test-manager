@@ -276,7 +276,7 @@ function App() {
               <Route path="/admin" element={<Admin projects={projects} />} />
             )}
             {canAccessModule(user?.role, 'board') && (
-              <Route path="/board" element={<Board />} />
+              <Route path="/board" element={<Board projectId={activeProjectId} />} />
             )}
             {canAccessModule(user?.role, 'work-items') && (
               <Route path="/work-items" element={<WorkItems projectId={activeProjectId} />} />

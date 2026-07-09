@@ -121,6 +121,22 @@ const api = {
   getSettings: () => apiClient.get('/settings'),
   updateSettings: (category, data) => apiClient.put(`/settings/${category}`, data),
 
+  getBoards: (projectId) => apiClient.get('/boards', { params: { projectId } }),
+  createBoard: (data) => apiClient.post('/boards', data),
+  updateBoard: (id, data) => apiClient.put(`/boards/${id}`, data),
+  deleteBoard: (id) => apiClient.delete(`/boards/${id}`),
+
+  getWorkItems: (projectId, filters = {}) => apiClient.get('/work-items', { params: { projectId, ...filters } }),
+  createWorkItem: (data) => apiClient.post('/work-items', data),
+  updateWorkItem: (id, data) => apiClient.put(`/work-items/${id}`, data),
+  deleteWorkItem: (id) => apiClient.delete(`/work-items/${id}`),
+  updateWorkItemsOrder: (items) => apiClient.put('/work-items/batch/order', { items }),
+
+  getSprints: (projectId) => apiClient.get('/sprints', { params: { projectId } }),
+  createSprint: (data) => apiClient.post('/sprints', data),
+  updateSprint: (id, data) => apiClient.put(`/sprints/${id}`, data),
+  deleteSprint: (id) => apiClient.delete(`/sprints/${id}`),
+
   getFileUrl: (path) => {
     if (!path || typeof path !== 'string') return '#';
     if (path.indexOf('://') !== -1) return path;

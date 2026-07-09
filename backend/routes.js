@@ -12,7 +12,10 @@ import {
   getExecutionResultsByRunId, createExecutionResult, updateExecutionResult, deleteExecutionResult,
   getAllReports, createReport, deleteReport, getReportById,
   getSettings, updateSettings, getStatistics,
-  searchUsers, getAllUsers
+  searchUsers, getAllUsers,
+  getAllBoards, getBoardById, createBoard, updateBoard, deleteBoard,
+  getAllWorkItems, getWorkItemById, createWorkItem, updateWorkItem, deleteWorkItem, updateWorkItemOrder,
+  getAllSprints, getSprintById, createSprint, updateSprint, deleteSprint
 } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
@@ -316,6 +319,25 @@ router.get('/reports/:id/download', async (req, res, next) => {
 });
 
 router.delete('/reports/:id', async (req, res, next) => { try { await deleteReport(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// ============================================
+// BOARD MODULE
+// ============================================
+router.get('/boards', async (req, res, next) => { try { res.json({ success: true, data: await getAllBoards(req.query.projectId) }); } catch (e) { next(e); } });
+router.post('/boards', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createBoard(req.body) }); } catch (e) { next(e); } });
+router.put('/boards/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateBoard(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/boards/:id', async (req, res, next) => { try { await deleteBoard(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+router.get('/work-items', async (req, res, next) => { try { res.json({ success: true, data: await getAllWorkItems(req.query.projectId, req.query) }); } catch (e) { next(e); } });
+router.post('/work-items', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkItem(req.body) }); } catch (e) { next(e); } });
+router.put('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateWorkItem(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/work-items/:id', async (req, res, next) => { try { await deleteWorkItem(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+router.put('/work-items/batch/order', async (req, res, next) => { try { await updateWorkItemOrder(req.body.items); res.json({ success: true }); } catch (e) { next(e); } });
+
+router.get('/sprints', async (req, res, next) => { try { res.json({ success: true, data: await getAllSprints(req.query.projectId) }); } catch (e) { next(e); } });
+router.post('/sprints', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createSprint(req.body) }); } catch (e) { next(e); } });
+router.put('/sprints/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateSprint(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/sprints/:id', async (req, res, next) => { try { await deleteSprint(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // ============================================
 // STATS & SETTINGS

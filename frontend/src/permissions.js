@@ -20,7 +20,7 @@ export const ROLE_LABELS = {
 
 const FULL_ACCESS = ['dashboard', 'test-cases', 'execution', 'bugs', 'reports', 'settings', 'admin', 'board', 'work-items', 'boards', 'backlogs', 'sprints'];
 const ALL_MODULES_EXCEPT_ADMIN = ['dashboard', 'test-cases', 'execution', 'bugs', 'reports', 'settings', 'board', 'work-items', 'boards', 'backlogs', 'sprints'];
-const VIEW_ONLY_MODULES = ['dashboard', 'test-cases', 'execution', 'bugs', 'reports', 'settings'];
+const VIEW_ONLY_MODULES = ['dashboard', 'test-cases', 'execution', 'bugs', 'reports', 'settings', 'board', 'work-items', 'boards', 'backlogs', 'sprints'];
 const BOARD_MODULES = ['board', 'work-items', 'boards', 'backlogs', 'sprints'];
 
 const ROLE_PERMISSIONS = {

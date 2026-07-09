@@ -59,6 +59,38 @@ const bugSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+const boardSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  name: { type: String, required: true },
+  description: String,
+  columns: { type: [String], default: ['Backlog', 'To Do', 'In Progress', 'Review', 'Done'] }
+}, { timestamps: true });
+
+const workItemSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  boardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Board' },
+  sprintId: { type: mongoose.Schema.Types.ObjectId, ref: 'Sprint' },
+  title: { type: String, required: true },
+  description: String,
+  type: { type: String, enum: ['Feature', 'Bug', 'Task', 'Epic'], default: 'Task' },
+  priority: { type: String, enum: ['Critical', 'High', 'Medium', 'Low'], default: 'Medium' },
+  status: { type: String, enum: ['Backlog', 'To Do', 'In Progress', 'Review', 'Done'], default: 'Backlog' },
+  assignee: String,
+  storyPoints: { type: Number, default: 0 },
+  order: { type: Number, default: 0 },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+}, { timestamps: true });
+
+const sprintSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  boardId: { type: mongoose.Schema.Types.ObjectId, ref: 'Board' },
+  name: { type: String, required: true },
+  goal: String,
+  startDate: Date,
+  endDate: Date,
+  status: { type: String, enum: ['Planned', 'Active', 'Completed'], default: 'Planned' }
+}, { timestamps: true });
+
 const settingsSchema = new mongoose.Schema({ category: { type: String, required: true, unique: true }, data: mongoose.Schema.Types.Mixed });
 
 const User = mongoose.model('User', userSchema);
@@ -69,6 +101,9 @@ const TestRun = mongoose.model('TestRun', testRunSchema);
 const ExecutionResult = mongoose.model('ExecutionResult', executionResultSchema);
 const Report = mongoose.model('Report', reportSchema);
 const Bug = mongoose.model('Bug', bugSchema);
+const BoardModel = mongoose.model('Board', boardSchema);
+const WorkItem = mongoose.model('WorkItem', workItemSchema);
+const Sprint = mongoose.model('Sprint', sprintSchema);
 const Setting = mongoose.model('Setting', settingsSchema);
 
 export async function initializeDatabase() {
@@ -161,6 +196,39 @@ export const getStatistics = async (projectId) => {
   };
 };
 export const saveDatabase = () => Promise.resolve(true);
+
+// ============================================
+// BOARD MODULE OPERATIONS
+// ============================================
+export const getAllBoards = (projectId) => BoardModel.find({ projectId }).sort({ createdAt: -1 });
+export const getBoardById = (id) => BoardModel.findById(id);
+export const createBoard = (data) => new BoardModel(data).save();
+export const updateBoard = (id, data) => BoardModel.findByIdAndUpdate(id, data, { new: true });
+export const deleteBoard = async (id) => { if (!mongoose.Types.ObjectId.isValid(id)) return null; await WorkItem.deleteMany({ boardId: id }); return BoardModel.findByIdAndDelete(id); };
+
+export const getAllWorkItems = (projectId, filters = {}) => {
+  const query = { projectId };
+  if (filters.boardId) query.boardId = filters.boardId;
+  if (filters.sprintId) query.sprintId = filters.sprintId;
+  if (filters.status) query.status = filters.status;
+  return WorkItem.find(query).sort({ order: 1, createdAt: -1 });
+};
+export const getWorkItemById = (id) => WorkItem.findById(id);
+export const createWorkItem = (data) => new WorkItem(data).save();
+export const updateWorkItem = (id, data) => WorkItem.findByIdAndUpdate(id, data, { new: true });
+export const deleteWorkItem = (id) => WorkItem.findByIdAndDelete(id);
+export const updateWorkItemOrder = async (items) => {
+  const ops = items.map(({ id, status, order }) => ({
+    updateOne: { filter: { _id: id }, update: { $set: { status, order } } }
+  }));
+  if (ops.length > 0) await WorkItem.bulkWrite(ops);
+};
+
+export const getAllSprints = (projectId) => Sprint.find({ projectId }).sort({ createdAt: -1 });
+export const getSprintById = (id) => Sprint.findById(id);
+export const createSprint = (data) => new Sprint(data).save();
+export const updateSprint = (id, data) => Sprint.findByIdAndUpdate(id, data, { new: true });
+export const deleteSprint = async (id) => { if (!mongoose.Types.ObjectId.isValid(id)) return null; await WorkItem.updateMany({ sprintId: id }, { $unset: { sprintId: 1 } }); return Sprint.findByIdAndDelete(id); };
 
 // ============================================
 // USER OPERATIONS

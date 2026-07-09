@@ -16,6 +16,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') !== 'light');
+  const [boardDropdownOpen, setBoardDropdownOpen] = useState(false);
 
   const location = useLocation();
   const userMenuRef = useRef(null);
@@ -70,6 +71,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
   useEffect(() => {
     setShowUserMenu(false);
     setShowNotifications(false);
+    setBoardDropdownOpen(false);
   }, [location.pathname]);
 
   /* ── helpers ── */
@@ -84,6 +86,14 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
   };
 
   const role = user?.role || 'user';
+  const boardSubItems = [
+    { path: '/work-items', label: 'Work Items', icon: FiClipboard, module: 'work-items' },
+    { path: '/boards', label: 'Boards', icon: FiLayers, module: 'boards' },
+    { path: '/backlogs', label: 'Backlogs', icon: FiList, module: 'backlogs' },
+    { path: '/sprints', label: 'Sprints', icon: FiClock, module: 'sprints' },
+  ].filter(item => canAccessModule(role, item.module));
+  const hasBoardAccess = canAccessModule(role, 'board') && boardSubItems.length > 0;
+  const isBoardActive = location.pathname === '/board' || boardSubItems.some(i => location.pathname.startsWith(i.path));
 
   const navSections = [
     {
@@ -92,16 +102,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
         { path: '/', label: 'Dashboard', icon: FiHome, module: 'dashboard' },
         { path: '/test-cases', label: 'Test Cases', icon: FiFileText, module: 'test-cases' },
         { path: '/execution', label: 'Execution', icon: FiPlay, module: 'execution' },
-      ].filter(item => canAccessModule(role, item.module)),
-    },
-    {
-      title: 'Board',
-      items: [
-        { path: '/board', label: 'Board', icon: FiTrello, module: 'board' },
-        { path: '/work-items', label: 'Work Items', icon: FiClipboard, module: 'work-items' },
-        { path: '/boards', label: 'Boards', icon: FiLayers, module: 'boards' },
-        { path: '/backlogs', label: 'Backlogs', icon: FiList, module: 'backlogs' },
-        { path: '/sprints', label: 'Sprints', icon: FiClock, module: 'sprints' },
       ].filter(item => canAccessModule(role, item.module)),
     },
     {
@@ -387,7 +387,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                       onMouseLeave={() => setHoveredItem(null)}
                       onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
                     >
-                      {/* Active indicator */}
                       {isActive && (
                         <div style={{
                           position: 'absolute', left: 0, top: '18%', bottom: '18%',
@@ -396,8 +395,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                           boxShadow: '0 0 10px rgba(99,102,241,0.5)',
                         }} />
                       )}
-
-                      {/* Icon */}
                       <div style={{
                         width: 36, height: 36, borderRadius: 9, flexShrink: 0,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -409,8 +406,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                       }}>
                         <item.icon size={17} color={isActive ? '#fff' : undefined} />
                       </div>
-
-                      {/* Label */}
                       <span style={{
                         fontSize: 13, fontWeight: 500,
                         opacity: collapsed ? 0 : 1,
@@ -421,8 +416,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                       }}>
                         {item.label}
                       </span>
-
-                      {/* Badge */}
                       {item.badge && !collapsed && (
                         <span style={{
                           padding: '2px 7px', borderRadius: 8, fontSize: 10, fontWeight: 700,
@@ -434,8 +427,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                         </span>
                       )}
                     </NavLink>
-
-                    {/* Tooltip (collapsed only) */}
                     {collapsed && isHovered && (
                       <div style={{
                         position: 'absolute', left: '100%', top: '50%',
@@ -471,6 +462,173 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
               })}
             </div>
           ))}
+
+          {/* ──── Board Dropdown ──── */}
+          {hasBoardAccess && (
+            <div>
+              {!collapsed && (
+                <div style={{
+                  fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase',
+                  color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
+                  padding: '16px 24px 6px',
+                  transition: 'opacity 0.25s ease',
+                }}>
+                  Board
+                </div>
+              )}
+              {/* Board parent item */}
+              <div
+                style={{ position: 'relative' }}
+                onMouseEnter={() => { if (collapsed) setHoveredItem('board-parent'); }}
+                onMouseLeave={() => { if (collapsed) setHoveredItem(null); }}
+              >
+                <div
+                  onClick={() => {
+                    if (collapsed) return;
+                    setBoardDropdownOpen(p => !p);
+                  }}
+                  style={{
+                    display: 'flex', alignItems: 'center',
+                    gap: collapsed ? 0 : 12,
+                    padding: collapsed ? '10px 0' : '10px 16px',
+                    margin: collapsed ? '2px 8px' : '2px 10px',
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: isBoardActive ? '#fff' : (hoveredItem === 'board-parent' ? 'var(--sidebar-text-bright, #e2e8f0)' : 'var(--sidebar-text, rgba(148,163,184,0.7))'),
+                    background: isBoardActive
+                      ? 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12))'
+                      : hoveredItem === 'board-parent' ? 'var(--sidebar-hover, rgba(255,255,255,0.04))' : 'transparent',
+                    transition: 'all 0.2s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  }}
+                  onMouseEnter={() => { if (!collapsed) setHoveredItem('board-parent'); }}
+                  onMouseLeave={() => { if (!collapsed) setHoveredItem(null); }}
+                >
+                  {isBoardActive && (
+                    <div style={{
+                      position: 'absolute', left: 0, top: '18%', bottom: '18%',
+                      width: 3, borderRadius: '0 3px 3px 0',
+                      background: 'linear-gradient(180deg, #6366f1, #8b5cf6)',
+                      boxShadow: '0 0 10px rgba(99,102,241,0.5)',
+                    }} />
+                  )}
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: isBoardActive
+                      ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                      : 'var(--sidebar-hover, rgba(255,255,255,0.04))',
+                    boxShadow: isBoardActive ? '0 3px 10px rgba(99,102,241,0.35)' : 'none',
+                    transition: 'all 0.25s ease',
+                  }}>
+                    <FiTrello size={17} color={isBoardActive ? '#fff' : undefined} />
+                  </div>
+                  <span style={{
+                    fontSize: 13, fontWeight: 500,
+                    opacity: collapsed ? 0 : 1,
+                    width: collapsed ? 0 : 'auto',
+                    overflow: 'hidden',
+                    transition: 'opacity 0.25s ease, width 0.3s ease',
+                    whiteSpace: 'nowrap', flex: collapsed ? 'none' : 1,
+                  }}>
+                    Board
+                  </span>
+                  {!collapsed && (
+                    <FiChevronDown
+                      size={13}
+                      style={{
+                        color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
+                        transition: 'transform 0.2s ease',
+                        transform: boardDropdownOpen ? 'rotate(180deg)' : 'rotate(0)',
+                        flexShrink: 0, marginLeft: 'auto',
+                      }}
+                    />
+                  )}
+                </div>
+                {/* Collapsed tooltip */}
+                {collapsed && hoveredItem === 'board-parent' && (
+                  <div style={{
+                    position: 'absolute', left: '100%', top: '50%',
+                    transform: 'translateY(-50%)', marginLeft: 12,
+                    padding: '7px 12px', borderRadius: 8,
+                    background: 'var(--surface-elevated, #1e293b)',
+                    border: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                    fontSize: 12, fontWeight: 500, color: '#fff',
+                    whiteSpace: 'nowrap', zIndex: 1100, pointerEvents: 'none',
+                    display: 'flex', alignItems: 'center', gap: 8,
+                  }}>
+                    <div style={{
+                      position: 'absolute', left: -4, top: '50%',
+                      transform: 'translateY(-50%) rotate(45deg)',
+                      width: 8, height: 8,
+                      background: 'var(--surface-elevated, #1e293b)',
+                      borderLeft: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                      borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                    }} />
+                    Board
+                  </div>
+                )}
+              </div>
+
+              {/* Sub-items */}
+              <div style={{
+                maxHeight: boardDropdownOpen || collapsed ? (boardSubItems.length * 48 + 8) : 0,
+                overflow: 'hidden',
+                transition: 'max-height 0.3s cubic-bezier(0.4,0,0.2,1)',
+              }}>
+                {boardSubItems.map((item) => {
+                  const isActive = location.pathname.startsWith(item.path);
+                  const isHovered = hoveredItem === item.path;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
+                      onMouseEnter={() => setHoveredItem(item.path)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      style={{
+                        display: 'flex', alignItems: 'center',
+                        gap: collapsed ? 0 : 12,
+                        padding: collapsed ? '9px 0' : '9px 16px 9px 64px',
+                        margin: collapsed ? '1px 8px' : '1px 10px',
+                        borderRadius: 8,
+                        textDecoration: 'none',
+                        justifyContent: collapsed ? 'center' : 'flex-start',
+                        color: isActive ? '#fff' : isHovered ? 'var(--sidebar-text-bright, #e2e8f0)' : 'var(--sidebar-text, rgba(148,163,184,0.55))',
+                        background: isActive
+                          ? 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1))'
+                          : isHovered ? 'var(--sidebar-hover, rgba(255,255,255,0.04))' : 'transparent',
+                        transition: 'all 0.2s ease',
+                        position: 'relative',
+                      }}
+                    >
+                      {isActive && (
+                        <div style={{
+                          position: 'absolute', left: -6, top: '20%', bottom: '20%',
+                          width: 2, borderRadius: 2,
+                          background: '#6366f1',
+                        }} />
+                      )}
+                      <item.icon size={14} />
+                      <span style={{
+                        fontSize: 12, fontWeight: 400,
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : 'auto',
+                        overflow: 'hidden',
+                        transition: 'opacity 0.25s ease',
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {item.label}
+                      </span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ──── User section ──── */}
