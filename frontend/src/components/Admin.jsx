@@ -5,7 +5,8 @@ import {
   FiShield, FiChevronRight, FiEye, FiUserPlus, FiLock,
   FiCalendar, FiActivity, FiHash, FiInfo, FiCheckCircle,
   FiAlertTriangle, FiFolder, FiArrowRight, FiRefreshCw,
-  FiToggleLeft, FiToggleRight, FiClock, FiExternalLink
+  FiToggleLeft, FiToggleRight, FiClock, FiExternalLink,
+  FiCode, FiStar, FiFileText
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
@@ -36,19 +37,40 @@ const MetricCard = ({ icon: Icon, label, value, color }) => (
   </div>
 );
 
+const ROLE_OPTIONS = [
+  { value: 'user', label: 'User' },
+  { value: 'admin', label: 'Administrator' },
+  { value: 'tester', label: 'Tester' },
+  { value: 'developer', label: 'Developer' },
+  { value: 'project_manager', label: 'Project Manager' },
+  { value: 'qa_lead', label: 'QA Lead' },
+  { value: 'business_analyst', label: 'Business Analyst' },
+];
+
+const ROLE_COLORS = {
+  admin: { color: '#a78bfa', bg: 'var(--badge-admin-bg)', border: 'var(--badge-admin-border)', icon: FiShield },
+  tester: { color: '#34d399', bg: 'rgba(52,211,153,0.1)', border: 'rgba(52,211,153,0.25)', icon: FiCheckCircle },
+  developer: { color: '#60a5fa', bg: 'rgba(96,165,250,0.1)', border: 'rgba(96,165,250,0.25)', icon: FiCode },
+  project_manager: { color: '#fbbf24', bg: 'rgba(251,191,36,0.1)', border: 'rgba(251,191,36,0.25)', icon: FiBriefcase },
+  qa_lead: { color: '#f472b6', bg: 'rgba(244,114,182,0.1)', border: 'rgba(244,114,182,0.25)', icon: FiStar },
+  business_analyst: { color: '#a78bfa', bg: 'rgba(167,139,250,0.1)', border: 'rgba(167,139,250,0.25)', icon: FiFileText },
+  user: { color: 'var(--accent-color)', bg: 'var(--badge-user-bg)', border: 'var(--badge-user-border)', icon: FiUser },
+};
+
 const RoleBadge = ({ role }) => {
-  const isAdmin = role === 'admin';
+  const cfg = ROLE_COLORS[role] || ROLE_COLORS.user;
+  const Icon = cfg.icon;
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
       padding: '3px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
-      color: isAdmin ? '#a78bfa' : 'var(--accent-color)',
-      background: isAdmin ? 'var(--badge-admin-bg)' : 'var(--badge-user-bg)',
-      border: `1px solid ${isAdmin ? 'var(--badge-admin-border)' : 'var(--badge-user-border)'}`,
+      color: cfg.color,
+      background: cfg.bg,
+      border: `1px solid ${cfg.border}`,
       whiteSpace: 'nowrap', lineHeight: 1, textTransform: 'capitalize',
     }}>
-      {isAdmin ? <FiShield size={10} /> : <FiUser size={10} />}
-      {role}
+      <Icon size={10} />
+      {role.replace(/_/g, ' ')}
     </span>
   );
 };
@@ -798,8 +820,9 @@ function Admin({ projects = [] }) {
                 onChange={e => setUserForm(p => ({ ...p, role: e.target.value }))}
                 style={{ ...inputStyles.base, cursor: 'pointer', appearance: 'none' }}
               >
-                <option value="user">User</option>
-                <option value="admin">Administrator</option>
+                {ROLE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </div>
 

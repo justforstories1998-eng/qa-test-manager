@@ -566,7 +566,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                   fontSize: 10, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
                   fontWeight: 500, whiteSpace: 'nowrap',
                 }}>
-                  {user.role === 'admin' ? '🛡️ Admin' : '👤 Member'}
+                  {user.role === 'admin' ? '🛡️ Admin' : user.role ? `👤 ${user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}` : '👤 Member'}
                 </div>
               </div>
 
