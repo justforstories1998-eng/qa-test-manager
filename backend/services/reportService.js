@@ -42,28 +42,31 @@ function calculateMetrics(results) {
 export async function generatePDFReport(reportData) {
   const fileName = `QA_Report_${Date.now()}.pdf`;
   const filePath = join(REPORTS_DIR, fileName);
-  const settings = await getSettings();
-  const metrics = calculateMetrics(reportData.results);
-  const orgName = settings.general?.organization || 'QA Department';
-  const ai = reportData.aiAnalysis || {};
-  
-  // Safe Property Access
-  const isProject = reportData.type === 'project';
-  const title = isProject ? 'Project Status Report' : 'Test Execution Report';
-  const runName = isProject ? 'All Project Runs' : (reportData.testRun?.name || 'Unknown Run');
-  const environment = isProject ? 'Multiple' : (reportData.testRun?.environment || 'QA');
-  const version = isProject ? 'Aggregated' : (reportData.testRun?.buildNumber || '1.0.0');
-  const tester = isProject ? 'QA Team' : (reportData.testRun?.tester || 'QA Engineer');
+      const settings = await getSettings();
+      const metrics = calculateMetrics(reportData.results);
+      const orgName = settings.general?.organization || 'QA Department';
+      const reportHeader = settings.reporting?.reportHeader || 'QA Report';
+      const reportFooter = settings.reporting?.reportFooter || 'Confidential';
+      const pdfPageSize = settings.export?.pdfPageSize || 'A4';
+      const ai = reportData.aiAnalysis || {};
+      
+      // Safe Property Access
+      const isProject = reportData.type === 'project';
+      const title = isProject ? 'Project Status Report' : 'Test Execution Report';
+      const runName = isProject ? 'All Project Runs' : (reportData.testRun?.name || 'Unknown Run');
+      const environment = isProject ? 'Multiple' : (reportData.testRun?.environment || 'QA');
+      const version = isProject ? 'Aggregated' : (reportData.testRun?.buildNumber || '1.0.0');
+      const tester = isProject ? 'QA Team' : (reportData.testRun?.tester || 'QA Engineer');
 
-  return new Promise((resolve, reject) => {
-    try {
-      const doc = new PDFDocument({ margin: 50, size: 'A4', bufferPages: true });
+      return new Promise((resolve, reject) => {
+        try {
+          const doc = new PDFDocument({ margin: 50, size: pdfPageSize, bufferPages: true });
       const stream = fs.createWriteStream(filePath);
       doc.pipe(stream);
 
       // --- HEADER ---
       doc.rect(0, 0, 600, 100).fill('#1e293b');
-      doc.fillColor('white').fontSize(24).font('Helvetica-Bold').text(title, 50, 35);
+      doc.fillColor('white').fontSize(24).font('Helvetica-Bold').text(reportHeader, 50, 35);
       doc.fontSize(12).font('Helvetica').text(orgName, 50, 70);
       
       doc.fontSize(10).text(`Date: ${new Date().toLocaleDateString()}`, 400, 35, { align: 'right' });
@@ -148,7 +151,7 @@ export async function generatePDFReport(reportData) {
       const pages = doc.bufferedPageRange();
       for (let i = 0; i < pages.count; i++) {
         doc.switchToPage(i);
-        doc.fontSize(9).fillColor('#94a3b8').text(`Page ${i + 1} of ${pages.count}`, 50, 750, { align: 'center', width: 500 });
+        doc.fontSize(9).fillColor('#94a3b8').text(`${reportFooter} — Page ${i + 1} of ${pages.count}`, 50, 750, { align: 'center', width: 500 });
       }
 
       doc.end();
@@ -193,6 +196,8 @@ export async function generateWordReport(reportData) {
   const metrics = calculateMetrics(reportData.results);
   const ai = reportData.aiAnalysis || {};
   const orgName = settings.general?.organization || 'QA Department';
+  const reportHeader = settings.reporting?.reportHeader || 'QA Report';
+  const reportFooter = settings.reporting?.reportFooter || 'Confidential';
 
   // Safe Property Access for Word
   const isProject = reportData.type === 'project';
@@ -210,7 +215,7 @@ export async function generateWordReport(reportData) {
             children: [
               new Paragraph({
                 children: [
-                  new TextRun({ text: reportTitle, bold: true, size: 28, color: "1E3A8A" }),
+                  new TextRun({ text: reportHeader, bold: true, size: 28, color: "1E3A8A" }),
                   new TextRun({ text: `\t${orgName}`, size: 20 })
                 ]
               })
@@ -219,7 +224,7 @@ export async function generateWordReport(reportData) {
         },
         footers: {
           default: new Footer({
-            children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun("Confidential Report")] })]
+            children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(reportFooter)] })]
           })
         },
         children: [

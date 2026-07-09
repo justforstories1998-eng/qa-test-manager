@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
+import { setToastSettings } from './toast';
 import './styles/main.css';
 
 import Navbar from './components/Navbar';
@@ -80,6 +81,10 @@ function App() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    setToastSettings(settings?.notifications);
+  }, [settings?.notifications]);
 
   const refreshData = useCallback(async () => {
     if (!activeProjectId) return;
@@ -233,6 +238,7 @@ function App() {
                 testSuites={testSuites}
                 testCases={testCases}
                 testRuns={testRuns}
+                settings={settings}
                 onCreateTestRun={handleCreateRun}
                 onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)}
                 onUpdateExecutionResult={handleUpdateExecutionResult}
@@ -243,6 +249,7 @@ function App() {
             <Route path="/reports" element={
               <Reports
                 testRuns={testRuns}
+                settings={settings}
                 projectId={activeProjectId}
                 onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)}
               />
@@ -290,9 +297,10 @@ function App() {
         </div>
       )}
 
-      <ToastContainer position="bottom-right" theme="colored" autoClose={3000} />
-    </div>
-  );
-}
+      <ToastContainer
+        position="bottom-right"
+        theme="colored"
+        autoClose={settings?.notifications?.duration || 3000}
+      />
 
 export default App;

@@ -43,6 +43,26 @@ function Settings({ settings, onUpdateSettings }) {
     setHasChanges(false);
   }, [settings]);
 
+  useEffect(() => {
+    const themeVal = formData.display?.theme || 'dark';
+    const resolved = themeVal === 'system'
+      ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : themeVal;
+    document.documentElement.setAttribute('data-theme', resolved);
+    localStorage.setItem('theme', resolved);
+  }, [formData.display?.theme]);
+
+  useEffect(() => {
+    if (formData.execution?.sessionTimeout) {
+      const ms = formData.execution.sessionTimeout * 60 * 1000;
+      let timer;
+      const reset = () => { clearTimeout(timer); timer = setTimeout(() => { localStorage.removeItem('token'); window.location.href = '/login'; }, ms); };
+      ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(e => document.addEventListener(e, reset));
+      reset();
+      return () => { clearTimeout(timer); ['mousedown', 'keydown', 'scroll', 'touchstart'].forEach(e => document.removeEventListener(e, reset)); };
+    }
+  }, [formData.execution?.sessionTimeout]);
+
   const handleInputChange = (category, field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -165,29 +185,6 @@ function Settings({ settings, onUpdateSettings }) {
           <div className="qa-set-panel-content">
             {activeTab === 'general' && (
               <>
-                <div className="qa-set-section">
-                  <h3 className="qa-set-section-title">Language & Region</h3>
-                  <div className="qa-set-row">
-                    <div className="qa-set-row-info">
-                      <div className="qa-set-row-label">Interface Language</div>
-                      <div className="qa-set-row-desc">Choose your preferred language</div>
-                    </div>
-                    <div className="qa-set-row-control">
-                      <select
-                        className="qa-set-select"
-                        value={formData.general?.language || 'en'}
-                        onChange={e => handleInputChange('general', 'language', e.target.value)}
-                      >
-                        <option value="en">English</option>
-                        <option value="es">Español</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="ja">日本語</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Data & Privacy</h3>
                   {renderToggle('general', 'autoBackup', 'Automatic Backup', 'Periodically back up your test data locally')}

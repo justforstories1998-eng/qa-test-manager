@@ -84,9 +84,11 @@ const ProgressRing = ({ pct, size = 48, stroke = 4, color = '#6366f1' }) => {
 /* ─────────────── main component ─────────────── */
 
 function Execution({
-  testSuites = [], testCases = [], testRuns = [],
+  testSuites = [], testCases = [], testRuns = [], settings = {},
   onCreateTestRun, onDeleteTestRun, onUpdateExecutionResult, onRefresh,
 }) {
+  const autoAdvance = settings.execution?.autoAdvance ?? false;
+  const requireCommentsOnFail = settings.execution?.requireCommentsOnFail ?? true;
   const [activeRunId,       setActiveRunId]       = useState(null);
   const [executionResults,  setExecutionResults]  = useState([]);
   const [currentTestIndex,  setCurrentTestIndex]  = useState(0);
@@ -169,6 +171,10 @@ function Execution({
   /* actions */
   const handleQuickStatus = async (status) => {
     if (!currentResult) return;
+    if (requireCommentsOnFail && status === 'failed' && (!comments || !comments.trim())) {
+      toast.warning('Please add a comment before marking as failed');
+      return;
+    }
     setIsSaving(true);
     try {
       const resultId = currentResult._id || currentResult.id;
@@ -176,8 +182,10 @@ function Execution({
       const updated = [...executionResults];
       updated[currentTestIndex] = { ...updated[currentTestIndex], status, comments };
       setExecutionResults(updated);
-      if (currentTestIndex < executionResults.length - 1) {
+      if (autoAdvance && currentTestIndex < executionResults.length - 1) {
         setCurrentTestIndex(p => p + 1);
+      } else if (!autoAdvance) {
+        toast.success('Result saved');
       } else {
         toast.success('🎉 All test cases completed!');
       }
