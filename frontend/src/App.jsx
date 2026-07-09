@@ -229,6 +229,7 @@ function App() {
               <TestCases
                 testSuites={testSuites}
                 testCases={testCases}
+                settings={settings}
                 onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)}
                 onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)}
               />

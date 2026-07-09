@@ -264,13 +264,17 @@ router.post('/reports/generate', async (req, res, next) => {
         const res = await getExecutionResultsByRunId(r._id);
         allResults = [...allResults, ...res.map(item => ({ ...item._doc, runName: r.name }))];
       }
+      if (settings.reporting?.includePassedTests === false) allResults = allResults.filter(r => r.status !== 'Passed');
+      if (settings.reporting?.includeFailedTests === false) allResults = allResults.filter(r => r.status !== 'Failed');
       reportName = `${project.name} Project Report`;
-      reportData = { type: 'project', project, runs, results: allResults };
+      reportData = { type: 'project', project, runs, results: allResults, includeCharts: settings.reporting?.includeCharts !== false };
     } else {
       const testRun = await getTestRunById(runId);
-      const results = await getExecutionResultsByRunId(runId);
+      let results = await getExecutionResultsByRunId(runId);
+      if (settings.reporting?.includePassedTests === false) results = results.filter(r => r.status !== 'Passed');
+      if (settings.reporting?.includeFailedTests === false) results = results.filter(r => r.status !== 'Failed');
       reportName = `${testRun.name} Report`;
-      reportData = { type: 'run', testRun, results };
+      reportData = { type: 'run', testRun, results, includeCharts: settings.reporting?.includeCharts !== false };
     }
 
     const aiAnalysis = await analyzeTestResults(reportData, settings);

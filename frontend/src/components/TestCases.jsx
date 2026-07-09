@@ -72,9 +72,10 @@ const inputBlur  = (e) => { e.target.style.borderColor = "var(--tc-border)"; e.t
 /* ═══════════════════ MAIN COMPONENT ═══════════════════ */
 
 function TestCases({
-  testSuites = [], testCases = [],
+  testSuites = [], testCases = [], settings = {},
   onCreateTestCase, onUpdateTestCase, onDeleteTestCase, onDeleteSuite, onUploadCSV,
 }) {
+  const showIds = settings.display?.showIds ?? true;
   const [selectedSuiteId, setSelectedSuiteId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -350,7 +351,7 @@ function TestCases({
               <table className="tc-table">
                 <thead>
                   <tr>
-                    <th style={{ width: 100 }}>ID</th>
+                    {showIds && <th style={{ width: 100 }}>ID</th>}
                     <th>Title</th>
                     <th style={{ width: 120 }}>Priority</th>
                     <th style={{ width: 110 }}>State</th>
@@ -370,11 +371,13 @@ function TestCases({
                         onMouseLeave={() => setHoveredRow(null)}
                         onClick={() => { setViewingTestCase(tc); setShowViewModal(true); }}
                       >
+                        {showIds && (
                         <td>
                           <span className="tc-id-badge">
                             {tc.adoId || `TC-${String(idx + 1).padStart(3, "0")}`}
                           </span>
                         </td>
+                        )}
                         <td className="tc-title-cell">{tc.title}</td>
                         <td><PriorityBadge priority={tc.priority || "Medium"} /></td>
                         <td><StateBadge state={tc.state || "Active"} /></td>
