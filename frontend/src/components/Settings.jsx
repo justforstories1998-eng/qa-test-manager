@@ -69,7 +69,7 @@ function Settings({ settings, onUpdateSettings }) {
     setHasChanges(false);
   };
 
-  const Toggle = ({ category, field, label, description }) => {
+  const renderToggle = (category, field, label, description) => {
     const value = formData[category]?.[field] ?? false;
     return (
       <div className="qa-set-row qa-set-toggle-row" onClick={() => handleInputChange(category, field, !value)}>
@@ -190,8 +190,8 @@ function Settings({ settings, onUpdateSettings }) {
 
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Data & Privacy</h3>
-                  <Toggle category="general" field="autoBackup" label="Automatic Backup" description="Periodically back up your test data locally" />
-                  <Toggle category="general" field="telemetry" label="Usage Analytics" description="Share anonymous usage data to help improve the product" />
+                  {renderToggle('general', 'autoBackup', 'Automatic Backup', 'Periodically back up your test data locally')}
+                  {renderToggle('general', 'telemetry', 'Usage Analytics', 'Share anonymous usage data to help improve the product')}
                 </div>
               </>
             )}
@@ -200,9 +200,9 @@ function Settings({ settings, onUpdateSettings }) {
               <>
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Test Run Behavior</h3>
-                  <Toggle category="execution" field="autoSave" label="Auto-Save Results" description="Save results automatically as you progress" />
-                  <Toggle category="execution" field="autoAdvance" label="Auto-Advance on Pass" description="Move to the next case when the current one passes" />
-                  <Toggle category="execution" field="requireCommentsOnFail" label="Require Comments on Fail" description="Force testers to add a comment for failed tests" />
+                  {renderToggle('execution', 'autoSave', 'Auto-Save Results', 'Save results automatically as you progress')}
+                  {renderToggle('execution', 'autoAdvance', 'Auto-Advance on Pass', 'Move to the next case when the current one passes')}
+                  {renderToggle('execution', 'requireCommentsOnFail', 'Require Comments on Fail', 'Force testers to add a comment for failed tests')}
                 </div>
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Session</h3>
@@ -231,9 +231,9 @@ function Settings({ settings, onUpdateSettings }) {
               <>
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Report Content</h3>
-                  <Toggle category="reporting" field="includePassedTests" label="Include Passed Tests" description="Show passed cases in reports" />
-                  <Toggle category="reporting" field="includeFailedTests" label="Include Failed Tests" description="Show failed cases in reports" />
-                  <Toggle category="reporting" field="includeCharts" label="Include Charts" description="Add visual charts and graphs" />
+                  {renderToggle('reporting', 'includePassedTests', 'Include Passed Tests', 'Show passed cases in reports')}
+                  {renderToggle('reporting', 'includeFailedTests', 'Include Failed Tests', 'Show failed cases in reports')}
+                  {renderToggle('reporting', 'includeCharts', 'Include Charts', 'Add visual charts and graphs')}
                 </div>
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Branding</h3>
@@ -332,8 +332,8 @@ function Settings({ settings, onUpdateSettings }) {
               <>
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Alert Preferences</h3>
-                  <Toggle category="notifications" field="showSuccess" label="Success Notifications" description="Show a toast after successful actions" />
-                  <Toggle category="notifications" field="showErrors" label="Error Notifications" description="Show a toast when something fails" />
+                  {renderToggle('notifications', 'showSuccess', 'Success Notifications', 'Show a toast after successful actions')}
+                  {renderToggle('notifications', 'showErrors', 'Error Notifications', 'Show a toast when something fails')}
                 </div>
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Timing</h3>
@@ -400,7 +400,7 @@ function Settings({ settings, onUpdateSettings }) {
 
                 <div className="qa-set-section">
                   <h3 className="qa-set-section-title">Tables & Lists</h3>
-                  <Toggle category="display" field="showIds" label="Show Test Case IDs" description="Display ADO IDs alongside test cases" />
+                  {renderToggle('display', 'showIds', 'Show Test Case IDs', 'Display ADO IDs alongside test cases')}
                   <div className="qa-set-row">
                     <div className="qa-set-row-info">
                       <div className="qa-set-row-label">Items Per Page</div>
