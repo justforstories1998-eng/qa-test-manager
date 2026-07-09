@@ -81,6 +81,9 @@ function TestCases({
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [hoveredRow, setHoveredRow] = useState(null);
+  const [showNewSuiteInput, setShowNewSuiteInput] = useState(false);
+  const [newSuiteName, setNewSuiteName] = useState("");
+  const [isCreatingSuite, setIsCreatingSuite] = useState(false);
   const searchRef = useRef(null);
 
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -183,6 +186,21 @@ function TestCases({
     finally { setIsUploading(false); }
   };
 
+  const handleCreateSuite = async () => {
+    if (!newSuiteName.trim()) return toast.error("Suite name required");
+    setIsCreatingSuite(true);
+    try {
+      const res = await api.createTestSuite({ name: newSuiteName.trim(), projectId: testSuites[0]?.projectId || '' });
+      if (res.success) {
+        toast.success("Suite created");
+        setNewSuiteName("");
+        setShowNewSuiteInput(false);
+        window.location.reload();
+      }
+    } catch { toast.error("Failed to create suite"); }
+    finally { setIsCreatingSuite(false); }
+  };
+
   const handleDrop = (e) => {
     e.preventDefault(); setDragOver(false);
     const f = e.dataTransfer?.files?.[0];
@@ -241,10 +259,45 @@ function TestCases({
                 <span className="tc-sidebar-count">{testSuites.length}</span>
               </div>
             )}
-            <button className="tc-sidebar-toggle" onClick={() => setSidebarCollapsed(p => !p)}>
-              {sidebarCollapsed ? <FiChevronRight size={15} /> : <FiChevronDown size={15} />}
-            </button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              {!sidebarCollapsed && (
+                <button
+                  className="tc-sidebar-toggle"
+                  onClick={() => setShowNewSuiteInput(p => !p)}
+                  title="New Suite"
+                  style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, border: '1px solid var(--tc-border)', background: showNewSuiteInput ? 'var(--tc-accent-bg)' : 'transparent', color: showNewSuiteInput ? 'var(--tc-accent)' : 'var(--tc-text-secondary)', cursor: 'pointer', transition: 'all 0.15s' }}
+                >
+                  <FiPlus size={14} />
+                </button>
+              )}
+              <button className="tc-sidebar-toggle" onClick={() => setSidebarCollapsed(p => !p)}>
+                {sidebarCollapsed ? <FiChevronRight size={15} /> : <FiChevronDown size={15} />}
+              </button>
+            </div>
           </div>
+
+          {showNewSuiteInput && !sidebarCollapsed && (
+            <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--tc-border)' }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input
+                  className="tc-input"
+                  value={newSuiteName}
+                  onChange={e => setNewSuiteName(e.target.value)}
+                  placeholder="Suite name..."
+                  onKeyDown={e => { if (e.key === 'Enter') handleCreateSuite(); if (e.key === 'Escape') setShowNewSuiteInput(false); }}
+                  autoFocus
+                  style={{ flex: 1, padding: '6px 10px', fontSize: 12, borderRadius: 6 }}
+                />
+                <button
+                  onClick={handleCreateSuite}
+                  disabled={isCreatingSuite || !newSuiteName.trim()}
+                  style={{ padding: '6px 10px', borderRadius: 6, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', opacity: isCreatingSuite || !newSuiteName.trim() ? 0.5 : 1 }}
+                >
+                  {isCreatingSuite ? '...' : 'Add'}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="tc-sidebar-list">
             {/* All Cases */}

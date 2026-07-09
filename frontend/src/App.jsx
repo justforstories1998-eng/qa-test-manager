@@ -238,7 +238,7 @@ function App() {
                   testCases={testCases}
                   settings={settings}
                   onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)}
-                  onUploadCSV={(f, n) => api.uploadCSV(f, n, activeProjectId).then(refreshData)}
+                  onUploadCSV={(f, n, p) => api.uploadCSV(f, n, p || activeProjectId).then(refreshData)}
                 />
               } />
             )}
