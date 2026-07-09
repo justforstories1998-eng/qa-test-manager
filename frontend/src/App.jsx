@@ -302,5 +302,8 @@ function App() {
         theme="colored"
         autoClose={settings?.notifications?.duration || 3000}
       />
+    </div>
+  );
+}
 
 export default App;
