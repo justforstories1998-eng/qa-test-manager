@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiTrello, FiPlus, FiSearch, FiMoreVertical, FiTrash2, FiEdit2, FiX, FiTag, FiUser, FiArrowUp, FiArrowDown, FiMinus } from 'react-icons/fi';
+import { FiTrello, FiPlus, FiSearch, FiTrash2, FiEdit2, FiX, FiArrowRight, FiArrowLeft, FiArrowUp, FiArrowDown, FiMinus } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
 
@@ -11,6 +11,9 @@ const COLUMNS = [
   { id: 'Done', title: 'Done', color: '#34d399' },
 ];
 
+const COL_INDEX = {};
+COLUMNS.forEach((c, i) => { COL_INDEX[c.id] = i; });
+
 const TYPE_COLORS = { Feature: '#6366f1', Bug: '#ef4444', Task: '#f59e0b', Epic: '#8b5cf6' };
 const PRIORITY_COLORS = { Critical: '#ef4444', High: '#f97316', Medium: '#eab308', Low: '#6b7280' };
 
@@ -18,7 +21,7 @@ export default function Board({ projectId }) {
   const [workItems, setWorkItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [draggedItem, setDraggedItem] = useState(null);
+  const [draggedItemId, setDraggedItemId] = useState(null);
   const [dragOverColumn, setDragOverColumn] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(null);
@@ -43,16 +46,34 @@ export default function Board({ projectId }) {
   const itemsByColumn = {};
   COLUMNS.forEach(c => { itemsByColumn[c.id] = filtered.filter(i => i.status === c.id).sort((a, b) => a.order - b.order); });
 
-  const handleDragStart = (e, item) => {
-    setDraggedItem(item);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', item._id);
-    requestAnimationFrame(() => { e.target.style.opacity = '0.4'; });
+  const moveItem = async (itemId, newStatus) => {
+    const item = workItems.find(i => i._id === itemId);
+    if (!item || item.status === newStatus) return;
+
+    const targetItems = itemsByColumn[newStatus] || [];
+    const newOrder = targetItems.length;
+
+    setWorkItems(prev => prev.map(i =>
+      i._id === itemId ? { ...i, status: newStatus, order: newOrder } : i
+    ));
+
+    try {
+      await api.updateWorkItem(itemId, { status: newStatus, order: newOrder });
+      toast.success(`Moved to ${newStatus}`);
+    } catch {
+      fetchItems();
+      toast.error('Failed to move item');
+    }
   };
 
-  const handleDragEnd = (e) => {
-    e.target.style.opacity = '1';
-    setDraggedItem(null);
+  const handleDragStart = (e, item) => {
+    setDraggedItemId(item._id);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', item._id);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItemId(null);
     setDragOverColumn(null);
   };
 
@@ -67,23 +88,10 @@ export default function Board({ projectId }) {
   const handleDrop = async (e, targetStatus) => {
     e.preventDefault();
     setDragOverColumn(null);
-    if (!draggedItem || draggedItem.status === targetStatus) return;
-
-    const targetItems = itemsByColumn[targetStatus] || [];
-    const newOrder = targetItems.length;
-
-    setWorkItems(prev => prev.map(i =>
-      i._id === draggedItem._id ? { ...i, status: targetStatus, order: newOrder } : i
-    ));
-
-    try {
-      await api.updateWorkItem(draggedItem._id, { status: targetStatus, order: newOrder });
-      toast.success(`Moved to ${targetStatus}`);
-    } catch {
-      fetchItems();
-      toast.error('Failed to move item');
-    }
-    setDraggedItem(null);
+    const itemId = e.dataTransfer.getData('text/plain');
+    if (!itemId) return;
+    await moveItem(itemId, targetStatus);
+    setDraggedItemId(null);
   };
 
   const handleCreate = async (e) => {
@@ -129,40 +137,40 @@ export default function Board({ projectId }) {
   const itemForm = (
     <form onSubmit={showEditModal ? handleUpdate : handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
-        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 }}>Title *</label>
-        <input value={newItem.title} onChange={e => setNewItem(p => ({ ...p, title: e.target.value }))} placeholder="Work item title" required autoFocus style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+        <label style={labelStyle}>Title *</label>
+        <input value={newItem.title} onChange={e => setNewItem(p => ({ ...p, title: e.target.value }))} placeholder="Work item title" required autoFocus style={inputStyle} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 }}>Type</label>
-          <select value={newItem.type} onChange={e => setNewItem(p => ({ ...p, type: e.target.value }))} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none' }}>
+          <label style={labelStyle}>Type</label>
+          <select value={newItem.type} onChange={e => setNewItem(p => ({ ...p, type: e.target.value }))} style={selectStyle}>
             <option value="Feature">Feature</option><option value="Bug">Bug</option><option value="Task">Task</option><option value="Epic">Epic</option>
           </select>
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 }}>Priority</label>
-          <select value={newItem.priority} onChange={e => setNewItem(p => ({ ...p, priority: e.target.value }))} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none' }}>
+          <label style={labelStyle}>Priority</label>
+          <select value={newItem.priority} onChange={e => setNewItem(p => ({ ...p, priority: e.target.value }))} style={selectStyle}>
             <option value="Critical">Critical</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option>
           </select>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
         <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 }}>Assignee</label>
-          <input value={newItem.assignee} onChange={e => setNewItem(p => ({ ...p, assignee: e.target.value }))} placeholder="Assignee name" style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none' }} />
+          <label style={labelStyle}>Assignee</label>
+          <input value={newItem.assignee} onChange={e => setNewItem(p => ({ ...p, assignee: e.target.value }))} placeholder="Assignee name" style={inputStyle} />
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 }}>Story Points</label>
-          <input type="number" min="0" value={newItem.storyPoints} onChange={e => setNewItem(p => ({ ...p, storyPoints: parseInt(e.target.value) || 0 }))} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none' }} />
+          <label style={labelStyle}>Story Points</label>
+          <input type="number" min="0" value={newItem.storyPoints} onChange={e => setNewItem(p => ({ ...p, storyPoints: parseInt(e.target.value) || 0 }))} style={inputStyle} />
         </div>
       </div>
       <div>
-        <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 }}>Description</label>
-        <textarea value={newItem.description} onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))} placeholder="Optional description..." rows={3} style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+        <label style={labelStyle}>Description</label>
+        <textarea value={newItem.description} onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))} placeholder="Optional description..." rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
       </div>
       <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-        <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'transparent', color: 'var(--text-secondary, rgba(203,213,225,0.85))', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-        <button type="submit" style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{showEditModal ? 'Update' : 'Create'}</button>
+        <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(null); }} style={cancelBtnStyle}>Cancel</button>
+        <button type="submit" style={primaryBtnStyle}>{showEditModal ? 'Update' : 'Create'}</button>
       </div>
     </form>
   );
@@ -177,7 +185,7 @@ export default function Board({ projectId }) {
             </div>
             <div>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)', letterSpacing: -0.3 }}>Board</h1>
-              <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--text-muted, rgba(148,163,184,0.55))' }}>{workItems.length} work items across {COLUMNS.length} columns</p>
+              <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--text-muted, rgba(148,163,184,0.55))' }}>{workItems.length} items &middot; Drag or use arrows to move</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -196,8 +204,14 @@ export default function Board({ projectId }) {
         {COLUMNS.map(col => {
           const items = itemsByColumn[col.id] || [];
           const isOver = dragOverColumn === col.id;
+          const colIdx = COL_INDEX[col.id];
+          const canMoveBack = colIdx > 0;
+          const canMoveForward = colIdx < COLUMNS.length - 1;
+          const prevStatus = canMoveBack ? COLUMNS[colIdx - 1].id : null;
+          const nextStatus = canMoveForward ? COLUMNS[colIdx + 1].id : null;
+
           return (
-            <div key={col.id} onDragOver={e => handleDragOver(e, col.id)} onDragLeave={handleDragLeave} onDrop={e => handleDrop(e, col.id)} style={{ minWidth: 280, maxWidth: 320, flex: '1 1 0', display: 'flex', flexDirection: 'column', background: isOver ? 'rgba(99,102,241,0.05)' : 'var(--card-bg, rgba(255,255,255,0.02))', border: isOver ? '2px dashed rgba(99,102,241,0.4)' : '1px solid var(--border-color, rgba(255,255,255,0.06))', borderRadius: 12, overflow: 'hidden', transition: 'all 0.2s ease' }}>
+            <div key={col.id} onDragOver={e => handleDragOver(e, col.id)} onDragLeave={handleDragLeave} onDrop={e => handleDrop(e, col.id)} style={{ minWidth: 290, maxWidth: 330, flex: '1 1 0', display: 'flex', flexDirection: 'column', background: isOver ? 'rgba(99,102,241,0.06)' : 'var(--card-bg, rgba(255,255,255,0.02))', border: isOver ? '2px dashed rgba(99,102,241,0.5)' : '1px solid var(--border-color, rgba(255,255,255,0.06))', borderRadius: 12, overflow: 'hidden', transition: 'all 0.2s ease' }}>
               <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: col.color }} />
@@ -209,14 +223,24 @@ export default function Board({ projectId }) {
                 {loading ? (
                   <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted, rgba(148,163,184,0.55))', fontSize: 12 }}>Loading...</div>
                 ) : items.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted, rgba(148,163,184,0.35))', fontSize: 12, fontStyle: 'italic' }}>No items</div>
+                  <div style={{ textAlign: 'center', padding: 30, color: 'var(--text-muted, rgba(148,163,184,0.35))', fontSize: 12, fontStyle: 'italic' }}>Drop items here</div>
                 ) : items.map(item => (
-                  <div key={item._id} draggable onDragStart={e => handleDragStart(e, item)} onDragEnd={handleDragEnd} style={{ padding: 14, borderRadius: 10, border: '1px solid var(--border-color, rgba(255,255,255,0.06))', background: draggedItem?._id === item._id ? 'rgba(99,102,241,0.08)' : 'var(--card-bg, rgba(255,255,255,0.02))', cursor: 'grab', transition: 'all 0.15s', userSelect: 'none' }}>
+                  <div key={item._id} draggable="true" onDragStart={e => handleDragStart(e, item)} onDragEnd={handleDragEnd} style={{ padding: 14, borderRadius: 10, border: '1px solid var(--border-color, rgba(255,255,255,0.06))', background: draggedItemId === item._id ? 'rgba(99,102,241,0.1)' : 'var(--card-bg, rgba(255,255,255,0.02))', cursor: 'grab', transition: 'all 0.15s', userSelect: 'none' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
                       <span style={{ fontSize: 11, fontWeight: 600, color: TYPE_COLORS[item.type] || '#6b7280', padding: '2px 8px', borderRadius: 4, background: `${TYPE_COLORS[item.type] || '#6b7280'}15` }}>{item.type}</span>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button onClick={(e) => { e.stopPropagation(); openEdit(item); }} style={{ width: 22, height: 22, borderRadius: 4, border: 'none', background: 'transparent', color: 'var(--text-muted, rgba(148,163,184,0.55))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiEdit2 size={11} /></button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDelete(item._id); }} style={{ width: 22, height: 22, borderRadius: 4, border: 'none', background: 'transparent', color: 'var(--text-muted, rgba(148,163,184,0.55))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiTrash2 size={11} /></button>
+                      <div style={{ display: 'flex', gap: 2 }}>
+                        {canMoveBack && (
+                          <button onClick={(e) => { e.stopPropagation(); moveItem(item._id, prevStatus); }} title={`Move to ${prevStatus}`} style={arrowBtnStyle}>
+                            <FiArrowLeft size={11} />
+                          </button>
+                        )}
+                        {canMoveForward && (
+                          <button onClick={(e) => { e.stopPropagation(); moveItem(item._id, nextStatus); }} title={`Move to ${nextStatus}`} style={arrowBtnStyle}>
+                            <FiArrowRight size={11} />
+                          </button>
+                        )}
+                        <button onClick={(e) => { e.stopPropagation(); openEdit(item); }} style={iconBtnStyle}><FiEdit2 size={11} /></button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(item._id); }} style={{ ...iconBtnStyle, color: '#ef4444' }}><FiTrash2 size={11} /></button>
                       </div>
                     </div>
                     <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 500, color: 'var(--text-primary, #f1f5f9)', lineHeight: 1.4 }}>{item.title}</p>
@@ -256,3 +280,11 @@ export default function Board({ projectId }) {
     </div>
   );
 }
+
+const labelStyle = { display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary, rgba(203,213,225,0.85))', marginBottom: 5 };
+const inputStyle = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+const selectStyle = { width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'var(--input-bg, rgba(255,255,255,0.04))', color: 'var(--text-primary, #f1f5f9)', fontSize: 13, outline: 'none' };
+const cancelBtnStyle = { padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-color, rgba(255,255,255,0.08))', background: 'transparent', color: 'var(--text-secondary, rgba(203,213,225,0.85))', fontSize: 13, fontWeight: 500, cursor: 'pointer' };
+const primaryBtnStyle = { padding: '8px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' };
+const arrowBtnStyle = { width: 24, height: 24, borderRadius: 5, border: '1px solid rgba(99,102,241,0.25)', background: 'rgba(99,102,241,0.1)', color: '#818cf8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' };
+const iconBtnStyle = { width: 24, height: 24, borderRadius: 5, border: 'none', background: 'transparent', color: 'var(--text-muted, rgba(148,163,184,0.55))', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
