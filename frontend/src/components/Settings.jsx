@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   FiSettings, FiSave, FiRefreshCw, FiPlay, FiFileText,
-  FiDownload, FiMonitor, FiBell, FiCheck, FiClock,
-  FiAlertTriangle, FiCheckCircle, FiSun, FiMoon, FiSmartphone,
+  FiDownload, FiMonitor, FiBell, FiCheck, FiFile,
+  FiCheckCircle, FiSun, FiMoon, FiSmartphone,
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
-/* ═══════════════════ theme detection ═══════════════════ */
+/* ══════════════ theme detection ══════════════ */
 const useTheme = () => {
   const [theme, setTheme] = useState(
     () => document.documentElement.getAttribute('data-theme') || 'dark'
@@ -21,52 +21,25 @@ const useTheme = () => {
   return theme;
 };
 
-/* ═══════════════════ default settings ═══════════════════ */
+/* ══════════════ defaults ══════════════ */
 const DEFAULT_SETTINGS = {
-  general: {
-    language: 'en',
-    autoBackup: true,
-    telemetry: false,
-  },
-  execution: {
-    autoSave: true,
-    autoAdvance: false,
-    requireCommentsOnFail: true,
-    sessionTimeout: 30,
-  },
-  reporting: {
-    includePassedTests: true,
-    includeFailedTests: true,
-    includeCharts: true,
-    reportHeader: 'QA Report',
-    reportFooter: 'Confidential',
-  },
-  export: {
-    defaultFormat: 'pdf',
-    pdfPageSize: 'A4',
-  },
-  notifications: {
-    showSuccess: true,
-    showErrors: true,
-    duration: 3000,
-  },
-  display: {
-    theme: 'dark',
-    itemsPerPage: 20,
-    showIds: true,
-  },
+  general: { language: 'en', autoBackup: true, telemetry: false },
+  execution: { autoSave: true, autoAdvance: false, requireCommentsOnFail: true, sessionTimeout: 30 },
+  reporting: { includePassedTests: true, includeFailedTests: true, includeCharts: true, reportHeader: 'QA Report', reportFooter: 'Confidential' },
+  export: { defaultFormat: 'pdf', pdfPageSize: 'A4' },
+  notifications: { showSuccess: true, showErrors: true, duration: 3000 },
+  display: { theme: 'dark', itemsPerPage: 20, showIds: true },
 };
 
-/* ═══════════════════ main ═══════════════════ */
 function Settings({ settings, onUpdateSettings }) {
   const [activeTab, setActiveTab] = useState('general');
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(() => JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
-    setFormData(settings ? JSON.parse(JSON.stringify(settings)) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+    setFormData(settings ? { ...DEFAULT_SETTINGS, ...JSON.parse(JSON.stringify(settings)) } : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
     setHasChanges(false);
   }, [settings]);
 
@@ -92,11 +65,10 @@ function Settings({ settings, onUpdateSettings }) {
   };
 
   const handleReset = () => {
-    setFormData(settings ? JSON.parse(JSON.stringify(settings)) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+    setFormData(settings ? { ...DEFAULT_SETTINGS, ...JSON.parse(JSON.stringify(settings)) } : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
     setHasChanges(false);
   };
 
-  /* ── Reusable Toggle ── */
   const Toggle = ({ category, field, label, description }) => {
     const value = formData[category]?.[field] ?? false;
     return (
@@ -127,6 +99,7 @@ function Settings({ settings, onUpdateSettings }) {
   ];
 
   const activeTabData = tabs.find(t => t.id === activeTab);
+  const ActiveIcon = activeTabData?.icon || FiSettings;
 
   return (
     <div className="set-page">
@@ -149,9 +122,9 @@ function Settings({ settings, onUpdateSettings }) {
         )}
       </div>
 
-      {/* ── Body: two-column layout ── */}
+      {/* ── Body: two columns ── */}
       <div className="set-body">
-        {/* Sidebar tabs */}
+        {/* Sidebar */}
         <aside className="set-sidebar">
           <div className="set-sidebar-title">Categories</div>
           {tabs.map(t => {
@@ -178,10 +151,9 @@ function Settings({ settings, onUpdateSettings }) {
 
         {/* Content panel */}
         <main className="set-panel">
-          {/* Panel header */}
           <div className="set-panel-header">
             <div className="set-panel-icon">
-              {activeTabData && <activeTabData.icon size={18} />}
+              <ActiveIcon size={18} />
             </div>
             <div>
               <h2 className="set-panel-title">{activeTabData?.label}</h2>
@@ -189,9 +161,7 @@ function Settings({ settings, onUpdateSettings }) {
             </div>
           </div>
 
-          {/* Content */}
           <div className="set-panel-content">
-            {/* ══ GENERAL ══ */}
             {activeTab === 'general' && (
               <>
                 <div className="set-section">
@@ -217,21 +187,12 @@ function Settings({ settings, onUpdateSettings }) {
 
                 <div className="set-section">
                   <h3 className="set-section-title">Data & Privacy</h3>
-                  <Toggle
-                    category="general" field="autoBackup"
-                    label="Automatic Backup"
-                    description="Periodically back up your test data locally"
-                  />
-                  <Toggle
-                    category="general" field="telemetry"
-                    label="Usage Analytics"
-                    description="Share anonymous usage data to help improve the product"
-                  />
+                  <Toggle category="general" field="autoBackup" label="Automatic Backup" description="Periodically back up your test data locally" />
+                  <Toggle category="general" field="telemetry" label="Usage Analytics" description="Share anonymous usage data to help improve the product" />
                 </div>
               </>
             )}
 
-            {/* ══ EXECUTION ══ */}
             {activeTab === 'execution' && (
               <>
                 <div className="set-section">
@@ -240,7 +201,6 @@ function Settings({ settings, onUpdateSettings }) {
                   <Toggle category="execution" field="autoAdvance" label="Auto-Advance on Pass" description="Move to the next case when the current one passes" />
                   <Toggle category="execution" field="requireCommentsOnFail" label="Require Comments on Fail" description="Force testers to add a comment for failed tests" />
                 </div>
-
                 <div className="set-section">
                   <h3 className="set-section-title">Session</h3>
                   <div className="set-row">
@@ -262,7 +222,6 @@ function Settings({ settings, onUpdateSettings }) {
               </>
             )}
 
-            {/* ══ REPORTING ══ */}
             {activeTab === 'reporting' && (
               <>
                 <div className="set-section">
@@ -271,7 +230,6 @@ function Settings({ settings, onUpdateSettings }) {
                   <Toggle category="reporting" field="includeFailedTests" label="Include Failed Tests" description="Show failed cases in reports" />
                   <Toggle category="reporting" field="includeCharts" label="Include Charts" description="Add visual charts and graphs" />
                 </div>
-
                 <div className="set-section">
                   <h3 className="set-section-title">Branding</h3>
                   <div className="set-row set-row-column">
@@ -302,7 +260,6 @@ function Settings({ settings, onUpdateSettings }) {
               </>
             )}
 
-            {/* ══ EXPORT ══ */}
             {activeTab === 'export' && (
               <>
                 <div className="set-section">
@@ -314,10 +271,11 @@ function Settings({ settings, onUpdateSettings }) {
                     </div>
                     <div className="set-option-grid set-option-grid-2">
                       {[
-                        { id: 'pdf', name: 'PDF Document', desc: 'Best for sharing & printing' },
-                        { id: 'word', name: 'Word Document', desc: 'Editable format' },
+                        { id: 'pdf', name: 'PDF Document', desc: 'Best for sharing & printing', icon: FiFileText },
+                        { id: 'word', name: 'Word Document', desc: 'Editable format', icon: FiFile },
                       ].map(f => {
                         const active = formData.export?.defaultFormat === f.id;
+                        const Icon = f.icon;
                         return (
                           <button
                             key={f.id}
@@ -326,7 +284,7 @@ function Settings({ settings, onUpdateSettings }) {
                             onClick={() => handleInputChange('export', 'defaultFormat', f.id)}
                           >
                             <div className="set-option-icon">
-                              <FiFileText size={18} />
+                              <Icon size={18} />
                             </div>
                             <div className="set-option-name">{f.name}</div>
                             <div className="set-option-desc">{f.desc}</div>
@@ -363,7 +321,6 @@ function Settings({ settings, onUpdateSettings }) {
               </>
             )}
 
-            {/* ══ NOTIFICATIONS ══ */}
             {activeTab === 'notifications' && (
               <>
                 <div className="set-section">
@@ -371,7 +328,6 @@ function Settings({ settings, onUpdateSettings }) {
                   <Toggle category="notifications" field="showSuccess" label="Success Notifications" description="Show a toast after successful actions" />
                   <Toggle category="notifications" field="showErrors" label="Error Notifications" description="Show a toast when something fails" />
                 </div>
-
                 <div className="set-section">
                   <h3 className="set-section-title">Timing</h3>
                   <div className="set-row">
@@ -393,7 +349,6 @@ function Settings({ settings, onUpdateSettings }) {
               </>
             )}
 
-            {/* ══ DISPLAY ══ */}
             {activeTab === 'display' && (
               <>
                 <div className="set-section">
@@ -437,7 +392,6 @@ function Settings({ settings, onUpdateSettings }) {
                 <div className="set-section">
                   <h3 className="set-section-title">Tables & Lists</h3>
                   <Toggle category="display" field="showIds" label="Show Test Case IDs" description="Display ADO IDs alongside test cases" />
-
                   <div className="set-row">
                     <div className="set-row-info">
                       <div className="set-row-label">Items Per Page</div>
@@ -459,13 +413,13 @@ function Settings({ settings, onUpdateSettings }) {
             )}
           </div>
 
-          {/* Footer actions */}
+          {/* Footer */}
           <div className="set-panel-footer">
             <div className="set-footer-status">
               {hasChanges ? (
                 <>
                   <span className="set-pulse-dot" />
-                  <span style={{ color: 'var(--set-warning)' }}>You have unsaved changes</span>
+                  <span style={{ color: 'var(--set-warning)' }}>Unsaved changes</span>
                 </>
               ) : (
                 <>
@@ -499,9 +453,8 @@ function Settings({ settings, onUpdateSettings }) {
         </main>
       </div>
 
-      {/* ═══════ Theme-aware styles ═══════ */}
       <style>{`
-        /* ── Dark tokens (default) ── */
+        /* ── Dark tokens ── */
         .set-page {
           --set-bg: transparent;
           --set-card: rgba(255,255,255,0.02);
@@ -522,7 +475,7 @@ function Settings({ settings, onUpdateSettings }) {
           --set-success: #4ade80;
           --set-danger: #f87171;
           --set-hover-bg: rgba(99,102,241,0.06);
-          --set-toggle-off: rgba(255,255,255,0.1);
+          --set-toggle-off: rgba(255,255,255,0.12);
         }
 
         /* ── Light overrides ── */
@@ -540,7 +493,7 @@ function Settings({ settings, onUpdateSettings }) {
           --set-accent-strong: #4f46e5;
           --set-accent-bg: rgba(99,102,241,0.08);
           --set-accent-border: rgba(99,102,241,0.2);
-          --set-accent-glow: rgba(99,102,241,0.12);
+          --set-accent-glow: rgba(99,102,241,0.06);
           --set-warning: #d97706;
           --set-success: #16a34a;
           --set-danger: #dc2626;
@@ -548,23 +501,23 @@ function Settings({ settings, onUpdateSettings }) {
           --set-toggle-off: #cbd5e1;
         }
 
-        /* ── Page layout ── */
+        /* ── Layout: use viewport height so content is scrollable ── */
         .set-page {
           display: flex; flex-direction: column;
-          height: 100%; overflow: hidden;
+          height: 100%;
+          min-height: 0;
+          overflow: hidden;
           background: var(--set-bg);
         }
 
         /* ── Header ── */
         .set-header {
-          padding: 28px 32px 24px;
+          padding: 24px 32px 20px;
           border-bottom: 1px solid var(--set-border);
           display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
           flex-shrink: 0;
         }
-        .set-header-left {
-          display: flex; align-items: center; gap: 12px;
-        }
+        .set-header-left { display: flex; align-items: center; gap: 12px; }
         .set-header-icon {
           width: 40px; height: 40px; border-radius: 11px;
           background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
@@ -589,19 +542,21 @@ function Settings({ settings, onUpdateSettings }) {
         }
         .set-pulse-dot {
           width: 7px; height: 7px; border-radius: 50%;
-          background: var(--set-warning);
+          background: currentColor;
           animation: setPulse 1.6s ease-in-out infinite;
-          box-shadow: 0 0 0 0 rgba(251,191,36,0.5);
         }
         @keyframes setPulse {
-          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(251,191,36,0.5); }
-          50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(251,191,36,0); }
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.5; }
         }
 
-        /* ── Body (2-column) ── */
+        /* ── Body (flexes to fill remaining space) ── */
         .set-body {
-          flex: 1; display: flex; gap: 24px;
-          padding: 24px 32px 32px; overflow: hidden;
+          flex: 1;
+          display: flex; gap: 20px;
+          padding: 20px 32px 24px;
+          overflow: hidden;
+          min-height: 0;
         }
 
         /* ── Sidebar ── */
@@ -666,7 +621,9 @@ function Settings({ settings, onUpdateSettings }) {
           display: flex; flex-direction: column;
           background: var(--set-card);
           border: 1px solid var(--set-border);
-          border-radius: 14px; overflow: hidden;
+          border-radius: 14px;
+          overflow: hidden;
+          min-height: 0;
         }
         .set-panel-header {
           display: flex; align-items: center; gap: 12px;
@@ -690,15 +647,20 @@ function Settings({ settings, onUpdateSettings }) {
           margin: 2px 0 0; font-size: 12px; color: var(--set-text-muted);
         }
         .set-panel-content {
-          flex: 1; overflow-y: auto;
+          flex: 1;
+          overflow-y: auto;
           padding: 20px 24px;
+          min-height: 0;
+        }
+        .set-panel-content::-webkit-scrollbar { width: 6px; }
+        .set-panel-content::-webkit-scrollbar-track { background: transparent; }
+        .set-panel-content::-webkit-scrollbar-thumb {
+          background: var(--set-border); border-radius: 3px;
         }
 
         /* ── Section ── */
-        .set-section {
-          margin-bottom: 28px;
-        }
-        .set-section:last-child { margin-bottom: 0; }
+        .set-section { margin-bottom: 28px; }
+        .set-section:last-child { margin-bottom: 8px; }
         .set-section-title {
           font-size: 11px; font-weight: 600;
           text-transform: uppercase; letter-spacing: 0.8px;
@@ -731,7 +693,7 @@ function Settings({ settings, onUpdateSettings }) {
           margin-top: 3px; line-height: 1.4;
         }
 
-        /* ── Toggle switch ── */
+        /* ── Toggle ── */
         .set-toggle {
           position: relative; flex-shrink: 0;
           width: 40px; height: 22px; border-radius: 999px;
@@ -741,7 +703,7 @@ function Settings({ settings, onUpdateSettings }) {
           padding: 0;
         }
         .set-toggle-on {
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+          background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
           box-shadow: 0 2px 8px rgba(99,102,241,0.35);
         }
         .set-toggle-thumb {
@@ -780,9 +742,7 @@ function Settings({ settings, onUpdateSettings }) {
         }
 
         /* ── Option cards ── */
-        .set-option-grid {
-          display: grid; gap: 10px;
-        }
+        .set-option-grid { display: grid; gap: 10px; }
         .set-option-grid-2 { grid-template-columns: repeat(2, 1fr); }
         .set-option-grid-3 { grid-template-columns: repeat(3, 1fr); }
         .set-option-card {
@@ -841,7 +801,7 @@ function Settings({ settings, onUpdateSettings }) {
         /* ── Footer ── */
         .set-panel-footer {
           display: flex; align-items: center; justify-content: space-between;
-          padding: 16px 24px;
+          padding: 14px 24px;
           border-top: 1px solid var(--set-border);
           background: var(--set-card-elevated);
           flex-shrink: 0;
@@ -883,7 +843,6 @@ function Settings({ settings, onUpdateSettings }) {
           transform: translateY(-1px);
         }
 
-        /* ── Spinner ── */
         .set-spinner {
           display: inline-block; width: 13px; height: 13px;
           border: 2px solid rgba(255,255,255,0.3);
@@ -893,26 +852,22 @@ function Settings({ settings, onUpdateSettings }) {
         }
         @keyframes setSpin { to { transform: rotate(360deg); } }
 
-        /* ── Scrollbars ── */
-        .set-panel-content::-webkit-scrollbar,
-        .set-sidebar::-webkit-scrollbar { width: 4px; }
-        .set-panel-content::-webkit-scrollbar-track,
-        .set-sidebar::-webkit-scrollbar-track { background: transparent; }
-        .set-panel-content::-webkit-scrollbar-thumb,
-        .set-sidebar::-webkit-scrollbar-thumb {
-          background: var(--set-border); border-radius: 4px;
-        }
-        .set-panel-content::-webkit-scrollbar-thumb:hover,
-        .set-sidebar::-webkit-scrollbar-thumb:hover {
-          background: var(--set-border-hover);
-        }
-
         /* ── Responsive ── */
         @media (max-width: 900px) {
-          .set-body { flex-direction: column; gap: 16px; padding: 16px 20px; }
-          .set-sidebar { width: 100%; flex-direction: row; overflow-x: auto; gap: 6px; }
+          .set-body {
+            flex-direction: column; gap: 12px;
+            padding: 16px 20px 20px;
+            overflow: auto;
+          }
+          .set-sidebar {
+            width: 100%;
+            flex-direction: row;
+            overflow-x: auto; overflow-y: hidden;
+            gap: 6px; padding-bottom: 4px;
+          }
           .set-sidebar-title { display: none; }
           .set-tab { flex-shrink: 0; min-width: 200px; }
+          .set-panel { min-height: 500px; }
         }
         @media (max-width: 640px) {
           .set-header { padding: 20px; }
