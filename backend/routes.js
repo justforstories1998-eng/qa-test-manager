@@ -14,8 +14,12 @@ import {
   getSettings, updateSettings, getStatistics,
   searchUsers, getAllUsers,
   getAllBoards, getBoardById, createBoard, updateBoard, deleteBoard,
-  getAllWorkItems, getWorkItemById, createWorkItem, updateWorkItem, deleteWorkItem, updateWorkItemOrder,
-  getAllSprints, getSprintById, createSprint, updateSprint, deleteSprint
+  getAllWorkItems, getWorkItemById, createWorkItem, updateWorkItem, deleteWorkItem, updateWorkItemOrder, getWorkItemHierarchy,
+  getLinksForWorkItem, createWorkItemLink, deleteWorkItemLink,
+  getAllSprints, getSprintById, createSprint, updateSprint, deleteSprint,
+  getCapacitiesBySprint, upsertCapacity, deleteCapacity,
+  generateBurndown, getBurndownBySprint, getVelocity,
+  getQueriesByProject, createQuery, updateQuery, deleteQuery
 } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
@@ -321,23 +325,44 @@ router.get('/reports/:id/download', async (req, res, next) => {
 router.delete('/reports/:id', async (req, res, next) => { try { await deleteReport(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // ============================================
-// BOARD MODULE
+// BOARD MODULE — FULL AZURE DEVOPS API
 // ============================================
 router.get('/boards', async (req, res, next) => { try { res.json({ success: true, data: await getAllBoards(req.query.projectId) }); } catch (e) { next(e); } });
+router.get('/boards/:id', async (req, res, next) => { try { res.json({ success: true, data: await getBoardById(req.params.id) }); } catch (e) { next(e); } });
 router.post('/boards', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createBoard(req.body) }); } catch (e) { next(e); } });
 router.put('/boards/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateBoard(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/boards/:id', async (req, res, next) => { try { await deleteBoard(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 router.get('/work-items', async (req, res, next) => { try { res.json({ success: true, data: await getAllWorkItems(req.query.projectId, req.query) }); } catch (e) { next(e); } });
+router.get('/work-items/hierarchy', async (req, res, next) => { try { res.json({ success: true, data: await getWorkItemHierarchy(req.query.projectId) }); } catch (e) { next(e); } });
+router.get('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await getWorkItemById(req.params.id) }); } catch (e) { next(e); } });
 router.post('/work-items', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkItem(req.body) }); } catch (e) { next(e); } });
 router.put('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateWorkItem(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/work-items/:id', async (req, res, next) => { try { await deleteWorkItem(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 router.put('/work-items/batch/order', async (req, res, next) => { try { await updateWorkItemOrder(req.body.items); res.json({ success: true }); } catch (e) { next(e); } });
 
+router.get('/work-item-links/:workItemId', async (req, res, next) => { try { res.json({ success: true, data: await getLinksForWorkItem(req.params.workItemId) }); } catch (e) { next(e); } });
+router.post('/work-item-links', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkItemLink(req.body) }); } catch (e) { next(e); } });
+router.delete('/work-item-links/:id', async (req, res, next) => { try { await deleteWorkItemLink(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
 router.get('/sprints', async (req, res, next) => { try { res.json({ success: true, data: await getAllSprints(req.query.projectId) }); } catch (e) { next(e); } });
 router.post('/sprints', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createSprint(req.body) }); } catch (e) { next(e); } });
 router.put('/sprints/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateSprint(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/sprints/:id', async (req, res, next) => { try { await deleteSprint(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+router.get('/sprint-capacity/:sprintId', async (req, res, next) => { try { res.json({ success: true, data: await getCapacitiesBySprint(req.params.sprintId) }); } catch (e) { next(e); } });
+router.post('/sprint-capacity', async (req, res, next) => { try { res.json({ success: true, data: await upsertCapacity(req.body) }); } catch (e) { next(e); } });
+router.delete('/sprint-capacity/:id', async (req, res, next) => { try { await deleteCapacity(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+router.get('/burndown/:sprintId', async (req, res, next) => { try { res.json({ success: true, data: await getBurndownBySprint(req.params.sprintId) }); } catch (e) { next(e); } });
+router.post('/burndown/generate', async (req, res, next) => { try { const data = await generateBurndown(req.body.sprintId, req.body.projectId); res.json({ success: true, data }); } catch (e) { next(e); } });
+
+router.get('/velocity/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getVelocity(req.params.projectId) }); } catch (e) { next(e); } });
+
+router.get('/queries/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getQueriesByProject(req.params.projectId) }); } catch (e) { next(e); } });
+router.post('/queries', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createQuery(req.body) }); } catch (e) { next(e); } });
+router.put('/queries/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateQuery(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/queries/:id', async (req, res, next) => { try { await deleteQuery(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // ============================================
 // STATS & SETTINGS

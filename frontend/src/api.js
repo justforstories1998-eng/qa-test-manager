@@ -122,20 +122,41 @@ const api = {
   updateSettings: (category, data) => apiClient.put(`/settings/${category}`, data),
 
   getBoards: (projectId) => apiClient.get('/boards', { params: { projectId } }),
+  getBoard: (id) => apiClient.get(`/boards/${id}`),
   createBoard: (data) => apiClient.post('/boards', data),
   updateBoard: (id, data) => apiClient.put(`/boards/${id}`, data),
   deleteBoard: (id) => apiClient.delete(`/boards/${id}`),
 
   getWorkItems: (projectId, filters = {}) => apiClient.get('/work-items', { params: { projectId, ...filters } }),
+  getWorkItemHierarchy: (projectId) => apiClient.get('/work-items/hierarchy', { params: { projectId } }),
+  getWorkItem: (id) => apiClient.get(`/work-items/${id}`),
   createWorkItem: (data) => apiClient.post('/work-items', data),
   updateWorkItem: (id, data) => apiClient.put(`/work-items/${id}`, data),
   deleteWorkItem: (id) => apiClient.delete(`/work-items/${id}`),
   updateWorkItemsOrder: (items) => apiClient.put('/work-items/batch/order', { items }),
 
+  getWorkItemLinks: (workItemId) => apiClient.get(`/work-item-links/${workItemId}`),
+  createWorkItemLink: (data) => apiClient.post('/work-item-links', data),
+  deleteWorkItemLink: (id) => apiClient.delete(`/work-item-links/${id}`),
+
   getSprints: (projectId) => apiClient.get('/sprints', { params: { projectId } }),
   createSprint: (data) => apiClient.post('/sprints', data),
   updateSprint: (id, data) => apiClient.put(`/sprints/${id}`, data),
   deleteSprint: (id) => apiClient.delete(`/sprints/${id}`),
+
+  getSprintCapacity: (sprintId) => apiClient.get(`/sprint-capacity/${sprintId}`),
+  upsertCapacity: (data) => apiClient.post('/sprint-capacity', data),
+  deleteCapacity: (id) => apiClient.delete(`/sprint-capacity/${id}`),
+
+  getBurndown: (sprintId) => apiClient.get(`/burndown/${sprintId}`),
+  generateBurndown: (sprintId, projectId) => apiClient.post('/burndown/generate', { sprintId, projectId }),
+
+  getVelocity: (projectId) => apiClient.get(`/velocity/${projectId}`),
+
+  getQueries: (projectId) => apiClient.get(`/queries/${projectId}`),
+  createQuery: (data) => apiClient.post('/queries', data),
+  updateQuery: (id, data) => apiClient.put(`/queries/${id}`, data),
+  deleteQuery: (id) => apiClient.delete(`/queries/${id}`),
 
   getFileUrl: (path) => {
     if (!path || typeof path !== 'string') return '#';
