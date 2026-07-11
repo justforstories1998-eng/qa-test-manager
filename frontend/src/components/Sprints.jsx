@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import api from '../api';
+import { toast } from 'react-toastify';
+import { FiClock, FiPlus, FiCalendar, FiCheckCircle, FiEdit2, FiTrash2, FiX, FiUsers, FiBarChart2, FiTarget } from 'react-icons/fi';
 
 const STATUS_STYLE = {
   Active: { color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
@@ -27,7 +30,7 @@ export default function Sprints({ projectId }) {
   const loadSprints = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await window.api.getSprints(projectId);
+      const res = await api.getSprints(projectId);
       if (res.success) setSprints(res.data);
     } catch (err) {
       console.error('Failed to load sprints:', err);
@@ -41,9 +44,9 @@ export default function Sprints({ projectId }) {
     setActiveTab('Task Breakdown');
     try {
       const [itemsRes, capRes, burndownRes] = await Promise.all([
-        window.api.getWorkItems(projectId, { sprintId: sprint._id }),
-        window.api.getSprintCapacity(sprint._id),
-        window.api.getBurndown(sprint._id),
+        api.getWorkItems(projectId, { sprintId: sprint._id }),
+        api.getSprintCapacity(sprint._id),
+        api.getBurndown(sprint._id),
       ]);
       if (itemsRes.success) setWorkItems(itemsRes.data);
       if (capRes.success) setCapacityData(capRes.data);
@@ -55,7 +58,7 @@ export default function Sprints({ projectId }) {
 
   const loadVelocity = useCallback(async () => {
     try {
-      const res = await window.api.getVelocity(projectId);
+      const res = await api.getVelocity(projectId);
       if (res.success) setVelocityData(res.data);
     } catch (err) {
       console.error('Failed to load velocity:', err);
@@ -70,7 +73,7 @@ export default function Sprints({ projectId }) {
 
   const handleCreateSprint = async (data) => {
     try {
-      await window.api.createSprint({ ...data, projectId });
+      await api.createSprint({ ...data, projectId });
       setShowCreateModal(false);
       loadSprints();
     } catch (err) {
@@ -80,7 +83,7 @@ export default function Sprints({ projectId }) {
 
   const handleUpdateSprint = async (id, data) => {
     try {
-      await window.api.updateSprint(id, data);
+      await api.updateSprint(id, data);
       setEditingSprint(null);
       loadSprints();
       if (activeSprintDetail && activeSprintDetail._id === id) {
@@ -93,7 +96,7 @@ export default function Sprints({ projectId }) {
 
   const handleDeleteSprint = async (id) => {
     try {
-      await window.api.deleteSprint(id);
+      await api.deleteSprint(id);
       setConfirmDelete(null);
       if (activeSprintDetail && activeSprintDetail._id === id) {
         setActiveSprintDetail(null);
@@ -106,7 +109,7 @@ export default function Sprints({ projectId }) {
 
   const handleStatusTransition = async (sprint, newStatus) => {
     try {
-      await window.api.updateSprint(sprint._id, { status: newStatus });
+      await api.updateSprint(sprint._id, { status: newStatus });
       loadSprints();
       if (activeSprintDetail && activeSprintDetail._id === sprint._id) {
         setActiveSprintDetail({ ...sprint, status: newStatus });
@@ -119,7 +122,7 @@ export default function Sprints({ projectId }) {
   const handleAddCapacity = async () => {
     if (!newMember.assignee.trim()) return;
     try {
-      await window.api.upsertCapacity({
+      await api.upsertCapacity({
         sprintId: activeSprintDetail._id,
         projectId,
         assignee: newMember.assignee.trim(),
@@ -127,7 +130,7 @@ export default function Sprints({ projectId }) {
         activities: newMember.activities.split(',').map(a => a.trim()).filter(Boolean),
       });
       setNewMember({ assignee: '', capacityPerDay: 8, activities: '' });
-      const res = await window.api.getSprintCapacity(activeSprintDetail._id);
+      const res = await api.getSprintCapacity(activeSprintDetail._id);
       if (res.success) setCapacityData(res.data);
     } catch (err) {
       console.error('Failed to add capacity:', err);
@@ -136,7 +139,7 @@ export default function Sprints({ projectId }) {
 
   const handleDeleteCapacity = async (id) => {
     try {
-      await window.api.deleteCapacity(id);
+      await api.deleteCapacity(id);
       setCapacityData(prev => prev.filter(c => c._id !== id));
     } catch (err) {
       console.error('Failed to delete capacity:', err);
@@ -145,9 +148,9 @@ export default function Sprints({ projectId }) {
 
   const handleGenerateBurndown = async () => {
     try {
-      const res = await window.api.generateBurndown(activeSprintDetail._id, projectId);
+      const res = await api.generateBurndown(activeSprintDetail._id, projectId);
       if (res.success) {
-        const bdRes = await window.api.getBurndown(activeSprintDetail._id);
+        const bdRes = await api.getBurndown(activeSprintDetail._id);
         if (bdRes.success) setBurndownData(bdRes.data);
       }
     } catch (err) {
