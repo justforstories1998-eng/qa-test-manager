@@ -33,13 +33,21 @@ const DEFAULT_SETTINGS = {
 
 function Settings({ settings, onUpdateSettings }) {
   const [activeTab, setActiveTab] = useState('general');
-  const [formData, setFormData] = useState(() => JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+  const [formData, setFormData] = useState(() => {
+    const base = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    const currentTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme') || 'dark';
+    base.display.theme = currentTheme;
+    return base;
+  });
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
-    setFormData(settings ? { ...DEFAULT_SETTINGS, ...JSON.parse(JSON.stringify(settings)) } : JSON.parse(JSON.stringify(DEFAULT_SETTINGS)));
+    const merged = settings ? { ...DEFAULT_SETTINGS, ...JSON.parse(JSON.stringify(settings)) } : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    const currentTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('theme') || 'dark';
+    merged.display.theme = currentTheme;
+    setFormData(merged);
     setHasChanges(false);
   }, [settings]);
 
