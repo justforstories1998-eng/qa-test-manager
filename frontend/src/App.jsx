@@ -237,8 +237,8 @@ function App() {
                   testSuites={testSuites}
                   testCases={testCases}
                   settings={settings}
-                  onDeleteTestCase={id => api.deleteTestCase(id).then(refreshData)}
-                  onUploadCSV={(f, n, p) => api.uploadCSV(f, n, p || activeProjectId).then(refreshData)}
+                  onDeleteTestCase={id => api.deleteTestCase(id).then(res => { refreshData(); return res; })}
+                  onUploadCSV={(f, n, p) => api.uploadCSV(f, n, p || activeProjectId).then(res => { refreshData(); return res; })}
                 />
               } />
             )}
@@ -250,7 +250,7 @@ function App() {
                   testRuns={testRuns}
                   settings={settings}
                   onCreateTestRun={handleCreateRun}
-                  onDeleteTestRun={id => api.deleteTestRun(id).then(refreshData)}
+                  onDeleteTestRun={id => api.deleteTestRun(id).then(res => { refreshData(); return res; })}
                   onUpdateExecutionResult={handleUpdateExecutionResult}
                   onRefresh={refreshData}
                 />

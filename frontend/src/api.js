@@ -116,7 +116,7 @@ const api = {
     fd.append('suiteName', suiteName);
     fd.append('projectId', projectId);
     return apiClient.post('/upload/csv', fd, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: { 'Content-Type': undefined },
       timeout: 120000,
     });
   },

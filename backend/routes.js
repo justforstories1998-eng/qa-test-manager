@@ -67,7 +67,9 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB Limit for video support
 });
 
-const csvUpload = multer({ dest: path.join(os.tmpdir(), 'csv-uploads') });
+const csvTmpDir = path.join(os.tmpdir(), 'csv-uploads');
+if (!fs.existsSync(csvTmpDir)) fs.mkdirSync(csvTmpDir, { recursive: true });
+const csvUpload = multer({ dest: csvTmpDir });
 
 // ============================================
 // PROJECTS
