@@ -96,7 +96,7 @@ const api = {
 
   uploadCSV: (file, suiteName, projectId) => {
     const fd = new FormData(); fd.append('file', file); fd.append('suiteName', suiteName); fd.append('projectId', projectId);
-    return apiClient.post('/upload/csv', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return apiClient.post('/upload/csv', fd);
   },
 
   getTestRuns: (projectId) => apiClient.get('/test-runs', { params: { projectId } }),
