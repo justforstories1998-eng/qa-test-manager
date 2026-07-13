@@ -3,6 +3,8 @@ import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import multerStorageCloudinary from 'multer-storage-cloudinary'; 
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import {
   getAllProjects, getProjectById, createProject, deleteProject,
   getAllBugs, createBug, updateBug, deleteBug,
@@ -65,7 +67,7 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB Limit for video support
 });
 
-const csvUpload = multer({ dest: 'uploads/' });
+const csvUpload = multer({ dest: path.join(os.tmpdir(), 'csv-uploads') });
 
 // ============================================
 // PROJECTS

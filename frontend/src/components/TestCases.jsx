@@ -179,10 +179,17 @@ function TestCases({
     if (!uploadFile || !uploadSuiteName.trim()) return toast.error("File and suite name required");
     setIsUploading(true);
     try {
-      await onUploadCSV?.(uploadFile, uploadSuiteName.trim(), "");
-      setShowUploadModal(false); setUploadFile(null); setUploadSuiteName("");
-      toast.success("CSV imported");
-    } catch { toast.error("Import failed"); }
+      const result = await onUploadCSV?.(uploadFile, uploadSuiteName.trim(), "");
+      if (result && !result.success && result.error) {
+        toast.error(`Import failed: ${result.error}`);
+      } else {
+        setShowUploadModal(false); setUploadFile(null); setUploadSuiteName("");
+        toast.success("CSV imported");
+      }
+    } catch (err) {
+      const msg = err?.error || err?.message || 'Unknown error';
+      toast.error(`Import failed: ${msg}`);
+    }
     finally { setIsUploading(false); }
   };
 
