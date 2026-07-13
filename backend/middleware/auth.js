@@ -8,6 +8,7 @@ export const authenticateToken = async (req, res, next) => {
   const token = authHeader && authHeader.split(' ')[1];
 
   if (!token) {
+    console.log(`⛔ No token: ${req.method} ${req.originalUrl}`);
     return res.status(401).json({ success: false, error: 'Access denied. No token provided.' });
   }
 
@@ -16,12 +17,14 @@ export const authenticateToken = async (req, res, next) => {
     const user = await getUserById(decoded.userId);
     
     if (!user || !user.isActive) {
+      console.log(`⛔ Invalid user (id=${decoded.userId}, active=${user?.isActive}): ${req.method} ${req.originalUrl}`);
       return res.status(401).json({ success: false, error: 'Invalid token or user deactivated.' });
     }
 
     req.user = user;
     next();
   } catch (error) {
+    console.log(`⛔ JWT error (${error.message}): ${req.method} ${req.originalUrl}`);
     return res.status(403).json({ success: false, error: 'Invalid or expired token.' });
   }
 };

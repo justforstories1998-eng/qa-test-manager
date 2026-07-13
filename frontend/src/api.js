@@ -27,9 +27,12 @@ apiClient.interceptors.response.use(
 
     if (error.response?.status === 401 || error.response?.status === 403) {
       if (!error.config?.url?.includes('/auth/login')) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        const serverMsg = error.response?.data?.error || '';
+        if (serverMsg.includes('expired') || serverMsg.includes('Invalid')) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
       }
     }
 
@@ -95,8 +98,27 @@ const api = {
   deleteTestCase: (id) => apiClient.delete(`/test-cases/${id}`),
 
   uploadCSV: (file, suiteName, projectId) => {
-    const fd = new FormData(); fd.append('file', file); fd.append('suiteName', suiteName); fd.append('projectId', projectId);
-    return apiClient.post('/upload/csv', fd);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return Promise.reject({ success: false, error: 'No auth token found. Please log in again.' });
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+        return Promise.reject({ success: false, error: 'Session expired. Please log in again.' });
+      }
+    } catch (e) { /* ignore decode errors, let server validate */ }
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('suiteName', suiteName);
+    fd.append('projectId', projectId);
+    return apiClient.post('/upload/csv', fd, {
+      headers: { 'Authorization': `Bearer ${token}` },
+      timeout: 120000,
+    });
   },
 
   getTestRuns: (projectId) => apiClient.get('/test-runs', { params: { projectId } }),
