@@ -187,7 +187,8 @@ function TestCases({
         toast.success("CSV imported");
       }
     } catch (err) {
-      const msg = err?.error || err?.message || 'Unknown error';
+      console.error('CSV Upload error:', err);
+      const msg = err?.error || err?.message || JSON.stringify(err) || 'Unknown error';
       toast.error(`Import failed: ${msg}`);
     }
     finally { setIsUploading(false); }

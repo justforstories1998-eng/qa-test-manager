@@ -116,7 +116,10 @@ const api = {
     fd.append('suiteName', suiteName);
     fd.append('projectId', projectId);
     return apiClient.post('/upload/csv', fd, {
-      headers: { 'Content-Type': undefined },
+      transformRequest: [(data, headers) => {
+        delete headers['Content-Type'];
+        return data;
+      }],
       timeout: 120000,
     });
   },
