@@ -304,7 +304,7 @@ export default function Backlogs({ projectId }) {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('backlog-theme');
+    const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
   });
@@ -312,7 +312,7 @@ export default function Backlogs({ projectId }) {
   const t = isDarkMode ? themes.dark : themes.light;
 
   useEffect(() => { injectStyles(t); }, [t]);
-  useEffect(() => { localStorage.setItem('backlog-theme', isDarkMode ? 'dark' : 'light'); }, [isDarkMode]);
+  useEffect(() => { localStorage.setItem('theme', isDarkMode ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light'); }, [isDarkMode]);
 
   const defaultForm = {
     title: '', type: 'Task', priority: 3, status: 'Backlog',
