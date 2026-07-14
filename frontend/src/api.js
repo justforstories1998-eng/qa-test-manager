@@ -9,6 +9,22 @@ const apiClient = axios.create({
   timeout: 60000
 });
 
+const uploadClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 120000,
+});
+
+uploadClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -98,30 +114,11 @@ const api = {
   deleteTestCase: (id) => apiClient.delete(`/test-cases/${id}`),
 
   uploadCSV: (file, suiteName, projectId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      return Promise.reject({ success: false, error: 'No auth token found. Please log in again.' });
-    }
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload.exp && payload.exp * 1000 < Date.now()) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        return Promise.reject({ success: false, error: 'Session expired. Please log in again.' });
-      }
-    } catch (e) { /* ignore decode errors, let server validate */ }
     const fd = new FormData();
     fd.append('file', file);
     fd.append('suiteName', suiteName);
     fd.append('projectId', projectId);
-    return axios.post(`${API_BASE_URL}/upload/csv`, fd, {
-      headers: { 'Authorization': `Bearer ${token}` },
-      timeout: 120000,
-    }).then(r => r.data).catch(err => {
-      const msg = err.response?.data?.error || err.message || 'Network Error';
-      return Promise.reject({ success: false, error: msg });
-    });
+    return uploadClient.post('/upload/csv', fd).then(r => r.data);
   },
 
   getTestRuns: (projectId) => apiClient.get('/test-runs', { params: { projectId } }),
