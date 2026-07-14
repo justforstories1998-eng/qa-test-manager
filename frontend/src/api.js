@@ -115,12 +115,12 @@ const api = {
     fd.append('file', file);
     fd.append('suiteName', suiteName);
     fd.append('projectId', projectId);
-    return apiClient.post('/upload/csv', fd, {
-      transformRequest: [(data, headers) => {
-        delete headers['Content-Type'];
-        return data;
-      }],
+    return axios.post(`${API_BASE_URL}/upload/csv`, fd, {
+      headers: { 'Authorization': `Bearer ${token}` },
       timeout: 120000,
+    }).then(r => r.data).catch(err => {
+      const msg = err.response?.data?.error || err.message || 'Network Error';
+      return Promise.reject({ success: false, error: msg });
     });
   },
 
