@@ -3,8 +3,6 @@ import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 import multerStorageCloudinary from 'multer-storage-cloudinary'; 
 import fs from 'fs';
-import os from 'os';
-import path from 'path';
 import {
   getAllProjects, getProjectById, createProject, deleteProject,
   getAllBugs, createBug, updateBug, deleteBug,
@@ -23,7 +21,6 @@ import {
   generateBurndown, getBurndownBySprint, getVelocity,
   getQueriesByProject, createQuery, updateQuery, deleteQuery
 } from './database.js';
-import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
 import { analyzeTestResults } from './services/grokService.js';
 import { sendBugAssignmentEmail, sendBugCreatedConfirmationEmail } from './services/emailService.js';
@@ -67,9 +64,7 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB Limit for video support
 });
 
-const csvTmpDir = path.join(os.tmpdir(), 'csv-uploads');
-if (!fs.existsSync(csvTmpDir)) fs.mkdirSync(csvTmpDir, { recursive: true });
-const csvUpload = multer({ dest: csvTmpDir });
+// CSV upload now handled directly in server.js with memoryStorage
 
 // ============================================
 // PROJECTS
@@ -207,20 +202,8 @@ router.put('/test-cases/:id', async (req, res, next) => { try { res.json({ succe
 router.delete('/test-cases/:id', async (req, res, next) => { try { await deleteTestCase(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 // ============================================
-// CSV IMPORT
+// CSV IMPORT (moved to server.js for clean middleware chain)
 // ============================================
-router.post('/upload/csv', csvUpload.single('file'), async (req, res, next) => {
-  try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file' });
-    const parsedData = await parseCSVFile(req.file.path);
-    const testCases = parseADOFormat(parsedData);
-    const suite = await createTestSuite({ projectId: req.body.projectId, name: req.body.suiteName, testCaseCount: testCases.length });
-    const mapped = testCases.map(tc => ({ ...tc, suiteId: suite._id, projectId: req.body.projectId }));
-    await createTestCases(mapped);
-    fs.unlink(req.file.path, () => {});
-    res.status(201).json({ success: true, message: `Imported ${testCases.length} cases` });
-  } catch (error) { next(error); }
-});
 
 // ============================================
 // TEST RUNS

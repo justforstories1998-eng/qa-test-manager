@@ -3,8 +3,12 @@ import cors from 'cors';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+
+import multer from 'multer';
 import dotenv from 'dotenv';
-import { initializeDatabase } from './database.js';
+import { initializeDatabase, createTestSuite, createTestCases } from './database.js';
+import { parseCSVFile, parseADOFormat } from './services/csvService.js';
+import { authenticateToken } from './middleware/auth.js';
 import routes from './routes.js';
 import authRouter from './routes/authRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
@@ -22,6 +26,15 @@ const reportUploadDir = join(uploadDir, 'reports');
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+});
+
+// ============================================
+// Global request logger (top of chain)
+// ============================================
+app.use((req, res, next) => {
+  const ct = req.headers['content-type'] || '';
+  console.log(`→ ${req.method} ${req.originalUrl} CT=${ct.substring(0, 60)}`);
+  next();
 });
 
 // ============================================
@@ -50,7 +63,11 @@ app.use((req, res, next) => {
   if (ct.includes('multipart/')) return next();
   express.json({ limit: '50mb' })(req, res, next);
 });
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use((req, res, next) => {
+  const ct = req.headers['content-type'] || '';
+  if (ct.includes('multipart/')) return next();
+  express.urlencoded({ extended: true, limit: '50mb' })(req, res, next);
+});
 app.use('/uploads', express.static(uploadDir));
 
 // ============================================
@@ -101,6 +118,33 @@ app.get('/health', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   res.status(200).json({ name: 'QA Test Manager API', version: '1.0.0', status: 'running' });
+});
+
+// ============================================
+// CSV UPLOAD - Handled directly in server.js
+// to avoid middleware chain issues with main router
+// ============================================
+const csvUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+
+app.post('/api/upload/csv', (req, res, next) => {
+  console.log(`📎 CSV Upload: ${req.method} ${req.originalUrl}`);
+  console.log(`  Content-Type: ${req.headers['content-type'] || 'NONE'}`);
+  console.log(`  Auth header: ${req.headers['authorization'] ? 'YES (' + req.headers['authorization'].substring(0, 20) + '...)' : 'MISSING'}`);
+  next();
+}, authenticateToken, csvUpload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
+    const parsedData = await parseCSVFile(req.file.buffer);
+    const testCases = parseADOFormat(parsedData);
+    const suite = await createTestSuite({ projectId: req.body.projectId, name: req.body.suiteName, testCaseCount: testCases.length });
+    const mapped = testCases.map(tc => ({ ...tc, suiteId: suite._id, projectId: req.body.projectId }));
+    await createTestCases(mapped);
+    console.log(`✅ CSV Upload success: ${testCases.length} cases imported`);
+    res.status(201).json({ success: true, message: `Imported ${testCases.length} cases` });
+  } catch (error) {
+    console.error('CSV Upload Error:', error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // ============================================

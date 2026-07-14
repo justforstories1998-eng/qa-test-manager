@@ -25,6 +25,27 @@ uploadClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+uploadClient.interceptors.response.use(
+  (response) => response.data,
+  async (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      const serverMsg = error.response?.data?.error || '';
+      if (serverMsg.includes('expired') || serverMsg.includes('Invalid')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    }
+
+    const errorMsg = error.response?.data?.error
+      || error.response?.data?.message
+      || error.message
+      || 'An unexpected error occurred';
+
+    return Promise.reject({ success: false, error: errorMsg });
+  }
+);
+
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -118,7 +139,7 @@ const api = {
     fd.append('file', file);
     fd.append('suiteName', suiteName);
     fd.append('projectId', projectId);
-    return uploadClient.post('/upload/csv', fd).then(r => r.data);
+    return uploadClient.post('/upload/csv', fd);
   },
 
   getTestRuns: (projectId) => apiClient.get('/test-runs', { params: { projectId } }),
