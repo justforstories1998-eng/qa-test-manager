@@ -2,46 +2,74 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 
+function detectDelimiter(firstLine) {
+  const tabs = (firstLine.match(/\t/g) || []).length;
+  const semicolons = (firstLine.match(/;/g) || []).length;
+  const pipes = (firstLine.match(/\|/g) || []).length;
+  const commas = (firstLine.match(/,/g) || []).length;
+  const max = Math.max(tabs, semicolons, pipes, commas);
+  if (max === 0) return ',';
+  if (tabs === max) return '\t';
+  if (semicolons === max) return ';';
+  if (pipes === max) return '|';
+  return ',';
+}
+
 /**
  * Parse a CSV file and return array of objects.
  * Accepts a Buffer (from multer memoryStorage) or a file path string.
+ * Auto-detects delimiter (comma, tab, semicolon, pipe).
  */
 export function parseCSVFile(source) {
   return new Promise((resolve, reject) => {
     const records = [];
 
-    const parser = parse({
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-      relax_quotes: true,
-      relax_column_count: true,
-      bom: true
-    });
+    let content = '';
+    const chunks = [];
 
-    parser.on('readable', () => {
-      let record;
-      while ((record = parser.read()) !== null) {
-        records.push(record);
-      }
-    });
+    const finish = (buf) => {
+      const text = buf.toString('utf-8');
+      const firstLine = text.split(/\r?\n/)[0] || '';
+      const delimiter = detectDelimiter(firstLine);
+      console.log('CSV delimiter detected:', JSON.stringify(delimiter));
 
-    parser.on('error', (err) => {
-      reject(new Error(`CSV parsing error: ${err.message}`));
-    });
+      const parser = parse({
+        columns: true,
+        skip_empty_lines: true,
+        trim: true,
+        relax_quotes: true,
+        relax_column_count: true,
+        bom: true,
+        delimiter
+      });
 
-    parser.on('end', () => {
-      resolve(records);
-    });
+      parser.on('readable', () => {
+        let record;
+        while ((record = parser.read()) !== null) {
+          records.push(record);
+        }
+      });
+
+      parser.on('error', (err) => {
+        reject(new Error(`CSV parsing error: ${err.message}`));
+      });
+
+      parser.on('end', () => {
+        resolve(records);
+      });
+
+      Readable.from(buf).pipe(parser);
+    };
 
     if (Buffer.isBuffer(source)) {
-      Readable.from(source).pipe(parser);
+      finish(source);
     } else if (typeof source === 'string') {
       const readStream = createReadStream(source, { encoding: 'utf-8' });
       readStream.on('error', (err) => {
         reject(new Error(`File read error: ${err.message}`));
       });
-      readStream.pipe(parser);
+      readStream.on('data', (chunk) => chunks.push(chunk));
+      readStream.on('end', () => finish(Buffer.from(chunks.join(''))));
     } else {
       reject(new Error('Invalid source: expected Buffer or file path'));
     }
