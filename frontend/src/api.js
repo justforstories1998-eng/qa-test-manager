@@ -37,6 +37,22 @@ uploadClient.interceptors.response.use(
       }
     }
 
+    const isRetryable =
+      !error.response ||
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ERR_NETWORK' ||
+      (error.message && (
+        error.message.includes('Network Error') ||
+        error.message.includes('timeout') ||
+        error.message.includes('CORS')
+      ));
+
+    if (isRetryable && !error.config?._retry) {
+      error.config._retry = true;
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      return uploadClient(error.config);
+    }
+
     const errorMsg = error.response?.data?.error
       || error.response?.data?.message
       || error.message
