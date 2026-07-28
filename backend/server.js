@@ -124,7 +124,10 @@ app.get('/', (req, res) => {
 // CSV UPLOAD - Handled directly in server.js
 // to avoid middleware chain issues with main router
 // ============================================
-const csvUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
+const csvUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 app.post('/api/upload/csv', (req, res, next) => {
   console.log(`📎 CSV Upload: ${req.method} ${req.originalUrl}`);
@@ -147,6 +150,16 @@ app.post('/api/upload/csv', (req, res, next) => {
   }
 });
 
+// Multer error handler - catches multer-specific errors with CORS headers
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    console.error('Multer Error:', err.code, err.message);
+    res.header('Access-Control-Allow-Origin', '*');
+    return res.status(400).json({ success: false, error: `Upload error: ${err.message}` });
+  }
+  next(err);
+});
+
 // ============================================
 // API ROUTES (auth routes MUST come before main router)
 // ============================================
@@ -156,12 +169,16 @@ app.use('/api', routes);
 
 // Catch-all for unmatched API routes
 app.use('/api', (req, res) => {
+  res.header('Access-Control-Allow-Origin', '*');
   res.status(404).json({ success: false, error: `Route not found: ${req.method} ${req.originalUrl}` });
 });
 
-// Global Error Handler
+// Global Error Handler - always include CORS headers
 app.use((err, req, res, next) => {
   console.error('Server Error:', err.message);
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.status(err.status || 500).json({ success: false, error: err.message || 'Internal server error' });
 });
 
