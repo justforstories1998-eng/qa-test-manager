@@ -685,7 +685,7 @@ function TestCases({
             onDragLeave={() => setDragOver(false)}
             onDrop={handleDrop}
           >
-            <input type="file" accept=".csv" onChange={e => setUploadFile(e.target.files?.[0] || null)} required className="tc-dropzone-input" />
+            <input type="file" accept=".csv" onChange={e => setUploadFile(e.target.files?.[0] || null)} className="tc-dropzone-input" />
             <div className="tc-dropzone-icon"><FiUpload size={22} /></div>
             <p className="tc-dropzone-text">Drag & drop your CSV file here</p>
             <p className="tc-dropzone-hint">or click to browse · .csv only</p>
