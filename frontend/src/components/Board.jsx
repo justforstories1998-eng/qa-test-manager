@@ -3,47 +3,50 @@ import {
   FiTrello, FiPlus, FiSearch, FiTrash2, FiEdit2, FiX,
   FiArrowRight, FiArrowLeft, FiArrowUp, FiArrowDown, FiMinus,
   FiChevronDown, FiChevronRight, FiAlertTriangle, FiTag,
-  FiSun, FiMoon, FiMoreHorizontal, FiFilter, FiLayout,
+  FiMoreHorizontal, FiFilter, FiLayout,
   FiClock, FiUser, FiHash, FiZap, FiTarget, FiCheckCircle
 } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
 
-const themes = {
-  dark: {
-    bgPrimary: '#0f1117', bgSecondary: '#161822', bgTertiary: '#1c1f2e',
-    bgCard: '#1a1d2e', bgCardHover: '#212438', bgElevated: '#1e2235',
-    bgInput: '#161822', bgOverlay: 'rgba(0, 0, 0, 0.65)',
-    textPrimary: '#e8eaed', textSecondary: '#9aa0b4', textMuted: '#5c6178', textInverse: '#0f1117',
-    borderPrimary: 'rgba(255, 255, 255, 0.06)', borderSecondary: 'rgba(255, 255, 255, 0.1)',
-    borderFocus: 'rgba(99, 102, 241, 0.5)',
-    accentPrimary: '#6366f1', accentSecondary: '#818cf8',
-    accentGradient: 'linear-gradient(135deg, #6366f1, #7c3aed)', accentGlow: 'rgba(99, 102, 241, 0.15)',
-    shadowSm: '0 1px 3px rgba(0, 0, 0, 0.3)', shadowMd: '0 4px 16px rgba(0, 0, 0, 0.3)',
-    shadowLg: '0 12px 40px rgba(0, 0, 0, 0.4)', shadowXl: '0 24px 64px rgba(0, 0, 0, 0.5)',
-    scrollTrack: 'transparent', scrollThumb: 'rgba(255, 255, 255, 0.08)',
-    scrollThumbHover: 'rgba(255, 255, 255, 0.15)',
-    columnBg: 'rgba(255, 255, 255, 0.015)', columnHeaderBg: 'rgba(255, 255, 255, 0.02)',
-    dropZone: 'rgba(99, 102, 241, 0.08)', swimlaneBg: 'rgba(255, 255, 255, 0.03)',
-    swimlaneHover: 'rgba(255, 255, 255, 0.06)',
-  },
-  light: {
-    bgPrimary: '#f0f2f5', bgSecondary: '#ffffff', bgTertiary: '#f8f9fb',
-    bgCard: '#ffffff', bgCardHover: '#f3f4ff', bgElevated: '#ffffff',
-    bgInput: '#f5f6f8', bgOverlay: 'rgba(15, 23, 42, 0.4)',
-    textPrimary: '#1a1d2e', textSecondary: '#5c6178', textMuted: '#9aa0b4', textInverse: '#ffffff',
-    borderPrimary: 'rgba(0, 0, 0, 0.08)', borderSecondary: 'rgba(0, 0, 0, 0.12)',
-    borderFocus: 'rgba(99, 102, 241, 0.5)',
-    accentPrimary: '#6366f1', accentSecondary: '#4f46e5',
-    accentGradient: 'linear-gradient(135deg, #6366f1, #7c3aed)', accentGlow: 'rgba(99, 102, 241, 0.1)',
-    shadowSm: '0 1px 3px rgba(0, 0, 0, 0.06)', shadowMd: '0 4px 16px rgba(0, 0, 0, 0.08)',
-    shadowLg: '0 12px 40px rgba(0, 0, 0, 0.12)', shadowXl: '0 24px 64px rgba(0, 0, 0, 0.15)',
+const getTheme = () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (dark) {
+    return {
+      bgPrimary: 'var(--bg-app)', bgSecondary: 'var(--surface-primary)', bgTertiary: 'var(--surface-tertiary)',
+      bgCard: 'var(--bg-card)', bgCardHover: 'var(--surface-glass-hover)', bgElevated: 'var(--surface-elevated)',
+      bgInput: 'var(--surface-secondary)', bgOverlay: 'var(--surface-overlay)',
+      textPrimary: 'var(--text-primary)', textSecondary: 'var(--text-secondary)', textMuted: 'var(--text-muted)', textInverse: 'var(--text-on-primary)',
+      borderPrimary: 'var(--border-color)', borderSecondary: 'var(--border-medium)',
+      borderFocus: 'var(--focus-ring)',
+      accentPrimary: 'var(--primary-color)', accentSecondary: 'var(--primary-light)',
+      accentGradient: 'var(--gradient-primary)', accentGlow: 'var(--glow-primary)',
+      shadowSm: 'var(--shadow-sm)', shadowMd: 'var(--shadow-md)',
+      shadowLg: 'var(--shadow-lg)', shadowXl: 'var(--shadow-xl)',
+      scrollTrack: 'transparent', scrollThumb: 'rgba(255, 255, 255, 0.08)',
+      scrollThumbHover: 'rgba(255, 255, 255, 0.15)',
+      columnBg: 'rgba(255, 255, 255, 0.015)', columnHeaderBg: 'rgba(255, 255, 255, 0.02)',
+      dropZone: 'rgba(99, 102, 241, 0.08)', swimlaneBg: 'rgba(255, 255, 255, 0.03)',
+      swimlaneHover: 'rgba(255, 255, 255, 0.06)',
+    };
+  }
+  return {
+    bgPrimary: 'var(--bg-app)', bgSecondary: 'var(--surface-primary)', bgTertiary: 'var(--surface-tertiary)',
+    bgCard: 'var(--bg-card)', bgCardHover: 'var(--surface-glass-hover)', bgElevated: 'var(--surface-elevated)',
+    bgInput: 'var(--surface-secondary)', bgOverlay: 'var(--surface-overlay)',
+    textPrimary: 'var(--text-primary)', textSecondary: 'var(--text-secondary)', textMuted: 'var(--text-muted)', textInverse: 'var(--text-on-primary)',
+    borderPrimary: 'var(--border-color)', borderSecondary: 'var(--border-medium)',
+    borderFocus: 'var(--focus-ring)',
+    accentPrimary: 'var(--primary-color)', accentSecondary: 'var(--primary-600)',
+    accentGradient: 'var(--gradient-primary)', accentGlow: 'var(--glow-primary)',
+    shadowSm: 'var(--shadow-sm)', shadowMd: 'var(--shadow-md)',
+    shadowLg: 'var(--shadow-lg)', shadowXl: 'var(--shadow-xl)',
     scrollTrack: 'transparent', scrollThumb: 'rgba(0, 0, 0, 0.1)',
     scrollThumbHover: 'rgba(0, 0, 0, 0.2)',
     columnBg: 'rgba(0, 0, 0, 0.02)', columnHeaderBg: 'rgba(0, 0, 0, 0.015)',
     dropZone: 'rgba(99, 102, 241, 0.06)', swimlaneBg: 'rgba(0, 0, 0, 0.025)',
     swimlaneHover: 'rgba(0, 0, 0, 0.05)',
-  },
+  };
 };
 
 const DEFAULT_COLUMNS = [
@@ -107,19 +110,20 @@ export default function Board({ projectId }) {
   const [collapsedSwimlanes, setCollapsedSwimlanes] = useState({});
   const [columns] = useState(DEFAULT_COLUMNS);
   const [dragOverCol, setDragOverCol] = useState(null);
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
-  });
   const [filterType, setFilterType] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [themeVersion, setThemeVersion] = useState(0);
 
-  const t = isDarkMode ? themes.dark : themes.light;
+  useEffect(() => {
+    const observer = new MutationObserver(() => setThemeVersion(v => v + 1));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const t = useMemo(() => getTheme(), [themeVersion]);
 
   useEffect(() => { injectScrollbarStyles(t); }, [t]);
-  useEffect(() => { localStorage.setItem('theme', isDarkMode ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light'); }, [isDarkMode]);
 
   const fetchItems = useCallback(async () => {
     if (!projectId) return;
@@ -400,9 +404,6 @@ export default function Board({ projectId }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className="btn-hover-scale" title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} style={{ width: 38, height: 38, borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgTertiary, color: t.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-            </button>
             <button onClick={() => setShowFilters(!showFilters)} className="btn-hover-scale" style={{ height: 38, borderRadius: 10, padding: '0 14px', border: `1px solid ${showFilters || activeFilterCount > 0 ? t.accentPrimary + '50' : t.borderSecondary}`, background: activeFilterCount > 0 ? `${t.accentPrimary}10` : t.bgTertiary, color: activeFilterCount > 0 ? t.accentPrimary : t.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
               <FiFilter size={14} />Filters
               {activeFilterCount > 0 && <span style={{ width: 18, height: 18, borderRadius: '50%', background: t.accentGradient, color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{activeFilterCount}</span>}

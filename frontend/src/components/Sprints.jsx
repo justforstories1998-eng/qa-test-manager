@@ -207,7 +207,7 @@ export default function Sprints({ projectId }) {
     },
     subtitle: {
       fontSize: '14px',
-      color: 'rgba(255,255,255,0.5)',
+      color: 'var(--text-muted)',
       marginTop: '4px',
     },
     createBtn: {
@@ -229,8 +229,8 @@ export default function Sprints({ projectId }) {
       gap: '16px',
     },
     sprintCard: {
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-secondary)',
+      border: '1px solid var(--border-color)',
       borderRadius: '12px',
       padding: '20px',
       cursor: 'pointer',
@@ -250,13 +250,13 @@ export default function Sprints({ projectId }) {
     },
     sprintGoal: {
       fontSize: '13px',
-      color: 'rgba(255,255,255,0.5)',
+      color: 'var(--text-muted)',
       marginTop: '4px',
       lineHeight: '1.4',
     },
     dateRange: {
       fontSize: '12px',
-      color: 'rgba(255,255,255,0.4)',
+      color: 'var(--text-muted)',
       marginBottom: '12px',
     },
     badge: {
@@ -268,7 +268,7 @@ export default function Sprints({ projectId }) {
     },
     progressBar: {
       height: '6px',
-      background: 'rgba(255,255,255,0.06)',
+      background: 'var(--surface-glass-hover)',
       borderRadius: '3px',
       overflow: 'hidden',
       marginBottom: '8px',
@@ -285,7 +285,7 @@ export default function Sprints({ projectId }) {
     },
     statText: {
       fontSize: '12px',
-      color: 'rgba(255,255,255,0.5)',
+      color: 'var(--text-muted)',
     },
     buttonGroup: {
       display: 'flex',
@@ -295,8 +295,8 @@ export default function Sprints({ projectId }) {
     actionBtn: {
       padding: '5px 12px',
       borderRadius: '6px',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
-      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid var(--border-color)',
+      background: 'var(--surface-tertiary)',
       color: 'var(--text-primary, #f1f5f9)',
       fontSize: '12px',
       cursor: 'pointer',
@@ -313,15 +313,16 @@ export default function Sprints({ projectId }) {
     modalOverlay: {
       position: 'fixed',
       inset: 0,
-      background: 'rgba(0,0,0,0.7)',
+      background: 'var(--surface-overlay)',
+      backdropFilter: 'blur(4px)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1000,
     },
     modal: {
-      background: '#1e1e2e',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-elevated)',
+      border: '1px solid var(--border-color)',
       borderRadius: '16px',
       padding: '28px',
       width: '480px',
@@ -332,7 +333,7 @@ export default function Sprints({ projectId }) {
     modalTitle: {
       fontSize: '18px',
       fontWeight: '700',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       margin: '0 0 20px 0',
     },
     formGroup: {
@@ -342,14 +343,14 @@ export default function Sprints({ projectId }) {
       display: 'block',
       fontSize: '13px',
       fontWeight: '600',
-      color: 'rgba(255,255,255,0.7)',
+      color: 'var(--text-primary)',
       marginBottom: '6px',
     },
     input: {
       width: '100%',
       padding: '10px 12px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-tertiary)',
+      border: '1px solid var(--border-color)',
       borderRadius: '8px',
       color: 'var(--text-primary, #f1f5f9)',
       fontSize: '14px',
@@ -359,8 +360,8 @@ export default function Sprints({ projectId }) {
     select: {
       width: '100%',
       padding: '10px 12px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-tertiary)',
+      border: '1px solid var(--border-color)',
       borderRadius: '8px',
       color: 'var(--text-primary, #f1f5f9)',
       fontSize: '14px',
@@ -376,8 +377,8 @@ export default function Sprints({ projectId }) {
     cancelBtn: {
       padding: '8px 16px',
       borderRadius: '8px',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
-      background: 'rgba(255,255,255,0.05)',
+      border: '1px solid var(--border-color)',
+      background: 'var(--surface-tertiary)',
       color: 'var(--text-primary, #f1f5f9)',
       fontSize: '14px',
       cursor: 'pointer',
@@ -400,7 +401,7 @@ export default function Sprints({ projectId }) {
     backBtn: {
       background: 'none',
       border: 'none',
-      color: 'rgba(255,255,255,0.6)',
+      color: 'var(--text-secondary)',
       fontSize: '14px',
       cursor: 'pointer',
       marginBottom: '16px',
@@ -418,7 +419,7 @@ export default function Sprints({ projectId }) {
       display: 'flex',
       gap: '4px',
       marginBottom: '24px',
-      background: 'rgba(255,255,255,0.03)',
+      background: 'var(--surface-secondary)',
       borderRadius: '10px',
       padding: '4px',
       width: 'fit-content',
@@ -428,7 +429,7 @@ export default function Sprints({ projectId }) {
       borderRadius: '8px',
       border: 'none',
       background: 'transparent',
-      color: 'rgba(255,255,255,0.5)',
+      color: 'var(--text-muted)',
       fontSize: '13px',
       fontWeight: '600',
       cursor: 'pointer',
@@ -447,8 +448,8 @@ export default function Sprints({ projectId }) {
       padding: '10px 14px',
       fontSize: '12px',
       fontWeight: '600',
-      color: 'rgba(255,255,255,0.5)',
-      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      color: 'var(--text-muted)',
+      borderBottom: '1px solid var(--border-color)',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
     },
@@ -456,7 +457,7 @@ export default function Sprints({ projectId }) {
       padding: '10px 14px',
       fontSize: '14px',
       color: 'var(--text-primary, #f1f5f9)',
-      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      borderBottom: '1px solid var(--border-color)',
     },
     addRow: {
       display: 'flex',
@@ -467,8 +468,8 @@ export default function Sprints({ projectId }) {
     addInput: {
       flex: 1,
       padding: '8px 10px',
-      background: 'rgba(255,255,255,0.05)',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-tertiary)',
+      border: '1px solid var(--border-color)',
       borderRadius: '6px',
       color: 'var(--text-primary, #f1f5f9)',
       fontSize: '13px',
@@ -502,13 +503,13 @@ export default function Sprints({ projectId }) {
     summaryCard: {
       flex: 1,
       padding: '16px',
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-secondary)',
+      border: '1px solid var(--border-color)',
       borderRadius: '10px',
     },
     summaryLabel: {
       fontSize: '12px',
-      color: 'rgba(255,255,255,0.5)',
+      color: 'var(--text-muted)',
       marginBottom: '4px',
     },
     summaryValue: {
@@ -517,8 +518,8 @@ export default function Sprints({ projectId }) {
       color: 'var(--text-primary, #f1f5f9)',
     },
     chartContainer: {
-      background: 'rgba(255,255,255,0.03)',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-secondary)',
+      border: '1px solid var(--border-color)',
       borderRadius: '12px',
       padding: '24px',
       marginTop: '16px',
@@ -537,15 +538,16 @@ export default function Sprints({ projectId }) {
     confirmOverlay: {
       position: 'fixed',
       inset: 0,
-      background: 'rgba(0,0,0,0.6)',
+      background: 'var(--surface-overlay)',
+      backdropFilter: 'blur(4px)',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1100,
     },
     confirmModal: {
-      background: '#1e1e2e',
-      border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+      background: 'var(--surface-elevated)',
+      border: '1px solid var(--border-color)',
       borderRadius: '12px',
       padding: '24px',
       width: '360px',
@@ -553,13 +555,13 @@ export default function Sprints({ projectId }) {
     },
     confirmText: {
       fontSize: '15px',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       marginBottom: '20px',
     },
     emptyState: {
       textAlign: 'center',
       padding: '60px 20px',
-      color: 'rgba(255,255,255,0.4)',
+      color: 'var(--text-muted)',
     },
     emptyIcon: {
       fontSize: '48px',
@@ -582,7 +584,7 @@ export default function Sprints({ projectId }) {
           e.currentTarget.style.transform = 'translateY(-2px)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border-color, rgba(255,255,255,0.06))';
+          e.currentTarget.style.borderColor = 'var(--border-color)';
           e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
@@ -920,7 +922,7 @@ export default function Sprints({ projectId }) {
           </tbody>
         </table>
         {capacityData.length > 0 && (
-          <div style={{ marginTop: '12px', fontSize: '13px', color: 'rgba(255,255,255,0.5)' }}>
+          <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-muted)' }}>
             Total: {capacityData.reduce((sum, c) => sum + c.capacityPerDay, 0)}h/day
             ({capacityData.reduce((sum, c) => sum + c.capacityPerDay, 0) * sprintDays}h total)
           </div>
@@ -987,14 +989,14 @@ export default function Sprints({ projectId }) {
                   y1={y}
                   x2={padding.left + chartW}
                   y2={y}
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke="var(--border-color)"
                   strokeWidth="1"
                 />
                 <text
                   x={padding.left - 10}
                   y={y + 4}
                   textAnchor="end"
-                  fill="rgba(255,255,255,0.4)"
+                  fill="var(--text-muted)"
                   fontSize="11"
                 >
                   {val}
@@ -1013,7 +1015,7 @@ export default function Sprints({ projectId }) {
                 x={xScale(i)}
                 y={height - padding.bottom + 20}
                 textAnchor="middle"
-                fill="rgba(255,255,255,0.4)"
+                fill="var(--text-muted)"
                 fontSize="11"
               >
                 {dateLabel}
@@ -1029,7 +1031,7 @@ export default function Sprints({ projectId }) {
           <path
             d={idealPath}
             fill="none"
-            stroke="rgba(255,255,255,0.25)"
+            stroke="var(--border-medium)"
             strokeWidth="2"
             strokeDasharray="6,4"
           />
@@ -1050,7 +1052,7 @@ export default function Sprints({ projectId }) {
               cy={yScale(d.remainingPoints)}
               r="4"
               fill="#6366f1"
-              stroke="#1e1e2e"
+              stroke="var(--border-color)"
               strokeWidth="2"
             >
               <title>{`${d.date}: ${d.remainingPoints} pts remaining`}</title>
@@ -1061,7 +1063,7 @@ export default function Sprints({ projectId }) {
             x={width / 2}
             y={height - 5}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.4)"
+            fill="var(--text-muted)"
             fontSize="12"
           >
             Date
@@ -1071,7 +1073,7 @@ export default function Sprints({ projectId }) {
             x={15}
             y={height / 2}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.4)"
+            fill="var(--text-muted)"
             fontSize="12"
             transform={`rotate(-90, 15, ${height / 2})`}
           >
@@ -1083,7 +1085,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top}
             x2={padding.left}
             y2={padding.top + chartH}
-            stroke="rgba(255,255,255,0.1)"
+            stroke="var(--border-color)"
             strokeWidth="1"
           />
           <line
@@ -1091,16 +1093,16 @@ export default function Sprints({ projectId }) {
             y1={padding.top + chartH}
             x2={padding.left + chartW}
             y2={padding.top + chartH}
-            stroke="rgba(255,255,255,0.1)"
+            stroke="var(--border-color)"
             strokeWidth="1"
           />
         </svg>
         <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', marginTop: '12px', fontSize: '12px' }}>
-          <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <span style={{ color: 'var(--text-muted)' }}>
             <span style={{ display: 'inline-block', width: '20px', height: '2px', background: 'rgba(255,255,255,0.25)', marginRight: '6px', verticalAlign: 'middle', borderTop: '2px dashed rgba(255,255,255,0.25)' }} />
             Ideal
           </span>
-          <span style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <span style={{ color: 'var(--text-muted)' }}>
             <span style={{ display: 'inline-block', width: '20px', height: '3px', background: '#6366f1', marginRight: '6px', verticalAlign: 'middle', borderRadius: '2px' }} />
             Actual
           </span>
@@ -1152,14 +1154,14 @@ export default function Sprints({ projectId }) {
                   y1={y}
                   x2={padding.left + chartW}
                   y2={y}
-                  stroke="rgba(255,255,255,0.06)"
+                  stroke="var(--border-color)"
                   strokeWidth="1"
                 />
                 <text
                   x={padding.left - 10}
                   y={y + 4}
                   textAnchor="end"
-                  fill="rgba(255,255,255,0.4)"
+                  fill="var(--text-muted)"
                   fontSize="11"
                 >
                   {val}
@@ -1191,7 +1193,7 @@ export default function Sprints({ projectId }) {
                   x={x + barWidth / 2}
                   y={y - 8}
                   textAnchor="middle"
-                  fill="rgba(255,255,255,0.7)"
+                  fill="var(--text-primary)"
                   fontSize="12"
                   fontWeight="600"
                 >
@@ -1201,7 +1203,7 @@ export default function Sprints({ projectId }) {
                   x={x + barWidth / 2}
                   y={height - padding.bottom + 16}
                   textAnchor="middle"
-                  fill="rgba(255,255,255,0.4)"
+                  fill="var(--text-muted)"
                   fontSize="11"
                 >
                   {label}
@@ -1226,7 +1228,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top}
             x2={padding.left}
             y2={padding.top + chartH}
-            stroke="rgba(255,255,255,0.1)"
+            stroke="var(--border-color)"
             strokeWidth="1"
           />
           <line
@@ -1234,7 +1236,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top + chartH}
             x2={padding.left + chartW}
             y2={padding.top + chartH}
-            stroke="rgba(255,255,255,0.1)"
+            stroke="var(--border-color)"
             strokeWidth="1"
           />
 
@@ -1242,7 +1244,7 @@ export default function Sprints({ projectId }) {
             x={width / 2}
             y={height - 5}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.4)"
+            fill="var(--text-muted)"
             fontSize="12"
           >
             Sprint
@@ -1251,7 +1253,7 @@ export default function Sprints({ projectId }) {
             x={15}
             y={height / 2}
             textAnchor="middle"
-            fill="rgba(255,255,255,0.4)"
+            fill="var(--text-muted)"
             fontSize="12"
             transform={`rotate(-90, 15, ${height / 2})`}
           >

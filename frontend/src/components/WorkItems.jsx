@@ -28,18 +28,18 @@ const btnBase = {
 };
 
 const btnPrimary = { ...btnBase, background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff' };
-const btnSecondary = { ...btnBase, background: 'rgba(255,255,255,0.06)', color: 'var(--text-primary, #f1f5f9)', border: '1px solid var(--border-color, rgba(255,255,255,0.06))' };
-const btnDanger = { ...btnBase, background: 'rgba(239,68,68,0.15)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' };
+const btnSecondary = { ...btnBase, background: 'var(--surface-secondary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' };
+const btnDanger = { ...btnBase, background: 'var(--danger-bg)', color: 'var(--danger)', border: '1px solid var(--danger-border)' };
 const btnSmall = { ...btnBase, padding: '4px 10px', fontSize: '12px' };
-const btnIcon = { ...btnSmall, padding: '6px 8px', background: 'transparent', border: '1px solid var(--border-color, rgba(255,255,255,0.06))' };
+const btnIcon = { ...btnSmall, padding: '6px 8px', background: 'transparent', border: '1px solid var(--border-color)' };
 
 const inputStyle = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: '8px',
-  border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
-  background: 'rgba(0,0,0,0.2)',
-  color: 'var(--text-primary, #f1f5f9)',
+  border: '1px solid var(--border-color)',
+  background: 'var(--surface-secondary)',
+  color: 'var(--text-primary)',
   fontSize: '13px',
   fontFamily: 'inherit',
   outline: 'none',
@@ -49,7 +49,7 @@ const inputStyle = {
 const labelStyle = {
   fontSize: '12px',
   fontWeight: '600',
-  color: 'rgba(255,255,255,0.6)',
+  color: 'var(--text-muted)',
   marginBottom: '4px',
   display: 'block',
   textTransform: 'uppercase',
@@ -71,15 +71,15 @@ function Modal({ open, onClose, title, children, wide }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'var(--surface-overlay)', backdropFilter: 'blur(4px)' }} />
       <div style={{
         position: 'relative', width: wide ? '800px' : '520px', maxWidth: '95vw', maxHeight: '90vh',
-        background: '#1e1e2e', borderRadius: '16px', border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+        background: 'var(--surface-elevated)', borderRadius: '16px', border: '1px solid var(--border-color)',
         boxShadow: '0 25px 60px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column',
         overflow: 'hidden',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))' }}>
-          <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-primary, #f1f5f9)', fontWeight: '600' }}>{title}</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
+          <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-primary)', fontWeight: '600' }}>{title}</h3>
           <button onClick={onClose} style={{ ...btnIcon, fontSize: '18px', lineHeight: 1, padding: '4px 8px' }}>×</button>
         </div>
         <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>{children}</div>
@@ -284,10 +284,10 @@ export default function WorkItems({ projectId }) {
   const colHeader = (key, label, w) => (
     <th key={key} onClick={() => toggleSort(key)} style={{
       padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700',
-      color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em',
+      color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em',
       cursor: 'pointer', userSelect: 'none', width: w, whiteSpace: 'nowrap',
-      borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))',
-      background: sortKey === key ? 'rgba(99,102,241,0.1)' : 'transparent',
+      borderBottom: '1px solid var(--border-color)',
+      background: sortKey === key ? 'var(--surface-interaction)' : 'transparent',
     }}>
       {label}{handleSortIcon(key)}
     </th>
@@ -295,14 +295,14 @@ export default function WorkItems({ projectId }) {
 
   const renderRow = (item) => (
     <tr key={item._id} onClick={() => setDetailItem(item)}
-      style={{ cursor: 'pointer', background: selected.has(item._id) ? 'rgba(99,102,241,0.1)' : 'transparent', transition: 'background 0.15s' }}
-      onMouseEnter={e => { if (!selected.has(item._id)) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-      onMouseLeave={e => { if (!selected.has(item._id)) e.currentTarget.style.background = selected.has(item._id) ? 'rgba(99,102,241,0.1)' : 'transparent'; }}>
+      style={{ cursor: 'pointer', background: selected.has(item._id) ? 'var(--surface-interaction)' : 'transparent', transition: 'background 0.15s' }}
+      onMouseEnter={e => { if (!selected.has(item._id)) e.currentTarget.style.background = 'var(--surface-glass-hover)'; }}
+      onMouseLeave={e => { if (!selected.has(item._id)) e.currentTarget.style.background = selected.has(item._id) ? 'var(--surface-interaction)' : 'transparent'; }}>
       <td style={tdStyle} onClick={e => e.stopPropagation()}>
         <input type="checkbox" checked={selected.has(item._id)} onChange={() => toggleSelect(item._id)}
           style={{ accentColor: '#6366f1', width: '15px', height: '15px', cursor: 'pointer' }} />
       </td>
-      <td style={tdStyle}><span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>WI-{item.workItemId}</span></td>
+      <td style={tdStyle}><span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-muted)' }}>WI-{item.workItemId}</span></td>
       <td style={{ ...tdStyle, maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500' }}>{item.title}</td>
       <td style={tdStyle}><Badge text={item.type} color={TYPE_COLORS[item.type] || '#888'} /></td>
       <td style={tdStyle}>
@@ -317,7 +317,7 @@ export default function WorkItems({ projectId }) {
           {(item.tags || []).slice(0, 3).map((t, i) => (
             <span key={i} style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{t}</span>
           ))}
-          {(item.tags || []).length > 3 && <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>+{item.tags.length - 3}</span>}
+          {(item.tags || []).length > 3 && <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>+{item.tags.length - 3}</span>}
         </div>
       </td>
       <td style={{ ...tdStyle, textAlign: 'right' }} onClick={e => e.stopPropagation()}>
@@ -330,19 +330,19 @@ export default function WorkItems({ projectId }) {
   return (
     <div style={{ padding: '0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', gap: '4px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border-color, rgba(255,255,255,0.06))' }}>
+        <div style={{ display: 'flex', gap: '4px', background: 'var(--surface-secondary)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border-color)' }}>
           {[['items', 'All Items'], ['queries', 'Saved Queries']].map(([k, l]) => (
             <button key={k} onClick={() => setTab(k)} style={{
               ...btnSmall, borderRadius: '7px', border: 'none',
               background: tab === k ? 'linear-gradient(135deg, #6366f1, #7c3aed)' : 'transparent',
-              color: tab === k ? '#fff' : 'rgba(255,255,255,0.5)',
+              color: tab === k ? '#fff' : 'var(--text-muted)',
             }}>{l}</button>
           ))}
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {selected.size > 0 && (
             <>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{selected.size} selected</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{selected.size} selected</span>
               <Select value="" onChange={v => { if (v) handleBulkStatus(v); }} options={[{ value: '', label: 'Set Status...' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '130px', height: '34px', fontSize: '12px' }} />
               <button onClick={handleBulkDelete} style={{ ...btnDanger, ...btnSmall }}>Delete Selected</button>
             </>
@@ -366,11 +366,11 @@ export default function WorkItems({ projectId }) {
             <Select value={filterStatus} onChange={setFilterStatus} options={[{ value: '', label: 'All Statuses' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '160px', height: '38px' }} />
           </div>
 
-          <div style={{ background: 'rgba(0,0,0,0.15)', borderRadius: '12px', border: '1px solid var(--border-color, rgba(255,255,255,0.06))', overflow: 'hidden' }}>
+          <div style={{ background: 'var(--surface-tertiary)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr>
-                  <th style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))', width: '40px' }}>
+                  <th style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-color)', width: '40px' }}>
                     <input type="checkbox" checked={paged.length > 0 && selected.size === paged.length} onChange={toggleSelectAll}
                       style={{ accentColor: '#6366f1', width: '15px', height: '15px', cursor: 'pointer' }} />
                   </th>
@@ -382,27 +382,27 @@ export default function WorkItems({ projectId }) {
                   {colHeader('assignee', 'Assignee', '120px')}
                   {colHeader('storyPoints', 'Points', '70px')}
                   {colHeader('effort', 'Effort', '70px')}
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))', width: '150px' }}>Tags</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))', width: '90px' }}>Actions</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-color)', width: '150px' }}>Tags</th>
+                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-color)', width: '90px' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan="12" style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>Loading...</td></tr>
+                  <tr><td colSpan="12" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</td></tr>
                 ) : paged.length === 0 ? (
-                  <tr><td colSpan="12" style={{ padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>No work items found</td></tr>
+                  <tr><td colSpan="12" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No work items found</td></tr>
                 ) : paged.map(renderRow)}
               </tbody>
             </table>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
               Showing {Math.min((page - 1) * PAGE_SIZE + 1, sorted.length)}–{Math.min(page * PAGE_SIZE, sorted.length)} of {sorted.length}
             </span>
             <div style={{ display: 'flex', gap: '6px' }}>
               <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ ...btnSmall, opacity: page <= 1 ? 0.4 : 1 }}>← Prev</button>
-              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', padding: '4px 8px' }}>Page {page} of {totalPages}</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '4px 8px' }}>Page {page} of {totalPages}</span>
               <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ ...btnSmall, opacity: page >= totalPages ? 0.4 : 1 }}>Next →</button>
             </div>
           </div>
@@ -412,15 +412,15 @@ export default function WorkItems({ projectId }) {
       {tab === 'queries' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
           {queries.length === 0 && (
-            <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'rgba(255,255,255,0.4)' }}>No saved queries yet. Go to All Items, set filters, and save as a query.</div>
+            <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No saved queries yet. Go to All Items, set filters, and save as a query.</div>
           )}
           {queries.map(q => (
             <div key={q._id} style={{
-              background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+              background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)',
               padding: '16px', cursor: 'pointer', transition: 'border-color 0.2s',
             }}
               onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color, rgba(255,255,255,0.06))'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
               onClick={() => {
                 if (q.filters) {
                   setFilterType(q.filters.type || '');
@@ -432,7 +432,7 @@ export default function WorkItems({ projectId }) {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
                   <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary, #f1f5f9)', marginBottom: '4px' }}>{q.name}</div>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                     {q.filters?.type || 'All types'} · {q.filters?.status || 'All statuses'}
                     {q.filters?.search ? ` · "${q.filters.search}"` : ''}
                   </div>
@@ -456,7 +456,7 @@ export default function WorkItems({ projectId }) {
           <label style={labelStyle}>Query Name</label>
           <input value={queryName} onChange={e => setQueryName(e.target.value)} placeholder="e.g. My Open Bugs"
             style={{ ...inputStyle, marginBottom: '12px' }} />
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginBottom: '16px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
             This will save: Type={filterType || 'All'}, Status={filterStatus || 'All'}, Search="{search || ''}"
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
@@ -477,7 +477,7 @@ export default function WorkItems({ projectId }) {
   );
 }
 
-const tdStyle = { padding: '12px 16px', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.04))' };
+const tdStyle = { padding: '12px 16px', borderBottom: '1px solid var(--border-color)' };
 
 function WorkItemDetail({ item, onClose }) {
   const [edit, setEdit] = useState(false);
@@ -556,7 +556,7 @@ function WorkItemDetail({ item, onClose }) {
           {field === 'priority' && <Badge text={`${form.priority} - ${PRIORITY_LABELS[form.priority] || form.priority}`} color={PRIORITY_COLORS[form.priority] || '#888'} small />}
           {field === 'status' && <Badge text={form.status} color={STATUS_COLORS[form.status] || '#888'} />}
           {field === 'type' && <Badge text={form.type} color={TYPE_COLORS[form.type] || '#888'} />}
-          {field !== 'priority' && field !== 'status' && field !== 'type' && (displayForm(field) || <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>)}
+          {field !== 'priority' && field !== 'status' && field !== 'type' && (displayForm(field) || <span style={{ color: 'var(--text-muted)' }}>—</span>)}
         </div>
       )}
     </div>
@@ -568,13 +568,13 @@ function WorkItemDetail({ item, onClose }) {
       <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
       <div style={{
         position: 'relative', width: '680px', maxWidth: '95vw', height: '100vh', background: '#1e1e2e',
-        borderLeft: '1px solid var(--border-color, rgba(255,255,255,0.06))',
+        borderLeft: '1px solid var(--border-color)',
         boxShadow: '-10px 0 40px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
       }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color, rgba(255,255,255,0.06))', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'rgba(255,255,255,0.4)' }}>WI-{item.workItemId}</span>
+              <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-muted)' }}>WI-{item.workItemId}</span>
               <Badge text={item.type} color={TYPE_COLORS[item.type] || '#888'} small />
               <Badge text={item.status} color={STATUS_COLORS[item.status] || '#888'} small />
             </div>
@@ -632,7 +632,7 @@ function WorkItemDetail({ item, onClose }) {
                 placeholder="tag1, tag2, tag3" style={inputStyle} />
             ) : (
               <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                {(item.tags || []).length === 0 && <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>No tags</span>}
+                {(item.tags || []).length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No tags</span>}
                 {(item.tags || []).map((t, i) => (
                   <span key={i} style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '5px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{t}</span>
                 ))}
@@ -646,7 +646,7 @@ function WorkItemDetail({ item, onClose }) {
               <button onClick={() => { setShowLinkModal(true); loadAllItems(); }} style={{ ...btnPrimary, ...btnSmall }}>+ Add Link</button>
             </div>
             {links.length === 0 ? (
-              <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.3)' }}>No linked items</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No linked items</div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {links.map(link => {
@@ -654,15 +654,15 @@ function WorkItemDetail({ item, onClose }) {
                   return (
                     <div key={link._id} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px',
-                      background: 'rgba(0,0,0,0.15)', borderRadius: '8px', border: '1px solid var(--border-color, rgba(255,255,255,0.04))',
+                      background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Badge text={link.linkType} color="#6366f1" small />
-                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
                           {target ? `WI-${target.workItemId}` : 'WI-?'}
                         </span>
                         <span style={{ fontSize: '13px', color: 'var(--text-primary, #f1f5f9)' }}>{target?.title || 'Unknown'}</span>
-                        {link.comment && <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>({link.comment})</span>}
+                        {link.comment && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({link.comment})</span>}
                       </div>
                       <button onClick={() => handleDeleteLink(link._id)} style={{ ...btnIcon, color: '#ef4444', padding: '4px 6px' }}>×</button>
                     </div>
@@ -682,19 +682,19 @@ function WorkItemDetail({ item, onClose }) {
                     <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: STATUS_COLORS[h.status] || '#6366f1', border: '2px solid #1e1e2e' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                       <Badge text={h.status} color={STATUS_COLORS[h.status] || '#888'} small />
-                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                         {h.changedAt ? new Date(h.changedAt).toLocaleString() : 'Unknown date'}
                         {h.changedBy ? ` · ${h.changedBy}` : ''}
                       </span>
                     </div>
-                    {h.note && <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>{h.note}</div>}
+                    {h.note && <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{h.note}</div>}
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', borderTop: '1px solid var(--border-color, rgba(255,255,255,0.06))', paddingTop: '12px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
             Created: {item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'} ·
             Updated: {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—'}
           </div>

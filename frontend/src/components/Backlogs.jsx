@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   FiList, FiPlus, FiSearch, FiArrowUp, FiArrowDown, FiMinus,
   FiEdit2, FiTrash2, FiX, FiChevronRight, FiChevronDown,
-  FiFilter, FiBarChart2, FiTarget, FiSun, FiMoon, FiTag,
+  FiFilter, FiBarChart2, FiTarget, FiTag,
   FiClock, FiUser, FiHash, FiZap, FiCheckCircle, FiLayers,
   FiMaximize2, FiMinimize2, FiAlertCircle, FiGitBranch,
   FiTrendingUp, FiActivity, FiCalendar
@@ -11,95 +11,40 @@ import api from '../api';
 import { toast } from 'react-toastify';
 
 /* ═══════════════════ Theme System ═══════════════════ */
-const themes = {
-  dark: {
-    bgPrimary: '#0b0e14',
-    bgSecondary: '#12151e',
-    bgTertiary: '#181c28',
-    bgCard: '#151924',
-    bgCardHover: '#1c2133',
-    bgElevated: '#1a1f2e',
-    bgInput: '#12151e',
-    bgOverlay: 'rgba(0, 0, 0, 0.7)',
-    bgGlass: 'rgba(18, 21, 30, 0.85)',
-
-    textPrimary: '#e4e7ed',
-    textSecondary: '#8b92a8',
-    textMuted: '#525972',
-    textInverse: '#0b0e14',
-
-    borderPrimary: 'rgba(255, 255, 255, 0.05)',
-    borderSecondary: 'rgba(255, 255, 255, 0.09)',
-    borderHover: 'rgba(255, 255, 255, 0.14)',
-    borderFocus: 'rgba(99, 102, 241, 0.55)',
-
-    accentPrimary: '#6366f1',
-    accentSecondary: '#818cf8',
-    accentGradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    accentGlow: 'rgba(99, 102, 241, 0.18)',
-    accentSoft: 'rgba(99, 102, 241, 0.08)',
-
-    successColor: '#34d399',
-    warningColor: '#fbbf24',
-    dangerColor: '#f87171',
-
-    shadowSm: '0 1px 3px rgba(0, 0, 0, 0.35)',
-    shadowMd: '0 4px 20px rgba(0, 0, 0, 0.35)',
-    shadowLg: '0 16px 48px rgba(0, 0, 0, 0.45)',
-    shadowXl: '0 28px 72px rgba(0, 0, 0, 0.55)',
-    shadowGlow: '0 0 20px rgba(99, 102, 241, 0.15)',
-
-    scrollThumb: 'rgba(255, 255, 255, 0.07)',
-    scrollThumbHover: 'rgba(255, 255, 255, 0.14)',
-
-    rowEven: 'rgba(255, 255, 255, 0.01)',
-    rowOdd: 'transparent',
-    rowHover: 'rgba(99, 102, 241, 0.04)',
-  },
-  light: {
-    bgPrimary: '#f3f4f8',
-    bgSecondary: '#ffffff',
-    bgTertiary: '#f8f9fc',
-    bgCard: '#ffffff',
-    bgCardHover: '#f0f1ff',
-    bgElevated: '#ffffff',
-    bgInput: '#f5f6fa',
-    bgOverlay: 'rgba(15, 23, 42, 0.45)',
-    bgGlass: 'rgba(255, 255, 255, 0.92)',
-
-    textPrimary: '#1a1d2e',
-    textSecondary: '#5c6178',
-    textMuted: '#9aa0b4',
-    textInverse: '#ffffff',
-
-    borderPrimary: 'rgba(0, 0, 0, 0.06)',
-    borderSecondary: 'rgba(0, 0, 0, 0.1)',
-    borderHover: 'rgba(0, 0, 0, 0.16)',
-    borderFocus: 'rgba(99, 102, 241, 0.5)',
-
-    accentPrimary: '#6366f1',
-    accentSecondary: '#4f46e5',
-    accentGradient: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-    accentGlow: 'rgba(99, 102, 241, 0.12)',
-    accentSoft: 'rgba(99, 102, 241, 0.06)',
-
-    successColor: '#10b981',
-    warningColor: '#f59e0b',
-    dangerColor: '#ef4444',
-
-    shadowSm: '0 1px 3px rgba(0, 0, 0, 0.05)',
-    shadowMd: '0 4px 20px rgba(0, 0, 0, 0.07)',
-    shadowLg: '0 16px 48px rgba(0, 0, 0, 0.1)',
-    shadowXl: '0 28px 72px rgba(0, 0, 0, 0.14)',
-    shadowGlow: '0 0 20px rgba(99, 102, 241, 0.08)',
-
-    scrollThumb: 'rgba(0, 0, 0, 0.1)',
-    scrollThumbHover: 'rgba(0, 0, 0, 0.2)',
-
-    rowEven: 'rgba(0, 0, 0, 0.015)',
-    rowOdd: 'transparent',
-    rowHover: 'rgba(99, 102, 241, 0.04)',
-  },
+const getTheme = () => {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (dark) {
+    return {
+      bgPrimary: 'var(--bg-app)', bgSecondary: 'var(--surface-primary)', bgTertiary: 'var(--surface-tertiary)',
+      bgCard: 'var(--bg-card)', bgCardHover: 'var(--surface-glass-hover)', bgElevated: 'var(--surface-elevated)',
+      bgInput: 'var(--surface-secondary)', bgOverlay: 'var(--surface-overlay)', bgGlass: 'var(--surface-glass)',
+      textPrimary: 'var(--text-primary)', textSecondary: 'var(--text-secondary)', textMuted: 'var(--text-muted)', textInverse: 'var(--text-on-primary)',
+      borderPrimary: 'var(--border-color)', borderSecondary: 'var(--border-medium)', borderHover: 'var(--border-strong)',
+      borderFocus: 'var(--focus-ring)',
+      accentPrimary: 'var(--primary-color)', accentSecondary: 'var(--primary-light)',
+      accentGradient: 'var(--gradient-primary)', accentGlow: 'var(--glow-primary)', accentSoft: 'var(--surface-interaction)',
+      successColor: 'var(--success)', warningColor: 'var(--warning)', dangerColor: 'var(--danger)',
+      shadowSm: 'var(--shadow-sm)', shadowMd: 'var(--shadow-md)', shadowLg: 'var(--shadow-lg)', shadowXl: 'var(--shadow-xl)',
+      shadowGlow: 'var(--shadow-glow)',
+      scrollThumb: 'rgba(255, 255, 255, 0.07)', scrollThumbHover: 'rgba(255, 255, 255, 0.14)',
+      rowEven: 'rgba(255, 255, 255, 0.01)', rowOdd: 'transparent', rowHover: 'rgba(99, 102, 241, 0.04)',
+    };
+  }
+  return {
+    bgPrimary: 'var(--bg-app)', bgSecondary: 'var(--surface-primary)', bgTertiary: 'var(--surface-tertiary)',
+    bgCard: 'var(--bg-card)', bgCardHover: 'var(--surface-glass-hover)', bgElevated: 'var(--surface-elevated)',
+    bgInput: 'var(--surface-secondary)', bgOverlay: 'var(--surface-overlay)', bgGlass: 'var(--surface-glass)',
+    textPrimary: 'var(--text-primary)', textSecondary: 'var(--text-secondary)', textMuted: 'var(--text-muted)', textInverse: 'var(--text-on-primary)',
+    borderPrimary: 'var(--border-color)', borderSecondary: 'var(--border-medium)', borderHover: 'var(--border-strong)',
+    borderFocus: 'var(--focus-ring)',
+    accentPrimary: 'var(--primary-color)', accentSecondary: 'var(--primary-600)',
+    accentGradient: 'var(--gradient-primary)', accentGlow: 'var(--glow-primary)', accentSoft: 'var(--surface-interaction)',
+    successColor: 'var(--success)', warningColor: 'var(--warning)', dangerColor: 'var(--danger)',
+    shadowSm: 'var(--shadow-sm)', shadowMd: 'var(--shadow-md)', shadowLg: 'var(--shadow-lg)', shadowXl: 'var(--shadow-xl)',
+    shadowGlow: 'var(--shadow-glow)',
+    scrollThumb: 'rgba(0, 0, 0, 0.1)', scrollThumbHover: 'rgba(0, 0, 0, 0.2)',
+    rowEven: 'rgba(0, 0, 0, 0.015)', rowOdd: 'transparent', rowHover: 'rgba(99, 102, 241, 0.04)',
+  };
 };
 
 /* ═══════════════════ Constants ═══════════════════ */
@@ -303,16 +248,17 @@ export default function Backlogs({ projectId }) {
   const [showFilters, setShowFilters] = useState(false);
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
-  });
+  const [themeVersion, setThemeVersion] = useState(0);
 
-  const t = isDarkMode ? themes.dark : themes.light;
+  useEffect(() => {
+    const observer = new MutationObserver(() => setThemeVersion(v => v + 1));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  const t = useMemo(() => getTheme(), [themeVersion]);
 
   useEffect(() => { injectStyles(t); }, [t]);
-  useEffect(() => { localStorage.setItem('theme', isDarkMode ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light'); }, [isDarkMode]);
 
   const defaultForm = {
     title: '', type: 'Task', priority: 3, status: 'Backlog',
@@ -803,21 +749,6 @@ export default function Backlogs({ projectId }) {
 
           {/* Right: Actions */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {/* Theme Toggle */}
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="bl-btn"
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              style={{
-                width: 38, height: 38, borderRadius: 10,
-                border: `1px solid ${t.borderSecondary}`,
-                background: t.bgTertiary, color: t.textSecondary,
-                cursor: 'pointer', display: 'flex',
-                alignItems: 'center', justifyContent: 'center',
-              }}
-            >
-              {isDarkMode ? <FiSun size={16} /> : <FiMoon size={16} />}
-            </button>
 
             {/* Filters Toggle */}
             <button

@@ -71,7 +71,9 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
   useEffect(() => {
     setShowUserMenu(false);
     setShowNotifications(false);
-    setBoardDropdownOpen(false);
+    /* keep board dropdown open when navigating within board routes */
+    const isBoardRoute = location.pathname === '/board' || boardSubItems.some(i => location.pathname.startsWith(i.path));
+    setBoardDropdownOpen(isBoardRoute);
   }, [location.pathname]);
 
   /* ── helpers ── */
