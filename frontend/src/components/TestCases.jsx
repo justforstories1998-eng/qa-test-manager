@@ -177,6 +177,7 @@ function TestCases({
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!uploadFile || !uploadSuiteName.trim()) return toast.error("File and suite name required");
+    setShowUploadModal(false);
     setIsUploading(true);
     try {
       const result = await onUploadCSV?.(uploadFile, uploadSuiteName.trim(), "");
@@ -705,6 +706,17 @@ function TestCases({
         </form>
       </Modal>
 
+      {/* ══════════ UPLOAD LOADING POPUP ══════════ */}
+      {isUploading && (
+        <div className="tc-upload-loading-overlay">
+          <div className="tc-upload-loading-popup">
+            <div className="tc-upload-loading-spinner" />
+            <div className="tc-upload-loading-text">Uploading CSV…</div>
+            <div className="tc-upload-loading-hint">Please wait while we process your file</div>
+          </div>
+        </div>
+      )}
+
       {/* ── STYLES ── */}
       <style>{`
         /* ═══════ THEME TOKENS ═══════ */
@@ -1137,6 +1149,36 @@ function TestCases({
         .tc-table-area::-webkit-scrollbar { width: 4px; }
         .tc-table-area::-webkit-scrollbar-track { background: transparent; }
         .tc-table-area::-webkit-scrollbar-thumb { background: var(--tc-border); border-radius: 4px; }
+
+        /* ── Upload Loading Popup ── */
+        .tc-upload-loading-overlay {
+          position: fixed; inset: 0; z-index: 10000;
+          background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(6px);
+          display: flex; align-items: center; justify-content: center;
+          animation: tc-fadeIn 0.2s ease;
+        }
+        .tc-upload-loading-popup {
+          background: var(--tc-surface-elevated);
+          border: 1px solid var(--tc-border);
+          border-radius: 16px; padding: 40px 48px;
+          text-align: center; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+          animation: tc-popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tc-upload-loading-spinner {
+          width: 44px; height: 44px; border-radius: 50%; margin: 0 auto 18px;
+          border: 3px solid var(--tc-border);
+          border-top-color: var(--tc-accent);
+          animation: tc-spin 0.8s linear infinite;
+        }
+        .tc-upload-loading-text {
+          font-size: 16px; font-weight: 700; color: var(--tc-text-primary);
+          margin: 0 0 6px;
+        }
+        .tc-upload-loading-hint {
+          font-size: 13px; color: var(--tc-text-muted); margin: 0;
+        }
+        @keyframes tc-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes tc-popIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
       `}</style>
     </div>
   );
