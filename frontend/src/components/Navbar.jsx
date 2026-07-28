@@ -342,9 +342,10 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
           flex: 1, overflowY: 'auto', overflowX: 'hidden',
           padding: '6px 0',
         }}>
-          {navSections.map((section, sIdx) => (
-            <div key={sIdx}>
-              {section.items.length > 0 && (
+          {/* ──── Board Dropdown ──── */}
+          {hasBoardAccess && (
+            <div>
+              {!collapsed && (
                 <div style={{
                   fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase',
                   color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
@@ -354,124 +355,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                   height: collapsed ? 8 : 'auto',
                   transition: 'opacity 0.25s ease',
                   overflow: 'hidden',
-                }}>
-                  {section.title}
-                </div>
-              )}
-              {section.items.map((item) => {
-                const isActive = location.pathname === item.path ||
-                  (item.path !== '/' && location.pathname.startsWith(item.path));
-                const isHovered = hoveredItem === item.path;
-
-                return (
-                  <div key={item.path} style={{ position: 'relative' }}>
-                    <NavLink
-                      to={item.path}
-                      style={{
-                        display: 'flex', alignItems: 'center',
-                        gap: collapsed ? 0 : 12,
-                        padding: collapsed ? '10px 0' : '10px 16px',
-                        margin: collapsed ? '2px 8px' : '2px 10px',
-                        borderRadius: 10,
-                        textDecoration: 'none',
-                        justifyContent: 'center',
-                        color: isActive ? '#fff' : isHovered ? 'var(--sidebar-text-bright, #e2e8f0)' : 'var(--sidebar-text, rgba(148,163,184,0.7))',
-                        background: isActive
-                          ? 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12))'
-                          : isHovered ? 'var(--sidebar-hover, rgba(255,255,255,0.04))' : 'transparent',
-                        transition: 'all 0.2s ease',
-                        position: 'relative',
-                        overflow: 'hidden',
-                      }}
-                      onMouseEnter={() => setHoveredItem(item.path)}
-                      onMouseLeave={() => setHoveredItem(null)}
-                      onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
-                    >
-                      {isActive && (
-                        <div style={{
-                          position: 'absolute', left: 0, top: '18%', bottom: '18%',
-                          width: 3, borderRadius: '0 3px 3px 0',
-                          background: 'linear-gradient(180deg, #6366f1, #8b5cf6)',
-                          boxShadow: '0 0 10px rgba(99,102,241,0.5)',
-                        }} />
-                      )}
-                      <div style={{
-                        width: 36, height: 36, borderRadius: 9, flexShrink: 0,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: isActive
-                          ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
-                          : 'var(--sidebar-hover, rgba(255,255,255,0.04))',
-                        boxShadow: isActive ? '0 3px 10px rgba(99,102,241,0.35)' : 'none',
-                        transition: 'all 0.25s ease',
-                      }}>
-                        <item.icon size={17} color={isActive ? '#fff' : undefined} />
-                      </div>
-                      <span style={{
-                        fontSize: 13, fontWeight: 500,
-                        opacity: collapsed ? 0 : 1,
-                        width: collapsed ? 0 : 'auto',
-                        overflow: 'hidden',
-                        transition: 'opacity 0.25s ease, width 0.3s ease',
-                        whiteSpace: 'nowrap', flex: collapsed ? 'none' : 1,
-                      }}>
-                        {item.label}
-                      </span>
-                      {item.badge && !collapsed && (
-                        <span style={{
-                          padding: '2px 7px', borderRadius: 8, fontSize: 10, fontWeight: 700,
-                          background: `${item.badgeColor || '#6366f1'}20`,
-                          color: item.badgeColor || '#6366f1',
-                          transition: 'opacity 0.25s ease',
-                        }}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </NavLink>
-                    {collapsed && isHovered && (
-                      <div style={{
-                        position: 'absolute', left: '100%', top: '50%',
-                        transform: 'translateY(-50%)', marginLeft: 12,
-                        padding: '7px 12px', borderRadius: 8,
-                        background: 'var(--surface-elevated, #1e293b)',
-                        border: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                        fontSize: 12, fontWeight: 500, color: '#fff',
-                        whiteSpace: 'nowrap', zIndex: 1100, pointerEvents: 'none',
-                        display: 'flex', alignItems: 'center', gap: 8,
-                      }}>
-                        <div style={{
-                          position: 'absolute', left: -4, top: '50%',
-                          transform: 'translateY(-50%) rotate(45deg)',
-                          width: 8, height: 8,
-                          background: 'var(--surface-elevated, #1e293b)',
-                          borderLeft: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
-                          borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
-                        }} />
-                        {item.label}
-                        {item.badge && (
-                          <span style={{
-                            padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
-                            background: `${item.badgeColor || '#6366f1'}20`,
-                            color: item.badgeColor || '#6366f1',
-                          }}>{item.badge}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-
-          {/* ──── Board Dropdown ──── */}
-          {hasBoardAccess && (
-            <div>
-              {!collapsed && (
-                <div style={{
-                  fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase',
-                  color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
-                  padding: '16px 24px 6px',
-                  transition: 'opacity 0.25s ease',
                 }}>
                   Board
                 </div>
@@ -629,6 +512,127 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
               </div>
             </div>
           )}
+
+          {navSections.map((section, sIdx) => (
+            <div key={sIdx}>
+              {section.items.length > 0 && (
+                <div style={{
+                  fontSize: 9, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase',
+                  color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))',
+                  padding: collapsed ? '16px 0 6px' : '16px 24px 6px',
+                  textAlign: collapsed ? 'center' : 'left',
+                  opacity: collapsed ? 0 : 1,
+                  height: collapsed ? 8 : 'auto',
+                  transition: 'opacity 0.25s ease',
+                  overflow: 'hidden',
+                }}>
+                  {section.title}
+                </div>
+              )}
+              {section.items.map((item) => {
+                const isActive = location.pathname === item.path ||
+                  (item.path !== '/' && location.pathname.startsWith(item.path));
+                const isHovered = hoveredItem === item.path;
+
+                return (
+                  <div key={item.path} style={{ position: 'relative' }}>
+                    <NavLink
+                      to={item.path}
+                      style={{
+                        display: 'flex', alignItems: 'center',
+                        gap: collapsed ? 0 : 12,
+                        padding: collapsed ? '10px 0' : '10px 16px',
+                        margin: collapsed ? '2px 8px' : '2px 10px',
+                        borderRadius: 10,
+                        textDecoration: 'none',
+                        justifyContent: 'center',
+                        color: isActive ? '#fff' : isHovered ? 'var(--sidebar-text-bright, #e2e8f0)' : 'var(--sidebar-text, rgba(148,163,184,0.7))',
+                        background: isActive
+                          ? 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.12))'
+                          : isHovered ? 'var(--sidebar-hover, rgba(255,255,255,0.04))' : 'transparent',
+                        transition: 'all 0.2s ease',
+                        position: 'relative',
+                        overflow: 'hidden',
+                      }}
+                      onMouseEnter={() => setHoveredItem(item.path)}
+                      onMouseLeave={() => setHoveredItem(null)}
+                      onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
+                    >
+                      {isActive && (
+                        <div style={{
+                          position: 'absolute', left: 0, top: '18%', bottom: '18%',
+                          width: 3, borderRadius: '0 3px 3px 0',
+                          background: 'linear-gradient(180deg, #6366f1, #8b5cf6)',
+                          boxShadow: '0 0 10px rgba(99,102,241,0.5)',
+                        }} />
+                      )}
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: isActive
+                          ? 'linear-gradient(135deg, #6366f1, #8b5cf6)'
+                          : 'var(--sidebar-hover, rgba(255,255,255,0.04))',
+                        boxShadow: isActive ? '0 3px 10px rgba(99,102,241,0.35)' : 'none',
+                        transition: 'all 0.25s ease',
+                      }}>
+                        <item.icon size={17} color={isActive ? '#fff' : undefined} />
+                      </div>
+                      <span style={{
+                        fontSize: 13, fontWeight: 500,
+                        opacity: collapsed ? 0 : 1,
+                        width: collapsed ? 0 : 'auto',
+                        overflow: 'hidden',
+                        transition: 'opacity 0.25s ease, width 0.3s ease',
+                        whiteSpace: 'nowrap', flex: collapsed ? 'none' : 1,
+                      }}>
+                        {item.label}
+                      </span>
+                      {item.badge && !collapsed && (
+                        <span style={{
+                          padding: '2px 7px', borderRadius: 8, fontSize: 10, fontWeight: 700,
+                          background: `${item.badgeColor || '#6366f1'}20`,
+                          color: item.badgeColor || '#6366f1',
+                          transition: 'opacity 0.25s ease',
+                        }}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </NavLink>
+                    {collapsed && isHovered && (
+                      <div style={{
+                        position: 'absolute', left: '100%', top: '50%',
+                        transform: 'translateY(-50%)', marginLeft: 12,
+                        padding: '7px 12px', borderRadius: 8,
+                        background: 'var(--surface-elevated, #1e293b)',
+                        border: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                        fontSize: 12, fontWeight: 500, color: '#fff',
+                        whiteSpace: 'nowrap', zIndex: 1100, pointerEvents: 'none',
+                        display: 'flex', alignItems: 'center', gap: 8,
+                      }}>
+                        <div style={{
+                          position: 'absolute', left: -4, top: '50%',
+                          transform: 'translateY(-50%) rotate(45deg)',
+                          width: 8, height: 8,
+                          background: 'var(--surface-elevated, #1e293b)',
+                          borderLeft: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                          borderBottom: '1px solid var(--sidebar-border, rgba(255,255,255,0.08))',
+                        }} />
+                        {item.label}
+                        {item.badge && (
+                          <span style={{
+                            padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
+                            background: `${item.badgeColor || '#6366f1'}20`,
+                            color: item.badgeColor || '#6366f1',
+                          }}>{item.badge}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
 
         {/* ──── User section ──── */}
