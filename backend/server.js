@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -38,25 +37,19 @@ app.use((req, res, next) => {
 });
 
 // ============================================
-// CORS - Handle ALL preflight OPTIONS first
+// CORS - Single reliable CORS handler
 // ============================================
-app.use((req, res, next) => {
+const corsHeaders = (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Max-Age', '86400');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(204);
   }
   next();
-});
-
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false,
-  optionsSuccessStatus: 204
-}));
+};
+app.use(corsHeaders);
 
 app.use((req, res, next) => {
   const ct = req.headers['content-type'] || '';
@@ -129,7 +122,7 @@ const csvUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-app.post('/api/upload/csv', (req, res, next) => {
+app.post('/api/upload/csv', corsHeaders, (req, res, next) => {
   console.log(`📎 CSV Upload: ${req.method} ${req.originalUrl}`);
   console.log(`  Content-Type: ${req.headers['content-type'] || 'NONE'}`);
   console.log(`  Auth header: ${req.headers['authorization'] ? 'YES (' + req.headers['authorization'].substring(0, 20) + '...)' : 'MISSING'}`);
@@ -146,6 +139,7 @@ app.post('/api/upload/csv', (req, res, next) => {
     res.status(201).json({ success: true, message: `Imported ${testCases.length} cases` });
   } catch (error) {
     console.error('CSV Upload Error:', error.message);
+    res.header('Access-Control-Allow-Origin', '*');
     res.status(500).json({ success: false, error: error.message });
   }
 });

@@ -9,6 +9,7 @@ export const authenticateToken = async (req, res, next) => {
 
   if (!token) {
     console.log(`⛔ No token: ${req.method} ${req.originalUrl}`);
+    res.header('Access-Control-Allow-Origin', '*');
     return res.status(401).json({ success: false, error: 'Access denied. No token provided.' });
   }
 
@@ -18,6 +19,7 @@ export const authenticateToken = async (req, res, next) => {
     
     if (!user || !user.isActive) {
       console.log(`⛔ Invalid user (id=${decoded.userId}, active=${user?.isActive}): ${req.method} ${req.originalUrl}`);
+      res.header('Access-Control-Allow-Origin', '*');
       return res.status(401).json({ success: false, error: 'Invalid token or user deactivated.' });
     }
 
@@ -25,6 +27,7 @@ export const authenticateToken = async (req, res, next) => {
     next();
   } catch (error) {
     console.log(`⛔ JWT error (${error.message}): ${req.method} ${req.originalUrl}`);
+    res.header('Access-Control-Allow-Origin', '*');
     return res.status(403).json({ success: false, error: 'Invalid or expired token.' });
   }
 };
