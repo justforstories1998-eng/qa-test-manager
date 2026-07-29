@@ -151,11 +151,20 @@ const api = {
   deleteTestCase: (id) => apiClient.delete(`/test-cases/${id}`),
 
   uploadCSV: (file, suiteName, projectId) => {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('suiteName', suiteName);
-    fd.append('projectId', projectId);
-    return uploadClient.post('/upload/csv', fd);
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64 = reader.result.split(',')[1];
+        uploadClient.post('/upload/csv', {
+          fileBase64: base64,
+          fileName: file.name,
+          suiteName,
+          projectId,
+        }).then(resolve).catch(reject);
+      };
+      reader.onerror = () => reject({ success: false, error: 'Failed to read file' });
+      reader.readAsDataURL(file);
+    });
   },
 
   getTestRuns: (projectId) => apiClient.get('/test-runs', { params: { projectId } }),

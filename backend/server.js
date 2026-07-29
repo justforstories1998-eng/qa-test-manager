@@ -127,15 +127,17 @@ app.post('/api/upload/csv', corsHeaders, (req, res, next) => {
   console.log(`  Content-Type: ${req.headers['content-type'] || 'NONE'}`);
   console.log(`  Auth header: ${req.headers['authorization'] ? 'YES (' + req.headers['authorization'].substring(0, 20) + '...)' : 'MISSING'}`);
   next();
-}, authenticateToken, csvUpload.single('file'), async (req, res) => {
+}, authenticateToken, async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
-    const parsedData = await parseCSVFile(req.file.buffer);
+    const { fileBase64, fileName } = req.body;
+    if (!fileBase64) return res.status(400).json({ success: false, error: 'No file uploaded' });
+    const buffer = Buffer.from(fileBase64, 'base64');
+    const parsedData = await parseCSVFile(buffer);
     const testCases = parseADOFormat(parsedData);
     const suite = await createTestSuite({ projectId: req.body.projectId, name: req.body.suiteName, testCaseCount: testCases.length });
     const mapped = testCases.map(tc => ({ ...tc, suiteId: suite._id, projectId: req.body.projectId }));
     await createTestCases(mapped);
-    console.log(`✅ CSV Upload success: ${testCases.length} cases imported`);
+    console.log(`✅ CSV Upload success: ${testCases.length} cases imported (file: ${fileName || 'unknown'})`);
     res.status(201).json({ success: true, message: `Imported ${testCases.length} cases` });
   } catch (error) {
     console.error('CSV Upload Error:', error.message);
