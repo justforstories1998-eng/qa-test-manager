@@ -335,11 +335,6 @@ export default function WorkItems({ projectId }) {
 
   useEffect(() => { setPage(1); }, [filterType, filterStatus, filterPriority, filterAssignee, filterTag, filterDateFrom, filterDateTo, search]);
 
-  const toggleSort = (key) => {
-    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
-    else { setSortKey(key); setSortDir('asc'); }
-  };
-
   const toggleSelect = (id) => {
     setSelected(prev => {
       const next = new Set(prev);
@@ -385,74 +380,18 @@ export default function WorkItems({ projectId }) {
     fetchItems();
   };
 
-  const handleSortIcon = (key) => {
-    if (sortKey !== key) return ' ↕';
-    return sortDir === 'asc' ? ' ↑' : ' ↓';
-  };
-
-  const colHeader = (key, label, w) => (
-    <th key={key} onClick={() => toggleSort(key)} style={{
-      padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700',
-      color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em',
-      cursor: 'pointer', userSelect: 'none', width: w, whiteSpace: 'nowrap',
-      borderBottom: '1px solid var(--border-color)',
-      background: sortKey === key ? 'var(--surface-interaction)' : 'transparent',
-    }}>
-      {label}{handleSortIcon(key)}
-    </th>
-  );
-
-  const renderRow = (item) => (
-    <tr key={item._id} onClick={() => setDetailItem(item)}
-      style={{ cursor: 'pointer', background: selected.has(item._id) ? 'var(--surface-interaction)' : 'transparent', transition: 'background 0.15s' }}
-      onMouseEnter={e => { if (!selected.has(item._id)) e.currentTarget.style.background = 'var(--surface-glass-hover)'; }}
-      onMouseLeave={e => { if (!selected.has(item._id)) e.currentTarget.style.background = selected.has(item._id) ? 'var(--surface-interaction)' : 'transparent'; }}>
-      <td style={tdStyle} onClick={e => e.stopPropagation()}>
-        <input type="checkbox" checked={selected.has(item._id)} onChange={() => toggleSelect(item._id)}
-          style={{ accentColor: '#6366f1', width: '15px', height: '15px', cursor: 'pointer' }} />
-      </td>
-      <td style={tdStyle}><span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-muted)' }}>WI-{item.workItemId}</span></td>
-      <td style={{ ...tdStyle, maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500' }}>{item.title}</td>
-      <td style={tdStyle}><Badge text={item.type} color={TYPE_COLORS[item.type] || '#888'} /></td>
-      <td style={tdStyle}>
-        <Badge text={PRIORITY_LABELS[item.priority] || item.priority} color={PRIORITY_COLORS[item.priority] || '#888'} small />
-      </td>
-      <td style={tdStyle}><Badge text={item.status} color={STATUS_COLORS[item.status] || '#888'} small /></td>
-      <td style={tdStyle}>{item.assignee || '—'}</td>
-      <td style={tdStyle}>{item.storyPoints ?? '—'}</td>
-      <td style={tdStyle}>{item.effort ?? '—'}</td>
-      <td style={tdStyle}>
-        <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-          {(item.tags || []).slice(0, 3).map((t, i) => (
-            <span key={i} style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{t}</span>
-          ))}
-          {(item.tags || []).length > 3 && <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>+{item.tags.length - 3}</span>}
-        </div>
-      </td>
-      <td style={{ ...tdStyle, textAlign: 'right' }} onClick={e => e.stopPropagation()}>
-        <button onClick={() => setDetailItem(item)} style={{ ...btnIcon, marginRight: '4px' }} title="View">👁</button>
-        <button onClick={async (e) => { e.stopPropagation(); const res = await api.cloneWorkItem(item._id); if (res.success) fetchItems(); }} style={{ ...btnIcon, marginRight: '4px' }} title="Clone">📄</button>
-        <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); fetchItems(); } }} style={{ ...btnIcon, color: '#ef4444' }} title="Delete">🗑</button>
-      </td>
-    </tr>
-  );
-
   return (
     <div style={{ padding: '0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', gap: '4px', background: 'var(--surface-secondary)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border-color)' }}>
-          {[['items', 'All Items'], ['queries', 'Saved Queries'], ['templates', 'Templates'], ['recycle', 'Recycle Bin']].map(([k, l]) => (
-            <button key={k} onClick={() => setTab(k)} style={{
-              ...btnSmall, borderRadius: '7px', border: 'none',
-              background: tab === k ? 'linear-gradient(135deg, #6366f1, #7c3aed)' : 'transparent',
-              color: tab === k ? '#fff' : 'var(--text-muted)',
-            }}>{l}</button>
-          ))}
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>Work Items</h2>
+          <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', background: 'var(--surface-tertiary)', padding: '3px 10px', borderRadius: '20px' }}>{sorted.length}</span>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {selected.size > 0 && (
             <>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{selected.size} selected</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500' }}>{selected.size} selected</span>
               <Select value="" onChange={v => { if (v) handleBulkStatus(v); }} options={[{ value: '', label: 'Status...' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '120px', height: '34px', fontSize: '12px' }} />
               <Select value="" onChange={v => { if (v) handleBulkType(v); }} options={[{ value: '', label: 'Type...' }, ...TYPES.map(t => ({ value: t, label: t }))]} style={{ width: '120px', height: '34px', fontSize: '12px' }} />
               <button onClick={handleBulkDelete} style={{ ...btnDanger, ...btnSmall }}>🗑 Delete</button>
@@ -465,73 +404,175 @@ export default function WorkItems({ projectId }) {
         </div>
       </div>
 
+      {/* ── Tab Bar ── */}
+      <div style={{ display: 'flex', gap: '2px', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '0' }}>
+        {[['items', 'All Items', items.length], ['queries', 'Queries', queries.length], ['templates', 'Templates', templates.length], ['recycle', 'Recycle Bin', deletedItems.length]].map(([k, l, count]) => (
+          <button key={k} onClick={() => setTab(k)} style={{
+            padding: '10px 16px', borderRadius: '8px 8px 0 0', border: 'none', cursor: 'pointer',
+            fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
+            background: 'transparent', transition: 'all 0.15s',
+            color: tab === k ? 'var(--text-primary)' : 'var(--text-muted)',
+            borderBottom: tab === k ? '2px solid #6366f1' : '2px solid transparent',
+            marginBottom: tab === k ? '-2px' : '0',
+            display: 'flex', alignItems: 'center', gap: '6px',
+          }}>
+            {l}
+            {count > 0 && (
+              <span style={{
+                fontSize: '10px', fontWeight: '700', padding: '1px 6px', borderRadius: '10px',
+                background: tab === k ? 'rgba(99,102,241,0.15)' : 'var(--surface-tertiary)',
+                color: tab === k ? '#6366f1' : 'var(--text-muted)',
+              }}>{count}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {tab === 'items' && (
         <>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
-            <div style={{ position: 'relative', flex: '1 1 250px' }}>
-              <input placeholder="Search work items..." value={search} onChange={e => setSearch(e.target.value)}
-                style={{ ...inputStyle, paddingLeft: '36px', height: '38px' }} />
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px', opacity: 0.4 }}>🔍</span>
+          {/* ── Filter Bar ── */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: '1 1 280px' }}>
+              <input placeholder="Search by title, ID, or tag..." value={search} onChange={e => setSearch(e.target.value)}
+                style={{ ...inputStyle, paddingLeft: '36px', height: '38px', borderRadius: '10px' }} />
+              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '14px', opacity: 0.35 }}>🔍</span>
             </div>
-            <Select value={filterType} onChange={setFilterType} options={[{ value: '', label: 'All Types' }, ...TYPES.map(t => ({ value: t, label: t }))]} style={{ width: '160px', height: '38px' }} />
-            <Select value={filterStatus} onChange={setFilterStatus} options={[{ value: '', label: 'All Statuses' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '160px', height: '38px' }} />
-            <button onClick={() => setShowAdvancedFilters(v => !v)} style={{ ...btnSecondary, height: '38px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
-              ⚙ {showAdvancedFilters ? 'Less Filters' : 'More Filters'}
+            <Select value={filterType} onChange={setFilterType} options={[{ value: '', label: 'All Types' }, ...TYPES.map(t => ({ value: t, label: t }))]} style={{ width: '150px', height: '38px', borderRadius: '10px' }} />
+            <Select value={filterStatus} onChange={setFilterStatus} options={[{ value: '', label: 'All Statuses' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '150px', height: '38px', borderRadius: '10px' }} />
+            <button onClick={() => setShowAdvancedFilters(v => !v)} style={{
+              height: '38px', padding: '0 14px', borderRadius: '10px', border: '1px solid var(--border-color)',
+              background: showAdvancedFilters ? 'rgba(99,102,241,0.08)' : 'var(--surface-secondary)',
+              color: showAdvancedFilters ? '#6366f1' : 'var(--text-muted)',
+              cursor: 'pointer', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit',
+              display: 'flex', alignItems: 'center', gap: '5px', transition: 'all 0.15s',
+            }}>
+              <span style={{ fontSize: '13px' }}>⚙</span> Filters
+              {(filterPriority || filterAssignee || filterTag || filterDateFrom || filterDateTo) && (
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#6366f1' }} />
+              )}
             </button>
           </div>
           {showAdvancedFilters && (
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', padding: '12px', background: 'var(--surface-secondary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-              <Select value={filterPriority} onChange={setFilterPriority} options={[{ value: '', label: 'All Priorities' }, ...PRIORITIES.map(p => ({ value: String(p), label: PRIORITY_LABELS[p] || p }))]} style={{ width: '160px', height: '36px' }} />
-              <Select value={filterAssignee} onChange={setFilterAssignee} options={[{ value: '', label: 'All Assignees' }, { value: '__unassigned', label: 'Unassigned' }, ...uniqueAssignees.map(a => ({ value: a, label: a }))]} style={{ width: '160px', height: '36px' }} />
-              <Select value={filterTag} onChange={setFilterTag} options={[{ value: '', label: 'All Tags' }, ...uniqueTags.map(t => ({ value: t, label: t }))]} style={{ width: '160px', height: '36px' }} />
-              <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} placeholder="From" style={{ ...inputStyle, height: '36px', width: '150px' }} />
-              <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} placeholder="To" style={{ ...inputStyle, height: '36px', width: '150px' }} />
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', padding: '14px 16px', background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', alignItems: 'center' }}>
+              <Select value={filterPriority} onChange={setFilterPriority} options={[{ value: '', label: 'All Priorities' }, ...PRIORITIES.map(p => ({ value: String(p), label: PRIORITY_LABELS[p] || p }))]} style={{ width: '150px', height: '36px' }} />
+              <Select value={filterAssignee} onChange={setFilterAssignee} options={[{ value: '', label: 'All Assignees' }, { value: '__unassigned', label: 'Unassigned' }, ...uniqueAssignees.map(a => ({ value: a, label: a }))]} style={{ width: '150px', height: '36px' }} />
+              <Select value={filterTag} onChange={setFilterTag} options={[{ value: '', label: 'All Tags' }, ...uniqueTags.map(t => ({ value: t, label: t }))]} style={{ width: '150px', height: '36px' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500' }}>From</span>
+                <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} style={{ ...inputStyle, height: '36px', width: '140px' }} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500' }}>To</span>
+                <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} style={{ ...inputStyle, height: '36px', width: '140px' }} />
+              </div>
               {(filterPriority || filterAssignee || filterTag || filterDateFrom || filterDateTo) && (
-                <button onClick={() => { setFilterPriority(''); setFilterAssignee(''); setFilterTag(''); setFilterDateFrom(''); setFilterDateTo(''); }} style={{ ...btnDanger, height: '36px', fontSize: '11px' }}>✕ Clear</button>
+                <button onClick={() => { setFilterPriority(''); setFilterAssignee(''); setFilterTag(''); setFilterDateFrom(''); setFilterDateTo(''); }} style={{ ...btnDanger, height: '36px', fontSize: '11px', padding: '0 10px' }}>✕ Clear</button>
               )}
             </div>
           )}
 
-          <div style={{ background: 'var(--surface-tertiary)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-color)', width: '40px' }}>
-                    <input type="checkbox" checked={paged.length > 0 && selected.size === paged.length} onChange={toggleSelectAll}
+          {/* ── Work Item Cards ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {loading ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>Loading work items...</div>
+            ) : paged.length === 0 ? (
+              <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+                <div style={{ fontSize: '32px', marginBottom: '8px', opacity: 0.3 }}>📋</div>
+                No work items found
+              </div>
+            ) : paged.map(item => {
+              const typeColor = TYPE_COLORS[item.type] || '#888';
+              const statusColor = STATUS_COLORS[item.status] || '#888';
+              const priorityColor = PRIORITY_COLORS[item.priority] || '#888';
+              const isSelected = selected.has(item._id);
+              return (
+                <div key={item._id} onClick={() => setDetailItem(item)} style={{
+                  display: 'flex', borderRadius: '10px', cursor: 'pointer',
+                  background: isSelected ? 'rgba(99,102,241,0.06)' : 'var(--surface-secondary)',
+                  border: `1px solid ${isSelected ? 'rgba(99,102,241,0.25)' : 'var(--border-color)'}`,
+                  overflow: 'hidden', transition: 'all 0.15s',
+                }}
+                  onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.borderColor = 'var(--border-medium)'; e.currentTarget.style.background = 'var(--surface-glass-hover)'; } }}
+                  onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--surface-secondary)'; } }}
+                >
+                  {/* Type ribbon */}
+                  <div style={{ width: '4px', flexShrink: 0, background: typeColor }} />
+
+                  {/* Content */}
+                  <div style={{ flex: 1, padding: '14px 16px', minWidth: 0 }}>
+                    {/* Row 1: ID + Type + Priority + Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: '600', color: 'var(--text-muted)', letterSpacing: '0.02em' }}>WI-{item.workItemId}</span>
+                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: priorityColor, flexShrink: 0 }} title={PRIORITY_LABELS[item.priority]} />
+                        <Badge text={item.type} color={typeColor} small />
+                        <Badge text={item.status} color={statusColor} small />
+                      </div>
+                      <div style={{ display: 'flex', gap: '2px', opacity: 0.4, transition: 'opacity 0.15s' }}
+                        onMouseEnter={e => e.currentTarget.style.opacity = '1'}
+                        onMouseLeave={e => e.currentTarget.style.opacity = '0.4'}
+                        onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setDetailItem(item)} style={{ ...btnIcon, padding: '4px 6px', fontSize: '11px' }} title="View">👁</button>
+                        <button onClick={async (e) => { e.stopPropagation(); const res = await api.cloneWorkItem(item._id); if (res.success) fetchItems(); }} style={{ ...btnIcon, padding: '4px 6px', fontSize: '11px' }} title="Clone">📄</button>
+                        <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); fetchItems(); } }} style={{ ...btnIcon, padding: '4px 6px', fontSize: '11px', color: '#ef4444' }} title="Delete">🗑</button>
+                      </div>
+                    </div>
+
+                    {/* Row 2: Title */}
+                    <div style={{ fontSize: '13.5px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '6px', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {item.title}
+                    </div>
+
+                    {/* Row 3: Meta line */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '12px', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
+                      {item.assignee && (
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(99,102,241,0.15)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px', fontWeight: '700' }}>
+                            {item.assignee.charAt(0).toUpperCase()}
+                          </span>
+                          {item.assignee}
+                        </span>
+                      )}
+                      {item.storyPoints != null && <span style={{ fontWeight: '600' }}>{item.storyPoints} pts</span>}
+                      {item.effort != null && <span>{item.effort}h</span>}
+                      {(item.tags || []).length > 0 && (
+                        <span style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                          {item.tags.slice(0, 4).map((t, i) => (
+                            <span key={i} style={{ fontSize: '10px', padding: '1px 6px', borderRadius: '4px', background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', fontWeight: '500' }}>{t}</span>
+                          ))}
+                          {item.tags.length > 4 && <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>+{item.tags.length - 4}</span>}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Checkbox overlay */}
+                    <div style={{ position: 'absolute', top: '14px', right: '16px', display: 'none' }} onClick={e => e.stopPropagation()}>
+                    </div>
+                  </div>
+
+                  {/* Selection checkbox */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0 14px 8px' }} onClick={e => e.stopPropagation()}>
+                    <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(item._id)}
                       style={{ accentColor: '#6366f1', width: '15px', height: '15px', cursor: 'pointer' }} />
-                  </th>
-                  {colHeader('workItemId', 'ID', '80px')}
-                  {colHeader('title', 'Title', 'auto')}
-                  {colHeader('type', 'Type', '120px')}
-                  {colHeader('priority', 'Priority', '90px')}
-                  {colHeader('status', 'Status', '100px')}
-                  {colHeader('assignee', 'Assignee', '120px')}
-                  {colHeader('storyPoints', 'Points', '70px')}
-                  {colHeader('effort', 'Effort', '70px')}
-                  <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-color)', width: '150px' }}>Tags</th>
-                  <th style={{ padding: '12px 16px', textAlign: 'right', fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: '1px solid var(--border-color)', width: '90px' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td colSpan="12" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Loading...</td></tr>
-                ) : paged.length === 0 ? (
-                  <tr><td colSpan="12" style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No work items found</td></tr>
-                ) : paged.map(renderRow)}
-              </tbody>
-            </table>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-              Showing {Math.min((page - 1) * PAGE_SIZE + 1, sorted.length)}–{Math.min(page * PAGE_SIZE, sorted.length)} of {sorted.length}
-            </span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ ...btnSmall, opacity: page <= 1 ? 0.4 : 1 }}>← Prev</button>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '4px 8px' }}>Page {page} of {totalPages}</span>
-              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ ...btnSmall, opacity: page >= totalPages ? 0.4 : 1 }}>Next →</button>
+          {/* ── Pagination ── */}
+          {sorted.length > PAGE_SIZE && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '20px', padding: '12px 0' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                Showing {Math.min((page - 1) * PAGE_SIZE + 1, sorted.length)}–{Math.min(page * PAGE_SIZE, sorted.length)} of {sorted.length}
+              </span>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} style={{ ...btnSmall, opacity: page <= 1 ? 0.3 : 1, padding: '6px 12px' }}>← Prev</button>
+                <span style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '0 8px', fontWeight: '600' }}>{page} / {totalPages}</span>
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages} style={{ ...btnSmall, opacity: page >= totalPages ? 0.3 : 1, padding: '6px 12px' }}>Next →</button>
+              </div>
             </div>
-          </div>
+          )}
         </>
       )}
 
@@ -708,8 +749,6 @@ export default function WorkItems({ projectId }) {
     </div>
   );
 }
-
-const tdStyle = { padding: '12px 16px', borderBottom: '1px solid var(--border-color)' };
 
 function WorkItemDetail({ item, onClose }) {
   const [edit, setEdit] = useState(false);
