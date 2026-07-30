@@ -34,7 +34,7 @@ function ChangePassword({ user, onPasswordChanged }) {
         const updatedUser = { ...user, mustChangePassword: false };
         localStorage.setItem('user', JSON.stringify(updatedUser));
         onPasswordChanged(updatedUser);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         toast.error(res?.error || 'Failed to change password');
       }

@@ -257,6 +257,17 @@ const api = {
   updateQuery: (id, data) => apiClient.put(`/queries/${id}`, data),
   deleteQuery: (id) => apiClient.delete(`/queries/${id}`),
 
+  followWorkItem: (data) => apiClient.post('/notifications/follow', data),
+  unfollowWorkItem: (data) => apiClient.post('/notifications/unfollow', data),
+  getFollowers: (workItemId) => apiClient.get(`/notifications/followers/${workItemId}`),
+  getUserSubscriptions: (userId, projectId) => apiClient.get(`/notifications/subscriptions/${userId}/${projectId}`),
+  isFollowing: (userId, workItemId) => apiClient.get(`/notifications/is-following/${userId}/${workItemId}`),
+
+  getWorkflowRules: (projectId) => apiClient.get(`/workflow-rules/${projectId}`),
+  createWorkflowRule: (data) => apiClient.post('/workflow-rules', data),
+  updateWorkflowRule: (id, data) => apiClient.put(`/workflow-rules/${id}`, data),
+  deleteWorkflowRule: (id) => apiClient.delete(`/workflow-rules/${id}`),
+
   getFileUrl: (path) => {
     if (!path || typeof path !== 'string') return '#';
     if (path.indexOf('://') !== -1) return path;

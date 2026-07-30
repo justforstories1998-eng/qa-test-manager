@@ -24,7 +24,9 @@ import {
   getTemplatesByProject, getTemplateById, createTemplate, updateTemplate, deleteTemplate,
   softDeleteWorkItem, getDeletedWorkItems, restoreWorkItem, permanentDeleteWorkItem,
   getDiscussionsByWorkItem, createDiscussion, updateDiscussion, deleteDiscussion, addReaction,
-  getQueriesByProject, createQuery, updateQuery, deleteQuery
+  getQueriesByProject, createQuery, updateQuery, deleteQuery,
+  followWorkItem, unfollowWorkItem, getFollowers, getUserSubscriptions, isFollowing,
+  getWorkflowRules, createWorkflowRule, updateWorkflowRule, deleteWorkflowRule
 } from './database.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
 import { analyzeTestResults } from './services/grokService.js';
@@ -465,5 +467,22 @@ router.post('/discussions/:id/reaction', async (req, res, next) => { try { res.j
 router.get('/statistics', async (req, res, next) => { try { res.json({ success: true, data: await getStatistics(req.query.projectId) }); } catch (e) { next(e); } });
 router.get('/settings', async (req, res, next) => { try { res.json({ success: true, data: await getSettings() }); } catch (e) { next(e); } });
 router.put('/settings/:category', async (req, res, next) => { try { await updateSettings(req.params.category, req.body); const allSettings = await getSettings(); res.json({ success: true, data: allSettings }); } catch (e) { next(e); } });
+
+// ============================================
+// NOTIFICATION SUBSCRIPTIONS
+// ============================================
+router.post('/notifications/follow', async (req, res, next) => { try { const sub = await followWorkItem(req.body.userId, req.body.workItemId, req.body.projectId, req.body.type); res.json({ success: true, data: sub }); } catch (e) { next(e); } });
+router.post('/notifications/unfollow', async (req, res, next) => { try { await unfollowWorkItem(req.body.userId, req.body.workItemId); res.json({ success: true }); } catch (e) { next(e); } });
+router.get('/notifications/followers/:workItemId', async (req, res, next) => { try { res.json({ success: true, data: await getFollowers(req.params.workItemId) }); } catch (e) { next(e); } });
+router.get('/notifications/subscriptions/:userId/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getUserSubscriptions(req.params.userId, req.params.projectId) }); } catch (e) { next(e); } });
+router.get('/notifications/is-following/:userId/:workItemId', async (req, res, next) => { try { const result = await isFollowing(req.params.userId, req.params.workItemId); res.json({ success: true, data: !!result }); } catch (e) { next(e); } });
+
+// ============================================
+// WORKFLOW RULES
+// ============================================
+router.get('/workflow-rules/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getWorkflowRules(req.params.projectId) }); } catch (e) { next(e); } });
+router.post('/workflow-rules', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkflowRule(req.body) }); } catch (e) { next(e); } });
+router.put('/workflow-rules/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateWorkflowRule(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/workflow-rules/:id', async (req, res, next) => { try { await deleteWorkflowRule(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 export default router;

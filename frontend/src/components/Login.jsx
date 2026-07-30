@@ -138,7 +138,7 @@ function Login({ onLogin }) {
         localStorage.setItem('user', JSON.stringify(res.data.user));
         toast.success(`Welcome back, ${res.data.user.firstName}!`);
         onLogin(res.data.user);
-        navigate('/');
+        navigate('/dashboard');
       } else {
         toast.error(res?.error || 'Login failed');
       }

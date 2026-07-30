@@ -65,10 +65,21 @@ const boardSchema = new mongoose.Schema({
     title: { type: String, required: true },
     color: { type: String, default: '#94a3b8' },
     wipLimit: { type: Number, default: 0 },
-    state: { type: String }
+    state: { type: String },
+    split: { type: Boolean, default: false },
+    doingTitle: { type: String, default: 'Doing' },
+    doneTitle: { type: String, default: 'Done' },
   }],
   swimlanes: [{ id: String, title: String, color: String, collapsed: { type: Boolean, default: false } }],
-  cardFields: { type: [String], default: ['type', 'priority', 'assignee', 'storyPoints'] }
+  cardFields: { type: [String], default: ['type', 'priority', 'assignee', 'storyPoints'] },
+  stateTransitions: { type: mongoose.Schema.Types.Mixed, default: {
+    'Backlog': ['To Do'],
+    'To Do': ['In Progress', 'Backlog'],
+    'In Progress': ['Review', 'To Do'],
+    'Review': ['Done', 'In Progress'],
+    'Done': ['Review', 'Closed'],
+    'Closed': ['Done'],
+  }},
 }, { timestamps: true });
 
 const workItemSchema = new mongoose.Schema({
@@ -201,6 +212,26 @@ const discussionSchema = new mongoose.Schema({
   editedAt: Date,
 }, { timestamps: true });
 
+const notificationSubscriptionSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  workItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkItem', required: true },
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  type: { type: String, enum: ['follow', 'mention'], default: 'follow' },
+}, { timestamps: true });
+
+notificationSubscriptionSchema.index({ userId: 1, workItemId: 1 }, { unique: true });
+
+const workflowRuleSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  name: { type: String, required: true },
+  type: { type: String, enum: ['state-transition', 'field-update', 'notification'], default: 'state-transition' },
+  fromState: String,
+  toState: String,
+  conditions: { type: mongoose.Schema.Types.Mixed, default: {} },
+  actions: { type: mongoose.Schema.Types.Mixed, default: {} },
+  enabled: { type: Boolean, default: true },
+}, { timestamps: true });
+
 // ============================================
 // MODELS
 // ============================================
@@ -223,6 +254,8 @@ const CfdSnapshot = mongoose.model('CfdSnapshot', cfdSnapshotSchema);
 const WorkItemTemplate = mongoose.model('WorkItemTemplate', workItemTemplateSchema);
 const DeletedWorkItem = mongoose.model('DeletedWorkItem', deletedWorkItemSchema);
 const Discussion = mongoose.model('Discussion', discussionSchema);
+const NotificationSubscription = mongoose.model('NotificationSubscription', notificationSubscriptionSchema);
+const WorkflowRule = mongoose.model('WorkflowRule', workflowRuleSchema);
 const Setting = mongoose.model('Setting', settingsSchema);
 
 export async function initializeDatabase() {
@@ -590,6 +623,27 @@ export const getQueriesByProject = (projectId) => SavedQuery.find({ projectId })
 export const createQuery = (data) => new SavedQuery(data).save();
 export const updateQuery = (id, data) => SavedQuery.findByIdAndUpdate(id, data, { new: true });
 export const deleteQuery = (id) => SavedQuery.findByIdAndDelete(id);
+
+// ============================================
+// NOTIFICATION SUBSCRIPTIONS
+// ============================================
+export const followWorkItem = (userId, workItemId, projectId, type = 'follow') => {
+  return NotificationSubscription.findOneAndUpdate(
+    { userId, workItemId }, { userId, workItemId, projectId, type }, { upsert: true, new: true }
+  );
+};
+export const unfollowWorkItem = (userId, workItemId) => NotificationSubscription.findOneAndDelete({ userId, workItemId });
+export const getFollowers = (workItemId) => NotificationSubscription.find({ workItemId });
+export const getUserSubscriptions = (userId, projectId) => NotificationSubscription.find({ userId, projectId });
+export const isFollowing = (userId, workItemId) => NotificationSubscription.findOne({ userId, workItemId });
+
+// ============================================
+// WORKFLOW RULES
+// ============================================
+export const getWorkflowRules = (projectId) => WorkflowRule.find({ projectId, enabled: true });
+export const createWorkflowRule = (data) => new WorkflowRule(data).save();
+export const updateWorkflowRule = (id, data) => WorkflowRule.findByIdAndUpdate(id, data, { new: true });
+export const deleteWorkflowRule = (id) => WorkflowRule.findByIdAndDelete(id);
 
 // ============================================
 // USER OPERATIONS

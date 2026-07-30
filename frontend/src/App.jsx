@@ -236,7 +236,7 @@ function App() {
 
         {activeProjectId ? (
           <Routes>
-            <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} workItemStats={workItemStats} sprints={sprints} onRefresh={refreshData} />} />
+            <Route path="/dashboard" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} workItemStats={workItemStats} sprints={sprints} onRefresh={refreshData} />} />
             {canAccessModule(user?.role, 'test-cases') && (
               <Route path="/test-cases" element={
                 <TestCases
@@ -296,7 +296,7 @@ function App() {
             {canAccessModule(user?.role, 'sprints') && (
               <Route path="/sprints" element={<Sprints projectId={activeProjectId} />} />
             )}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         ) : (
           <div className="loading-state">

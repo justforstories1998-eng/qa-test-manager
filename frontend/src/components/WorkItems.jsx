@@ -676,6 +676,7 @@ function WorkItemDetail({ item, onClose }) {
   const [newComment, setNewComment] = useState('');
   const [editingComment, setEditingComment] = useState(null);
   const [editCommentText, setEditCommentText] = useState('');
+  const [isFollowing, setIsFollowing] = useState(false);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -687,6 +688,29 @@ function WorkItemDetail({ item, onClose }) {
   }, [item._id]);
 
   useEffect(() => { fetchLinks(); fetchDiscussions(); }, [fetchLinks, fetchDiscussions]);
+
+  useEffect(() => {
+    const checkFollow = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const res = await api.isFollowing(user.id || user._id, item._id);
+        if (res.success) setIsFollowing(res.data);
+      } catch {}
+    };
+    checkFollow();
+  }, [item._id]);
+
+  const handleToggleFollow = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (isFollowing) {
+        await api.unfollowWorkItem({ userId: user.id || user._id, workItemId: item._id });
+      } else {
+        await api.followWorkItem({ userId: user.id || user._id, workItemId: item._id, projectId: item.projectId });
+      }
+      setIsFollowing(!isFollowing);
+    } catch {}
+  };
 
   const fetchDiscussions = useCallback(async () => {
     try { const res = await api.getDiscussions(item._id); if (res.success) setDiscussions(res.data || []); } catch {}
@@ -848,6 +872,7 @@ function WorkItemDetail({ item, onClose }) {
                   const res = await api.cloneWorkItem(item._id);
                   if (res.success) { fetchItems(); alert('Work item cloned!'); }
                 }} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px' }}>📄 Clone</button>
+                <button onClick={handleToggleFollow} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px', color: isFollowing ? '#2563eb' : undefined }}>{isFollowing ? '🔕 Unfollow' : '🔔 Follow'}</button>
                 <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }} style={{ ...btnDanger, ...btnSmall }}>🗑</button>
                 <button onClick={onClose} style={{ ...btnIcon }}>×</button>
               </>

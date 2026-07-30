@@ -101,7 +101,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
     {
       title: 'Main',
       items: [
-        { path: '/', label: 'Dashboard', icon: FiHome, module: 'dashboard' },
+        { path: '/dashboard', label: 'Dashboard', icon: FiHome, module: 'dashboard' },
         { path: '/test-cases', label: 'Test Cases', icon: FiFileText, module: 'test-cases' },
         { path: '/execution', label: 'Execution', icon: FiPlay, module: 'execution' },
       ].filter(item => canAccessModule(role, item.module)),

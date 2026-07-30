@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../api';
 import { toast } from 'react-toastify';
-import { FiClock, FiPlus, FiCalendar, FiCheckCircle, FiEdit2, FiTrash2, FiX, FiUsers, FiBarChart2, FiTarget } from 'react-icons/fi';
+import { FiClock, FiPlus, FiCalendar, FiCheckCircle, FiEdit2, FiTrash2, FiX, FiUsers, FiBarChart2, FiTarget, FiSearch, FiFilter } from 'react-icons/fi';
 
 const STATUS_STYLE = {
   Active: { color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
@@ -11,7 +11,7 @@ const STATUS_STYLE = {
 
 const SPRINT_STATUS = ['Planned', 'Active', 'Completed'];
 
-const TABS = ['Taskboard', 'Task Breakdown', 'Capacity', 'Burndown', 'Burnup', 'CFD', 'Velocity'];
+const TABS = ['Planning', 'Taskboard', 'Task Breakdown', 'Capacity', 'Burndown', 'Burnup', 'CFD', 'Velocity'];
 
 export default function Sprints({ projectId }) {
   const [sprints, setSprints] = useState([]);
@@ -27,6 +27,9 @@ export default function Sprints({ projectId }) {
   const [velocityData, setVelocityData] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [newMember, setNewMember] = useState({ assignee: '', capacityPerDay: 8, activities: '' });
+  const [backlogItems, setBacklogItems] = useState([]);
+  const [planningSearch, setPlanningSearch] = useState('');
+  const [planningTypeFilter, setPlanningTypeFilter] = useState('');
 
   const loadSprints = useCallback(async () => {
     try {
@@ -72,7 +75,14 @@ export default function Sprints({ projectId }) {
 
   useEffect(() => {
     if (activeSprintDetail) loadSprintDetail(activeSprintDetail);
-  }, [activeSprintDetail, loadSprintDetail]);
+    const loadBacklog = async () => {
+      try {
+        const res = await api.getWorkItems(projectId);
+        if (res.success) setBacklogItems(res.data || []);
+      } catch { /* ignore */ }
+    };
+    loadBacklog();
+  }, [activeSprintDetail, loadSprintDetail, projectId]);
 
   const handleCreateSprint = async (data) => {
     try {
@@ -806,6 +816,111 @@ export default function Sprints({ projectId }) {
           <div style={styles.modalActions}>
             <button style={styles.cancelBtn} onClick={() => setEditingSprint(null)}>Cancel</button>
             <button style={styles.saveBtn} onClick={handleSubmit}>Save Changes</button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const handleAssignToSprint = async (itemId) => {
+    if (!activeSprintDetail) return;
+    try {
+      await api.updateWorkItem(itemId, { sprintId: activeSprintDetail._id });
+      const res = await api.getWorkItems(projectId, { sprintId: activeSprintDetail._id });
+      if (res.success) setWorkItems(res.data);
+      const allRes = await api.getWorkItems(projectId);
+      if (allRes.success) setBacklogItems(allRes.data || []);
+      toast.success('Item added to sprint');
+    } catch { toast.error('Failed to add item'); }
+  };
+
+  const handleRemoveFromSprint = async (itemId) => {
+    try {
+      await api.updateWorkItem(itemId, { sprintId: null });
+      const res = await api.getWorkItems(projectId, { sprintId: activeSprintDetail._id });
+      if (res.success) setWorkItems(res.data);
+      const allRes = await api.getWorkItems(projectId);
+      if (allRes.success) setBacklogItems(allRes.data || []);
+      toast.success('Item removed from sprint');
+    } catch { toast.error('Failed to remove item'); }
+  };
+
+  const renderPlanning = () => {
+    if (!activeSprintDetail) return null;
+    const sprintItemIds = new Set(workItems.map(i => i._id));
+    const backlogOnly = backlogItems.filter(i => !sprintItemIds.has(i._id));
+    const filtered = backlogOnly.filter(i => {
+      const matchSearch = !planningSearch || i.title.toLowerCase().includes(planningSearch.toLowerCase()) || (`WI-${i.workItemId}`).toLowerCase().includes(planningSearch.toLowerCase());
+      const matchType = !planningTypeFilter || i.type === planningTypeFilter;
+      return matchSearch && matchType;
+    });
+    const sprintPoints = workItems.reduce((s, i) => s + (i.storyPoints || 0), 0);
+    const capacity = capacityData.reduce((s, c) => s + (c.capacityPerDay || 8) * 10, 0);
+    return (
+      <div style={{ display: 'flex', gap: 16, height: '100%' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)' }}>Backlog ({filtered.length} items, {filtered.reduce((s, i) => s + (i.storyPoints || 0), 0)} pts)</h3>
+            <div style={{ flex: 1 }} />
+            <div style={{ position: 'relative' }}>
+              <input placeholder="Search..." value={planningSearch} onChange={e => setPlanningSearch(e.target.value)} style={{ padding: '6px 10px 6px 30px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary, #f1f5f9)', fontSize: 12, width: 160, outline: 'none' }} />
+              <FiSearch size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+            </div>
+            <select value={planningTypeFilter} onChange={e => setPlanningTypeFilter(e.target.value)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary, #f1f5f9)', fontSize: 12, outline: 'none', cursor: 'pointer' }}>
+              <option value="">All Types</option>
+              {['Epic', 'Feature', 'User Story', 'Task', 'Bug', 'Issue', 'Test Case'].map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {filtered.length === 0 && <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No backlog items to add</div>}
+            {filtered.map(item => (
+              <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'var(--surface-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'} onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', minWidth: 50 }}>WI-{item.workItemId}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary, #f1f5f9)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
+                <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 5, background: 'rgba(99,102,241,0.12)', color: '#a5b4fc' }}>{item.type}</span>
+                {item.storyPoints > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>{item.storyPoints} pts</span>}
+                <button onClick={() => handleAssignToSprint(item._id)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>+ Add</button>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ width: 260, flexShrink: 0 }}>
+          <div style={{ padding: 16, borderRadius: 12, background: 'var(--surface-secondary)', border: '1px solid var(--border-color)' }}>
+            <h4 style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)' }}>Sprint Summary</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { label: 'Items', value: workItems.length },
+                { label: 'Points', value: `${sprintPoints} pts` },
+                { label: 'Capacity', value: capacity > 0 ? `${capacity} hrs` : 'Not set' },
+                { label: 'Team', value: `${capacityData.length} members` },
+              ].map((s, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>{s.label}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary, #f1f5f9)' }}>{s.value}</span>
+                </div>
+              ))}
+            </div>
+            {capacity > 0 && (
+              <div style={{ marginTop: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 4 }}>
+                  <span style={{ color: 'var(--text-muted)' }}>Progress</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary, #f1f5f9)' }}>{Math.min(100, Math.round((sprintPoints / capacity) * 100))}%</span>
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: 'var(--border-color)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(100, (sprintPoints / capacity) * 100)}%`, background: 'linear-gradient(90deg, #6366f1, #7c3aed)', transition: 'width 0.3s' }} />
+                </div>
+              </div>
+            )}
+            <h4 style={{ margin: '14px 0 8px', fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)' }}>In Sprint ({workItems.length})</h4>
+            <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {workItems.map(item => (
+                <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, background: 'var(--surface-tertiary)', fontSize: 11 }}>
+                  <span style={{ fontWeight: 700, color: 'var(--text-muted)', minWidth: 40 }}>WI-{item.workItemId}</span>
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary, #f1f5f9)' }}>{item.title}</span>
+                  <button onClick={() => handleRemoveFromSprint(item._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 2, fontSize: 12 }}>×</button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -1546,6 +1661,7 @@ export default function Sprints({ projectId }) {
           ))}
         </div>
 
+        {activeTab === 'Planning' && renderPlanning()}
         {activeTab === 'Taskboard' && renderTaskboard()}
         {activeTab === 'Task Breakdown' && renderTaskBreakdown()}
         {activeTab === 'Capacity' && renderCapacity()}
