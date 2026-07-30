@@ -465,55 +465,30 @@ function Reports({ testRuns = [], settings, projectId }) {
 
       {/* ═══════════ THEME-AWARE STYLES ═══════════ */}
       <style>{`
-        /* ── Dark tokens (default) ── */
+        /* ── Theme tokens (mapped to design system) ── */
         .rep-page {
           --rep-bg: transparent;
-          --rep-card: rgba(255,255,255,0.02);
-          --rep-card-hover: rgba(255,255,255,0.04);
-          --rep-card-elevated: rgba(255,255,255,0.03);
-          --rep-border: rgba(255,255,255,0.06);
-          --rep-border-hover: rgba(255,255,255,0.1);
-          --rep-input-bg: rgba(255,255,255,0.03);
-          --rep-text: #f1f5f9;
-          --rep-text-secondary: rgba(203,213,225,0.85);
-          --rep-text-muted: rgba(148,163,184,0.55);
-          --rep-text-faint: rgba(148,163,184,0.35);
-          --rep-accent: #818cf8;
-          --rep-accent-strong: #6366f1;
-          --rep-accent-bg: rgba(99,102,241,0.12);
-          --rep-accent-border: rgba(99,102,241,0.22);
-          --rep-accent-glow: rgba(99,102,241,0.08);
-          --rep-success: #4ade80;
-          --rep-warning: #fbbf24;
-          --rep-danger: #f87171;
-          --rep-danger-bg: rgba(248,113,113,0.08);
-          --rep-danger-border: rgba(248,113,113,0.15);
-          --rep-hover-bg: rgba(99,102,241,0.06);
-        }
-
-        /* ── Light overrides ── */
-        [data-theme="light"] .rep-page {
-          --rep-card: #ffffff;
-          --rep-card-hover: #fafbfd;
-          --rep-card-elevated: #ffffff;
-          --rep-border: #e5e7eb;
-          --rep-border-hover: #d1d5db;
-          --rep-input-bg: #ffffff;
-          --rep-text: #0f172a;
-          --rep-text-secondary: #475569;
-          --rep-text-muted: #94a3b8;
+          --rep-card: var(--bg-card, #ffffff);
+          --rep-card-hover: var(--bg-card-hover, #fafbfc);
+          --rep-card-elevated: var(--bg-elevated, #ffffff);
+          --rep-border: var(--border-default, #e2e8f0);
+          --rep-border-hover: var(--border-strong, #cbd5e1);
+          --rep-input-bg: var(--bg-input, #ffffff);
+          --rep-text: var(--text-primary, #0f172a);
+          --rep-text-secondary: var(--text-secondary, #475569);
+          --rep-text-muted: var(--text-muted, #94a3b8);
           --rep-text-faint: #cbd5e1;
-          --rep-accent: #6366f1;
-          --rep-accent-strong: #4f46e5;
-          --rep-accent-bg: rgba(99,102,241,0.08);
-          --rep-accent-border: rgba(99,102,241,0.2);
-          --rep-accent-glow: rgba(99,102,241,0.06);
-          --rep-success: #16a34a;
-          --rep-warning: #d97706;
-          --rep-danger: #dc2626;
-          --rep-danger-bg: rgba(239,68,68,0.06);
+          --rep-accent: var(--color-primary-light, #818cf8);
+          --rep-accent-strong: var(--color-primary, #6366f1);
+          --rep-accent-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
+          --rep-accent-border: rgba(99,102,241,0.22);
+          --rep-accent-glow: var(--color-primary-faint, rgba(99,102,241,0.08));
+          --rep-success: var(--color-success, #10b981);
+          --rep-warning: var(--color-warning, #f59e0b);
+          --rep-danger: var(--color-danger, #ef4444);
+          --rep-danger-bg: var(--color-danger-faint, rgba(239,68,68,0.08));
           --rep-danger-border: rgba(239,68,68,0.15);
-          --rep-hover-bg: rgba(99,102,241,0.04);
+          --rep-hover-bg: var(--color-primary-faint, rgba(99,102,241,0.06));
         }
 
         /* ── Page layout ── */
@@ -734,9 +709,6 @@ function Reports({ testRuns = [], settings, projectId }) {
         .rep-card-ai {
           background: linear-gradient(135deg, rgba(251,191,36,0.04), rgba(99,102,241,0.03));
           border-color: rgba(251,191,36,0.15);
-        }
-        [data-theme="light"] .rep-card-ai {
-          background: linear-gradient(135deg, rgba(251,191,36,0.05), rgba(99,102,241,0.03));
         }
         .rep-ai-header {
           padding: 16px 18px 12px;

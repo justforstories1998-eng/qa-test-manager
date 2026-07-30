@@ -471,42 +471,24 @@ function Settings({ settings, onUpdateSettings }) {
 
       <style>{`
         /* ═══════ Theme tokens (dark default) ═══════ */
+        /* ── Theme tokens (mapped to design system) ── */
         .qa-set-page {
           --qa-bg: transparent;
-          --qa-card: rgba(255,255,255,0.02);
-          --qa-card-hover: rgba(255,255,255,0.04);
-          --qa-card-elevated: rgba(255,255,255,0.03);
-          --qa-border: rgba(255,255,255,0.06);
-          --qa-border-hover: rgba(255,255,255,0.1);
-          --qa-input-bg: rgba(255,255,255,0.03);
-          --qa-text: #f1f5f9;
-          --qa-text-secondary: rgba(203,213,225,0.85);
-          --qa-text-muted: rgba(148,163,184,0.55);
-          --qa-accent: #818cf8;
-          --qa-accent-bg: rgba(99,102,241,0.12);
+          --qa-card: var(--bg-card, #ffffff);
+          --qa-card-hover: var(--bg-card-hover, #fafbfc);
+          --qa-card-elevated: var(--bg-elevated, #ffffff);
+          --qa-border: var(--border-default, #e2e8f0);
+          --qa-border-hover: var(--border-strong, #cbd5e1);
+          --qa-input-bg: var(--bg-input, #ffffff);
+          --qa-text: var(--text-primary, #0f172a);
+          --qa-text-secondary: var(--text-secondary, #475569);
+          --qa-text-muted: var(--text-muted, #94a3b8);
+          --qa-accent: var(--color-primary-light, #818cf8);
+          --qa-accent-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
           --qa-accent-border: rgba(99,102,241,0.22);
-          --qa-accent-glow: rgba(99,102,241,0.08);
-          --qa-warning: #fbbf24;
-          --qa-success: #4ade80;
-          --qa-toggle-off: rgba(255,255,255,0.12);
-        }
-
-        [data-theme="light"] .qa-set-page {
-          --qa-card: #ffffff;
-          --qa-card-hover: #f8fafc;
-          --qa-card-elevated: #ffffff;
-          --qa-border: #e5e7eb;
-          --qa-border-hover: #d1d5db;
-          --qa-input-bg: #ffffff;
-          --qa-text: #0f172a;
-          --qa-text-secondary: #475569;
-          --qa-text-muted: #94a3b8;
-          --qa-accent: #6366f1;
-          --qa-accent-bg: rgba(99,102,241,0.08);
-          --qa-accent-border: rgba(99,102,241,0.2);
-          --qa-accent-glow: rgba(99,102,241,0.06);
-          --qa-warning: #d97706;
-          --qa-success: #16a34a;
+          --qa-accent-glow: var(--color-primary-faint, rgba(99,102,241,0.08));
+          --qa-warning: var(--color-warning, #f59e0b);
+          --qa-success: var(--color-success, #10b981);
           --qa-toggle-off: #cbd5e1;
         }
 

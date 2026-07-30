@@ -719,46 +719,26 @@ function TestCases({
 
       {/* ── STYLES ── */}
       <style>{`
-        /* ═══════ THEME TOKENS ═══════ */
+        /* ═══════ THEME TOKENS (mapped to design system) ═══════ */
         .tc-page {
-          --tc-accent: #6366f1;
-          --tc-accent-light: #818cf8;
-          --tc-accent-glow: rgba(99,102,241,0.08);
-          --tc-accent-bg: rgba(99,102,241,0.12);
+          --tc-accent: var(--color-primary, #6366f1);
+          --tc-accent-light: var(--color-primary-light, #818cf8);
+          --tc-accent-glow: var(--color-primary-faint, rgba(99,102,241,0.08));
+          --tc-accent-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
           --tc-accent-border: rgba(99,102,241,0.2);
-          display: flex; flex-direction: column; height: 100%; gap: 0;
-        }
-
-        /* ── Dark mode (default) ── */
-        .tc-page {
           --tc-bg: transparent;
-          --tc-surface: rgba(255,255,255,0.02);
-          --tc-surface-hover: rgba(255,255,255,0.04);
-          --tc-surface-input: rgba(255,255,255,0.03);
-          --tc-border: rgba(255,255,255,0.06);
-          --tc-border-hover: rgba(255,255,255,0.1);
-          --tc-text: #f1f5f9;
-          --tc-text-secondary: rgba(203,213,225,0.8);
-          --tc-text-muted: rgba(148,163,184,0.5);
-          --tc-row-hover: rgba(99,102,241,0.04);
-          --tc-sidebar-bg: rgba(255,255,255,0.01);
-          --tc-danger: #f87171;
-        }
-
-        /* ── Light mode ── */
-        [data-theme="light"] .tc-page {
-          --tc-surface: #ffffff;
-          --tc-surface-hover: #f8fafc;
-          --tc-surface-input: #ffffff;
-          --tc-border: #e2e8f0;
-          --tc-border-hover: #cbd5e1;
-          --tc-text: #0f172a;
-          --tc-text-secondary: #475569;
-          --tc-text-muted: #94a3b8;
-          --tc-row-hover: rgba(99,102,241,0.04);
-          --tc-sidebar-bg: #f8fafc;
-          --tc-danger: #ef4444;
-          --tc-accent-glow: rgba(99,102,241,0.06);
+          --tc-surface: var(--bg-card, #ffffff);
+          --tc-surface-hover: var(--bg-card-hover, #fafbfc);
+          --tc-surface-input: var(--bg-input, #ffffff);
+          --tc-border: var(--border-default, #e2e8f0);
+          --tc-border-hover: var(--border-strong, #cbd5e1);
+          --tc-text: var(--text-primary, #0f172a);
+          --tc-text-secondary: var(--text-secondary, #475569);
+          --tc-text-muted: var(--text-muted, #94a3b8);
+          --tc-row-hover: var(--color-primary-faint, rgba(99,102,241,0.04));
+          --tc-sidebar-bg: var(--bg-inset, #f8f9fb);
+          --tc-danger: var(--color-danger, #ef4444);
+          display: flex; flex-direction: column; height: 100%; gap: 0;
         }
 
         /* ═══════ HEADER ═══════ */

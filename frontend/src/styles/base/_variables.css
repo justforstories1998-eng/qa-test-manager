@@ -100,6 +100,9 @@
   --sidebar-collapsed: 72px;
   --header-height: 60px;
 
+  /* ── Gradients ── */
+  --gradient-primary: linear-gradient(135deg, var(--color-primary), #7c3aed);
+
   /* ── Focus ── */
   --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }

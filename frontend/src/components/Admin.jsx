@@ -1097,78 +1097,41 @@ function Admin({ projects = [] }) {
       {/* ── Theme-aware CSS variables ── */}
       <style>{`
         .admin-page {
-          /* ── Semantic tokens that flip with theme ── */
-          --card-bg: rgba(255,255,255,0.02);
-          --card-border: rgba(255,255,255,0.06);
-          --tab-bg: rgba(255,255,255,0.02);
-          --tab-active-bg: rgba(99,102,241,0.12);
+          /* ── Semantic tokens mapped to design system ── */
+          --card-bg: var(--bg-card, #ffffff);
+          --card-border: var(--border-default, #e2e8f0);
+          --tab-bg: var(--bg-inset, #f8f9fb);
+          --tab-active-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
           --tab-active-shadow: 0 1px 3px rgba(0,0,0,0.1);
-          --tab-hover-bg: rgba(255,255,255,0.04);
-          --table-header-bg: rgba(255,255,255,0.02);
-          --table-border: rgba(255,255,255,0.04);
-          --table-row-hover: rgba(99,102,241,0.04);
-          --input-bg: rgba(255,255,255,0.03);
-          --input-border: rgba(255,255,255,0.08);
-          --text-primary: #f1f5f9;
-          --text-secondary: rgba(203,213,225,0.8);
-          --text-muted: rgba(148,163,184,0.5);
-          --accent-color: #818cf8;
-          --accent-glow: rgba(99,102,241,0.08);
-          --accent-badge-bg: rgba(99,102,241,0.12);
+          --tab-hover-bg: var(--bg-card-hover, #fafbfc);
+          --table-header-bg: var(--bg-inset, #f8f9fb);
+          --table-border: var(--border-light, #f1f5f9);
+          --table-row-hover: var(--color-primary-faint, rgba(99,102,241,0.04));
+          --input-bg: var(--bg-input, #ffffff);
+          --input-border: var(--border-default, #e2e8f0);
+          --text-primary: var(--text-primary, #0f172a);
+          --text-secondary: var(--text-secondary, #475569);
+          --text-muted: var(--text-muted, #94a3b8);
+          --accent-color: var(--color-primary, #6366f1);
+          --accent-glow: var(--color-primary-faint, rgba(99,102,241,0.08));
+          --accent-badge-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
           --accent-badge-border: rgba(99,102,241,0.2);
           --avatar-bg: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1));
           --badge-admin-bg: rgba(167,139,250,0.12);
           --badge-admin-border: rgba(167,139,250,0.25);
-          --badge-user-bg: rgba(99,102,241,0.12);
+          --badge-user-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
           --badge-user-border: rgba(99,102,241,0.25);
-          --badge-active-bg: rgba(34,197,94,0.1);
+          --badge-active-bg: var(--color-success-faint, rgba(34,197,94,0.1));
           --badge-active-border: rgba(34,197,94,0.2);
           --badge-inactive-bg: rgba(148,163,184,0.08);
           --badge-inactive-border: rgba(148,163,184,0.15);
-          --badge-count-bg: rgba(255,255,255,0.05);
-          --btn-primary-bg: linear-gradient(135deg, #6366f1, #7c3aed);
+          --badge-count-bg: var(--bg-inset, #f8f9fb);
+          --btn-primary-bg: var(--color-primary, #6366f1);
           --btn-primary-shadow: 0 2px 12px rgba(99,102,241,0.3);
           --btn-primary-hover-shadow: 0 4px 20px rgba(99,102,241,0.45);
           --btn-disabled-bg: rgba(99,102,241,0.4);
-          --btn-ghost-bg: rgba(255,255,255,0.04);
-          --btn-ghost-border: rgba(255,255,255,0.06);
-        }
-
-        [data-theme="light"] .admin-page {
-          --card-bg: #ffffff;
-          --card-border: #e2e8f0;
-          --tab-bg: #f8fafc;
-          --tab-active-bg: #ffffff;
-          --tab-active-shadow: 0 1px 4px rgba(0,0,0,0.06);
-          --tab-hover-bg: #f1f5f9;
-          --table-header-bg: #f8fafc;
-          --table-border: #f1f5f9;
-          --table-row-hover: rgba(99,102,241,0.04);
-          --input-bg: #ffffff;
-          --input-border: #e2e8f0;
-          --text-primary: #0f172a;
-          --text-secondary: #475569;
-          --text-muted: #94a3b8;
-          --accent-color: #6366f1;
-          --accent-glow: rgba(99,102,241,0.06);
-          --accent-badge-bg: rgba(99,102,241,0.08);
-          --accent-badge-border: rgba(99,102,241,0.15);
-          --avatar-bg: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08));
-          --badge-admin-bg: rgba(167,139,250,0.08);
-          --badge-admin-border: rgba(167,139,250,0.2);
-          --badge-user-bg: rgba(99,102,241,0.08);
-          --badge-user-border: rgba(99,102,241,0.18);
-          --badge-active-bg: rgba(34,197,94,0.08);
-          --badge-active-border: rgba(34,197,94,0.15);
-          --badge-inactive-bg: rgba(148,163,184,0.06);
-          --badge-inactive-border: rgba(148,163,184,0.12);
-          --badge-count-bg: #f1f5f9;
-          --btn-primary-bg: linear-gradient(135deg, #6366f1, #7c3aed);
-          --btn-primary-shadow: 0 2px 10px rgba(99,102,241,0.2);
-          --btn-primary-hover-shadow: 0 4px 16px rgba(99,102,241,0.3);
-          --btn-disabled-bg: #c7d2fe;
-          --btn-ghost-bg: #f8fafc;
-          --btn-ghost-border: #e2e8f0;
+          --btn-ghost-bg: var(--bg-inset, #f8f9fb);
+          --btn-ghost-border: var(--border-default, #e2e8f0);
         }
 
         @keyframes spin {

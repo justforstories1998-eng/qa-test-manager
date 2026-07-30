@@ -134,7 +134,7 @@ export default function Boards({ projectId }) {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ padding: '24px 32px 16px', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+      <div style={{ padding: '24px 32px 16px', borderBottom: '1px solid var(--border-default)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: 11, background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2))', border: '1px solid rgba(99,102,241,0.22)', color: '#818cf8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiLayers size={19} /></div>
@@ -155,7 +155,7 @@ export default function Boards({ projectId }) {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
             {boards.map(board => (
-              <div key={board._id} style={{ padding: 20, borderRadius: 12, border: '1px solid var(--border-color)', background: 'var(--bg-card)', transition: 'all 0.15s' }}>
+              <div key={board._id} style={{ padding: 20, borderRadius: 12, border: '1px solid var(--border-default)', background: 'var(--bg-card)', transition: 'all 0.15s' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                   <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--text-primary)' }}>{board.name}</h3>
                   <div style={{ display: 'flex', gap: 4 }}>
@@ -183,23 +183,23 @@ export default function Boards({ projectId }) {
       </div>
 
       {showModal && (
-        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, background: 'var(--surface-overlay)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, background: 'var(--surface-elevated)', borderRadius: 16, border: '1px solid var(--border-color)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)', padding: 24 }}>
+        <div onClick={() => setShowModal(false)} style={{ position: 'fixed', inset: 0, background: 'var(--bg-overlay)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, background: 'var(--bg-elevated)', borderRadius: 16, border: '1px solid var(--border-default)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)', padding: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>{editBoard ? 'Edit Board' : 'New Board'}</h3>
-              <button onClick={() => setShowModal(false)} style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: 'var(--surface-glass-hover)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={16} /></button>
+              <button onClick={() => setShowModal(false)} style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: 'var(--bg-card-hover)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={16} /></button>
             </div>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>Name *</label>
-                <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required autoFocus placeholder="Board name" style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required autoFocus placeholder="Board name" style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 5 }}>Description</label>
-                <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Optional description" style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary)', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Optional description" style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+                <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
                 <button type="submit" style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{editBoard ? 'Update' : 'Create'}</button>
               </div>
             </form>
@@ -208,17 +208,17 @@ export default function Boards({ projectId }) {
       )}
 
       {configBoard && (
-        <div onClick={() => setConfigBoard(null)} style={{ position: 'fixed', inset: 0, background: 'var(--surface-overlay)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
-          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 600, maxHeight: '85vh', background: 'var(--surface-elevated)', borderRadius: 16, border: '1px solid var(--border-color)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div onClick={() => setConfigBoard(null)} style={{ position: 'fixed', inset: 0, background: 'var(--bg-overlay)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }}>
+          <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 600, maxHeight: '85vh', background: 'var(--bg-elevated)', borderRadius: 16, border: '1px solid var(--border-default)', boxShadow: '0 24px 64px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>Configure: {configBoard.name}</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>Columns, swimlanes, and card fields</p>
               </div>
-              <button onClick={() => setConfigBoard(null)} style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: 'var(--surface-glass-hover)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={16} /></button>
+              <button onClick={() => setConfigBoard(null)} style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: 'var(--bg-card-hover)', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={16} /></button>
             </div>
 
-            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', flexShrink: 0 }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid var(--border-default)', flexShrink: 0 }}>
               {['columns', 'swimlanes', 'cards'].map(tab => (
                 <button key={tab} onClick={() => setConfigTab(tab)} style={{ flex: 1, padding: '10px 0', border: 'none', borderBottom: configTab === tab ? '2px solid #6366f1' : '2px solid transparent', background: 'transparent', color: configTab === tab ? '#6366f1' : 'var(--text-muted)', fontSize: 13, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>{tab}</button>
               ))}
@@ -228,22 +228,22 @@ export default function Boards({ projectId }) {
               {configTab === 'columns' && (
                 <div>
                   <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                    <input value={newColTitle} onChange={e => setNewColTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && addColumn()} placeholder="New column name..." style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary)', fontSize: 13, outline: 'none' }} />
+                    <input value={newColTitle} onChange={e => setNewColTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && addColumn()} placeholder="New column name..." style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none' }} />
                     <button onClick={addColumn} style={{ padding: '8px 14px', borderRadius: 8, border: 'none', background: '#6366f1', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>Add</button>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {configColumns.map((col, idx) => (
-                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)' }}>
+                      <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)' }}>
                         <div style={{ width: 14, height: 14, borderRadius: 4, background: col.color, cursor: 'pointer', position: 'relative' }} onClick={() => {
                           const colors = ['#94a3b8','#60a5fa','#fbbf24','#a78bfa','#34d399','#f472b6','#f97316','#06b6d4'];
                           const ci = colors.indexOf(col.color);
                           updateColumn(idx, 'color', colors[(ci + 1) % colors.length]);
                         }} title="Click to change color" />
-                        <input value={col.title} onChange={e => updateColumn(idx, 'title', e.target.value)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none' }} />
-                        <input type="number" min="0" value={col.wipLimit} onChange={e => updateColumn(idx, 'wipLimit', parseInt(e.target.value) || 0)} style={{ width: 60, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 12, outline: 'none', textAlign: 'center' }} title="WIP Limit (0 = no limit)" />
+                        <input value={col.title} onChange={e => updateColumn(idx, 'title', e.target.value)} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none' }} />
+                        <input type="number" min="0" value={col.wipLimit} onChange={e => updateColumn(idx, 'wipLimit', parseInt(e.target.value) || 0)} style={{ width: 60, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 12, outline: 'none', textAlign: 'center' }} title="WIP Limit (0 = no limit)" />
                         <div style={{ display: 'flex', gap: 2 }}>
-                          <button onClick={() => moveColumn(idx, -1)} disabled={idx === 0} style={{ width: 24, height: 24, borderRadius: 4, border: 'none', background: 'transparent', color: idx === 0 ? 'var(--border-color)' : 'var(--text-muted)', cursor: idx === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiArrowUp size={12} /></button>
-                          <button onClick={() => moveColumn(idx, 1)} disabled={idx === configColumns.length - 1} style={{ width: 24, height: 24, borderRadius: 4, border: 'none', background: 'transparent', color: idx === configColumns.length - 1 ? 'var(--border-color)' : 'var(--text-muted)', cursor: idx === configColumns.length - 1 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiArrowDown size={12} /></button>
+                          <button onClick={() => moveColumn(idx, -1)} disabled={idx === 0} style={{ width: 24, height: 24, borderRadius: 4, border: 'none', background: 'transparent', color: idx === 0 ? 'var(--border-default)' : 'var(--text-muted)', cursor: idx === 0 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiArrowUp size={12} /></button>
+                          <button onClick={() => moveColumn(idx, 1)} disabled={idx === configColumns.length - 1} style={{ width: 24, height: 24, borderRadius: 4, border: 'none', background: 'transparent', color: idx === configColumns.length - 1 ? 'var(--border-default)' : 'var(--text-muted)', cursor: idx === configColumns.length - 1 ? 'default' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiArrowDown size={12} /></button>
                         </div>
                         <button onClick={() => removeColumn(idx)} style={{ width: 24, height: 24, borderRadius: 4, border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiTrash2 size={11} /></button>
                       </div>
@@ -254,15 +254,15 @@ export default function Boards({ projectId }) {
 
               {configTab === 'swimlanes' && (
                 <div>
-                  <button onClick={addSwimlane} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, border: '1px dashed var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600, cursor: 'pointer', marginBottom: 16 }}><FiPlus size={13} /> Add Swimlane</button>
+                  <button onClick={addSwimlane} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, border: '1px dashed var(--border-default)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 600, cursor: 'pointer', marginBottom: 16 }}><FiPlus size={13} /> Add Swimlane</button>
                   {configSwimlanes.length === 0 ? (
                     <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: 20 }}>No custom swimlanes. The board will auto-detect swimlanes from assignees.</p>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {configSwimlanes.map((lane, idx) => (
-                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)' }}>
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)' }}>
                           <div style={{ width: 14, height: 14, borderRadius: 4, background: lane.color }} />
-                          <input value={lane.title} onChange={e => setConfigSwimlanes(prev => prev.map((l, i) => i === idx ? { ...l, title: e.target.value } : l))} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border-color)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none' }} />
+                          <input value={lane.title} onChange={e => setConfigSwimlanes(prev => prev.map((l, i) => i === idx ? { ...l, title: e.target.value } : l))} style={{ flex: 1, padding: '5px 8px', borderRadius: 6, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none' }} />
                           <button onClick={() => removeSwimlane(idx)} style={{ width: 24, height: 24, borderRadius: 4, border: 'none', background: 'transparent', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiTrash2 size={11} /></button>
                         </div>
                       ))}
@@ -276,7 +276,7 @@ export default function Boards({ projectId }) {
                   <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>Choose which fields appear on board cards:</p>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {CARD_FIELD_OPTIONS.map(field => (
-                      <label key={field.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: configCardFields.includes(field.id) ? 'rgba(99,102,241,0.06)' : 'var(--surface-secondary)', cursor: 'pointer', transition: 'all 0.15s' }}>
+                      <label key={field.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: configCardFields.includes(field.id) ? 'rgba(99,102,241,0.06)' : 'var(--bg-card)', cursor: 'pointer', transition: 'all 0.15s' }}>
                         <input type="checkbox" checked={configCardFields.includes(field.id)} onChange={() => toggleCardField(field.id)} style={{ accentColor: '#6366f1' }} />
                         <span style={{ fontSize: 13, color: 'var(--text-primary)', fontWeight: 500 }}>{field.label}</span>
                       </label>
@@ -286,8 +286,8 @@ export default function Boards({ projectId }) {
               )}
             </div>
 
-            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
-              <button onClick={() => setConfigBoard(null)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-default)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
+              <button onClick={() => setConfigBoard(null)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
               <button onClick={saveConfig} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Save Configuration</button>
             </div>
           </div>

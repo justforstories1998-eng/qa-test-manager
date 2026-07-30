@@ -710,50 +710,28 @@ function Bugs({ projectId, user }) {
       {/* ═══════ Theme-aware styles ═══════ */}
       <style>{`
         /* ── Dark tokens (default) ── */
+        /* ── Theme tokens (mapped to design system) ── */
         .bug-page {
           --bug-bg: transparent;
-          --bug-card: rgba(255,255,255,0.02);
-          --bug-card-hover: rgba(255,255,255,0.04);
-          --bug-card-elevated: rgba(255,255,255,0.03);
-          --bug-border: rgba(255,255,255,0.06);
-          --bug-border-hover: rgba(255,255,255,0.1);
-          --bug-input-bg: rgba(255,255,255,0.03);
-          --bug-text: #f1f5f9;
-          --bug-text-secondary: rgba(203,213,225,0.85);
-          --bug-text-muted: rgba(148,163,184,0.55);
-          --bug-text-faint: rgba(148,163,184,0.35);
-          --bug-accent: #818cf8;
-          --bug-accent-strong: #6366f1;
-          --bug-accent-bg: rgba(99,102,241,0.12);
-          --bug-accent-border: rgba(99,102,241,0.2);
-          --bug-accent-glow: rgba(99,102,241,0.08);
-          --bug-danger: #f87171;
-          --bug-danger-bg: rgba(248,113,113,0.08);
-          --bug-danger-border: rgba(248,113,113,0.15);
-          --bug-hover-bg: rgba(99,102,241,0.06);
-        }
-
-        /* ── Light overrides ── */
-        [data-theme="light"] .bug-page {
-          --bug-card: #ffffff;
-          --bug-card-hover: #fafbfd;
-          --bug-card-elevated: #ffffff;
-          --bug-border: #e5e7eb;
-          --bug-border-hover: #d1d5db;
-          --bug-input-bg: #ffffff;
-          --bug-text: #0f172a;
-          --bug-text-secondary: #475569;
-          --bug-text-muted: #94a3b8;
+          --bug-card: var(--bg-card, #ffffff);
+          --bug-card-hover: var(--bg-card-hover, #fafbfc);
+          --bug-card-elevated: var(--bg-elevated, #ffffff);
+          --bug-border: var(--border-default, #e2e8f0);
+          --bug-border-hover: var(--border-strong, #cbd5e1);
+          --bug-input-bg: var(--bg-input, #ffffff);
+          --bug-text: var(--text-primary, #0f172a);
+          --bug-text-secondary: var(--text-secondary, #475569);
+          --bug-text-muted: var(--text-muted, #94a3b8);
           --bug-text-faint: #cbd5e1;
-          --bug-accent: #6366f1;
-          --bug-accent-strong: #4f46e5;
-          --bug-accent-bg: rgba(99,102,241,0.08);
-          --bug-accent-border: rgba(99,102,241,0.18);
-          --bug-accent-glow: rgba(99,102,241,0.06);
-          --bug-danger: #ef4444;
-          --bug-danger-bg: rgba(239,68,68,0.06);
+          --bug-accent: var(--color-primary-light, #818cf8);
+          --bug-accent-strong: var(--color-primary, #6366f1);
+          --bug-accent-bg: var(--color-primary-soft, rgba(99,102,241,0.12));
+          --bug-accent-border: rgba(99,102,241,0.2);
+          --bug-accent-glow: var(--color-primary-faint, rgba(99,102,241,0.08));
+          --bug-danger: var(--color-danger, #ef4444);
+          --bug-danger-bg: var(--color-danger-faint, rgba(239,68,68,0.08));
           --bug-danger-border: rgba(239,68,68,0.15);
-          --bug-hover-bg: rgba(99,102,241,0.04);
+          --bug-hover-bg: var(--color-primary-faint, rgba(99,102,241,0.06));
         }
 
         /* ── Page layout ── */
@@ -1196,9 +1174,6 @@ function Bugs({ projectId, user }) {
           border: 1px solid var(--bug-border);
           box-shadow: 0 12px 40px rgba(0,0,0,0.2);
           max-height: 200px; overflow-y: auto;
-        }
-        [data-theme="light"] .bug-dropdown {
-          box-shadow: 0 12px 40px rgba(0,0,0,0.08);
         }
         .bug-dropdown-item {
           display: flex; align-items: center; gap: 10px;

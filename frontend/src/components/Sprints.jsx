@@ -215,7 +215,7 @@ export default function Sprints({ projectId }) {
     title: {
       fontSize: '24px',
       fontWeight: '700',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       margin: 0,
     },
     subtitle: {
@@ -242,8 +242,8 @@ export default function Sprints({ projectId }) {
       gap: '16px',
     },
     sprintCard: {
-      background: 'var(--surface-secondary)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-default)',
       borderRadius: '12px',
       padding: '20px',
       cursor: 'pointer',
@@ -258,7 +258,7 @@ export default function Sprints({ projectId }) {
     sprintName: {
       fontSize: '16px',
       fontWeight: '600',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       margin: 0,
     },
     sprintGoal: {
@@ -281,7 +281,7 @@ export default function Sprints({ projectId }) {
     },
     progressBar: {
       height: '6px',
-      background: 'var(--surface-glass-hover)',
+      background: 'var(--bg-card-hover)',
       borderRadius: '3px',
       overflow: 'hidden',
       marginBottom: '8px',
@@ -308,9 +308,9 @@ export default function Sprints({ projectId }) {
     actionBtn: {
       padding: '5px 12px',
       borderRadius: '6px',
-      border: '1px solid var(--border-color)',
-      background: 'var(--surface-tertiary)',
-      color: 'var(--text-primary, #f1f5f9)',
+      border: '1px solid var(--border-default)',
+      background: 'var(--bg-inset)',
+      color: 'var(--text-primary)',
       fontSize: '12px',
       cursor: 'pointer',
     },
@@ -326,7 +326,7 @@ export default function Sprints({ projectId }) {
     modalOverlay: {
       position: 'fixed',
       inset: 0,
-      background: 'var(--surface-overlay)',
+      background: 'var(--bg-overlay)',
       backdropFilter: 'blur(4px)',
       display: 'flex',
       justifyContent: 'center',
@@ -334,8 +334,8 @@ export default function Sprints({ projectId }) {
       zIndex: 1000,
     },
     modal: {
-      background: 'var(--surface-elevated)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-elevated)',
+      border: '1px solid var(--border-default)',
       borderRadius: '16px',
       padding: '28px',
       width: '480px',
@@ -362,10 +362,10 @@ export default function Sprints({ projectId }) {
     input: {
       width: '100%',
       padding: '10px 12px',
-      background: 'var(--surface-tertiary)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-inset)',
+      border: '1px solid var(--border-default)',
       borderRadius: '8px',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       fontSize: '14px',
       outline: 'none',
       boxSizing: 'border-box',
@@ -373,10 +373,10 @@ export default function Sprints({ projectId }) {
     select: {
       width: '100%',
       padding: '10px 12px',
-      background: 'var(--surface-tertiary)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-inset)',
+      border: '1px solid var(--border-default)',
       borderRadius: '8px',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       fontSize: '14px',
       outline: 'none',
       boxSizing: 'border-box',
@@ -390,9 +390,9 @@ export default function Sprints({ projectId }) {
     cancelBtn: {
       padding: '8px 16px',
       borderRadius: '8px',
-      border: '1px solid var(--border-color)',
-      background: 'var(--surface-tertiary)',
-      color: 'var(--text-primary, #f1f5f9)',
+      border: '1px solid var(--border-default)',
+      background: 'var(--bg-inset)',
+      color: 'var(--text-primary)',
       fontSize: '14px',
       cursor: 'pointer',
     },
@@ -432,7 +432,7 @@ export default function Sprints({ projectId }) {
       display: 'flex',
       gap: '4px',
       marginBottom: '24px',
-      background: 'var(--surface-secondary)',
+      background: 'var(--bg-card)',
       borderRadius: '10px',
       padding: '4px',
       width: 'fit-content',
@@ -462,15 +462,15 @@ export default function Sprints({ projectId }) {
       fontSize: '12px',
       fontWeight: '600',
       color: 'var(--text-muted)',
-      borderBottom: '1px solid var(--border-color)',
+      borderBottom: '1px solid var(--border-default)',
       textTransform: 'uppercase',
       letterSpacing: '0.5px',
     },
     td: {
       padding: '10px 14px',
       fontSize: '14px',
-      color: 'var(--text-primary, #f1f5f9)',
-      borderBottom: '1px solid var(--border-color)',
+      color: 'var(--text-primary)',
+      borderBottom: '1px solid var(--border-default)',
     },
     addRow: {
       display: 'flex',
@@ -481,10 +481,10 @@ export default function Sprints({ projectId }) {
     addInput: {
       flex: 1,
       padding: '8px 10px',
-      background: 'var(--surface-tertiary)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-inset)',
+      border: '1px solid var(--border-default)',
       borderRadius: '6px',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       fontSize: '13px',
       outline: 'none',
     },
@@ -516,8 +516,8 @@ export default function Sprints({ projectId }) {
     summaryCard: {
       flex: 1,
       padding: '16px',
-      background: 'var(--surface-secondary)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-default)',
       borderRadius: '10px',
     },
     summaryLabel: {
@@ -528,11 +528,11 @@ export default function Sprints({ projectId }) {
     summaryValue: {
       fontSize: '22px',
       fontWeight: '700',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
     },
     chartContainer: {
-      background: 'var(--surface-secondary)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-card)',
+      border: '1px solid var(--border-default)',
       borderRadius: '12px',
       padding: '24px',
       marginTop: '16px',
@@ -540,7 +540,7 @@ export default function Sprints({ projectId }) {
     chartTitle: {
       fontSize: '16px',
       fontWeight: '600',
-      color: 'var(--text-primary, #f1f5f9)',
+      color: 'var(--text-primary)',
       marginBottom: '16px',
     },
     chartActions: {
@@ -551,7 +551,7 @@ export default function Sprints({ projectId }) {
     confirmOverlay: {
       position: 'fixed',
       inset: 0,
-      background: 'var(--surface-overlay)',
+      background: 'var(--bg-overlay)',
       backdropFilter: 'blur(4px)',
       display: 'flex',
       justifyContent: 'center',
@@ -559,8 +559,8 @@ export default function Sprints({ projectId }) {
       zIndex: 1100,
     },
     confirmModal: {
-      background: 'var(--surface-elevated)',
-      border: '1px solid var(--border-color)',
+      background: 'var(--bg-elevated)',
+      border: '1px solid var(--border-default)',
       borderRadius: '12px',
       padding: '24px',
       width: '360px',
@@ -597,7 +597,7 @@ export default function Sprints({ projectId }) {
           e.currentTarget.style.transform = 'translateY(-2px)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = 'var(--border-color)';
+          e.currentTarget.style.borderColor = 'var(--border-default)';
           e.currentTarget.style.transform = 'translateY(0)';
         }}
       >
@@ -860,13 +860,13 @@ export default function Sprints({ projectId }) {
       <div style={{ display: 'flex', gap: 16, height: '100%' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
-            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)' }}>Backlog ({filtered.length} items, {filtered.reduce((s, i) => s + (i.storyPoints || 0), 0)} pts)</h3>
+            <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>Backlog ({filtered.length} items, {filtered.reduce((s, i) => s + (i.storyPoints || 0), 0)} pts)</h3>
             <div style={{ flex: 1 }} />
             <div style={{ position: 'relative' }}>
-              <input placeholder="Search..." value={planningSearch} onChange={e => setPlanningSearch(e.target.value)} style={{ padding: '6px 10px 6px 30px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary, #f1f5f9)', fontSize: 12, width: 160, outline: 'none' }} />
+              <input placeholder="Search..." value={planningSearch} onChange={e => setPlanningSearch(e.target.value)} style={{ padding: '6px 10px 6px 30px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 12, width: 160, outline: 'none' }} />
               <FiSearch size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             </div>
-            <select value={planningTypeFilter} onChange={e => setPlanningTypeFilter(e.target.value)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary, #f1f5f9)', fontSize: 12, outline: 'none', cursor: 'pointer' }}>
+            <select value={planningTypeFilter} onChange={e => setPlanningTypeFilter(e.target.value)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 12, outline: 'none', cursor: 'pointer' }}>
               <option value="">All Types</option>
               {['Epic', 'Feature', 'User Story', 'Task', 'Bug', 'Issue', 'Test Case'].map(t => <option key={t} value={t}>{t}</option>)}
             </select>
@@ -874,9 +874,9 @@ export default function Sprints({ projectId }) {
           <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {filtered.length === 0 && <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No backlog items to add</div>}
             {filtered.map(item => (
-              <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'var(--surface-secondary)', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'} onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}>
+              <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'var(--bg-card)', border: '1px solid var(--border-default)', cursor: 'pointer', transition: 'border-color 0.15s' }} onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'} onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-default)'}>
                 <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', minWidth: 50 }}>WI-{item.workItemId}</span>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary, #f1f5f9)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</span>
                 <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 5, background: 'rgba(99,102,241,0.12)', color: '#a5b4fc' }}>{item.type}</span>
                 {item.storyPoints > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)' }}>{item.storyPoints} pts</span>}
                 <button onClick={() => handleAssignToSprint(item._id)} style={{ padding: '4px 10px', borderRadius: 6, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}>+ Add</button>
@@ -885,8 +885,8 @@ export default function Sprints({ projectId }) {
           </div>
         </div>
         <div style={{ width: 260, flexShrink: 0 }}>
-          <div style={{ padding: 16, borderRadius: 12, background: 'var(--surface-secondary)', border: '1px solid var(--border-color)' }}>
-            <h4 style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)' }}>Sprint Summary</h4>
+          <div style={{ padding: 16, borderRadius: 12, background: 'var(--bg-card)', border: '1px solid var(--border-default)' }}>
+            <h4 style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Sprint Summary</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { label: 'Items', value: workItems.length },
@@ -896,7 +896,7 @@ export default function Sprints({ projectId }) {
               ].map((s, i) => (
                 <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                   <span style={{ color: 'var(--text-muted)' }}>{s.label}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary, #f1f5f9)' }}>{s.value}</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{s.value}</span>
                 </div>
               ))}
             </div>
@@ -904,19 +904,19 @@ export default function Sprints({ projectId }) {
               <div style={{ marginTop: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, marginBottom: 4 }}>
                   <span style={{ color: 'var(--text-muted)' }}>Progress</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-primary, #f1f5f9)' }}>{Math.min(100, Math.round((sprintPoints / capacity) * 100))}%</span>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{Math.min(100, Math.round((sprintPoints / capacity) * 100))}%</span>
                 </div>
-                <div style={{ height: 6, borderRadius: 3, background: 'var(--border-color)', overflow: 'hidden' }}>
+                <div style={{ height: 6, borderRadius: 3, background: 'var(--border-default)', overflow: 'hidden' }}>
                   <div style={{ height: '100%', borderRadius: 3, width: `${Math.min(100, (sprintPoints / capacity) * 100)}%`, background: 'linear-gradient(90deg, #6366f1, #7c3aed)', transition: 'width 0.3s' }} />
                 </div>
               </div>
             )}
-            <h4 style={{ margin: '14px 0 8px', fontSize: 12, fontWeight: 700, color: 'var(--text-primary, #f1f5f9)' }}>In Sprint ({workItems.length})</h4>
+            <h4 style={{ margin: '14px 0 8px', fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>In Sprint ({workItems.length})</h4>
             <div style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
               {workItems.map(item => (
-                <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, background: 'var(--surface-tertiary)', fontSize: 11 }}>
+                <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 8px', borderRadius: 6, background: 'var(--bg-inset)', fontSize: 11 }}>
                   <span style={{ fontWeight: 700, color: 'var(--text-muted)', minWidth: 40 }}>WI-{item.workItemId}</span>
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary, #f1f5f9)' }}>{item.title}</span>
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-primary)' }}>{item.title}</span>
                   <button onClick={() => handleRemoveFromSprint(item._id)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: 2, fontSize: 12 }}>×</button>
                 </div>
               ))}
@@ -968,14 +968,14 @@ export default function Sprints({ projectId }) {
           {TASKBOARD_COLUMNS.map(col => {
             const colItems = workItems.filter(i => i.status === col);
             return (
-              <div key={col} onDragOver={handleDragOver} onDrop={e => handleDrop(e, col)} style={{ flex: 1, minWidth: 200, background: 'var(--surface-secondary)', borderRadius: 12, border: '1px solid var(--border-color)', overflow: 'hidden' }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div key={col} onDragOver={handleDragOver} onDrop={e => handleDrop(e, col)} style={{ flex: 1, minWidth: 200, background: 'var(--bg-card)', borderRadius: 12, border: '1px solid var(--border-default)', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{col}</span>
                   <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-card)', padding: '2px 8px', borderRadius: 6 }}>{colItems.length}</span>
                 </div>
                 <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 80 }}>
                   {colItems.map(item => (
-                    <div key={item._id} draggable onDragStart={e => handleDragStart(e, item)} onDragEnd={handleDragEnd} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-card)', cursor: 'grab', transition: 'all 0.15s' }}
+                    <div key={item._id} draggable onDragStart={e => handleDragStart(e, item)} onDragEnd={handleDragEnd} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', cursor: 'grab', transition: 'all 0.15s' }}
                       onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'}
                       onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{item.title}</div>
@@ -987,7 +987,7 @@ export default function Sprints({ projectId }) {
                     </div>
                   ))}
                   {colItems.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '20px 12px', color: 'var(--text-muted)', fontSize: 12, border: '2px dashed var(--border-color)', borderRadius: 8 }}>Drop items here</div>
+                    <div style={{ textAlign: 'center', padding: '20px 12px', color: 'var(--text-muted)', fontSize: 12, border: '2px dashed var(--border-default)', borderRadius: 8 }}>Drop items here</div>
                   )}
                 </div>
               </div>
@@ -1178,7 +1178,7 @@ export default function Sprints({ projectId }) {
                   y1={y}
                   x2={padding.left + chartW}
                   y2={y}
-                  stroke="var(--border-color)"
+                  stroke="var(--border-default)"
                   strokeWidth="1"
                 />
                 <text
@@ -1220,7 +1220,7 @@ export default function Sprints({ projectId }) {
           <path
             d={idealPath}
             fill="none"
-            stroke="var(--border-medium)"
+            stroke="var(--border-strong)"
             strokeWidth="2"
             strokeDasharray="6,4"
           />
@@ -1241,7 +1241,7 @@ export default function Sprints({ projectId }) {
               cy={yScale(d.remainingPoints)}
               r="4"
               fill="#6366f1"
-              stroke="var(--border-color)"
+              stroke="var(--border-default)"
               strokeWidth="2"
             >
               <title>{`${d.date}: ${d.remainingPoints} pts remaining`}</title>
@@ -1274,7 +1274,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top}
             x2={padding.left}
             y2={padding.top + chartH}
-            stroke="var(--border-color)"
+            stroke="var(--border-default)"
             strokeWidth="1"
           />
           <line
@@ -1282,7 +1282,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top + chartH}
             x2={padding.left + chartW}
             y2={padding.top + chartH}
-            stroke="var(--border-color)"
+            stroke="var(--border-default)"
             strokeWidth="1"
           />
         </svg>
@@ -1340,7 +1340,7 @@ export default function Sprints({ projectId }) {
         <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', maxWidth: width }}>
           {[0, 0.25, 0.5, 0.75, 1].map(f => (
             <g key={f}>
-              <line x1={padding.left} y1={yScale(maxY * f)} x2={width - padding.right} y2={yScale(maxY * f)} stroke="var(--border-color)" strokeDasharray="4 4" />
+              <line x1={padding.left} y1={yScale(maxY * f)} x2={width - padding.right} y2={yScale(maxY * f)} stroke="var(--border-default)" strokeDasharray="4 4" />
               <text x={padding.left - 10} y={yScale(maxY * f) + 4} textAnchor="end" fill="var(--text-muted)" fontSize={10}>{Math.round(maxY * f)}</text>
             </g>
           ))}
@@ -1410,7 +1410,7 @@ export default function Sprints({ projectId }) {
         <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', maxWidth: width }}>
           {[0, 0.25, 0.5, 0.75, 1].map(f => (
             <g key={f}>
-              <line x1={padding.left} y1={yScale(maxY * f)} x2={width - padding.right} y2={yScale(maxY * f)} stroke="var(--border-color)" strokeDasharray="4 4" />
+              <line x1={padding.left} y1={yScale(maxY * f)} x2={width - padding.right} y2={yScale(maxY * f)} stroke="var(--border-default)" strokeDasharray="4 4" />
               <text x={padding.left - 10} y={yScale(maxY * f) + 4} textAnchor="end" fill="var(--text-muted)" fontSize={10}>{Math.round(maxY * f)}</text>
             </g>
           ))}
@@ -1490,7 +1490,7 @@ export default function Sprints({ projectId }) {
                   y1={y}
                   x2={padding.left + chartW}
                   y2={y}
-                  stroke="var(--border-color)"
+                  stroke="var(--border-default)"
                   strokeWidth="1"
                 />
                 <text
@@ -1564,7 +1564,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top}
             x2={padding.left}
             y2={padding.top + chartH}
-            stroke="var(--border-color)"
+            stroke="var(--border-default)"
             strokeWidth="1"
           />
           <line
@@ -1572,7 +1572,7 @@ export default function Sprints({ projectId }) {
             y1={padding.top + chartH}
             x2={padding.left + chartW}
             y2={padding.top + chartH}
-            stroke="var(--border-color)"
+            stroke="var(--border-default)"
             strokeWidth="1"
           />
 
