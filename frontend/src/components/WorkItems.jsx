@@ -1,13 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../api';
 import RichTextEditor from './shared/RichTextEditor';
-import {
-  Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
-  PointElement, LineElement, Tooltip, Legend,
-} from 'chart.js';
+import './shared/chartSetup';
 import { Doughnut, Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Tooltip, Legend);
 const PRIORITY_COLORS = { 1: '#ef4444', 2: '#f97316', 3: '#eab308', 4: '#6b7280' };
 const PRIORITY_LABELS = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' };
 const TYPE_COLORS = { Epic: '#8b5cf6', Feature: '#6366f1', 'User Story': '#3b82f6', Task: '#f59e0b', Bug: '#ef4444', Issue: '#f97316', 'Test Case': '#10b981' };

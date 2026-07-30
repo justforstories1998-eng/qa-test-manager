@@ -1,5 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { FiBold, FiItalic, FiUnderline, FiLink, FiList, FiCode, FiImage, FiType } from 'react-icons/fi';
+import { FiBold, FiItalic, FiUnderline, FiLink, FiList, FiCode } from 'react-icons/fi';
 
 const toolbarButtons = [
   { icon: FiBold, command: 'bold', title: 'Bold' },
@@ -10,7 +10,7 @@ const toolbarButtons = [
   { icon: FiLink, command: 'createLink', title: 'Link' },
 ];
 
-const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeight = 120, style = {} }) => {
+const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeight = 120, style: styleProp }) => {
   const editorRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -20,7 +20,7 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
       if (url) document.execCommand('createLink', false, url);
     } else if (command === 'insertHTML') {
       const sel = window.getSelection();
-      if (sel.rangeCount) {
+      if (sel && sel.rangeCount) {
         const range = sel.getRangeAt(0);
         if (valueArg === '<code>') {
           const selected = range.toString();
@@ -40,7 +40,7 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
     } else {
       document.execCommand(command, false, valueArg || null);
     }
-    editorRef.current?.focus();
+    if (editorRef.current) editorRef.current.focus();
   }, []);
 
   const handleInput = useCallback(() => {
@@ -55,16 +55,17 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
     if (e.key === 'u' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); execCommand('underline'); }
   }, [execCommand]);
 
+  const containerStyle = {
+    border: '1px solid ' + (isFocused ? '#6366f1' : 'var(--border-color)'),
+    borderRadius: '10px',
+    overflow: 'hidden',
+    background: 'var(--surface-secondary)',
+    transition: 'border-color 0.2s',
+    ...(styleProp || {}),
+  };
+
   return (
-    <div style={{
-      border: `1px solid ${isFocused ? '#6366f1' : 'var(--border-color)'}`,
-      borderRadius: '10px',
-      overflow: 'hidden',
-      background: 'var(--surface-secondary)',
-      transition: 'border-color 0.2s',
-      ...style,
-    }}>
-      {/* Toolbar */}
+    <div style={containerStyle}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: '2px',
         padding: '6px 8px',
@@ -86,15 +87,14 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
                 color: 'var(--text-muted)', cursor: 'pointer',
                 transition: 'all 0.15s',
               }}
-              onMouseEnter={e => { e.target.style.background = 'rgba(99,102,241,0.1)'; e.target.style.color = '#818cf8'; }}
-              onMouseLeave={e => { e.target.style.background = 'transparent'; e.target.style.color = 'var(--text-muted)'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; e.currentTarget.style.color = '#818cf8'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
             >
               <Icon size={14} />
             </button>
           );
         })}
       </div>
-      {/* Editor */}
       <div
         ref={editorRef}
         contentEditable
@@ -105,14 +105,13 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
         onKeyDown={handleKeyDown}
         data-placeholder={placeholder}
         style={{
-          minHeight: `${minHeight}px`,
+          minHeight: minHeight + 'px',
           padding: '12px 14px',
           fontSize: '13px',
           lineHeight: '1.6',
           color: 'var(--text-primary, #f1f5f9)',
           outline: 'none',
           wordBreak: 'break-word',
-          ...(!editorRef.current?.textContent && { color: 'var(--text-muted)' }),
         }}
         dangerouslySetInnerHTML={{ __html: value || '' }}
       />

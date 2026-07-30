@@ -1,20 +1,12 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
-import {
-  Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
-  PointElement, LineElement, Title, Tooltip, Legend, Filler,
-} from 'chart.js';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
+import './shared/chartSetup';
 import {
   FiRefreshCw, FiCheckCircle, FiXCircle, FiAlertCircle, FiTrendingUp,
   FiFolder, FiPlay, FiFileText, FiMinusCircle, FiActivity, FiClock,
   FiArrowUpRight, FiArrowDownRight, FiShield, FiLayers, FiBarChart2,
   FiPieChart, FiCalendar, FiChevronRight, FiInbox,
 } from 'react-icons/fi';
-
-ChartJS.register(
-  CategoryScale, LinearScale, BarElement, ArcElement,
-  PointElement, LineElement, Title, Tooltip, Legend, Filler
-);
 
 /* ═══════════════════ theme detection ═══════════════════ */
 const useTheme = () => {
