@@ -339,13 +339,25 @@ export default function WorkItems({ projectId }) {
 
   const handleBulkDelete = async () => {
     if (!confirm(`Delete ${selected.size} items?`)) return;
-    for (const id of selected) { await api.deleteWorkItem(id); }
+    await api.bulkDeleteWorkItems([...selected]);
     setSelected(new Set());
     fetchItems();
   };
 
   const handleBulkStatus = async (status) => {
-    for (const id of selected) { await api.updateWorkItem(id, { status }); }
+    await api.bulkUpdateWorkItems([...selected], { status });
+    setSelected(new Set());
+    fetchItems();
+  };
+
+  const handleBulkAssignee = async (assignee) => {
+    await api.bulkUpdateWorkItems([...selected], { assignee });
+    setSelected(new Set());
+    fetchItems();
+  };
+
+  const handleBulkType = async (type) => {
+    await api.bulkChangeType([...selected], type);
     setSelected(new Set());
     fetchItems();
   };
@@ -396,6 +408,7 @@ export default function WorkItems({ projectId }) {
       </td>
       <td style={{ ...tdStyle, textAlign: 'right' }} onClick={e => e.stopPropagation()}>
         <button onClick={() => setDetailItem(item)} style={{ ...btnIcon, marginRight: '4px' }} title="View">👁</button>
+        <button onClick={async (e) => { e.stopPropagation(); const res = await api.cloneWorkItem(item._id); if (res.success) fetchItems(); }} style={{ ...btnIcon, marginRight: '4px' }} title="Clone">📄</button>
         <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); fetchItems(); } }} style={{ ...btnIcon, color: '#ef4444' }} title="Delete">🗑</button>
       </td>
     </tr>
@@ -417,8 +430,9 @@ export default function WorkItems({ projectId }) {
           {selected.size > 0 && (
             <>
               <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{selected.size} selected</span>
-              <Select value="" onChange={v => { if (v) handleBulkStatus(v); }} options={[{ value: '', label: 'Set Status...' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '130px', height: '34px', fontSize: '12px' }} />
-              <button onClick={handleBulkDelete} style={{ ...btnDanger, ...btnSmall }}>Delete Selected</button>
+              <Select value="" onChange={v => { if (v) handleBulkStatus(v); }} options={[{ value: '', label: 'Status...' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '120px', height: '34px', fontSize: '12px' }} />
+              <Select value="" onChange={v => { if (v) handleBulkType(v); }} options={[{ value: '', label: 'Type...' }, ...TYPES.map(t => ({ value: t, label: t }))]} style={{ width: '120px', height: '34px', fontSize: '12px' }} />
+              <button onClick={handleBulkDelete} style={{ ...btnDanger, ...btnSmall }}>🗑 Delete</button>
             </>
           )}
           {tab === 'queries' && (
@@ -830,6 +844,10 @@ function WorkItemDetail({ item, onClose }) {
               <>
                 <button onClick={() => setEdit(true)} style={{ ...btnSecondary, ...btnSmall }}>✏ Edit</button>
                 <button onClick={handleSaveAsTemplate} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px' }}>📋 Save as Template</button>
+                <button onClick={async () => {
+                  const res = await api.cloneWorkItem(item._id);
+                  if (res.success) { fetchItems(); alert('Work item cloned!'); }
+                }} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px' }}>📄 Clone</button>
                 <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }} style={{ ...btnDanger, ...btnSmall }}>🗑</button>
                 <button onClick={onClose} style={{ ...btnIcon }}>×</button>
               </>
@@ -987,13 +1005,13 @@ function WorkItemDetail({ item, onClose }) {
             </div>
           </div>
 
-          {history.length > 0 && (
+          {(history.length > 0 || (item.fieldHistory || []).length > 0) && (
             <div style={{ marginBottom: '20px' }}>
-              <label style={labelStyle}>State History</label>
+              <label style={labelStyle}>History ({history.length + (item.fieldHistory || []).length} changes)</label>
               <div style={{ position: 'relative', paddingLeft: '20px' }}>
                 <div style={{ position: 'absolute', left: '7px', top: '8px', bottom: '8px', width: '2px', background: 'rgba(99,102,241,0.2)' }} />
                 {history.map((h, i) => (
-                  <div key={i} style={{ position: 'relative', marginBottom: '12px', paddingLeft: '12px' }}>
+                  <div key={`s-${i}`} style={{ position: 'relative', marginBottom: '12px', paddingLeft: '12px' }}>
                     <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: STATUS_COLORS[h.status] || '#6366f1', border: '2px solid #1e1e2e' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                       <Badge text={h.status} color={STATUS_COLORS[h.status] || '#888'} small />
@@ -1002,7 +1020,20 @@ function WorkItemDetail({ item, onClose }) {
                         {h.changedBy ? ` · ${h.changedBy}` : ''}
                       </span>
                     </div>
-                    {h.note && <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{h.note}</div>}
+                  </div>
+                ))}
+                {(item.fieldHistory || []).slice().reverse().map((h, i) => (
+                  <div key={`f-${i}`} style={{ position: 'relative', marginBottom: '12px', paddingLeft: '12px' }}>
+                    <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: '#818cf8', border: '2px solid #1e1e2e' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '12px', color: 'var(--text-primary, #f1f5f9)' }}>{h.field}</span>
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                        {String(h.oldValue || '—')} → {String(h.newValue || '—')}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                      {h.changedAt ? new Date(h.changedAt).toLocaleString() : ''} {h.changedBy ? `· ${h.changedBy}` : ''}
+                    </span>
                   </div>
                 ))}
               </div>

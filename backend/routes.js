@@ -366,6 +366,13 @@ router.post('/work-items', async (req, res, next) => { try { res.status(201).jso
 router.put('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateWorkItem(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/work-items/:id', async (req, res, next) => { try { await softDeleteWorkItem(req.params.id, req.user?.firstName || 'Unknown'); res.json({ success: true }); } catch (e) { next(e); } });
 router.put('/work-items/batch/order', async (req, res, next) => { try { await updateWorkItemOrder(req.body.items); res.json({ success: true }); } catch (e) { next(e); } });
+router.post('/work-items/:id/clone', async (req, res, next) => { try { res.status(201).json({ success: true, data: await cloneWorkItem(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.put('/work-items/bulk/update', async (req, res, next) => { try { res.json({ success: true, data: await bulkUpdateWorkItems(req.body.ids, req.body.updates) }); } catch (e) { next(e); } });
+router.post('/work-items/bulk/delete', async (req, res, next) => { try { res.json({ success: true, data: await bulkDeleteWorkItems(req.body.ids) }); } catch (e) { next(e); } });
+router.post('/work-items/bulk/change-type', async (req, res, next) => { try { res.json({ success: true, data: await bulkChangeType(req.body.ids, req.body.newType) }); } catch (e) { next(e); } });
+router.post('/work-items/bulk/move-iteration', async (req, res, next) => { try { res.json({ success: true, data: await bulkMoveToIteration(req.body.ids, req.body.iterationPath) }); } catch (e) { next(e); } });
+router.post('/work-items/bulk/add-tags', async (req, res, next) => { try { res.json({ success: true, data: await bulkAddTags(req.body.ids, req.body.tags) }); } catch (e) { next(e); } });
+router.post('/work-items/bulk/remove-tags', async (req, res, next) => { try { res.json({ success: true, data: await bulkRemoveTags(req.body.ids, req.body.tags) }); } catch (e) { next(e); } });
 
 router.post('/work-items/:id/attachments', upload.single('file'), async (req, res, next) => {
   try {

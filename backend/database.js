@@ -101,6 +101,7 @@ const workItemSchema = new mongoose.Schema({
   order: { type: Number, default: 0 },
   customFields: { type: mongoose.Schema.Types.Mixed, default: {} },
   stateHistory: [{ status: String, changedAt: { type: Date, default: Date.now }, changedBy: String }],
+  fieldHistory: [{ field: String, oldValue: mongoose.Schema.Types.Mixed, newValue: mongoose.Schema.Types.Mixed, changedAt: { type: Date, default: Date.now }, changedBy: String }],
   attachments: [{ url: String, originalName: String, mimeType: String, size: Number, uploadedAt: { type: Date, default: Date.now }, uploadedBy: String }],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
@@ -352,11 +353,25 @@ export const createWorkItem = async (data) => {
   return new WorkItem(data).save();
 };
 export const updateWorkItem = async (id, data) => {
-  if (data.status) {
-    const existing = await WorkItem.findById(id);
-    if (existing && existing.status !== data.status) {
-      if (!data.stateHistory) data.stateHistory = existing.stateHistory || [];
-      data.stateHistory = [...(data.stateHistory || existing.stateHistory || []), { status: data.status, changedAt: new Date() }];
+  const existing = await WorkItem.findById(id);
+  if (existing) {
+    const changes = [];
+    const trackedFields = ['status', 'assignee', 'priority', 'severity', 'type', 'storyPoints', 'effort', 'iterationPath', 'areaPath', 'title'];
+    for (const field of trackedFields) {
+      if (data[field] !== undefined && data[field] !== existing[field]) {
+        changes.push({ field, oldValue: existing[field], newValue: data[field], changedAt: new Date(), changedBy: data.changedBy || 'System' });
+      }
+    }
+    if (data.status && data.status !== existing.status) {
+      const history = existing.stateHistory || [];
+      history.push({ status: data.status, changedAt: new Date(), changedBy: data.changedBy || 'System' });
+      data.stateHistory = history;
+    }
+    if (changes.length > 0) {
+      const existingHistory = existing.stateHistory || [];
+      const statusChange = data.status && data.status !== existing.status ? [{ status: data.status, changedAt: new Date(), changedBy: data.changedBy || 'System' }] : [];
+      data.stateHistory = [...existingHistory, ...statusChange];
+      data.fieldHistory = [...(existing.fieldHistory || []), ...changes];
     }
   }
   return WorkItem.findByIdAndUpdate(id, data, { new: true });

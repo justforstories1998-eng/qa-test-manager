@@ -202,6 +202,13 @@ const api = {
   createWorkItem: (data) => apiClient.post('/work-items', data),
   updateWorkItem: (id, data) => apiClient.put(`/work-items/${id}`, data),
   deleteWorkItem: (id) => apiClient.delete(`/work-items/${id}`),
+  cloneWorkItem: (id, overrides = {}) => apiClient.post(`/work-items/${id}/clone`, overrides),
+  bulkUpdateWorkItems: (ids, updates) => apiClient.put('/work-items/bulk/update', { ids, updates }),
+  bulkDeleteWorkItems: (ids) => apiClient.post('/work-items/bulk/delete', { ids }),
+  bulkChangeType: (ids, newType) => apiClient.post('/work-items/bulk/change-type', { ids, newType }),
+  bulkMoveToIteration: (ids, iterationPath) => apiClient.post('/work-items/bulk/move-iteration', { ids, iterationPath }),
+  bulkAddTags: (ids, tags) => apiClient.post('/work-items/bulk/add-tags', { ids, tags }),
+  bulkRemoveTags: (ids, tags) => apiClient.post('/work-items/bulk/remove-tags', { ids, tags }),
   updateWorkItemsOrder: (items) => apiClient.put('/work-items/batch/order', { items }),
   uploadWorkItemAttachment: (workItemId, file) => {
     const fd = new FormData();
