@@ -260,9 +260,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                   <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>{user.firstName} {user.lastName}</div>
                   {user.email && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{user.email}</div>}
                 </div>
-                <button onClick={onLogout} className="btn btn-danger-ghost" style={{ width: '100%', justifyContent: 'flex-start', borderRadius: 0, padding: '10px 14px' }}>
-                  <FiLogOut size={14} /> Sign Out
-                </button>
               </div>
             )}
             <div className="sidebar-user" onClick={() => { setShowUserMenu(p => !p); setShowNotifications(false); }}>
@@ -278,6 +275,16 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
               )}
               {!collapsed && <FiChevronDown size={13} style={{ color: 'var(--sidebar-text)', opacity: 0.5, transition: 'transform 0.2s', transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)' }} />}
             </div>
+            {/* Visible Logout Button */}
+            <button
+              onClick={onLogout}
+              className="sidebar-logout"
+              style={{ justifyContent: collapsed ? 'center' : 'flex-start', margin: collapsed ? '4px 8px' : '4px 0' }}
+              title="Sign Out"
+            >
+              <FiLogOut size={17} />
+              {!collapsed && <span>Sign Out</span>}
+            </button>
           </div>
         )}
 

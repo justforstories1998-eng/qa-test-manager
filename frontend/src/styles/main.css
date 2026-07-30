@@ -1,6 +1,8 @@
 /* ============================================
    QA TEST MANAGER — MASTER STYLESHEET
    ============================================ */
+@import 'tailwindcss';
+
 @import 'base/_variables.css';
 @import 'base/_reset.css';
 @import 'base/_typography.css';

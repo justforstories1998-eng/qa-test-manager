@@ -3,19 +3,22 @@
    ============================================ */
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 .app-content {
   flex: 1;
   margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 .main-content {
   flex: 1;
   padding: var(--space-6);
   overflow-y: auto;
+  overflow-x: hidden;
 }
 .page-header {
   display: flex;

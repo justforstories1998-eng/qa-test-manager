@@ -1,8 +1,14 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      '@': '/src',
+    },
+  },
   server: {
     port: 3000,
     open: true,
@@ -15,7 +21,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'build', // This is why we need to set 'build' in Render
-    chunkSizeWarningLimit: 1600, // This silences the warning you saw
+    outDir: 'build',
+    chunkSizeWarningLimit: 1600,
   }
 });
