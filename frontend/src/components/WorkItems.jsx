@@ -73,19 +73,33 @@ function Modal({ open, onClose, title, children, wide }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'var(--surface-overlay)', backdropFilter: 'blur(4px)' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} />
       <div style={{
-        position: 'relative', width: wide ? '800px' : '520px', maxWidth: '95vw', maxHeight: '90vh',
+        position: 'relative', width: wide ? '780px' : '500px', maxWidth: '92vw', maxHeight: '88vh',
         background: 'var(--surface-elevated)', borderRadius: '16px', border: '1px solid var(--border-color)',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.5)', display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
+        boxShadow: '0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03) inset',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        animation: 'modalSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
-          <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-primary)', fontWeight: '600' }}>{title}</h3>
-          <button onClick={onClose} style={{ ...btnIcon, fontSize: '18px', lineHeight: 1, padding: '4px 8px' }}>×</button>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '18px 24px', borderBottom: '1px solid var(--border-color)',
+          background: 'var(--surface-secondary)',
+        }}>
+          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>{title}</h3>
+          <button onClick={onClose} style={{
+            width: '28px', height: '28px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+            background: 'var(--surface-tertiary)', color: 'var(--text-muted)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '16px', lineHeight: 1, transition: 'all 0.15s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-bg)'; e.currentTarget.style.color = 'var(--danger)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-tertiary)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >×</button>
         </div>
-        <div style={{ padding: '20px', overflowY: 'auto', flex: 1 }}>{children}</div>
+        <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>{children}</div>
       </div>
+      <style>{`@keyframes modalSlideIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
     </div>
   );
 }
@@ -108,27 +122,24 @@ function WorkItemForm({ initial, onSubmit, onCancel, submitLabel, templates, pro
     activity: '', acceptanceCriteria: '', ...initial,
   });
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
-  const fields = [
-    { key: 'title', label: 'Title', type: 'text', full: true, required: true },
-    { key: 'type', label: 'Type', type: 'select', options: TYPES },
-    { key: 'priority', label: 'Priority', type: 'select', options: PRIORITIES.map(p => ({ value: p, label: `${p} - ${PRIORITY_LABELS[p]}` })) },
-    { key: 'severity', label: 'Severity', type: 'select', options: SEVERITIES },
-    { key: 'status', label: 'Status', type: 'select', options: STATUSES },
-    { key: 'assignee', label: 'Assignee', type: 'text' },
-    { key: 'storyPoints', label: 'Story Points', type: 'number' },
-    { key: 'effort', label: 'Effort', type: 'number' },
-    { key: 'remainingWork', label: 'Remaining Work', type: 'number' },
-    { key: 'originalEstimate', label: 'Original Estimate', type: 'number' },
-    { key: 'completedWork', label: 'Completed Work', type: 'number' },
-    { key: 'activity', label: 'Activity', type: 'select', options: ACTIVITIES },
-    { key: 'areaPath', label: 'Area Path', type: 'text' },
-    { key: 'iterationPath', label: 'Iteration Path', type: 'text' },
-    { key: 'tags', label: 'Tags (comma-separated)', type: 'text', full: true },
-  ];
+
+  const handleSubmit = () => {
+    if (!form.title.trim()) return;
+    const payload = { ...form };
+    payload.storyPoints = payload.storyPoints !== '' ? Number(payload.storyPoints) : undefined;
+    payload.effort = payload.effort !== '' ? Number(payload.effort) : undefined;
+    payload.remainingWork = payload.remainingWork !== '' ? Number(payload.remainingWork) : undefined;
+    payload.originalEstimate = payload.originalEstimate !== '' ? Number(payload.originalEstimate) : undefined;
+    payload.completedWork = payload.completedWork !== '' ? Number(payload.completedWork) : undefined;
+    payload.tags = typeof payload.tags === 'string' ? payload.tags.split(',').map(t => t.trim()).filter(Boolean) : payload.tags;
+    onSubmit(payload);
+  };
+
   return (
     <div>
+      {/* ── Template selector ── */}
       {templates && templates.length > 0 && (
-        <div style={{ marginBottom: '14px', padding: '10px 12px', background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+        <div style={{ marginBottom: '16px', padding: '12px 14px', background: 'var(--surface-secondary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
           <label style={{ ...labelStyle, marginBottom: '6px', display: 'block' }}>Apply Template</label>
           <select value={selectedTemplate} onChange={e => {
             const tpl = templates.find(t => t._id === e.target.value);
@@ -143,51 +154,118 @@ function WorkItemForm({ initial, onSubmit, onCancel, submitLabel, templates, pro
                 tags: tpl.tags?.length ? tpl.tags.join(', ') : p.tags, description: tpl.description || p.description,
               }));
             }
-          }} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}>
+          }} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--surface-tertiary)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}>
             <option value="">— Select a template —</option>
             {templates.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
           </select>
         </div>
       )}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-        {fields.map(f => (
-          <div key={f.key} style={{ gridColumn: f.full ? '1 / -1' : undefined }}>
-            <label style={labelStyle}>{f.label}</label>
-            {f.type === 'select' ? (
-              <Select value={form[f.key]} onChange={v => set(f.key, f.key === 'priority' ? Number(v) : v)}
-                options={f.options} style={{ height: '38px' }} />
-            ) : f.key === 'description' || f.key === 'acceptanceCriteria' ? (
-              <RichTextEditor value={form[f.key]} onChange={v => set(f.key, v)} placeholder={f.label} minHeight={80} />
-            ) : (
-              <input type={f.type} value={form[f.key]} onChange={e => set(f.key, f.type === 'number' ? e.target.value : e.target.value)}
-                style={{ ...inputStyle, height: '38px' }} />
-            )}
+
+      {/* ── Type color bar ── */}
+      <div style={{ height: '3px', background: TYPE_COLORS[form.type] || '#888', borderRadius: '2px', marginBottom: '20px', transition: 'background 0.2s' }} />
+
+      {/* ── Title ── */}
+      <div style={{ marginBottom: '20px' }}>
+        <label style={labelStyle}>Title *</label>
+        <input value={form.title} onChange={e => set('title', e.target.value)}
+          placeholder="Enter work item title..."
+          style={{ ...inputStyle, fontSize: '15px', fontWeight: '600', padding: '10px 14px' }} />
+      </div>
+
+      {/* ── Section: Details ── */}
+      <div style={{ padding: '0 0 16px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
+        <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Details</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+          <div>
+            <label style={labelStyle}>Type</label>
+            <Select value={form.type} onChange={v => set('type', v)} options={TYPES} style={{ height: '36px' }} />
           </div>
-        ))}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-        <div>
-          <label style={labelStyle}>Description</label>
-          <RichTextEditor value={form.description} onChange={v => set('description', v)} placeholder="Describe the work item..." minHeight={100} />
+          <div>
+            <label style={labelStyle}>Priority</label>
+            <Select value={form.priority} onChange={v => set('priority', Number(v))}
+              options={PRIORITIES.map(p => ({ value: p, label: `${p} - ${PRIORITY_LABELS[p]}` }))} style={{ height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Severity</label>
+            <Select value={form.severity} onChange={v => set('severity', v)}
+              options={SEVERITIES.map(s => ({ value: s, label: s }))} style={{ height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Status</label>
+            <Select value={form.status} onChange={v => set('status', v)}
+              options={STATUSES.map(s => ({ value: s, label: s }))} style={{ height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Assignee</label>
+            <input value={form.assignee} onChange={e => set('assignee', e.target.value)}
+              placeholder="e.g. john" style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Activity</label>
+            <Select value={form.activity} onChange={v => set('activity', v)}
+              options={ACTIVITIES.map(a => ({ value: a, label: a }))} style={{ height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Story Points</label>
+            <input type="number" value={form.storyPoints} onChange={e => set('storyPoints', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Effort</label>
+            <input type="number" value={form.effort} onChange={e => set('effort', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Remaining Work</label>
+            <input type="number" value={form.remainingWork} onChange={e => set('remainingWork', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Original Estimate</label>
+            <input type="number" value={form.originalEstimate} onChange={e => set('originalEstimate', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Completed Work</label>
+            <input type="number" value={form.completedWork} onChange={e => set('completedWork', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Area Path</label>
+            <input value={form.areaPath} onChange={e => set('areaPath', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
+          <div>
+            <label style={labelStyle}>Iteration Path</label>
+            <input value={form.iterationPath} onChange={e => set('iterationPath', e.target.value)}
+              style={{ ...inputStyle, height: '36px' }} />
+          </div>
         </div>
-        <div>
-          <label style={labelStyle}>Acceptance Criteria</label>
-          <RichTextEditor value={form.acceptanceCriteria} onChange={v => set('acceptanceCriteria', v)} placeholder="Define acceptance criteria..." minHeight={100} />
-        </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+
+      {/* ── Section: Tags ── */}
+      <div style={{ padding: '0 0 16px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
+        <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Tags</div>
+        <input value={form.tags} onChange={e => set('tags', e.target.value)}
+          placeholder="tag1, tag2, tag3" style={{ ...inputStyle, height: '36px' }} />
+      </div>
+
+      {/* ── Section: Description ── */}
+      <div style={{ padding: '0 0 16px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
+        <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Description</div>
+        <RichTextEditor value={form.description} onChange={v => set('description', v)} placeholder="Describe the work item..." minHeight={100} />
+      </div>
+
+      {/* ── Section: Acceptance Criteria ── */}
+      <div style={{ padding: '0 0 16px', borderBottom: '1px solid var(--border-color)', marginBottom: '16px' }}>
+        <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Acceptance Criteria</div>
+        <RichTextEditor value={form.acceptanceCriteria} onChange={v => set('acceptanceCriteria', v)} placeholder="Define acceptance criteria..." minHeight={100} />
+      </div>
+
+      {/* ── Actions ── */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px' }}>
         <button onClick={onCancel} style={btnSecondary}>Cancel</button>
-        <button onClick={() => {
-          if (!form.title.trim()) return;
-          const payload = { ...form };
-          payload.storyPoints = payload.storyPoints !== '' ? Number(payload.storyPoints) : undefined;
-          payload.effort = payload.effort !== '' ? Number(payload.effort) : undefined;
-          payload.remainingWork = payload.remainingWork !== '' ? Number(payload.remainingWork) : undefined;
-          payload.originalEstimate = payload.originalEstimate !== '' ? Number(payload.originalEstimate) : undefined;
-          payload.completedWork = payload.completedWork !== '' ? Number(payload.completedWork) : undefined;
-          payload.tags = typeof payload.tags === 'string' ? payload.tags.split(',').map(t => t.trim()).filter(Boolean) : payload.tags;
-          onSubmit(payload);
-        }} style={btnPrimary}>{submitLabel || 'Create'}</button>
+        <button onClick={handleSubmit} style={btnPrimary}>{submitLabel || 'Create'}</button>
       </div>
     </div>
   );
@@ -926,103 +1004,128 @@ function WorkItemDetail({ item, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', justifyContent: 'flex-end' }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }} onClick={onClose} />
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)' }} onClick={onClose} />
       <div style={{
-        position: 'relative', width: '680px', maxWidth: '95vw', height: '100vh', background: '#1e1e2e',
+        position: 'relative', width: '720px', maxWidth: '95vw', height: '100vh',
+        background: 'var(--surface-elevated)',
         borderLeft: '1px solid var(--border-color)',
-        boxShadow: '-10px 0 40px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        boxShadow: '-16px 0 48px rgba(0,0,0,0.4)',
+        display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        animation: 'panelSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
       }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-              <span style={{ fontFamily: 'monospace', fontSize: '12px', color: 'var(--text-muted)' }}>WI-{item.workItemId}</span>
-              <Badge text={item.type} color={TYPE_COLORS[item.type] || '#888'} small />
-              <Badge text={item.status} color={STATUS_COLORS[item.status] || '#888'} small />
+        {/* ── Type color bar ── */}
+        <div style={{ height: '3px', background: TYPE_COLORS[item.type] || '#888', flexShrink: 0 }} />
+
+        {/* ── Header ── */}
+        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', background: 'var(--surface-tertiary)', padding: '3px 8px', borderRadius: '6px' }}>WI-{item.workItemId}</span>
+              <Badge text={item.type} color={TYPE_COLORS[item.type] || '#888'} />
+              <Badge text={item.status} color={STATUS_COLORS[item.status] || '#888'} />
+              <Badge text={`${PRIORITY_LABELS[item.priority] || item.priority}`} color={PRIORITY_COLORS[item.priority] || '#888'} small />
             </div>
-            {edit ? (
-              <input value={form.title} onChange={e => set('title', e.target.value)}
-                style={{ ...inputStyle, fontSize: '18px', fontWeight: '600', padding: '6px 10px', marginBottom: '4px' }} />
-            ) : (
-              <h2 style={{ margin: 0, fontSize: '18px', color: 'var(--text-primary, #f1f5f9)', fontWeight: '600' }}>{item.title}</h2>
-            )}
+            <button onClick={onClose} style={{
+              width: '30px', height: '30px', borderRadius: '8px', border: '1px solid var(--border-color)',
+              background: 'var(--surface-secondary)', color: 'var(--text-muted)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px',
+              transition: 'all 0.15s', flexShrink: 0,
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--danger-bg)'; e.currentTarget.style.color = 'var(--danger)'; e.currentTarget.style.borderColor = 'var(--danger-border)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--surface-secondary)'; e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+            >×</button>
           </div>
-          <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+          {edit ? (
+            <input value={form.title} onChange={e => set('title', e.target.value)}
+              style={{ ...inputStyle, fontSize: '17px', fontWeight: '600', padding: '8px 12px', letterSpacing: '-0.01em' }} />
+          ) : (
+            <h2 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: 1.3 }}>{item.title}</h2>
+          )}
+          {/* ── Action bar ── */}
+          <div style={{ display: 'flex', gap: '4px', marginTop: '14px', flexWrap: 'wrap' }}>
             {edit ? (
               <>
-                <button onClick={handleSave} style={{ ...btnPrimary, ...btnSmall }}>Save</button>
-                <button onClick={() => { setEdit(false); setForm({ ...item, tags: (item.tags || []).join(', ') }); }} style={btnSecondary}>Cancel</button>
+                <button onClick={handleSave} style={{ ...btnPrimary, ...btnSmall }}>Save changes</button>
+                <button onClick={() => { setEdit(false); setForm({ ...item, tags: (item.tags || []).join(', ') }); }} style={{ ...btnSecondary, ...btnSmall }}>Cancel</button>
               </>
             ) : (
               <>
                 <button onClick={() => setEdit(true)} style={{ ...btnSecondary, ...btnSmall }}>✏ Edit</button>
-                <button onClick={handleSaveAsTemplate} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px' }}>📋 Save as Template</button>
-                <button onClick={async () => {
-                  const res = await api.cloneWorkItem(item._id);
-                  if (res.success) { fetchItems(); alert('Work item cloned!'); }
-                }} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px' }}>📄 Clone</button>
-                <button onClick={handleToggleFollow} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px', color: isFollowing ? '#2563eb' : undefined }}>{isFollowing ? '🔕 Unfollow' : '🔔 Follow'}</button>
-                <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }} style={{ ...btnDanger, ...btnSmall }}>🗑</button>
-                <button onClick={onClose} style={{ ...btnIcon }}>×</button>
+                <button onClick={handleSaveAsTemplate} style={{ ...btnSecondary, ...btnSmall }}>📋 Template</button>
+                <button onClick={async () => { const res = await api.cloneWorkItem(item._id); if (res.success) { fetchItems(); alert('Cloned!'); } }} style={{ ...btnSecondary, ...btnSmall }}>📄 Clone</button>
+                <button onClick={handleToggleFollow} style={{ ...btnSecondary, ...btnSmall, color: isFollowing ? '#6366f1' : undefined }}>{isFollowing ? '🔕 Following' : '🔔 Follow'}</button>
+                <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }} style={{ ...btnDanger, ...btnSmall }}>🗑 Delete</button>
               </>
             )}
           </div>
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-            <FieldEdit label="Priority" field="priority" type="select" options={PRIORITIES.map(p => ({ value: p, label: `${p} - ${PRIORITY_LABELS[p]}` }))} />
-            <FieldEdit label="Severity" field="severity" type="select" options={SEVERITIES.map(s => ({ value: s, label: s }))} />
-            <FieldEdit label="Status" field="status" type="select" options={STATUSES.map(s => ({ value: s, label: s }))} />
-            <FieldEdit label="Assignee" field="assignee" />
-            <FieldEdit label="Story Points" field="storyPoints" type="number" />
-            <FieldEdit label="Effort" field="effort" type="number" />
-            <FieldEdit label="Remaining Work" field="remainingWork" type="number" />
-            <FieldEdit label="Original Estimate" field="originalEstimate" type="number" />
-            <FieldEdit label="Completed Work" field="completedWork" type="number" />
-            <FieldEdit label="Activity" field="activity" type="select" options={ACTIVITIES.map(a => ({ value: a, label: a }))} />
-            <FieldEdit label="Area Path" field="areaPath" />
-            <FieldEdit label="Iteration Path" field="iterationPath" />
+        {/* ── Scrollable body ── */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
+          {/* Section: Details */}
+          <div style={{ padding: '20px 0', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '14px' }}>Details</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+              <FieldEdit label="Priority" field="priority" type="select" options={PRIORITIES.map(p => ({ value: p, label: `${p} - ${PRIORITY_LABELS[p]}` }))} />
+              <FieldEdit label="Severity" field="severity" type="select" options={SEVERITIES.map(s => ({ value: s, label: s }))} />
+              <FieldEdit label="Status" field="status" type="select" options={STATUSES.map(s => ({ value: s, label: s }))} />
+              <FieldEdit label="Assignee" field="assignee" />
+              <FieldEdit label="Story Points" field="storyPoints" type="number" />
+              <FieldEdit label="Effort" field="effort" type="number" />
+              <FieldEdit label="Remaining Work" field="remainingWork" type="number" />
+              <FieldEdit label="Original Estimate" field="originalEstimate" type="number" />
+              <FieldEdit label="Completed Work" field="completedWork" type="number" />
+              <FieldEdit label="Activity" field="activity" type="select" options={ACTIVITIES.map(a => ({ value: a, label: a }))} />
+              <FieldEdit label="Area Path" field="areaPath" />
+              <FieldEdit label="Iteration Path" field="iterationPath" />
+            </div>
           </div>
 
-          <div style={{ marginBottom: '16px' }}>
-            <FieldEdit label="Description" field="description" type="textarea" />
-          </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <FieldEdit label="Acceptance Criteria" field="acceptanceCriteria" type="textarea" />
-          </div>
-
-          <div style={{ marginBottom: '20px' }}>
-            <label style={labelStyle}>Tags</label>
+          {/* Section: Tags */}
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Tags</div>
             {edit ? (
               <input value={displayForm('tags')} onChange={e => set('tags', e.target.value)}
-                placeholder="tag1, tag2, tag3" style={inputStyle} />
+                placeholder="tag1, tag2, tag3" style={{ ...inputStyle, height: '36px' }} />
             ) : (
-              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                {(item.tags || []).length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No tags</span>}
+              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                {(item.tags || []).length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>No tags yet</span>}
                 {(item.tags || []).map((t, i) => (
-                  <span key={i} style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '5px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{t}</span>
+                  <span key={i} style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '6px', background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', fontWeight: '500' }}>{t}</span>
                 ))}
               </div>
             )}
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
+          {/* Section: Description */}
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Description</div>
+            <FieldEdit label="" field="description" type="textarea" />
+          </div>
+
+          {/* Section: Acceptance Criteria */}
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>Acceptance Criteria</div>
+            <FieldEdit label="" field="acceptanceCriteria" type="textarea" />
+          </div>
+
+          {/* Section: Attachments */}
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Attachments ({attachments.length})</label>
-              <label style={{ ...btnPrimary, ...btnSmall, cursor: 'pointer' }}>
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Attachments ({attachments.length})</div>
+              <label style={{ ...btnPrimary, ...btnSmall, cursor: 'pointer', fontSize: '11px' }}>
                 + Upload
                 <input type="file" onChange={handleUploadAttachment} style={{ display: 'none' }} />
               </label>
             </div>
             {attachments.length === 0 ? (
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No attachments</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '12px', background: 'var(--surface-secondary)', borderRadius: '8px', textAlign: 'center' }}>No attachments yet</div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {attachments.map((att, idx) => (
                   <div key={idx} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px',
-                    background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)',
+                    background: 'var(--surface-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
                       <span style={{ fontSize: '14px' }}>📎</span>
@@ -1038,28 +1141,29 @@ function WorkItemDetail({ item, onClose }) {
             )}
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
+          {/* Section: Links */}
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Links ({links.length})</label>
-              <button onClick={() => { setShowLinkModal(true); loadAllItems(); }} style={{ ...btnPrimary, ...btnSmall }}>+ Add Link</button>
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Links ({links.length})</div>
+              <button onClick={() => { setShowLinkModal(true); loadAllItems(); }} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>+ Add Link</button>
             </div>
             {links.length === 0 ? (
-              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No linked items</div>
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '12px', background: 'var(--surface-secondary)', borderRadius: '8px', textAlign: 'center' }}>No linked items</div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 {links.map(link => {
                   const target = link.targetId && typeof link.targetId === 'object' ? link.targetId : null;
                   return (
                     <div key={link._id} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px',
-                      background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)',
+                      background: 'var(--surface-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Badge text={link.linkType} color="#6366f1" small />
-                        <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
                           {target ? `WI-${target.workItemId}` : 'WI-?'}
                         </span>
-                        <span style={{ fontSize: '13px', color: 'var(--text-primary, #f1f5f9)' }}>{target?.title || 'Unknown'}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--text-primary)' }}>{target?.title || 'Unknown'}</span>
                         {link.comment && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>({link.comment})</span>}
                       </div>
                       <button onClick={() => handleDeleteLink(link._id)} style={{ ...btnIcon, color: '#ef4444', padding: '4px 6px' }}>×</button>
@@ -1070,41 +1174,46 @@ function WorkItemDetail({ item, onClose }) {
             )}
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ ...labelStyle, marginBottom: '10px', display: 'block' }}>Discussion ({discussions.length})</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
+          {/* Section: Discussion */}
+          <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>Discussion ({discussions.length})</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
               {discussions.map(c => (
-                <div key={c._id} style={{ padding: '10px 12px', background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#fff', fontWeight: '700' }}>
+                <div key={c._id} style={{ padding: '12px', background: 'var(--surface-secondary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#fff', fontWeight: '700' }}>
                         {(c.author || '?')[0]?.toUpperCase()}
                       </div>
-                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary, #f1f5f9)' }}>{c.author}</span>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary)' }}>{c.author}</span>
                       <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(c.createdAt).toLocaleString()}</span>
                       {c.editedAt && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontStyle: 'italic' }}>(edited)</span>}
                     </div>
-                    <div style={{ display: 'flex', gap: '4px' }}>
-                      <button onClick={() => { setEditingComment(c._id); setEditCommentText(c.content); }} style={{ ...btnIcon, fontSize: '10px', padding: '2px 4px' }}>✏️</button>
-                      <button onClick={() => handleDeleteComment(c._id)} style={{ ...btnIcon, color: '#ef4444', fontSize: '10px', padding: '2px 4px' }}>🗑</button>
+                    <div style={{ display: 'flex', gap: '2px' }}>
+                      <button onClick={() => { setEditingComment(c._id); setEditCommentText(c.content); }} style={{ ...btnIcon, fontSize: '10px', padding: '3px 5px' }}>✏️</button>
+                      <button onClick={() => handleDeleteComment(c._id)} style={{ ...btnIcon, color: '#ef4444', fontSize: '10px', padding: '3px 5px' }}>🗑</button>
                     </div>
                   </div>
                   {editingComment === c._id ? (
                     <div>
                       <textarea value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ ...inputStyle, minHeight: '60px', fontSize: '12px' }} />
-                      <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                      <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
                         <button onClick={() => handleEditComment(c._id)} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>Save</button>
                         <button onClick={() => setEditingComment(null)} style={{ ...btnSmall, fontSize: '11px' }}>Cancel</button>
                       </div>
                     </div>
                   ) : (
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6', whiteSpace: 'pre-wrap' }}>
                       {c.content.split(/(@\w+)/g).map((part, i) => part.startsWith('@') ? <span key={i} style={{ color: '#818cf8', fontWeight: '600' }}>{part}</span> : part)}
                     </div>
                   )}
-                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                  <div style={{ display: 'flex', gap: '3px', marginTop: '8px' }}>
                     {['👍', '❤️', '😂', '🎉', '👀'].map(emoji => (
-                      <button key={emoji} onClick={() => handleReaction(c._id, emoji)} style={{ padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: (c.reactions || []).some(r => r.emoji === emoji) ? 'rgba(99,102,241,0.15)' : 'transparent', cursor: 'pointer', fontSize: '12px' }}>
+                      <button key={emoji} onClick={() => handleReaction(c._id, emoji)} style={{
+                        padding: '3px 7px', borderRadius: '6px', border: '1px solid var(--border-color)',
+                        background: (c.reactions || []).some(r => r.emoji === emoji) ? 'rgba(99,102,241,0.12)' : 'transparent',
+                        cursor: 'pointer', fontSize: '12px', transition: 'all 0.15s',
+                      }}>
                         {emoji} {(c.reactions || []).filter(r => r.emoji === emoji).length || ''}
                       </button>
                     ))}
@@ -1113,19 +1222,20 @@ function WorkItemDetail({ item, onClose }) {
               ))}
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-              <textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Add a comment... Use @name to mention" style={{ ...inputStyle, minHeight: '60px', flex: 1, fontSize: '13px' }} />
+              <textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Add a comment... Use @name to mention" style={{ ...inputStyle, minHeight: '56px', flex: 1, fontSize: '13px' }} />
               <button onClick={handleAddComment} disabled={!newComment.trim()} style={{ ...btnPrimary, alignSelf: 'flex-end', opacity: !newComment.trim() ? 0.5 : 1 }}>Post</button>
             </div>
           </div>
 
+          {/* Section: History */}
           {(history.length > 0 || (item.fieldHistory || []).length > 0) && (
-            <div style={{ marginBottom: '20px' }}>
-              <label style={labelStyle}>History ({history.length + (item.fieldHistory || []).length} changes)</label>
+            <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>History ({history.length + (item.fieldHistory || []).length})</div>
               <div style={{ position: 'relative', paddingLeft: '20px' }}>
-                <div style={{ position: 'absolute', left: '7px', top: '8px', bottom: '8px', width: '2px', background: 'rgba(99,102,241,0.2)' }} />
+                <div style={{ position: 'absolute', left: '7px', top: '8px', bottom: '8px', width: '2px', background: 'rgba(99,102,241,0.15)' }} />
                 {history.map((h, i) => (
                   <div key={`s-${i}`} style={{ position: 'relative', marginBottom: '12px', paddingLeft: '12px' }}>
-                    <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: STATUS_COLORS[h.status] || '#6366f1', border: '2px solid #1e1e2e' }} />
+                    <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: STATUS_COLORS[h.status] || '#6366f1', border: '2px solid var(--surface-elevated)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
                       <Badge text={h.status} color={STATUS_COLORS[h.status] || '#888'} small />
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -1137,9 +1247,9 @@ function WorkItemDetail({ item, onClose }) {
                 ))}
                 {(item.fieldHistory || []).slice().reverse().map((h, i) => (
                   <div key={`f-${i}`} style={{ position: 'relative', marginBottom: '12px', paddingLeft: '12px' }}>
-                    <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: '#818cf8', border: '2px solid #1e1e2e' }} />
+                    <div style={{ position: 'absolute', left: '-16px', top: '6px', width: '10px', height: '10px', borderRadius: '50%', background: '#818cf8', border: '2px solid var(--surface-elevated)' }} />
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                      <span style={{ fontSize: '12px', color: 'var(--text-primary, #f1f5f9)' }}>{h.field}</span>
+                      <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--text-primary)' }}>{h.field}</span>
                       <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                         {String(h.oldValue || '—')} → {String(h.newValue || '—')}
                       </span>
@@ -1153,9 +1263,10 @@ function WorkItemDetail({ item, onClose }) {
             </div>
           )}
 
-          <div style={{ fontSize: '11px', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
-            Created: {item.createdAt ? new Date(item.createdAt).toLocaleString() : '—'} ·
-            Updated: {item.updatedAt ? new Date(item.updatedAt).toLocaleString() : '—'}
+          {/* Footer timestamps */}
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', padding: '16px 0 0', display: 'flex', gap: '16px' }}>
+            <span>Created {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '—'}</span>
+            <span>Updated {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : '—'}</span>
           </div>
         </div>
 
@@ -1180,6 +1291,7 @@ function WorkItemDetail({ item, onClose }) {
           </div>
         </Modal>
       </div>
+      <style>{`@keyframes panelSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
     </div>
   );
 }
