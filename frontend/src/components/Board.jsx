@@ -50,11 +50,11 @@ const getTheme = () => {
 };
 
 const DEFAULT_COLUMNS = [
-  { id: 'Backlog', title: 'Backlog', color: '#94a3b8', icon: FiHash, wipLimit: 0 },
-  { id: 'To Do', title: 'To Do', color: '#60a5fa', icon: FiTarget, wipLimit: 0 },
-  { id: 'In Progress', title: 'In Progress', color: '#fbbf24', icon: FiZap, wipLimit: 5 },
-  { id: 'Review', title: 'Review', color: '#a78bfa', icon: FiSearch, wipLimit: 0 },
-  { id: 'Done', title: 'Done', color: '#34d399', icon: FiCheckCircle, wipLimit: 0 },
+  { id: 'Backlog', title: 'Backlog', color: '#94a3b8', icon: FiHash, wipLimit: 0, split: false },
+  { id: 'To Do', title: 'To Do', color: '#60a5fa', icon: FiTarget, wipLimit: 0, split: false },
+  { id: 'In Progress', title: 'In Progress', color: '#fbbf24', icon: FiZap, wipLimit: 5, split: true },
+  { id: 'Review', title: 'Review', color: '#a78bfa', icon: FiSearch, wipLimit: 0, split: false },
+  { id: 'Done', title: 'Done', color: '#34d399', icon: FiCheckCircle, wipLimit: 0, split: false },
 ];
 
 const COLUMN_ICONS = { Backlog: FiHash, 'To Do': FiTarget, 'In Progress': FiZap, Review: FiSearch, Done: FiCheckCircle };
@@ -110,12 +110,15 @@ export default function Board({ projectId }) {
   const [showEditModal, setShowEditModal] = useState(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [collapsedSwimlanes, setCollapsedSwimlanes] = useState({});
+  const [quickAddCol, setQuickAddCol] = useState(null);
+  const [quickAddTitle, setQuickAddTitle] = useState('');
   const [columns, setColumns] = useState(DEFAULT_COLUMNS);
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState('');
   const [dragOverCol, setDragOverCol] = useState(null);
   const [filterType, setFilterType] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
+  const [filterAssignee, setFilterAssignee] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [themeVersion, setThemeVersion] = useState(0);
 
@@ -177,9 +180,10 @@ export default function Board({ projectId }) {
         (i.workItemId && `WI-${i.workItemId}`.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchType = !filterType || i.type === filterType;
       const matchPriority = !filterPriority || i.priority === parseInt(filterPriority);
-      return matchSearch && matchType && matchPriority;
+      const matchAssignee = !filterAssignee || (filterAssignee === 'unassigned' ? !i.assignee : i.assignee === filterAssignee);
+      return matchSearch && matchType && matchPriority && matchAssignee;
     });
-  }, [workItems, searchTerm, filterType, filterPriority]);
+  }, [workItems, searchTerm, filterType, filterPriority, filterAssignee]);
 
   const moveItem = async (itemId, newStatus) => {
     const item = workItems.find(i => i._id === itemId);
@@ -212,6 +216,17 @@ export default function Board({ projectId }) {
         tags: tagsArray, projectId, order: filtered.filter(i => i.status === form.status).length,
       });
       if (res.success) { setWorkItems(prev => [...prev, res.data]); setShowAddModal(false); setForm({ ...EMPTY_FORM }); toast.success('Work item created'); }
+    } catch { toast.error('Failed to create work item'); }
+  };
+
+  const handleQuickAdd = async (colId) => {
+    if (!quickAddTitle.trim()) return;
+    try {
+      const res = await api.createWorkItem({
+        title: quickAddTitle, type: 'Task', priority: 3, status: colId,
+        projectId, order: filtered.filter(i => i.status === colId).length,
+      });
+      if (res.success) { setWorkItems(prev => [...prev, res.data]); setQuickAddTitle(''); setQuickAddCol(null); toast.success('Work item created'); }
     } catch { toast.error('Failed to create work item'); }
   };
 
@@ -271,7 +286,7 @@ export default function Board({ projectId }) {
     return { total, done, inProgress, totalPoints };
   }, [workItems]);
 
-  const activeFilterCount = [filterType, filterPriority].filter(Boolean).length;
+  const activeFilterCount = [filterType, filterPriority, filterAssignee].filter(Boolean).length;
 
   const renderCard = (item, colIdx) => {
     const prevStatus = colIdx > 0 ? columns[colIdx - 1].id : null;
@@ -467,7 +482,12 @@ export default function Board({ projectId }) {
             <select value={filterPriority} onChange={e => setFilterPriority(e.target.value)} className="board-input" style={{ padding: '6px 12px', borderRadius: 8, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 12, outline: 'none', cursor: 'pointer' }}>
               <option value="">All Priorities</option>{Object.entries(PRIORITY_LABELS).map(([k, v]) => (<option key={k} value={k}>{v}</option>))}
             </select>
-            {activeFilterCount > 0 && <button onClick={() => { setFilterType(''); setFilterPriority(''); }} style={{ padding: '5px 12px', borderRadius: 8, border: 'none', background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}><FiX size={11} /> Clear</button>}
+            <select value={filterAssignee} onChange={e => setFilterAssignee(e.target.value)} className="board-input" style={{ padding: '6px 12px', borderRadius: 8, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 12, outline: 'none', cursor: 'pointer' }}>
+              <option value="">All Assignees</option>
+              <option value="unassigned">Unassigned</option>
+              {[...new Set(workItems.map(i => i.assignee).filter(Boolean))].sort().map(a => (<option key={a} value={a}>{a}</option>))}
+            </select>
+            {activeFilterCount > 0 && <button onClick={() => { setFilterType(''); setFilterPriority(''); setFilterAssignee(''); }} style={{ padding: '5px 12px', borderRadius: 8, border: 'none', background: 'rgba(239,68,68,0.1)', color: '#ef4444', fontSize: 11, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}><FiX size={11} /> Clear</button>}
           </div>
         )}
       </div>
@@ -518,6 +538,19 @@ export default function Board({ projectId }) {
                     <FiLayout size={20} style={{ marginBottom: 6, opacity: 0.5 }} /><br />{isDragTarget ? 'Drop here' : 'No items'}
                   </div>
                 )}
+                <div style={{ marginTop: 8 }}>
+                  {quickAddCol === col.id ? (
+                    <form onSubmit={e => { e.preventDefault(); handleQuickAdd(col.id); }} style={{ display: 'flex', gap: 6 }}>
+                      <input autoFocus value={quickAddTitle} onChange={e => setQuickAddTitle(e.target.value)} placeholder="Title..." className="board-input" style={{ flex: 1, padding: '6px 10px', borderRadius: 8, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 12, outline: 'none' }} onKeyDown={e => { if (e.key === 'Escape') { setQuickAddCol(null); setQuickAddTitle(''); } }} />
+                      <button type="submit" style={{ padding: '4px 10px', borderRadius: 8, border: 'none', background: t.accentPrimary, color: '#fff', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>Add</button>
+                      <button type="button" onClick={() => { setQuickAddCol(null); setQuickAddTitle(''); }} style={{ padding: '4px 8px', borderRadius: 8, border: `1px solid ${t.borderSecondary}`, background: 'transparent', color: t.textMuted, fontSize: 11, cursor: 'pointer' }}>×</button>
+                    </form>
+                  ) : (
+                    <button onClick={() => { setQuickAddCol(col.id); setQuickAddTitle(''); }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, width: '100%', padding: '7px 12px', borderRadius: 8, border: `1px dashed ${t.borderSecondary}`, background: 'transparent', color: t.textMuted, fontSize: 11, cursor: 'pointer', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.borderColor = t.accentPrimary; e.currentTarget.style.color = t.accentPrimary; }} onMouseLeave={e => { e.currentTarget.style.borderColor = t.borderSecondary; e.currentTarget.style.color = t.textMuted; }}>
+                      <FiPlus size={12} /> Quick Add
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );
