@@ -97,7 +97,8 @@ function Select({ value, onChange, options, style: s, placeholder }) {
   );
 }
 
-function WorkItemForm({ initial, onSubmit, onCancel, submitLabel }) {
+function WorkItemForm({ initial, onSubmit, onCancel, submitLabel, templates, projectId }) {
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const [form, setForm] = useState({
     title: '', description: '', type: 'User Story', priority: 3, severity: 'Medium',
     status: 'Backlog', assignee: '', storyPoints: '', effort: '', remainingWork: '',
@@ -124,6 +125,28 @@ function WorkItemForm({ initial, onSubmit, onCancel, submitLabel }) {
   ];
   return (
     <div>
+      {templates && templates.length > 0 && (
+        <div style={{ marginBottom: '14px', padding: '10px 12px', background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <label style={{ ...labelStyle, marginBottom: '6px', display: 'block' }}>Apply Template</label>
+          <select value={selectedTemplate} onChange={e => {
+            const tpl = templates.find(t => t._id === e.target.value);
+            if (tpl) {
+              setSelectedTemplate(e.target.value);
+              setForm(p => ({ ...p,
+                type: tpl.type || p.type, priority: tpl.priority || p.priority, severity: tpl.severity || p.severity,
+                status: tpl.status || p.status, assignee: tpl.assignee || p.assignee,
+                storyPoints: tpl.storyPoints || p.storyPoints, effort: tpl.effort || p.effort,
+                areaPath: tpl.areaPath || p.areaPath, iterationPath: tpl.iterationPath || p.iterationPath,
+                activity: tpl.activity || p.activity, acceptanceCriteria: tpl.acceptanceCriteria || p.acceptanceCriteria,
+                tags: tpl.tags?.length ? tpl.tags.join(', ') : p.tags, description: tpl.description || p.description,
+              }));
+            }
+          }} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--surface-secondary)', color: 'var(--text-primary)', fontSize: '13px', outline: 'none', cursor: 'pointer' }}>
+            <option value="">— Select a template —</option>
+            {templates.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+          </select>
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
         {fields.map(f => (
           <div key={f.key} style={{ gridColumn: f.full ? '1 / -1' : undefined }}>
@@ -187,6 +210,8 @@ export default function WorkItems({ projectId }) {
   const [queries, setQueries] = useState([]);
   const [queryName, setQueryName] = useState('');
   const [showSaveQuery, setShowSaveQuery] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [deletedItems, setDeletedItems] = useState([]);
 
   const fetchItems = useCallback(async () => {
     if (!projectId) return;
@@ -216,6 +241,18 @@ export default function WorkItems({ projectId }) {
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
   useEffect(() => { if (tab === 'queries') fetchQueries(); }, [tab, fetchQueries]);
+  useEffect(() => { if (tab === 'templates') fetchTemplates(); }, [tab, fetchTemplates]);
+  useEffect(() => { if (tab === 'recycle') fetchDeleted(); }, [tab, fetchDeleted]);
+
+  const fetchTemplates = useCallback(async () => {
+    if (!projectId) return;
+    try { const res = await api.getTemplates(projectId); if (res.success) setTemplates(res.data || []); } catch {}
+  }, [projectId]);
+
+  const fetchDeleted = useCallback(async () => {
+    if (!projectId) return;
+    try { const res = await api.getRecycleBin(projectId); if (res.success) setDeletedItems(res.data || []); } catch {}
+  }, [projectId]);
 
   const sorted = useMemo(() => {
     const arr = [...items];
@@ -331,7 +368,7 @@ export default function WorkItems({ projectId }) {
     <div style={{ padding: '0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', gap: '4px', background: 'var(--surface-secondary)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border-color)' }}>
-          {[['items', 'All Items'], ['queries', 'Saved Queries']].map(([k, l]) => (
+          {[['items', 'All Items'], ['queries', 'Saved Queries'], ['templates', 'Templates'], ['recycle', 'Recycle Bin']].map(([k, l]) => (
             <button key={k} onClick={() => setTab(k)} style={{
               ...btnSmall, borderRadius: '7px', border: 'none',
               background: tab === k ? 'linear-gradient(135deg, #6366f1, #7c3aed)' : 'transparent',
@@ -447,8 +484,70 @@ export default function WorkItems({ projectId }) {
         </div>
       )}
 
+      {tab === 'templates' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+            <button onClick={async () => {
+              const name = prompt('Template name:');
+              if (!name) return;
+              await api.createTemplate({ projectId, name, type: 'Task', priority: 3, status: 'Backlog' });
+              fetchTemplates();
+            }} style={{ ...btnPrimary, ...btnSmall }}>+ New Template</button>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
+            {templates.length === 0 && (
+              <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No templates yet. Create one to speed up work item creation.</div>
+            )}
+            {templates.map(t => (
+              <div key={t._id} style={{ background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary, #f1f5f9)' }}>{t.name}</div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
+                    <button onClick={async () => {
+                      const name = prompt('Rename template:', t.name);
+                      if (name) { await api.updateTemplate(t._id, { name }); fetchTemplates(); }
+                    }} style={{ ...btnIcon, fontSize: '12px' }}>✏️</button>
+                    <button onClick={async () => { if (confirm('Delete template?')) { await api.deleteTemplate(t._id); fetchTemplates(); } }} style={{ ...btnIcon, color: '#ef4444' }}>🗑</button>
+                  </div>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <span>Type: {t.type}</span>
+                  <span>Priority: {t.priority}</span>
+                  <span>Status: {t.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === 'recycle' && (
+        <div>
+          <div style={{ marginBottom: '12px', fontSize: '13px', color: 'var(--text-muted)' }}>
+            Deleted work items are kept for 30 days. You can restore them or permanently delete.
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+            {deletedItems.length === 0 && (
+              <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>Recycle bin is empty.</div>
+            )}
+            {deletedItems.map(d => (
+              <div key={d._id} style={{ background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '16px', opacity: 0.8 }}>
+                <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary, #f1f5f9)', marginBottom: '4px' }}>{d.data?.title || 'Untitled'}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                  WI-{d.data?.workItemId} · {d.data?.type} · Deleted {new Date(d.deletedAt).toLocaleDateString()}
+                </div>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button onClick={async () => { await api.restoreWorkItem(d._id); fetchDeleted(); fetchItems(); }} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>♻️ Restore</button>
+                  <button onClick={async () => { if (confirm('Permanently delete? This cannot be undone.')) { await api.permanentDeleteWorkItem(d._id); fetchDeleted(); } }} style={{ ...btnDanger, ...btnSmall, fontSize: '11px' }}>Delete Forever</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="New Work Item" wide>
-        <WorkItemForm onSubmit={handleCreate} onCancel={() => setShowCreate(false)} submitLabel="Create Work Item" />
+        <WorkItemForm onSubmit={handleCreate} onCancel={() => setShowCreate(false)} submitLabel="Create Work Item" templates={templates} projectId={projectId} />
       </Modal>
 
       <Modal open={showSaveQuery} onClose={() => setShowSaveQuery(false)} title="Save Query">
@@ -489,6 +588,10 @@ function WorkItemDetail({ item, onClose }) {
   const [linkComment, setLinkComment] = useState('');
   const [allItems, setAllItems] = useState([]);
   const [attachments, setAttachments] = useState(item.attachments || []);
+  const [discussions, setDiscussions] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [editingComment, setEditingComment] = useState(null);
+  const [editCommentText, setEditCommentText] = useState('');
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -499,7 +602,38 @@ function WorkItemDetail({ item, onClose }) {
     } catch (err) { console.error(err); }
   }, [item._id]);
 
-  useEffect(() => { fetchLinks(); }, [fetchLinks]);
+  useEffect(() => { fetchLinks(); fetchDiscussions(); }, [fetchLinks, fetchDiscussions]);
+
+  const fetchDiscussions = useCallback(async () => {
+    try { const res = await api.getDiscussions(item._id); if (res.success) setDiscussions(res.data || []); } catch {}
+  }, [item._id]);
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    const mentions = [...newComment.matchAll(/@(\w+)/g)].map(m => m[1]);
+    await api.createDiscussion({ workItemId: item._id, content: newComment, mentions });
+    setNewComment('');
+    fetchDiscussions();
+  };
+
+  const handleEditComment = async (id) => {
+    if (!editCommentText.trim()) return;
+    await api.updateDiscussion(id, { content: editCommentText });
+    setEditingComment(null);
+    setEditCommentText('');
+    fetchDiscussions();
+  };
+
+  const handleDeleteComment = async (id) => {
+    if (!confirm('Delete comment?')) return;
+    await api.deleteDiscussion(id);
+    fetchDiscussions();
+  };
+
+  const handleReaction = async (discussionId, emoji) => {
+    await api.toggleReaction(discussionId, emoji, item._id);
+    fetchDiscussions();
+  };
 
   const loadAllItems = async () => {
     try {
@@ -547,6 +681,21 @@ function WorkItemDetail({ item, onClose }) {
     try {
       const res = await api.deleteWorkItemAttachment(item._id, idx);
       if (res.success) setAttachments(res.data.attachments || []);
+    } catch { /* ignore */ }
+  };
+
+  const handleSaveAsTemplate = async () => {
+    const name = prompt('Template name:');
+    if (!name) return;
+    try {
+      await api.createTemplate({
+        projectId: item.projectId, name, type: item.type, priority: item.priority,
+        severity: item.severity, status: 'Backlog', storyPoints: item.storyPoints,
+        effort: item.effort, areaPath: item.areaPath, iterationPath: item.iterationPath,
+        activity: item.activity, acceptanceCriteria: item.acceptanceCriteria,
+        tags: item.tags || [], description: item.description,
+      });
+      alert('Template saved!');
     } catch { /* ignore */ }
   };
 
@@ -611,6 +760,7 @@ function WorkItemDetail({ item, onClose }) {
             ) : (
               <>
                 <button onClick={() => setEdit(true)} style={{ ...btnSecondary, ...btnSmall }}>✏ Edit</button>
+                <button onClick={handleSaveAsTemplate} style={{ ...btnSecondary, ...btnSmall, fontSize: '11px' }}>📋 Save as Template</button>
                 <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }} style={{ ...btnDanger, ...btnSmall }}>🗑</button>
                 <button onClick={onClose} style={{ ...btnIcon }}>×</button>
               </>
@@ -718,6 +868,54 @@ function WorkItemDetail({ item, onClose }) {
                 })}
               </div>
             )}
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ ...labelStyle, marginBottom: '10px', display: 'block' }}>Discussion ({discussions.length})</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' }}>
+              {discussions.map(c => (
+                <div key={c._id} style={{ padding: '10px 12px', background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#fff', fontWeight: '700' }}>
+                        {(c.author || '?')[0]?.toUpperCase()}
+                      </div>
+                      <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-primary, #f1f5f9)' }}>{c.author}</span>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{new Date(c.createdAt).toLocaleString()}</span>
+                      {c.editedAt && <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontStyle: 'italic' }}>(edited)</span>}
+                    </div>
+                    <div style={{ display: 'flex', gap: '4px' }}>
+                      <button onClick={() => { setEditingComment(c._id); setEditCommentText(c.content); }} style={{ ...btnIcon, fontSize: '10px', padding: '2px 4px' }}>✏️</button>
+                      <button onClick={() => handleDeleteComment(c._id)} style={{ ...btnIcon, color: '#ef4444', fontSize: '10px', padding: '2px 4px' }}>🗑</button>
+                    </div>
+                  </div>
+                  {editingComment === c._id ? (
+                    <div>
+                      <textarea value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ ...inputStyle, minHeight: '60px', fontSize: '12px' }} />
+                      <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                        <button onClick={() => handleEditComment(c._id)} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>Save</button>
+                        <button onClick={() => setEditingComment(null)} style={{ ...btnSmall, fontSize: '11px' }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5', whiteSpace: 'pre-wrap' }}>
+                      {c.content.split(/(@\w+)/g).map((part, i) => part.startsWith('@') ? <span key={i} style={{ color: '#818cf8', fontWeight: '600' }}>{part}</span> : part)}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
+                    {['👍', '❤️', '😂', '🎉', '👀'].map(emoji => (
+                      <button key={emoji} onClick={() => handleReaction(c._id, emoji)} style={{ padding: '2px 6px', borderRadius: '4px', border: '1px solid var(--border-color)', background: (c.reactions || []).some(r => r.emoji === emoji) ? 'rgba(99,102,241,0.15)' : 'transparent', cursor: 'pointer', fontSize: '12px' }}>
+                        {emoji} {(c.reactions || []).filter(r => r.emoji === emoji).length || ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Add a comment... Use @name to mention" style={{ ...inputStyle, minHeight: '60px', flex: 1, fontSize: '13px' }} />
+              <button onClick={handleAddComment} disabled={!newComment.trim()} style={{ ...btnPrimary, alignSelf: 'flex-end', opacity: !newComment.trim() ? 0.5 : 1 }}>Post</button>
+            </div>
           </div>
 
           {history.length > 0 && (

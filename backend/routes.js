@@ -20,6 +20,9 @@ import {
   getCapacitiesBySprint, upsertCapacity, deleteCapacity,
   generateBurndown, getBurndownBySprint, getVelocity,
   generateCFD, getCfdBySprint,
+  getTemplatesByProject, getTemplateById, createTemplate, updateTemplate, deleteTemplate,
+  softDeleteWorkItem, getDeletedWorkItems, restoreWorkItem, permanentDeleteWorkItem,
+  getDiscussionsByWorkItem, createDiscussion, updateDiscussion, deleteDiscussion, addReaction,
   getQueriesByProject, createQuery, updateQuery, deleteQuery
 } from './database.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
@@ -326,7 +329,7 @@ router.get('/work-items/hierarchy', async (req, res, next) => { try { res.json({
 router.get('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await getWorkItemById(req.params.id) }); } catch (e) { next(e); } });
 router.post('/work-items', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkItem(req.body) }); } catch (e) { next(e); } });
 router.put('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateWorkItem(req.params.id, req.body) }); } catch (e) { next(e); } });
-router.delete('/work-items/:id', async (req, res, next) => { try { await deleteWorkItem(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+router.delete('/work-items/:id', async (req, res, next) => { try { await softDeleteWorkItem(req.params.id, req.user?.firstName || 'Unknown'); res.json({ success: true }); } catch (e) { next(e); } });
 router.put('/work-items/batch/order', async (req, res, next) => { try { await updateWorkItemOrder(req.body.items); res.json({ success: true }); } catch (e) { next(e); } });
 
 router.post('/work-items/:id/attachments', upload.single('file'), async (req, res, next) => {
@@ -389,6 +392,30 @@ router.get('/queries/:projectId', async (req, res, next) => { try { res.json({ s
 router.post('/queries', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createQuery(req.body) }); } catch (e) { next(e); } });
 router.put('/queries/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateQuery(req.params.id, req.body) }); } catch (e) { next(e); } });
 router.delete('/queries/:id', async (req, res, next) => { try { await deleteQuery(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// ============================================
+// WORK ITEM TEMPLATES
+// ============================================
+router.get('/templates/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getTemplatesByProject(req.params.projectId) }); } catch (e) { next(e); } });
+router.post('/templates', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createTemplate(req.body) }); } catch (e) { next(e); } });
+router.put('/templates/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateTemplate(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/templates/:id', async (req, res, next) => { try { await deleteTemplate(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// ============================================
+// RECYCLE BIN
+// ============================================
+router.get('/recycle-bin/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getDeletedWorkItems(req.params.projectId) }); } catch (e) { next(e); } });
+router.post('/recycle-bin/:id/restore', async (req, res, next) => { try { res.json({ success: true, data: await restoreWorkItem(req.params.id) }); } catch (e) { next(e); } });
+router.delete('/recycle-bin/:id', async (req, res, next) => { try { await permanentDeleteWorkItem(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+
+// ============================================
+// DISCUSSION / COMMENTS
+// ============================================
+router.get('/discussions/:workItemId', async (req, res, next) => { try { res.json({ success: true, data: await getDiscussionsByWorkItem(req.params.workItemId) }); } catch (e) { next(e); } });
+router.post('/discussions', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createDiscussion({ ...req.body, author: req.user?.firstName || req.body.author || 'Unknown' }) }); } catch (e) { next(e); } });
+router.put('/discussions/:id', async (req, res, next) => { try { res.json({ success: true, data: await updateDiscussion(req.params.id, req.body) }); } catch (e) { next(e); } });
+router.delete('/discussions/:id', async (req, res, next) => { try { await deleteDiscussion(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
+router.post('/discussions/:id/reaction', async (req, res, next) => { try { res.json({ success: true, data: await addReaction(req.params.id, req.body.emoji, req.body.userId) }); } catch (e) { next(e); } });
 
 // ============================================
 // STATS & SETTINGS

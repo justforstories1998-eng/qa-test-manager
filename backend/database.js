@@ -164,6 +164,42 @@ const cfdSnapshotSchema = new mongoose.Schema({
   closedCount: { type: Number, default: 0 },
 }, { timestamps: true });
 
+const workItemTemplateSchema = new mongoose.Schema({
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  name: { type: String, required: true },
+  description: String,
+  type: { type: String, default: 'Task' },
+  priority: { type: Number, default: 3 },
+  severity: { type: String, default: '3 - Medium' },
+  status: { type: String, default: 'Backlog' },
+  assignee: String,
+  storyPoints: { type: Number, default: 0 },
+  effort: { type: Number, default: 0 },
+  areaPath: String,
+  iterationPath: String,
+  activity: String,
+  acceptanceCriteria: String,
+  tags: [String],
+  steps: [{ stepNumber: Number, action: String, expectedResult: String }],
+}, { timestamps: true });
+
+const deletedWorkItemSchema = new mongoose.Schema({
+  originalId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  data: { type: mongoose.Schema.Types.Mixed, required: true },
+  deletedAt: { type: Date, default: Date.now },
+  deletedBy: String,
+}, { timestamps: true });
+
+const discussionSchema = new mongoose.Schema({
+  workItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkItem', required: true },
+  author: { type: String, required: true },
+  content: { type: String, required: true },
+  mentions: [String],
+  reactions: [{ emoji: String, userId: String }],
+  editedAt: Date,
+}, { timestamps: true });
+
 // ============================================
 // MODELS
 // ============================================
@@ -183,6 +219,9 @@ const SprintCapacity = mongoose.model('SprintCapacity', sprintCapacitySchema);
 const SavedQuery = mongoose.model('SavedQuery', savedQuerySchema);
 const BurndownSnapshot = mongoose.model('BurndownSnapshot', burndownSnapshotSchema);
 const CfdSnapshot = mongoose.model('CfdSnapshot', cfdSnapshotSchema);
+const WorkItemTemplate = mongoose.model('WorkItemTemplate', workItemTemplateSchema);
+const DeletedWorkItem = mongoose.model('DeletedWorkItem', deletedWorkItemSchema);
+const Discussion = mongoose.model('Discussion', discussionSchema);
 const Setting = mongoose.model('Setting', settingsSchema);
 
 export async function initializeDatabase() {
@@ -476,3 +515,52 @@ export const updateUser = (id, data) => User.findByIdAndUpdate(id, data, { new: 
 export const deleteUser = (id) => User.findByIdAndDelete(id);
 export const getUsersByProject = (projectId) => User.find({ assignedProjects: projectId }).select('-password');
 export const searchUsers = (query) => User.find({ $or: [{ firstName: { $regex: query, $options: 'i' } }, { lastName: { $regex: query, $options: 'i' } }, { email: { $regex: query, $options: 'i' } }] }).select('-password');
+
+// ============================================
+// WORK ITEM TEMPLATES
+// ============================================
+export const getTemplatesByProject = (projectId) => WorkItemTemplate.find({ projectId }).sort({ name: 1 });
+export const getTemplateById = (id) => WorkItemTemplate.findById(id);
+export const createTemplate = (data) => new WorkItemTemplate(data).save();
+export const updateTemplate = (id, data) => WorkItemTemplate.findByIdAndUpdate(id, data, { new: true });
+export const deleteTemplate = (id) => WorkItemTemplate.findByIdAndDelete(id);
+
+// ============================================
+// RECYCLE BIN (DELETED WORK ITEMS)
+// ============================================
+export const softDeleteWorkItem = async (id, deletedBy) => {
+  const item = await WorkItem.findById(id);
+  if (!item) return null;
+  await new DeletedWorkItem({ originalId: item._id, projectId: item.projectId, data: item.toObject(), deletedBy }).save();
+  await WorkItem.findByIdAndDelete(id);
+  return item;
+};
+export const getDeletedWorkItems = (projectId) => DeletedWorkItem.find({ projectId }).sort({ deletedAt: -1 });
+export const restoreWorkItem = async (deletedId) => {
+  const deleted = await DeletedWorkItem.findById(deletedId);
+  if (!deleted) return null;
+  const restored = await new WorkItem(deleted.data).save();
+  await DeletedWorkItem.findByIdAndDelete(deletedId);
+  return restored;
+};
+export const permanentDeleteWorkItem = (deletedId) => DeletedWorkItem.findByIdAndDelete(deletedId);
+
+// ============================================
+// DISCUSSION / COMMENTS
+// ============================================
+export const getDiscussionsByWorkItem = (workItemId) => Discussion.find({ workItemId }).sort({ createdAt: 1 });
+export const createDiscussion = (data) => new Discussion(data).save();
+export const updateDiscussion = (id, data) => Discussion.findByIdAndUpdate(id, { ...data, editedAt: new Date() }, { new: true });
+export const deleteDiscussion = (id) => Discussion.findByIdAndDelete(id);
+export const addReaction = async (discussionId, emoji, userId) => {
+  const doc = await Discussion.findById(discussionId);
+  if (!doc) return null;
+  const existing = doc.reactions.find(r => r.emoji === emoji && r.userId === userId);
+  if (existing) {
+    doc.reactions = doc.reactions.filter(r => !(r.emoji === emoji && r.userId === userId));
+  } else {
+    doc.reactions.push({ emoji, userId });
+  }
+  await doc.save();
+  return doc;
+};

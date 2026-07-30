@@ -209,6 +209,21 @@ const api = {
   },
   deleteWorkItemAttachment: (workItemId, attIdx) => apiClient.delete(`/work-items/${workItemId}/attachments/${attIdx}`),
 
+  getTemplates: (projectId) => apiClient.get(`/templates/${projectId}`),
+  createTemplate: (data) => apiClient.post('/templates', data),
+  updateTemplate: (id, data) => apiClient.put(`/templates/${id}`, data),
+  deleteTemplate: (id) => apiClient.delete(`/templates/${id}`),
+
+  getRecycleBin: (projectId) => apiClient.get(`/recycle-bin/${projectId}`),
+  restoreWorkItem: (id) => apiClient.post(`/recycle-bin/${id}/restore`),
+  permanentDeleteWorkItem: (id) => apiClient.delete(`/recycle-bin/${id}`),
+
+  getDiscussions: (workItemId) => apiClient.get(`/discussions/${workItemId}`),
+  createDiscussion: (data) => apiClient.post('/discussions', data),
+  updateDiscussion: (id, data) => apiClient.put(`/discussions/${id}`, data),
+  deleteDiscussion: (id) => apiClient.delete(`/discussions/${id}`),
+  toggleReaction: (discussionId, emoji, userId) => apiClient.post(`/discussions/${discussionId}/reaction`, { emoji, userId }),
+
   getWorkItemLinks: (workItemId) => apiClient.get(`/work-item-links/${workItemId}`),
   createWorkItemLink: (data) => apiClient.post('/work-item-links', data),
   deleteWorkItemLink: (id) => apiClient.delete(`/work-item-links/${id}`),
