@@ -1,168 +1,52 @@
 /* ============================================
-   TOP HEADER - SNEAT-STYLE CLEAN WHITE
+   HEADER
    ============================================ */
-
-.top-header {
-  position: fixed;
-  top: 0;
-  right: 0;
-  left: var(--sidebar-width);
+.header {
   height: var(--header-height);
   background: var(--bg-card);
-  border-bottom: 1px solid var(--border-color);
-  z-index: 90;
+  border-bottom: 1px solid var(--border-default);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  transition: left 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+  padding: 0 var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
-
-.app.sidebar-collapsed .top-header {
-  left: var(--sidebar-collapsed-width);
-}
-
-/* Project Selector */
-.project-selector {
+.header-left { display: flex; align-items: center; gap: var(--space-4); }
+.header-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.header-subtitle { font-size: 0.8125rem; color: var(--text-tertiary); margin-left: var(--space-2); }
+.header-breadcrumb {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
-
-.project-dropdown {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--surface-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.project-dropdown:hover {
-  border-color: var(--primary-color);
-}
-
-.project-icon {
-  color: var(--primary-color);
-  font-size: 16px;
-}
-
-.project-select {
-  border: none;
-  background: transparent;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  cursor: pointer;
-  outline: none;
-  padding-right: 8px;
-  font-family: inherit;
-}
-
-.project-select option {
-  padding: 8px;
-  background: var(--bg-card);
-  color: var(--text-primary);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Theme Toggle Button */
-.theme-toggle-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid var(--border-color);
-  background: var(--surface-secondary);
-  color: var(--text-secondary);
-  cursor: pointer;
+.header-breadcrumb a { color: var(--text-tertiary); transition: color var(--duration-fast) var(--ease); }
+.header-breadcrumb a:hover { color: var(--color-primary); }
+.header-breadcrumb .current { color: var(--text-primary); font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: var(--space-3); }
+.header-action {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  font-size: 18px;
-  flex-shrink: 0;
+  color: var(--text-tertiary);
+  transition: all var(--duration-fast) var(--ease);
+  position: relative;
 }
-
-.theme-toggle-btn:hover {
-  background: var(--primary-50);
-  color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-[data-theme="dark"] .theme-toggle-btn:hover {
-  background: rgba(99, 102, 241, 0.15);
-}
-
-/* Mobile Menu Button */
-.mobile-menu-btn {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: none;
-  background: var(--bg-card);
-  border-radius: 8px;
-  color: var(--text-primary);
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.mobile-menu-btn:hover {
-  background: var(--surface-secondary);
-}
-
-/* Sidebar Overlay */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 999;
-}
-
-.sidebar-overlay.visible {
-  display: block;
-}
-
-/* Responsive */
-@media (max-width: 1100px) {
-  .top-header {
-    left: var(--sidebar-collapsed-width);
-  }
-}
-
-@media (max-width: 768px) {
-  .top-header {
-    left: 0;
-    padding: 0 16px;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-  }
-
-  .header-right {
-    display: none;
-  }
-
-  .project-select {
-    min-width: 140px;
-    font-size: 13px;
-  }
-}
-
-@media print {
-  .top-header {
-    display: none;
-  }
+.header-action:hover { background: var(--color-primary-faint); color: var(--color-primary); }
+.header-action svg { width: 18px; height: 18px; }
+.header-action-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-danger);
+  border: 2px solid var(--bg-card);
 }

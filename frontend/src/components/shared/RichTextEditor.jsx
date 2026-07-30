@@ -28,11 +28,6 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
             range.deleteContents();
             const code = document.createElement('code');
             code.textContent = selected;
-            code.style.background = 'rgba(99,102,241,0.12)';
-            code.style.padding = '2px 6px';
-            code.style.borderRadius = '4px';
-            code.style.fontFamily = 'monospace';
-            code.style.fontSize = '12px';
             range.insertNode(code);
           }
         }
@@ -55,22 +50,20 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
     if (e.key === 'u' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); execCommand('underline'); }
   }, [execCommand]);
 
-  const containerStyle = {
-    border: '1px solid ' + (isFocused ? '#6366f1' : 'var(--border-color)'),
-    borderRadius: '10px',
-    overflow: 'hidden',
-    background: 'var(--surface-secondary)',
-    transition: 'border-color 0.2s',
-    ...(styleProp || {}),
-  };
-
   return (
-    <div style={containerStyle}>
+    <div style={{
+      border: `1.5px solid ${isFocused ? 'var(--color-primary)' : 'var(--border-default)'}`,
+      borderRadius: 'var(--radius)',
+      overflow: 'hidden',
+      background: 'var(--bg-input)',
+      transition: 'border-color 0.15s',
+      ...(styleProp || {}),
+    }}>
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '2px',
+        display: 'flex', alignItems: 'center', gap: 2,
         padding: '6px 8px',
-        borderBottom: '1px solid var(--border-color)',
-        background: 'var(--surface-tertiary)',
+        borderBottom: '1px solid var(--border-light)',
+        background: 'var(--bg-inset)',
       }}>
         {toolbarButtons.map((btn) => {
           const Icon = btn.icon;
@@ -80,15 +73,8 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
               type="button"
               title={btn.title}
               onClick={() => execCommand(btn.command, btn.value)}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                width: '28px', height: '28px', borderRadius: '6px',
-                border: 'none', background: 'transparent',
-                color: 'var(--text-muted)', cursor: 'pointer',
-                transition: 'all 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.1)'; e.currentTarget.style.color = '#818cf8'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+              className="btn btn-ghost btn-icon"
+              style={{ width: 28, height: 28, padding: 0 }}
             >
               <Icon size={14} />
             </button>
@@ -107,9 +93,9 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
         style={{
           minHeight: minHeight + 'px',
           padding: '12px 14px',
-          fontSize: '13px',
-          lineHeight: '1.6',
-          color: 'var(--text-primary, #f1f5f9)',
+          fontSize: '0.875rem',
+          lineHeight: 1.6,
+          color: 'var(--text-primary)',
           outline: 'none',
           wordBreak: 'break-word',
         }}
@@ -121,11 +107,11 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
           color: var(--text-muted);
           pointer-events: none;
         }
-        [contenteditable] a { color: #818cf8; text-decoration: underline; }
+        [contenteditable] a { color: var(--color-primary); text-decoration: underline; }
         [contenteditable] code {
-          background: rgba(99,102,241,0.12);
+          background: var(--color-primary-faint);
           padding: 2px 6px; border-radius: 4px;
-          font-family: monospace; font-size: 12px;
+          font-family: var(--font-mono); font-size: 0.8125rem;
         }
         [contenteditable] ul { margin: 4px 0; padding-left: 20px; }
         [contenteditable] li { margin: 2px 0; }

@@ -1,38 +1,31 @@
 /* ============================================
-   QA TEST MANAGER - MAIN CSS
-   Master Import File
+   QA TEST MANAGER — MASTER STYLESHEET
    ============================================ */
+@import 'base/_variables.css';
+@import 'base/_reset.css';
+@import 'base/_typography.css';
+@import 'base/_animations.css';
 
-/* Base Styles */
-@import './base/_variables.css';
-@import './base/_reset.css';
-@import './base/_typography.css';
-@import './base/_animations.css';
+@import 'layout/_sidebar.css';
+@import 'layout/_header.css';
+@import 'layout/_main.css';
 
-/* Layout */
-@import './layout/_header.css';
-@import './layout/_main.css';
-@import './layout/_sidebar.css';
+@import 'components/_glass.css';
+@import 'components/_buttons.css';
+@import 'components/_cards.css';
+@import 'components/_badges.css';
+@import 'components/_forms.css';
+@import 'components/_tables.css';
+@import 'components/_modals.css';
+@import 'components/_loading.css';
 
-/* Components */
-@import './components/_glass.css';
-@import './components/_buttons.css';
-@import './components/_cards.css';
-@import './components/_badges.css';
-@import './components/_forms.css';
-@import './components/_tables.css';
-@import './components/_modals.css';
-@import './components/_loading.css';
+@import 'pages/_dashboard.css';
+@import 'pages/_test-cases.css';
+@import 'pages/_execution.css';
+@import 'pages/_reports.css';
+@import 'pages/_settings.css';
+@import 'pages/_bugs.css';
+@import 'pages/_auth.css';
 
-/* Pages */
-@import './pages/_dashboard.css';
-@import './pages/_test-cases.css';
-@import './pages/_execution.css';
-@import './pages/_reports.css';
-@import './pages/_settings.css';
-@import './pages/_bugs.css';
-@import './pages/_auth.css';
-
-/* Utilities */
-@import './utilities/_helpers.css';
-@import './utilities/_responsive.css';
+@import 'utilities/_helpers.css';
+@import 'utilities/_responsive.css';
