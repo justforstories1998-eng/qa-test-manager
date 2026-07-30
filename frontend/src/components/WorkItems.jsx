@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../api';
+import RichTextEditor from './shared/RichTextEditor';
+import {
+  Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
+  PointElement, LineElement, Tooltip, Legend,
+} from 'chart.js';
+import { Doughnut, Bar } from 'react-chartjs-2';
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Tooltip, Legend);
 const PRIORITY_COLORS = { 1: '#ef4444', 2: '#f97316', 3: '#eab308', 4: '#6b7280' };
 const PRIORITY_LABELS = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' };
 const TYPE_COLORS = { Epic: '#8b5cf6', Feature: '#6366f1', 'User Story': '#3b82f6', Task: '#f59e0b', Bug: '#ef4444', Issue: '#f97316', 'Test Case': '#10b981' };
@@ -155,8 +162,7 @@ function WorkItemForm({ initial, onSubmit, onCancel, submitLabel, templates, pro
               <Select value={form[f.key]} onChange={v => set(f.key, f.key === 'priority' ? Number(v) : v)}
                 options={f.options} style={{ height: '38px' }} />
             ) : f.key === 'description' || f.key === 'acceptanceCriteria' ? (
-              <textarea value={form[f.key]} onChange={e => set(f.key, e.target.value)}
-                style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} />
+              <RichTextEditor value={form[f.key]} onChange={v => set(f.key, v)} placeholder={f.label} minHeight={80} />
             ) : (
               <input type={f.type} value={form[f.key]} onChange={e => set(f.key, f.type === 'number' ? e.target.value : e.target.value)}
                 style={{ ...inputStyle, height: '38px' }} />
@@ -167,13 +173,11 @@ function WorkItemForm({ initial, onSubmit, onCancel, submitLabel, templates, pro
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
         <div>
           <label style={labelStyle}>Description</label>
-          <textarea value={form.description} onChange={e => set('description', e.target.value)}
-            style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Describe the work item..." />
+          <RichTextEditor value={form.description} onChange={v => set('description', v)} placeholder="Describe the work item..." minHeight={100} />
         </div>
         <div>
           <label style={labelStyle}>Acceptance Criteria</label>
-          <textarea value={form.acceptanceCriteria} onChange={e => set('acceptanceCriteria', e.target.value)}
-            style={{ ...inputStyle, minHeight: '100px', resize: 'vertical' }} placeholder="Define acceptance criteria..." />
+          <RichTextEditor value={form.acceptanceCriteria} onChange={v => set('acceptanceCriteria', v)} placeholder="Define acceptance criteria..." minHeight={100} />
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
@@ -212,6 +216,7 @@ export default function WorkItems({ projectId }) {
   const [showSaveQuery, setShowSaveQuery] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [deletedItems, setDeletedItems] = useState([]);
+  const [queryChartVisible, setQueryChartVisible] = useState(false);
 
   const fetchItems = useCallback(async () => {
     if (!projectId) return;
@@ -272,6 +277,43 @@ export default function WorkItems({ projectId }) {
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const paged = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const queryChartData = useMemo(() => {
+    if (!queryChartVisible || sorted.length === 0) return null;
+    const statusCounts = {};
+    const typeCounts = {};
+    const priorityCounts = {};
+    sorted.forEach(item => {
+      statusCounts[item.status || 'Unknown'] = (statusCounts[item.status || 'Unknown'] || 0) + 1;
+      typeCounts[item.type || 'Unknown'] = (typeCounts[item.type || 'Unknown'] || 0) + 1;
+      priorityCounts[item.priority || 'Unknown'] = (priorityCounts[item.priority || 'Unknown'] || 0) + 1;
+    });
+    const statusColors = { Backlog: '#64748b', 'To Do': '#818cf8', 'In Progress': '#f59e0b', 'Code Review': '#8b5cf6', Done: '#22c55e', Closed: '#94a3b8', Removed: '#ef4444' };
+    const typeColors = { Epic: '#ef4444', Feature: '#8b5cf6', 'User Story': '#818cf8', Task: '#f59e0b', Bug: '#22c55e', Issue: '#f97316', 'Test Case': '#06b6d4' };
+    return {
+      status: {
+        labels: Object.keys(statusCounts),
+        datasets: [{ data: Object.values(statusCounts), backgroundColor: Object.keys(statusCounts).map(s => (statusColors[s] || '#64748b') + '40'), borderColor: Object.keys(statusCounts).map(s => statusColors[s] || '#64748b'), borderWidth: 1.5, borderRadius: 6, barPercentage: 0.6 }],
+      },
+      type: {
+        labels: Object.keys(typeCounts),
+        datasets: [{ data: Object.values(typeCounts), backgroundColor: Object.keys(typeCounts).map(t => typeColors[t] || '#64748b'), borderWidth: 0, hoverOffset: 6, spacing: 2 }],
+      },
+      priority: {
+        labels: Object.keys(priorityCounts).map(p => `P${p}`),
+        datasets: [{ data: Object.values(priorityCounts), backgroundColor: ['#ef444440', '#f9731640', '#6366f140', '#22c55e40'], borderColor: ['#ef4444', '#f97316', '#6366f1', '#22c55e'], borderWidth: 1.5, borderRadius: 6, barPercentage: 0.6 }],
+      },
+    };
+  }, [sorted, queryChartVisible]);
+
+  const queryChartOptions = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', titleColor: '#f1f5f9', bodyColor: '#cbd5e1', borderWidth: 1, padding: 10, cornerRadius: 8 } },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: 'rgba(148,163,184,0.5)', font: { size: 11 } }, border: { display: false } },
+      y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(148,163,184,0.5)', font: { size: 11 } }, border: { display: false } },
+    },
+  }), []);
 
   useEffect(() => { setPage(1); }, [filterType, filterStatus, search]);
 
@@ -447,40 +489,73 @@ export default function WorkItems({ projectId }) {
       )}
 
       {tab === 'queries' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
-          {queries.length === 0 && (
-            <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No saved queries yet. Go to All Items, set filters, and save as a query.</div>
-          )}
-          {queries.map(q => (
-            <div key={q._id} style={{
-              background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)',
-              padding: '16px', cursor: 'pointer', transition: 'border-color 0.2s',
-            }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
-              onClick={() => {
-                if (q.filters) {
-                  setFilterType(q.filters.type || '');
-                  setFilterStatus(q.filters.status || '');
-                  setSearch(q.filters.search || '');
-                }
-                setTab('items');
-              }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary, #f1f5f9)', marginBottom: '4px' }}>{q.name}</div>
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                    {q.filters?.type || 'All types'} · {q.filters?.status || 'All statuses'}
-                    {q.filters?.search ? ` · "${q.filters.search}"` : ''}
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+            <button onClick={() => setQueryChartVisible(v => !v)} style={{ ...btnSecondary, ...btnSmall }}>
+              {queryChartVisible ? '📊 Hide Charts' : '📊 Show Charts'}
+            </button>
+          </div>
+          {queryChartVisible && queryChartData && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>By Status</div>
+                <div style={{ height: '160px' }}><Bar data={queryChartData.status} options={queryChartOptions} /></div>
+              </div>
+              <div style={{ background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>By Type</div>
+                <div style={{ display: 'flex', alignItems: 'center', height: '160px' }}>
+                  <div style={{ width: '120px', height: '120px', flexShrink: 0 }}><Doughnut data={queryChartData.type} options={{ responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }} /></div>
+                  <div style={{ marginLeft: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {queryChartData.type.labels.map((l, i) => (
+                      <div key={l} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: 'var(--text-muted)' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '2px', background: queryChartData.type.datasets[0].backgroundColor[i] }} />
+                        {l} ({queryChartData.type.datasets[0].data[i]})
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <button onClick={async (e) => {
-                  e.stopPropagation();
-                  if (confirm('Delete query?')) { await api.deleteQuery(q._id); fetchQueries(); }
-                }} style={{ ...btnIcon, color: '#ef4444', flexShrink: 0 }}>🗑</button>
+              </div>
+              <div style={{ background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', padding: '16px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>By Priority</div>
+                <div style={{ height: '160px' }}><Bar data={queryChartData.priority} options={queryChartOptions} /></div>
               </div>
             </div>
-          ))}
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '12px' }}>
+            {queries.length === 0 && (
+              <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>No saved queries yet. Go to All Items, set filters, and save as a query.</div>
+            )}
+            {queries.map(q => (
+              <div key={q._id} style={{
+                background: 'var(--surface-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)',
+                padding: '16px', cursor: 'pointer', transition: 'border-color 0.2s',
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#6366f1'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-color)'}
+                onClick={() => {
+                  if (q.filters) {
+                    setFilterType(q.filters.type || '');
+                    setFilterStatus(q.filters.status || '');
+                    setSearch(q.filters.search || '');
+                  }
+                  setTab('items');
+                }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary, #f1f5f9)', marginBottom: '4px' }}>{q.name}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                      {q.filters?.type || 'All types'} · {q.filters?.status || 'All statuses'}
+                      {q.filters?.search ? ` · "${q.filters.search}"` : ''}
+                    </div>
+                  </div>
+                  <button onClick={async (e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete query?')) { await api.deleteQuery(q._id); fetchQueries(); }
+                  }} style={{ ...btnIcon, color: '#ef4444', flexShrink: 0 }}>🗑</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -712,8 +787,7 @@ function WorkItemDetail({ item, onClose }) {
         type === 'select' ? (
           <Select value={form[field]} onChange={v => set(field, field === 'priority' ? Number(v) : v)} options={options} style={{ height: '36px' }} />
         ) : type === 'textarea' ? (
-          <textarea value={displayForm(field)} onChange={e => set(field, e.target.value)}
-            style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }} />
+          <RichTextEditor value={displayForm(field)} onChange={v => set(field, v)} placeholder={label} minHeight={80} />
         ) : (
           <input type={type || 'text'} value={displayForm(field)} onChange={e => set(field, e.target.value)} style={{ ...inputStyle, height: '36px' }} />
         )

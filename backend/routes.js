@@ -325,6 +325,40 @@ router.put('/boards/:id', async (req, res, next) => { try { res.json({ success: 
 router.delete('/boards/:id', async (req, res, next) => { try { await deleteBoard(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 
 router.get('/work-items', async (req, res, next) => { try { res.json({ success: true, data: await getAllWorkItems(req.query.projectId, req.query) }); } catch (e) { next(e); } });
+
+router.get('/work-items/stats/:projectId', async (req, res, next) => {
+  try {
+    const items = await getAllWorkItems(req.params.projectId);
+    const statusCounts = {};
+    const typeCounts = {};
+    const priorityCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    const assigneeCounts = {};
+    const sprintPoints = {};
+    let totalStoryPoints = 0;
+    let completedStoryPoints = 0;
+
+    items.forEach(item => {
+      statusCounts[item.status] = (statusCounts[item.status] || 0) + 1;
+      typeCounts[item.type] = (typeCounts[item.type] || 0) + 1;
+      if (item.priority >= 1 && item.priority <= 4) priorityCounts[item.priority]++;
+      const assignee = item.assignee || 'Unassigned';
+      assigneeCounts[assignee] = (assigneeCounts[assignee] || 0) + 1;
+      totalStoryPoints += item.storyPoints || 0;
+      if (item.status === 'Done' || item.status === 'Closed') completedStoryPoints += item.storyPoints || 0;
+      if (item.sprintId) {
+        const sid = item.sprintId.toString();
+        if (!sprintPoints[sid]) sprintPoints[sid] = { total: 0, completed: 0 };
+        sprintPoints[sid].total += item.storyPoints || 0;
+        if (item.status === 'Done' || item.status === 'Closed') sprintPoints[sid].completed += item.storyPoints || 0;
+      }
+    });
+
+    res.json({
+      success: true,
+      data: { statusCounts, typeCounts, priorityCounts, assigneeCounts, totalStoryPoints, completedStoryPoints, sprintPoints, total: items.length }
+    });
+  } catch (e) { next(e); }
+});
 router.get('/work-items/hierarchy', async (req, res, next) => { try { res.json({ success: true, data: await getWorkItemHierarchy(req.query.projectId) }); } catch (e) { next(e); } });
 router.get('/work-items/:id', async (req, res, next) => { try { res.json({ success: true, data: await getWorkItemById(req.params.id) }); } catch (e) { next(e); } });
 router.post('/work-items', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkItem(req.body) }); } catch (e) { next(e); } });

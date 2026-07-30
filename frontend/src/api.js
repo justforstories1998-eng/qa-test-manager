@@ -196,6 +196,7 @@ const api = {
   deleteBoard: (id) => apiClient.delete(`/boards/${id}`),
 
   getWorkItems: (projectId, filters = {}) => apiClient.get('/work-items', { params: { projectId, ...filters } }),
+  getWorkItemStats: (projectId) => apiClient.get(`/work-items/stats/${projectId}`),
   getWorkItemHierarchy: (projectId) => apiClient.get('/work-items/hierarchy', { params: { projectId } }),
   getWorkItem: (id) => apiClient.get(`/work-items/${id}`),
   createWorkItem: (data) => apiClient.post('/work-items', data),

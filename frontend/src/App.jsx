@@ -43,6 +43,8 @@ function App() {
   const [testCases, setTestCases] = useState([]);
   const [testRuns, setTestRuns] = useState([]);
   const [statistics, setStatistics] = useState(null);
+  const [workItemStats, setWorkItemStats] = useState(null);
+  const [sprints, setSprints] = useState([]);
   const [settings, setSettings] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(window.innerWidth < 1100);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -95,16 +97,20 @@ function App() {
   const refreshData = useCallback(async () => {
     if (!activeProjectId) return;
     try {
-      const [suites, cases, runs, stats] = await Promise.all([
+      const [suites, cases, runs, stats, wiStats, sprintsData] = await Promise.all([
         api.getTestSuites(activeProjectId),
         api.getTestCases(activeProjectId),
         api.getTestRuns(activeProjectId),
-        api.getStatistics(activeProjectId)
+        api.getStatistics(activeProjectId),
+        api.getWorkItemStats(activeProjectId),
+        api.getSprints(activeProjectId)
       ]);
       if (suites.success) setTestSuites(suites.data);
       if (cases.success) setTestCases(cases.data);
       if (runs.success) setTestRuns(runs.data);
       if (stats.success) setStatistics(stats.data);
+      if (wiStats.success) setWorkItemStats(wiStats.data);
+      if (sprintsData.success) setSprints(sprintsData.data || []);
     } catch (e) {
       console.error("Data synchronization error:", e);
     }
@@ -230,7 +236,7 @@ function App() {
 
         {activeProjectId ? (
           <Routes>
-            <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} onRefresh={refreshData} />} />
+            <Route path="/" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} workItemStats={workItemStats} sprints={sprints} onRefresh={refreshData} />} />
             {canAccessModule(user?.role, 'test-cases') && (
               <Route path="/test-cases" element={
                 <TestCases

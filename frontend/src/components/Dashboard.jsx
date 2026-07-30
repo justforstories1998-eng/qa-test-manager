@@ -102,7 +102,7 @@ const StatusDot = ({ color, size = 8 }) => (
 
 /* ═══════════════════ main component ═══════════════════ */
 
-function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
+function Dashboard({ statistics, testSuites, testRuns, workItemStats, sprints, onRefresh }) {
   const [refreshing, setRefreshing] = useState(false);
   const [greeting, setGreeting] = useState('');
   const theme = useTheme();
@@ -154,6 +154,62 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
 
   const totalExecuted = stats.statusCounts.passed + stats.statusCounts.failed + stats.statusCounts.blocked + stats.statusCounts.na;
   const executionRate = stats.totalTestCases > 0 ? Math.round((totalExecuted / stats.totalTestCases) * 100) : 0;
+
+  /* ── work item data ── */
+  const wiStatusData = useMemo(() => {
+    if (!workItemStats?.statusCounts) return null;
+    const labels = Object.keys(workItemStats.statusCounts);
+    const values = Object.values(workItemStats.statusCounts);
+    const colors = labels.map(s => {
+      if (s === 'Done' || s === 'Closed') return '#22c55e';
+      if (s === 'In Progress') return '#f59e0b';
+      if (s === 'Code Review') return '#8b5cf6';
+      if (s === 'Backlog') return '#64748b';
+      return '#818cf8';
+    });
+    return {
+      labels, datasets: [{
+        label: 'Work Items', data: values,
+        backgroundColor: colors.map(c => `${c}30`), borderColor: colors,
+        borderWidth: 1.5, borderRadius: 6, barPercentage: 0.6,
+      }],
+    };
+  }, [workItemStats]);
+
+  const wiTypeData = useMemo(() => {
+    if (!workItemStats?.typeCounts) return null;
+    const typeColors = { Epic: '#ef4444', Feature: '#8b5cf6', 'User Story': '#818cf8', Task: '#f59e0b', Bug: '#22c55e', 'Test Case': '#06b6d4', Issue: '#f97316' };
+    const labels = Object.keys(workItemStats.typeCounts);
+    const values = Object.values(workItemStats.typeCounts);
+    const colors = labels.map(l => typeColors[l] || '#64748b');
+    return {
+      labels, datasets: [{
+        data: values,
+        backgroundColor: colors, borderWidth: 0, hoverOffset: 6, spacing: 2,
+      }],
+    };
+  }, [workItemStats]);
+
+  const wiTypeDoughnutOptions = useMemo(() => ({
+    responsive: true, maintainAspectRatio: false, cutout: '65%',
+    plugins: {
+      legend: { display: false },
+      tooltip: chartOptions().plugins.tooltip,
+    },
+  }), [chartOptions]);
+
+  const assigneeChartData = useMemo(() => {
+    if (!workItemStats?.assigneeCounts) return null;
+    const sorted = Object.entries(workItemStats.assigneeCounts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+    return {
+      labels: sorted.map(([name]) => name),
+      datasets: [{
+        label: 'Work Items', data: sorted.map(([, count]) => count),
+        backgroundColor: 'rgba(129,140,248,0.3)', borderColor: '#818cf8',
+        borderWidth: 1.5, borderRadius: 6, barPercentage: 0.6,
+      }],
+    };
+  }, [workItemStats]);
 
   /* ── chart data ── */
   const statusChartData = {
@@ -543,6 +599,110 @@ function Dashboard({ statistics, testSuites, testRuns, onRefresh }) {
               })}
             </div>
           </div>
+        )}
+
+        {/* ══════ WORK ITEM WIDGETS ══════ */}
+        {workItemStats && workItemStats.total > 0 && (
+          <>
+            {/* Work item summary cards */}
+            <div className="dash-stats-grid">
+              <div className="dash-stat-card" style={{ '--card-accent': '#818cf8' }}>
+                <div className="dash-stat-accent" style={{ background: 'linear-gradient(90deg, #818cf8, #818cf800)' }} />
+                <div className="dash-stat-icon" style={{ background: '#818cf815', borderColor: '#818cf825' }}>
+                  <FiLayers size={18} style={{ color: '#818cf8' }} />
+                </div>
+                <div className="dash-stat-value"><AnimatedNumber value={workItemStats.total} /></div>
+                <div className="dash-stat-label">Total Work Items</div>
+              </div>
+              <div className="dash-stat-card" style={{ '--card-accent': '#22c55e' }}>
+                <div className="dash-stat-accent" style={{ background: 'linear-gradient(90deg, #22c55e, #22c55e00)' }} />
+                <div className="dash-stat-icon" style={{ background: '#22c55e15', borderColor: '#22c55e25' }}>
+                  <FiCheckCircle size={18} style={{ color: '#22c55e' }} />
+                </div>
+                <div className="dash-stat-value"><AnimatedNumber value={workItemStats.completedStoryPoints} /></div>
+                <div className="dash-stat-label">Story Points Completed</div>
+              </div>
+              <div className="dash-stat-card" style={{ '--card-accent': '#f59e0b' }}>
+                <div className="dash-stat-accent" style={{ background: 'linear-gradient(90deg, #f59e0b, #f59e0b00)' }} />
+                <div className="dash-stat-icon" style={{ background: '#f59e0b15', borderColor: '#f59e0b25' }}>
+                  <FiClock size={18} style={{ color: '#f59e0b' }} />
+                </div>
+                <div className="dash-stat-value"><AnimatedNumber value={workItemStats.totalStoryPoints - workItemStats.completedStoryPoints} /></div>
+                <div className="dash-stat-label">Remaining Points</div>
+              </div>
+              <div className="dash-stat-card" style={{ '--card-accent': '#a78bfa' }}>
+                <div className="dash-stat-accent" style={{ background: 'linear-gradient(90deg, #a78bfa, #a78bfa00)' }} />
+                <div className="dash-stat-icon" style={{ background: '#a78bfa15', borderColor: '#a78bfa25' }}>
+                  <FiActivity size={18} style={{ color: '#a78bfa' }} />
+                </div>
+                <div className="dash-stat-value">
+                  <AnimatedNumber value={workItemStats.totalStoryPoints > 0 ? Math.round((workItemStats.completedStoryPoints / workItemStats.totalStoryPoints) * 100) : 0} suffix="%" />
+                </div>
+                <div className="dash-stat-label">Completion Rate</div>
+              </div>
+            </div>
+
+            {/* Work item charts row */}
+            <div className="dash-charts-grid">
+              {/* Status distribution */}
+              {wiStatusData && (
+                <div className="dash-chart-card">
+                  <div className="dash-chart-header">
+                    <h3 className="dash-chart-title">
+                      <FiBarChart2 size={15} /> Work Item Status
+                    </h3>
+                    <span className="dash-chip">{workItemStats.total} items</span>
+                  </div>
+                  <div className="dash-chart-body" style={{ height: 200 }}>
+                    <Bar data={wiStatusData} options={chartOptions()} />
+                  </div>
+                </div>
+              )}
+
+              {/* Type breakdown */}
+              {wiTypeData && (
+                <div className="dash-chart-card">
+                  <div className="dash-chart-header">
+                    <h3 className="dash-chart-title">
+                      <FiPieChart size={15} /> Work Item Types
+                    </h3>
+                  </div>
+                  <div className="dash-doughnut-body">
+                    <div className="dash-doughnut-wrap">
+                      <Doughnut data={wiTypeData} options={wiTypeDoughnutOptions} />
+                      <div className="dash-doughnut-center">
+                        <div className="dash-doughnut-value">{workItemStats.total}</div>
+                        <div className="dash-doughnut-caption">total</div>
+                      </div>
+                    </div>
+                    <div className="dash-legend-list">
+                      {wiTypeData.labels.map((label, i) => (
+                        <div key={label} className="dash-legend-row">
+                          <StatusDot color={wiTypeData.datasets[0].backgroundColor[i]} />
+                          <span className="dash-legend-label">{label}</span>
+                          <span className="dash-legend-value">{wiTypeData.datasets[0].data[i]}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Assignee chart */}
+            {assigneeChartData && assigneeChartData.labels.length > 0 && (
+              <div className="dash-chart-card">
+                <div className="dash-chart-header">
+                  <h3 className="dash-chart-title">
+                    <FiTrendingUp size={15} /> Work Items by Assignee
+                  </h3>
+                </div>
+                <div className="dash-chart-body" style={{ height: 180 }}>
+                  <Bar data={assigneeChartData} options={chartOptions()} />
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
