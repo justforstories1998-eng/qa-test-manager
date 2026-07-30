@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUser, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShield, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
-import * as THREE from 'three';
 import api from '../api';
 
 function Login({ onLogin }) {
@@ -14,14 +13,13 @@ function Login({ onLogin }) {
   const [formVisible, setFormVisible] = useState(false);
   const navigate = useNavigate();
   const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const timer = setTimeout(() => setFormVisible(true), 200);
     return () => clearTimeout(timer);
   }, []);
 
-  // Three.js particle animation
+  // Canvas particle animation (replaces THREE.js)
   useEffect(() => {
     const prevBg = document.body.style.backgroundColor;
     const prevOverflow = document.body.style.overflow;
@@ -32,113 +30,91 @@ function Login({ onLogin }) {
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    const ctx = canvas.getContext('2d');
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
 
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x05050f, 1);
-
-    const particleCount = 2000;
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-
-    const colorPalette = [
-      new THREE.Color('#818cf8'), new THREE.Color('#a78bfa'),
-      new THREE.Color('#6366f1'), new THREE.Color('#c4b5fd'),
-      new THREE.Color('#4f46e5'), new THREE.Color('#7c3aed'),
-      new THREE.Color('#5b21b6'),
-    ];
-
+    const colorPalette = ['#818cf8', '#a78bfa', '#6366f1', '#c4b5fd', '#4f46e5', '#7c3aed', '#5b21b6'];
+    const particleCount = 600;
+    const particles = [];
     for (let i = 0; i < particleCount; i++) {
-      const radius = 15 + Math.random() * 20;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = radius * Math.cos(phi) - 10;
-      const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-      colors[i * 3] = color.r;
-      colors[i * 3 + 1] = color.g;
-      colors[i * 3 + 2] = color.b;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 100 + Math.random() * 300;
+      particles.push({
+        x: w / 2 + Math.cos(angle) * radius,
+        y: h / 2 + Math.sin(angle) * radius,
+        baseX: 0, baseY: 0,
+        size: 1 + Math.random() * 2,
+        color: colorPalette[Math.floor(Math.random() * colorPalette.length)],
+        speed: 0.2 + Math.random() * 0.5,
+        angle: angle,
+        radius: radius,
+        opacity: 0.3 + Math.random() * 0.7,
+        phase: Math.random() * Math.PI * 2,
+      });
+      particles[i].baseX = particles[i].x;
+      particles[i].baseY = particles[i].y;
     }
 
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.12, vertexColors: true, transparent: true, opacity: 0.85,
-      blending: THREE.AdditiveBlending, sizeAttenuation: true, depthWrite: false,
-    });
-
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    const orbs = [];
-    const orbConfigs = [
-      { color: 0x6366f1, opacity: 0.06, scale: 6, pos: [-8, 5, -8] },
-      { color: 0x8b5cf6, opacity: 0.04, scale: 8, pos: [6, -4, -10] },
-      { color: 0x4f46e5, opacity: 0.035, scale: 5, pos: [0, 7, -7] },
-      { color: 0x7c3aed, opacity: 0.03, scale: 10, pos: [-3, -6, -12] },
-      { color: 0xa78bfa, opacity: 0.025, scale: 7, pos: [8, 3, -9] },
+    const orbs = [
+      { x: w * 0.2, y: h * 0.3, r: 150, color: 'rgba(99,102,241,0.06)', speed: 0.15, rangeX: 80, rangeY: 60, phase: 0 },
+      { x: w * 0.7, y: h * 0.6, r: 200, color: 'rgba(139,92,246,0.04)', speed: 0.1, rangeX: 100, rangeY: 80, phase: 1 },
+      { x: w * 0.5, y: h * 0.2, r: 120, color: 'rgba(79,70,229,0.04)', speed: 0.12, rangeX: 60, rangeY: 50, phase: 2 },
+      { x: w * 0.3, y: h * 0.7, r: 250, color: 'rgba(124,58,237,0.03)', speed: 0.08, rangeX: 120, rangeY: 100, phase: 3 },
     ];
-    orbConfigs.forEach(cfg => {
-      const geo = new THREE.SphereGeometry(0.5, 20, 20);
-      const mat = new THREE.MeshBasicMaterial({ color: cfg.color, transparent: true, opacity: cfg.opacity });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.scale.set(cfg.scale, cfg.scale, cfg.scale);
-      mesh.position.set(...cfg.pos);
-      scene.add(mesh);
-      orbs.push(mesh);
-    });
 
-    camera.position.z = 10;
+    let mouseX = 0, mouseY = 0;
+    let startTime = Date.now();
+    let animationId;
 
     const handleMouseMove = (e) => {
-      mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouseX = (e.clientX / w) * 2 - 1;
+      mouseY = -(e.clientY / h) * 2 + 1;
     };
     const handleResize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
     };
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('resize', handleResize);
 
-    let animationId;
-    const clock = new THREE.Clock();
     const animate = () => {
       animationId = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
-      const pos = particles.geometry.attributes.position.array;
+      const elapsed = (Date.now() - startTime) / 1000;
 
-      for (let i = 0; i < particleCount; i++) {
-        const i3 = i * 3;
-        pos[i3 + 1] += Math.sin(elapsed * 0.25 + pos[i3] * 0.08) * 0.003;
-        pos[i3] += Math.cos(elapsed * 0.18 + pos[i3 + 1] * 0.06) * 0.002;
-        pos[i3 + 2] += Math.sin(elapsed * 0.12 + pos[i3] * 0.04) * 0.001;
-      }
-      particles.geometry.attributes.position.needsUpdate = true;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#05050f';
+      ctx.fillRect(0, 0, w, h);
 
-      const targetRotY = elapsed * 0.02 + mouseRef.current.x * 0.15;
-      const targetRotX = Math.sin(elapsed * 0.08) * 0.08 + mouseRef.current.y * 0.08;
-      particles.rotation.y += (targetRotY - particles.rotation.y) * 0.02;
-      particles.rotation.x += (targetRotX - particles.rotation.x) * 0.02;
-
-      orbs.forEach((orb, i) => {
-        const speed = 0.15 + i * 0.03;
-        const range = 1.5 + i * 0.3;
-        orb.position.x = orbConfigs[i].pos[0] + Math.sin(elapsed * speed + i) * range;
-        orb.position.y = orbConfigs[i].pos[1] + Math.cos(elapsed * (speed * 0.8) + i * 0.5) * range;
-        const pulse = 1 + Math.sin(elapsed * 0.5 + i * 1.2) * 0.08;
-        const s = orbConfigs[i].scale * pulse;
-        orb.scale.set(s, s, s);
+      orbs.forEach((orb) => {
+        const cx = orb.x + Math.sin(elapsed * orb.speed + orb.phase) * orb.rangeX;
+        const cy = orb.y + Math.cos(elapsed * orb.speed * 0.8 + orb.phase) * orb.rangeY;
+        const pulse = 1 + Math.sin(elapsed * 0.5 + orb.phase) * 0.08;
+        const r = orb.r * pulse;
+        const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        gradient.addColorStop(0, orb.color);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
       });
 
-      renderer.render(scene, camera);
+      particles.forEach((p) => {
+        p.x = p.baseX + Math.sin(elapsed * p.speed * 0.3 + p.phase) * 15 + mouseX * 10;
+        p.y = p.baseY + Math.cos(elapsed * p.speed * 0.25 + p.phase * 0.5) * 10 + mouseY * 8;
+
+        ctx.globalAlpha = p.opacity * (0.6 + Math.sin(elapsed * p.speed + p.phase) * 0.4);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
     };
     animate();
 
@@ -146,9 +122,6 @@ function Login({ onLogin }) {
       cancelAnimationFrame(animationId);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
       document.body.style.backgroundColor = prevBg;
       document.body.style.overflow = prevOverflow;
       document.documentElement.classList.remove('login-active');

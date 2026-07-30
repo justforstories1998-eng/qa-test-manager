@@ -15,6 +15,7 @@ import {
   searchUsers, getAllUsers,
   getAllBoards, getBoardById, createBoard, updateBoard, deleteBoard,
   getAllWorkItems, getWorkItemById, createWorkItem, updateWorkItem, deleteWorkItem, updateWorkItemOrder, getWorkItemHierarchy,
+  cloneWorkItem, bulkUpdateWorkItems, bulkDeleteWorkItems, bulkChangeType, bulkMoveToIteration, bulkAddTags, bulkRemoveTags,
   getLinksForWorkItem, createWorkItemLink, deleteWorkItemLink,
   getAllSprints, getSprintById, createSprint, updateSprint, deleteSprint,
   getCapacitiesBySprint, upsertCapacity, deleteCapacity,

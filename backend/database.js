@@ -380,6 +380,79 @@ export const getWorkItemHierarchy = async (projectId) => {
 };
 
 // ============================================
+// WORK ITEM CLONE
+// ============================================
+export const cloneWorkItem = async (id, overrides = {}) => {
+  const original = await WorkItem.findById(id);
+  if (!original) throw new Error('Work item not found');
+  const cloneData = original.toObject();
+  delete cloneData._id;
+  delete cloneData.workItemId;
+  delete cloneData.createdAt;
+  delete cloneData.updatedAt;
+  cloneData.title = overrides.title || `${original.title} (Copy)`;
+  cloneData.status = overrides.status || 'Backlog';
+  cloneData.stateHistory = [{ status: cloneData.status, changedAt: new Date(), changedBy: 'System' }];
+  cloneData.tags = [...(original.tags || [])];
+  if (overrides.assignee !== undefined) cloneData.assignee = overrides.assignee;
+  if (overrides.parentId !== undefined) cloneData.parentId = overrides.parentId;
+  if (overrides.sprintId !== undefined) cloneData.sprintId = overrides.sprintId;
+  cloneData.workItemId = await getNextWorkItemId(original.projectId);
+  return new WorkItem(cloneData).save();
+};
+
+// ============================================
+// BULK OPERATIONS
+// ============================================
+export const bulkUpdateWorkItems = async (ids, updates) => {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  if (validIds.length === 0) return { modifiedCount: 0 };
+  const existingItems = await WorkItem.find({ _id: { $in: validIds } });
+  const statusChange = updates.status;
+  if (statusChange) {
+    for (const item of existingItems) {
+      if (item.status !== statusChange) {
+        const history = item.stateHistory || [];
+        history.push({ status: statusChange, changedAt: new Date(), changedBy: 'Bulk Operation' });
+        await WorkItem.findByIdAndUpdate(item._id, { $set: { stateHistory: history } });
+      }
+    }
+  }
+  return WorkItem.updateMany({ _id: { $in: validIds } }, { $set: updates }, { new: true });
+};
+
+export const bulkDeleteWorkItems = async (ids) => {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  if (validIds.length === 0) return { deletedCount: 0 };
+  await WorkItemLink.deleteMany({ $or: [{ sourceId: { $in: validIds } }, { targetId: { $in: validIds } }] });
+  return WorkItem.deleteMany({ _id: { $in: validIds } });
+};
+
+export const bulkChangeType = async (ids, newType) => {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  if (validIds.length === 0) return { modifiedCount: 0 };
+  return WorkItem.updateMany({ _id: { $in: validIds } }, { $set: { type: newType } });
+};
+
+export const bulkMoveToIteration = async (ids, iterationPath) => {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  if (validIds.length === 0) return { modifiedCount: 0 };
+  return WorkItem.updateMany({ _id: { $in: validIds } }, { $set: { iterationPath } });
+};
+
+export const bulkAddTags = async (ids, tags) => {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  if (validIds.length === 0) return { modifiedCount: 0 };
+  return WorkItem.updateMany({ _id: { $in: validIds } }, { $addToSet: { tags: { $each: tags } } });
+};
+
+export const bulkRemoveTags = async (ids, tags) => {
+  const validIds = ids.filter(id => mongoose.Types.ObjectId.isValid(id));
+  if (validIds.length === 0) return { modifiedCount: 0 };
+  return WorkItem.updateMany({ _id: { $in: validIds } }, { $pullAll: { tags } });
+};
+
+// ============================================
 // WORK ITEM LINKS
 // ============================================
 export const getLinksForWorkItem = async (workItemId) => {
