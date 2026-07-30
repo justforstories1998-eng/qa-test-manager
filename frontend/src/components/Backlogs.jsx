@@ -540,6 +540,62 @@ export default function Backlogs({ projectId }) {
     </div>
   );
 
+  const [showForecast, setShowForecast] = useState(false);
+
+  const forecastData = useMemo(() => {
+    if (!velocity || !velocity.averageVelocity || velocity.averageVelocity <= 0) return null;
+    const remaining = allPoints;
+    const avgVelocity = velocity.averageVelocity;
+    const sprintsLeft = Math.ceil(remaining / avgVelocity);
+    const recentVelocities = (velocity.recentVelocities || []).slice(-6);
+    const trend = recentVelocities.length >= 2
+      ? recentVelocities[recentVelocities.length - 1] - recentVelocities[0]
+      : 0;
+    const projectedVelocity = Math.max(1, avgVelocity + (trend / recentVelocities.length));
+    const projectedSprints = Math.ceil(remaining / projectedVelocity);
+    const today = new Date();
+    const projectedEnd = new Date(today);
+    projectedEnd.setDate(projectedEnd.getDate() + projectedSprints * 14);
+    return { remaining, avgVelocity, sprintsLeft, projectedSprints, projectedEnd, trend: trend > 0 ? 'up' : trend < 0 ? 'down' : 'stable', recentVelocities };
+  }, [velocity, allPoints]);
+
+  const ForecastPanel = forecastData && (
+    <div style={{ padding: '16px 20px', background: t.bgCard, borderRadius: 14, border: `1px solid ${t.borderPrimary}`, boxShadow: t.shadowSm, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <FiTrendingUp size={16} color={t.accentPrimary} />
+          <span style={{ fontSize: 14, fontWeight: 700, color: t.textPrimary }}>Sprint Forecast</span>
+        </div>
+        <button onClick={() => setShowForecast(false)} style={{ background: 'none', border: 'none', color: t.textMuted, cursor: 'pointer', padding: 4 }}><FiX size={14} /></button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        {[
+          { label: 'Remaining', value: `${forecastData.remaining} pts`, color: t.accentPrimary },
+          { label: 'Avg Velocity', value: `${forecastData.avgVelocity}/sprint`, color: '#3b82f6' },
+          { label: 'Projected', value: `${forecastData.projectedSprints} sprints`, color: forecastData.trend === 'up' ? '#22c55e' : forecastData.trend === 'down' ? '#ef4444' : t.warningColor },
+          { label: 'Est. Completion', value: forecastData.projectedEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }), color: t.successColor },
+        ].map((item, i) => (
+          <div key={i} style={{ padding: '10px 12px', borderRadius: 10, background: t.bgTertiary, border: `1px solid ${t.borderPrimary}` }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: t.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>{item.label}</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: item.color }}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+      {forecastData.recentVelocities.length > 1 && (
+        <div style={{ marginTop: 12, padding: '8px 12px', borderRadius: 8, background: t.bgTertiary, border: `1px solid ${t.borderPrimary}` }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: t.textMuted, marginBottom: 6 }}>VELOCITY TREND (last {forecastData.recentVelocities.length} sprints)</div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 40 }}>
+            {forecastData.recentVelocities.map((v, i) => {
+              const max = Math.max(...forecastData.recentVelocities, 1);
+              const h = (v / max) * 36;
+              return <div key={i} style={{ flex: 1, height: Math.max(4, h), background: `linear-gradient(180deg, ${t.accentPrimary}, ${t.accentSecondary})`, borderRadius: 3, opacity: 0.5 + (i / forecastData.recentVelocities.length) * 0.5 }} title={`${v} pts`} />;
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   /* ═══════════════════ Row Renderer ═══════════════════ */
   const renderRow = (item, index) => {
     const depth = item._depth;
@@ -923,6 +979,16 @@ export default function Backlogs({ projectId }) {
         flexShrink: 0, background: t.bgSecondary,
       }}>
         {renderStatsCards()}
+
+        {forecastData && (
+          <div style={{ marginTop: 12 }}>
+            {!showForecast ? (
+              <button onClick={() => setShowForecast(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgTertiary, color: t.textSecondary, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                <FiTrendingUp size={13} /> Show Forecast ({forecastData.projectedSprints} sprints projected)
+              </button>
+            ) : ForecastPanel}
+          </div>
+        )}
 
         {/* Type summary chips */}
         <div style={{
