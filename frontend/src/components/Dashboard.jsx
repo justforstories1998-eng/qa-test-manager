@@ -147,6 +147,38 @@ function Dashboard({ statistics, testSuites, testRuns, workItemStats, sprints, o
   const totalExecuted = stats.statusCounts.passed + stats.statusCounts.failed + stats.statusCounts.blocked + stats.statusCounts.na;
   const executionRate = stats.totalTestCases > 0 ? Math.round((totalExecuted / stats.totalTestCases) * 100) : 0;
 
+  /* ── chart options (theme-aware) ── */
+  const chartOptions = useCallback((yMax) => ({
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: isDark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.98)',
+        titleColor: isDark ? '#f1f5f9' : '#0f172a',
+        bodyColor: isDark ? '#cbd5e1' : '#475569',
+        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+        borderWidth: 1, padding: 10, cornerRadius: 8,
+        titleFont: { size: 12, weight: '600' },
+        bodyFont: { size: 12 },
+        displayColors: true, boxPadding: 4,
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: isDark ? 'rgba(148,163,184,0.5)' : '#94a3b8', font: { size: 11 } },
+        border: { display: false },
+      },
+      y: {
+        beginAtZero: true,
+        ...(yMax ? { max: yMax } : {}),
+        grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
+        ticks: { color: isDark ? 'rgba(148,163,184,0.5)' : '#94a3b8', font: { size: 11 } },
+        border: { display: false },
+      },
+    },
+  }), [isDark]);
+
   /* ── work item data ── */
   const wiStatusData = useMemo(() => {
     if (!workItemStats?.statusCounts) return null;
@@ -253,38 +285,6 @@ function Dashboard({ statistics, testSuites, testRuns, workItemStats, sprints, o
       pointBorderWidth: 2, borderWidth: 2,
     }],
   };
-
-  /* ── chart options (theme-aware) ── */
-  const chartOptions = useCallback((yMax) => ({
-    responsive: true, maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: isDark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.98)',
-        titleColor: isDark ? '#f1f5f9' : '#0f172a',
-        bodyColor: isDark ? '#cbd5e1' : '#475569',
-        borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-        borderWidth: 1, padding: 10, cornerRadius: 8,
-        titleFont: { size: 12, weight: '600' },
-        bodyFont: { size: 12 },
-        displayColors: true, boxPadding: 4,
-      },
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: isDark ? 'rgba(148,163,184,0.5)' : '#94a3b8', font: { size: 11 } },
-        border: { display: false },
-      },
-      y: {
-        beginAtZero: true,
-        ...(yMax ? { max: yMax } : {}),
-        grid: { color: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' },
-        ticks: { color: isDark ? 'rgba(148,163,184,0.5)' : '#94a3b8', font: { size: 11 } },
-        border: { display: false },
-      },
-    },
-  }), [isDark]);
 
   const doughnutOptions = useMemo(() => ({
     responsive: true, maintainAspectRatio: false, cutout: '72%',
