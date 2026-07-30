@@ -394,7 +394,6 @@ export const getAllWorkItems = async (projectId, filters = {}) => {
     ] });
   }
   if (orConditions.length > 0) query.$and = orConditions;
-  }
   let q = WorkItem.find(query);
   if (filters.sortBy === 'priority') q = q.sort({ priority: 1 });
   else if (filters.sortBy === 'storyPoints') q = q.sort({ storyPoints: -1 });
