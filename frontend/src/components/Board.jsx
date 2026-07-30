@@ -116,11 +116,13 @@ export default function Board({ projectId }) {
   const [boards, setBoards] = useState([]);
   const [selectedBoardId, setSelectedBoardId] = useState('');
   const [dragOverCol, setDragOverCol] = useState(null);
+  const [dragItemStatus, setDragItemStatus] = useState(null);
   const [filterType, setFilterType] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
   const [filterAssignee, setFilterAssignee] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [themeVersion, setThemeVersion] = useState(0);
+  const [stateTransitions, setStateTransitions] = useState({});
 
   useEffect(() => {
     const observer = new MutationObserver(() => setThemeVersion(v => v + 1));
@@ -158,8 +160,22 @@ export default function Board({ projectId }) {
       } else {
         setColumns(DEFAULT_COLUMNS);
       }
+      setStateTransitions(board?.stateTransitions || {
+        'Backlog': ['To Do'],
+        'To Do': ['In Progress', 'Backlog'],
+        'In Progress': ['Review', 'To Do'],
+        'Review': ['Done', 'In Progress'],
+        'Done': ['Review'],
+      });
     } else {
       setColumns(DEFAULT_COLUMNS);
+      setStateTransitions({
+        'Backlog': ['To Do'],
+        'To Do': ['In Progress', 'Backlog'],
+        'In Progress': ['Review', 'To Do'],
+        'Review': ['Done', 'In Progress'],
+        'Done': ['Review'],
+      });
     }
   }, [selectedBoardId, boards]);
 
@@ -171,6 +187,14 @@ export default function Board({ projectId }) {
   }, [projectId]);
 
   useEffect(() => { fetchItems(); }, [fetchItems]);
+
+  const isTransitionAllowed = useCallback((fromStatus, toStatus) => {
+    if (fromStatus === toStatus) return true;
+    if (!stateTransitions || Object.keys(stateTransitions).length === 0) return true;
+    const allowed = stateTransitions[fromStatus];
+    if (!allowed) return false;
+    return allowed.includes(toStatus);
+  }, [stateTransitions]);
 
   const filtered = useMemo(() => {
     return workItems.filter(i => {
@@ -188,6 +212,10 @@ export default function Board({ projectId }) {
   const moveItem = async (itemId, newStatus) => {
     const item = workItems.find(i => i._id === itemId);
     if (!item || item.status === newStatus) return;
+    if (!isTransitionAllowed(item.status, newStatus)) {
+      toast.warning(`Cannot move from "${item.status}" to "${newStatus}" — transition not allowed`);
+      return;
+    }
     const colDef = columns.find(c => c.id === newStatus);
     if (colDef && colDef.wipLimit > 0) {
       const currentCount = workItems.filter(i => i.status === newStatus && i._id !== itemId).length;
@@ -199,11 +227,11 @@ export default function Board({ projectId }) {
     try { await api.updateWorkItem(itemId, { status: newStatus, order: newOrder }); toast.success(`Moved to ${newStatus}`); } catch { fetchItems(); toast.error('Failed to move item'); }
   };
 
-  const handleDragStart = (e, item) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', item._id); e.currentTarget.style.opacity = '0.5'; };
-  const handleDragEnd = (e) => { e.currentTarget.style.opacity = '1'; setDragOverCol(null); };
+  const handleDragStart = (e, item) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', item._id); e.currentTarget.style.opacity = '0.5'; setDragItemStatus(item.status); };
+  const handleDragEnd = (e) => { e.currentTarget.style.opacity = '1'; setDragOverCol(null); setDragItemStatus(null); };
   const handleDragOver = (e, colId) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverCol(colId); };
   const handleDragLeave = () => { setDragOverCol(null); };
-  const handleDrop = async (e, targetStatus) => { e.preventDefault(); setDragOverCol(null); const itemId = e.dataTransfer.getData('text/plain'); if (!itemId) return; await moveItem(itemId, targetStatus); };
+  const handleDrop = async (e, targetStatus) => { e.preventDefault(); setDragOverCol(null); setDragItemStatus(null); const itemId = e.dataTransfer.getData('text/plain'); if (!itemId) return; await moveItem(itemId, targetStatus); };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -289,8 +317,8 @@ export default function Board({ projectId }) {
   const activeFilterCount = [filterType, filterPriority, filterAssignee].filter(Boolean).length;
 
   const renderCard = (item, colIdx) => {
-    const prevStatus = colIdx > 0 ? columns[colIdx - 1].id : null;
-    const nextStatus = colIdx < columns.length - 1 ? columns[colIdx + 1].id : null;
+    const prevStatus = colIdx > 0 && isTransitionAllowed(item.status, columns[colIdx - 1].id) ? columns[colIdx - 1].id : null;
+    const nextStatus = colIdx < columns.length - 1 && isTransitionAllowed(item.status, columns[colIdx + 1].id) ? columns[colIdx + 1].id : null;
     const priorityLabel = PRIORITY_LABELS[item.priority] || 'Medium';
     const priorityColor = PRIORITY_COLORS[item.priority] || '#eab308';
     const typeColor = TYPE_COLORS[item.type] || '#6b7280';
@@ -498,9 +526,10 @@ export default function Board({ projectId }) {
           const itemCount = allItemsInCol.length;
           const isOverLimit = col.wipLimit > 0 && itemCount >= col.wipLimit;
           const isDragTarget = dragOverCol === col.id;
+          const isInvalidDrop = dragItemStatus && isDragTarget && !isTransitionAllowed(dragItemStatus, col.id);
           const ColIcon = col.icon;
           return (
-            <div key={col.id} className={`board-column ${isDragTarget ? 'drag-over' : ''}`} onDragOver={e => handleDragOver(e, col.id)} onDragLeave={handleDragLeave} onDrop={e => handleDrop(e, col.id)} style={{ minWidth: 290, maxWidth: 340, flex: '1 1 0', display: 'flex', flexDirection: 'column', background: t.columnBg, border: `1px solid ${isOverLimit ? 'rgba(239,68,68,0.25)' : t.borderPrimary}`, borderRadius: 14, overflow: 'hidden' }}>
+            <div key={col.id} className={`board-column ${isDragTarget ? 'drag-over' : ''}`} onDragOver={e => handleDragOver(e, col.id)} onDragLeave={handleDragLeave} onDrop={e => handleDrop(e, col.id)} style={{ minWidth: 290, maxWidth: 340, flex: '1 1 0', display: 'flex', flexDirection: 'column', background: t.columnBg, border: `1px solid ${isInvalidDrop ? 'rgba(239,68,68,0.4)' : isOverLimit ? 'rgba(239,68,68,0.25)' : isDragTarget ? t.accentPrimary : t.borderPrimary}`, borderRadius: 14, overflow: 'hidden', transition: 'border-color 0.15s' }}>
               <div style={{ padding: '14px 16px', borderBottom: `1px solid ${t.borderPrimary}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isOverLimit ? 'rgba(239,68,68,0.06)' : t.columnHeaderBg }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 28, height: 28, borderRadius: 8, background: `${isOverLimit ? '#ef4444' : col.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${isOverLimit ? '#ef4444' : col.color}30` }}>
@@ -534,8 +563,8 @@ export default function Board({ projectId }) {
                   );
                 })}
                 {!loading && allItemsInCol.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '32px 16px', color: isDragTarget ? t.accentPrimary : t.textMuted, fontSize: 12, border: `2px dashed ${isDragTarget ? t.accentPrimary : t.borderPrimary}`, borderRadius: 12, background: isDragTarget ? `${t.accentPrimary}08` : 'transparent', transition: 'all 0.2s' }}>
-                    <FiLayout size={20} style={{ marginBottom: 6, opacity: 0.5 }} /><br />{isDragTarget ? 'Drop here' : 'No items'}
+                  <div style={{ textAlign: 'center', padding: '32px 16px', color: isInvalidDrop ? '#ef4444' : isDragTarget ? t.accentPrimary : t.textMuted, fontSize: 12, border: `2px dashed ${isInvalidDrop ? '#ef4444' : isDragTarget ? t.accentPrimary : t.borderPrimary}`, borderRadius: 12, background: isInvalidDrop ? 'rgba(239,68,68,0.04)' : isDragTarget ? `${t.accentPrimary}08` : 'transparent', transition: 'all 0.2s' }}>
+                    <FiLayout size={20} style={{ marginBottom: 6, opacity: 0.5 }} /><br />{isInvalidDrop ? 'Transition not allowed' : isDragTarget ? 'Drop here' : 'No items'}
                   </div>
                 )}
                 <div style={{ marginTop: 8 }}>

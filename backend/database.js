@@ -363,15 +363,38 @@ const getNextWorkItemId = async (projectId) => {
 
 export const getAllWorkItems = async (projectId, filters = {}) => {
   const query = { projectId };
+  const orConditions = [];
   if (filters.boardId) query.boardId = filters.boardId;
   if (filters.sprintId) query.sprintId = filters.sprintId;
   if (filters.status) query.status = filters.status;
   if (filters.type) query.type = filters.type;
-  if (filters.assignee) query.assignee = filters.assignee;
+  if (filters.assignee) {
+    if (filters.assignee === '__unassigned') {
+      orConditions.push({ $or: [{ assignee: { $exists: false } }, { assignee: null }, { assignee: '' }] });
+    } else {
+      query.assignee = filters.assignee;
+    }
+  }
   if (filters.parentId) query.parentId = filters.parentId;
   if (filters.parentId === 'null') query.parentId = null;
   if (filters.areaPath) query.areaPath = filters.areaPath;
   if (filters.iterationPath) query.iterationPath = filters.iterationPath;
+  if (filters.priority) query.priority = parseInt(filters.priority);
+  if (filters.tag) query.tags = { $in: [filters.tag] };
+  if (filters.dateFrom || filters.dateTo) {
+    query.createdAt = {};
+    if (filters.dateFrom) query.createdAt.$gte = new Date(filters.dateFrom);
+    if (filters.dateTo) query.createdAt.$lte = new Date(filters.dateTo + 'T23:59:59.999Z');
+  }
+  if (filters.search) {
+    orConditions.push({ $or: [
+      { title: { $regex: filters.search, $options: 'i' } },
+      { description: { $regex: filters.search, $options: 'i' } },
+      { workItemId: isNaN(filters.search) ? -1 : parseInt(filters.search) },
+    ] });
+  }
+  if (orConditions.length > 0) query.$and = orConditions;
+  }
   let q = WorkItem.find(query);
   if (filters.sortBy === 'priority') q = q.sort({ priority: 1 });
   else if (filters.sortBy === 'storyPoints') q = q.sort({ storyPoints: -1 });
@@ -636,6 +659,18 @@ export const unfollowWorkItem = (userId, workItemId) => NotificationSubscription
 export const getFollowers = (workItemId) => NotificationSubscription.find({ workItemId });
 export const getUserSubscriptions = (userId, projectId) => NotificationSubscription.find({ userId, projectId });
 export const isFollowing = (userId, workItemId) => NotificationSubscription.findOne({ userId, workItemId });
+
+export const getFollowedItemsWithDetails = async (userId) => {
+  const subs = await NotificationSubscription.find({ userId }).sort({ updatedAt: -1 }).lean();
+  const itemIds = subs.map(s => s.workItemId);
+  const items = await WorkItem.find({ _id: { $in: itemIds } }).lean();
+  const itemMap = {};
+  items.forEach(i => { itemMap[i._id.toString()] = i; });
+  return subs.map(s => ({
+    ...s,
+    workItem: itemMap[s.workItemId.toString()] || null,
+  })).filter(s => s.workItem);
+};
 
 // ============================================
 // WORKFLOW RULES

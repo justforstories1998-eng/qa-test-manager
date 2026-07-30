@@ -262,6 +262,7 @@ const api = {
   getFollowers: (workItemId) => apiClient.get(`/notifications/followers/${workItemId}`),
   getUserSubscriptions: (userId, projectId) => apiClient.get(`/notifications/subscriptions/${userId}/${projectId}`),
   isFollowing: (userId, workItemId) => apiClient.get(`/notifications/is-following/${userId}/${workItemId}`),
+  getFollowedItems: (userId) => apiClient.get(`/notifications/followed/${userId}`),
 
   getWorkflowRules: (projectId) => apiClient.get(`/workflow-rules/${projectId}`),
   createWorkflowRule: (data) => apiClient.post('/workflow-rules', data),

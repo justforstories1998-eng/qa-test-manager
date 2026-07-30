@@ -200,6 +200,12 @@ export default function WorkItems({ projectId }) {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterPriority, setFilterPriority] = useState('');
+  const [filterAssignee, setFilterAssignee] = useState('');
+  const [filterTag, setFilterTag] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [sortKey, setSortKey] = useState('workItemId');
   const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(1);
@@ -220,6 +226,11 @@ export default function WorkItems({ projectId }) {
       const filters = {};
       if (filterType) filters.type = filterType;
       if (filterStatus) filters.status = filterStatus;
+      if (filterPriority) filters.priority = filterPriority;
+      if (filterAssignee) filters.assignee = filterAssignee;
+      if (filterTag) filters.tag = filterTag;
+      if (filterDateFrom) filters.dateFrom = filterDateFrom;
+      if (filterDateTo) filters.dateTo = filterDateTo;
       if (search) filters.search = search;
       const res = await api.getWorkItems(projectId, filters);
       if (res.success) setItems(res.data || []);
@@ -227,7 +238,7 @@ export default function WorkItems({ projectId }) {
       console.error('Failed to fetch work items', err);
     }
     setLoading(false);
-  }, [projectId, filterType, filterStatus, search]);
+  }, [projectId, filterType, filterStatus, filterPriority, filterAssignee, filterTag, filterDateFrom, filterDateTo, search]);
 
   const fetchQueries = useCallback(async () => {
     if (!projectId) return;
@@ -270,6 +281,18 @@ export default function WorkItems({ projectId }) {
     return arr;
   }, [items, sortKey, sortDir]);
 
+  const uniqueAssignees = useMemo(() => {
+    const set = new Set();
+    items.forEach(i => { if (i.assignee) set.add(i.assignee); });
+    return [...set].sort();
+  }, [items]);
+
+  const uniqueTags = useMemo(() => {
+    const set = new Set();
+    items.forEach(i => (i.tags || []).forEach(t => set.add(t)));
+    return [...set].sort();
+  }, [items]);
+
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const paged = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -310,7 +333,7 @@ export default function WorkItems({ projectId }) {
     },
   }), []);
 
-  useEffect(() => { setPage(1); }, [filterType, filterStatus, search]);
+  useEffect(() => { setPage(1); }, [filterType, filterStatus, filterPriority, filterAssignee, filterTag, filterDateFrom, filterDateTo, search]);
 
   const toggleSort = (key) => {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -452,7 +475,22 @@ export default function WorkItems({ projectId }) {
             </div>
             <Select value={filterType} onChange={setFilterType} options={[{ value: '', label: 'All Types' }, ...TYPES.map(t => ({ value: t, label: t }))]} style={{ width: '160px', height: '38px' }} />
             <Select value={filterStatus} onChange={setFilterStatus} options={[{ value: '', label: 'All Statuses' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '160px', height: '38px' }} />
+            <button onClick={() => setShowAdvancedFilters(v => !v)} style={{ ...btnSecondary, height: '38px', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
+              ⚙ {showAdvancedFilters ? 'Less Filters' : 'More Filters'}
+            </button>
           </div>
+          {showAdvancedFilters && (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', padding: '12px', background: 'var(--surface-secondary)', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+              <Select value={filterPriority} onChange={setFilterPriority} options={[{ value: '', label: 'All Priorities' }, ...PRIORITIES.map(p => ({ value: String(p), label: PRIORITY_LABELS[p] || p }))]} style={{ width: '160px', height: '36px' }} />
+              <Select value={filterAssignee} onChange={setFilterAssignee} options={[{ value: '', label: 'All Assignees' }, { value: '__unassigned', label: 'Unassigned' }, ...uniqueAssignees.map(a => ({ value: a, label: a }))]} style={{ width: '160px', height: '36px' }} />
+              <Select value={filterTag} onChange={setFilterTag} options={[{ value: '', label: 'All Tags' }, ...uniqueTags.map(t => ({ value: t, label: t }))]} style={{ width: '160px', height: '36px' }} />
+              <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} placeholder="From" style={{ ...inputStyle, height: '36px', width: '150px' }} />
+              <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} placeholder="To" style={{ ...inputStyle, height: '36px', width: '150px' }} />
+              {(filterPriority || filterAssignee || filterTag || filterDateFrom || filterDateTo) && (
+                <button onClick={() => { setFilterPriority(''); setFilterAssignee(''); setFilterTag(''); setFilterDateFrom(''); setFilterDateTo(''); }} style={{ ...btnDanger, height: '36px', fontSize: '11px' }}>✕ Clear</button>
+              )}
+            </div>
+          )}
 
           <div style={{ background: 'var(--surface-tertiary)', borderRadius: '12px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -545,6 +583,11 @@ export default function WorkItems({ projectId }) {
                   if (q.filters) {
                     setFilterType(q.filters.type || '');
                     setFilterStatus(q.filters.status || '');
+                    setFilterPriority(q.filters.priority || '');
+                    setFilterAssignee(q.filters.assignee || '');
+                    setFilterTag(q.filters.tag || '');
+                    setFilterDateFrom(q.filters.dateFrom || '');
+                    setFilterDateTo(q.filters.dateTo || '');
                     setSearch(q.filters.search || '');
                   }
                   setTab('items');
@@ -554,6 +597,8 @@ export default function WorkItems({ projectId }) {
                     <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--text-primary, #f1f5f9)', marginBottom: '4px' }}>{q.name}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                       {q.filters?.type || 'All types'} · {q.filters?.status || 'All statuses'}
+                      {q.filters?.assignee ? ` · ${q.filters.assignee}` : ''}
+                      {q.filters?.priority ? ` · P${q.filters.priority}` : ''}
                       {q.filters?.search ? ` · "${q.filters.search}"` : ''}
                     </div>
                   </div>
@@ -639,14 +684,18 @@ export default function WorkItems({ projectId }) {
           <label style={labelStyle}>Query Name</label>
           <input value={queryName} onChange={e => setQueryName(e.target.value)} placeholder="e.g. My Open Bugs"
             style={{ ...inputStyle, marginBottom: '12px' }} />
-          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
-            This will save: Type={filterType || 'All'}, Status={filterStatus || 'All'}, Search="{search || ''}"
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.6 }}>
+            <div>This will save:</div>
+            <div>Type: {filterType || 'All'} · Status: {filterStatus || 'All'} · Priority: {filterPriority ? PRIORITY_LABELS[filterPriority] : 'All'}</div>
+            <div>Assignee: {filterAssignee || 'All'} · Tag: {filterTag || 'All'}</div>
+            {(filterDateFrom || filterDateTo) && <div>Date: {filterDateFrom || 'any'} to {filterDateTo || 'any'}</div>}
+            {search && <div>Search: "{search}"</div>}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
             <button onClick={() => setShowSaveQuery(false)} style={btnSecondary}>Cancel</button>
             <button onClick={async () => {
               if (!queryName.trim()) return;
-              await api.createQuery({ projectId, name: queryName.trim(), filters: { type: filterType, status: filterStatus, search } });
+              await api.createQuery({ projectId, name: queryName.trim(), filters: { type: filterType, status: filterStatus, priority: filterPriority, assignee: filterAssignee, tag: filterTag, dateFrom: filterDateFrom, dateTo: filterDateTo, search } });
               setQueryName('');
               setShowSaveQuery(false);
               fetchQueries();

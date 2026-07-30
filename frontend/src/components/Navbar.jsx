@@ -33,14 +33,18 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const res = await api.getBugs();
+        const userId = user?.id || user?._id;
+        if (!userId) return;
+        const res = await api.getFollowedItems(userId);
         if (res.success && res.data) {
           setNotifications(
-            res.data.slice(0, 8).map(bug => ({
-              id: bug._id,
-              title: bug.title,
-              type: bug.severity === 'Critical' ? 'critical' : bug.severity === 'High' ? 'warning' : 'info',
-              time: new Date(bug.createdAt || bug.updatedAt).toLocaleDateString(),
+            res.data.slice(0, 10).map(sub => ({
+              id: sub._id,
+              workItemId: sub.workItem?._id,
+              title: `WI-${sub.workItem?.workItemId}: ${sub.workItem?.title}`,
+              status: sub.workItem?.status,
+              type: sub.type,
+              time: new Date(sub.updatedAt).toLocaleDateString(),
             }))
           );
         }
@@ -49,7 +53,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   /* ── click-outside ── */
   useEffect(() => {
@@ -303,17 +307,20 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                     <div style={{
                       width: 28, height: 28, borderRadius: 7, flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: n.type === 'critical' ? 'rgba(239,68,68,0.12)' : n.type === 'warning' ? 'rgba(245,158,11,0.12)' : 'rgba(99,102,241,0.12)',
-                      color: n.type === 'critical' ? '#f87171' : n.type === 'warning' ? '#fbbf24' : '#818cf8',
+                      background: n.status === 'In Progress' ? 'rgba(245,158,11,0.12)' : n.status === 'Done' ? 'rgba(34,197,94,0.12)' : n.status === 'Review' ? 'rgba(139,92,246,0.12)' : 'rgba(99,102,241,0.12)',
+                      color: n.status === 'In Progress' ? '#fbbf24' : n.status === 'Done' ? '#22c55e' : n.status === 'Review' ? '#8b5cf6' : '#818cf8',
                     }}>
-                      {n.type === 'critical' ? <FiAlertCircle size={14} /> : n.type === 'warning' ? <FiAlertTriangle size={14} /> : <FiInfo size={14} />}
+                      <FiBell size={14} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
                         fontSize: 12, fontWeight: 500, color: 'var(--sidebar-text-bright, #f1f5f9)',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3,
                       }}>{n.title}</div>
-                      <div style={{ fontSize: 10, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))', marginTop: 2 }}>{n.time}</div>
+                      <div style={{ fontSize: 10, color: 'var(--sidebar-text-muted, rgba(148,163,184,0.4))', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ padding: '1px 5px', borderRadius: 4, background: 'rgba(99,102,241,0.1)', color: '#818cf8', fontSize: 9, fontWeight: 600 }}>{n.status || 'Unknown'}</span>
+                        {n.time}
+                      </div>
                     </div>
                   </div>
                 ))
