@@ -5,7 +5,7 @@ import fs from 'fs';
 
 import multer from 'multer';
 import dotenv from 'dotenv';
-import { initializeDatabase, createTestSuite, createTestCases } from './database.js';
+import { initializeDatabase, createTestSuite, createTestCases, updateSettings, getSettings } from './database.js';
 import { parseCSVFile, parseADOFormat } from './services/csvService.js';
 import { authenticateToken } from './middleware/auth.js';
 import routes from './routes.js';
@@ -184,6 +184,16 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await initializeDatabase();
+
+    // Auto-enable OpenRouter AI if env var is set and not already configured
+    if (process.env.OPENROUTER_API_KEY) {
+      const settings = await getSettings();
+      if (!settings.grokAI?.enabled || settings.grokAI?.provider !== 'openrouter') {
+        await updateSettings('grokAI', { enabled: true, provider: 'openrouter', apiKey: '' });
+        console.log("🤖 AI auto-configured: OpenRouter (using OPENROUTER_API_KEY env var)");
+      }
+    }
+
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
