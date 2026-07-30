@@ -250,11 +250,6 @@ export default function WorkItems({ projectId }) {
     }
   }, [projectId]);
 
-  useEffect(() => { fetchItems(); }, [fetchItems]);
-  useEffect(() => { if (tab === 'queries') fetchQueries(); }, [tab, fetchQueries]);
-  useEffect(() => { if (tab === 'templates') fetchTemplates(); }, [tab, fetchTemplates]);
-  useEffect(() => { if (tab === 'recycle') fetchDeleted(); }, [tab, fetchDeleted]);
-
   const fetchTemplates = useCallback(async () => {
     if (!projectId) return;
     try { const res = await api.getTemplates(projectId); if (res.success) setTemplates(res.data || []); } catch {}
@@ -264,6 +259,11 @@ export default function WorkItems({ projectId }) {
     if (!projectId) return;
     try { const res = await api.getRecycleBin(projectId); if (res.success) setDeletedItems(res.data || []); } catch {}
   }, [projectId]);
+
+  useEffect(() => { fetchItems(); }, [fetchItems]);
+  useEffect(() => { if (tab === 'queries') fetchQueries(); }, [tab, fetchQueries]);
+  useEffect(() => { if (tab === 'templates') fetchTemplates(); }, [tab, fetchTemplates]);
+  useEffect(() => { if (tab === 'recycle') fetchDeleted(); }, [tab, fetchDeleted]);
 
   const sorted = useMemo(() => {
     const arr = [...items];
@@ -729,6 +729,10 @@ function WorkItemDetail({ item, onClose }) {
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
+  const fetchDiscussions = useCallback(async () => {
+    try { const res = await api.getDiscussions(item._id); if (res.success) setDiscussions(res.data || []); } catch {}
+  }, [item._id]);
+
   const fetchLinks = useCallback(async () => {
     try {
       const res = await api.getWorkItemLinks(item._id);
@@ -760,10 +764,6 @@ function WorkItemDetail({ item, onClose }) {
       setIsFollowing(!isFollowing);
     } catch {}
   };
-
-  const fetchDiscussions = useCallback(async () => {
-    try { const res = await api.getDiscussions(item._id); if (res.success) setDiscussions(res.data || []); } catch {}
-  }, [item._id]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
