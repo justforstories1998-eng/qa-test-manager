@@ -57,6 +57,8 @@ const DEFAULT_COLUMNS = [
   { id: 'Done', title: 'Done', color: '#34d399', icon: FiCheckCircle, wipLimit: 0 },
 ];
 
+const COLUMN_ICONS = { Backlog: FiHash, 'To Do': FiTarget, 'In Progress': FiZap, Review: FiSearch, Done: FiCheckCircle };
+
 const TYPE_COLORS = { Epic: '#8b5cf6', Feature: '#6366f1', 'User Story': '#3b82f6', Task: '#f59e0b', Bug: '#ef4444', Issue: '#f97316', 'Test Case': '#10b981' };
 const TYPE_ICONS = { Epic: '⚡', Feature: '✨', 'User Story': '📖', Task: '✅', Bug: '🐛', Issue: '⚠️', 'Test Case': '🧪' };
 const PRIORITY_LABELS = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' };
@@ -108,7 +110,9 @@ export default function Board({ projectId }) {
   const [showEditModal, setShowEditModal] = useState(null);
   const [form, setForm] = useState({ ...EMPTY_FORM });
   const [collapsedSwimlanes, setCollapsedSwimlanes] = useState({});
-  const [columns] = useState(DEFAULT_COLUMNS);
+  const [columns, setColumns] = useState(DEFAULT_COLUMNS);
+  const [boards, setBoards] = useState([]);
+  const [selectedBoardId, setSelectedBoardId] = useState('');
   const [dragOverCol, setDragOverCol] = useState(null);
   const [filterType, setFilterType] = useState('');
   const [filterPriority, setFilterPriority] = useState('');
@@ -124,6 +128,37 @@ export default function Board({ projectId }) {
   const t = useMemo(() => getTheme(), [themeVersion]);
 
   useEffect(() => { injectScrollbarStyles(t); }, [t]);
+
+  const fetchBoards = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      const res = await api.getBoards(projectId);
+      if (res.success && res.data.length > 0) {
+        setBoards(res.data);
+        if (!selectedBoardId) {
+          setSelectedBoardId(res.data[0]._id);
+        }
+      }
+    } catch { /* ignore */ }
+  }, [projectId, selectedBoardId]);
+
+  useEffect(() => { fetchBoards(); }, [fetchBoards]);
+
+  useEffect(() => {
+    if (selectedBoardId) {
+      const board = boards.find(b => b._id === selectedBoardId);
+      if (board && board.columns && board.columns.length > 0) {
+        setColumns(board.columns.map(c => ({
+          ...c,
+          icon: COLUMN_ICONS[c.id] || COLUMN_ICONS[c.title] || FiHash,
+        })));
+      } else {
+        setColumns(DEFAULT_COLUMNS);
+      }
+    } else {
+      setColumns(DEFAULT_COLUMNS);
+    }
+  }, [selectedBoardId, boards]);
 
   const fetchItems = useCallback(async () => {
     if (!projectId) return;
@@ -332,7 +367,7 @@ export default function Board({ projectId }) {
         <div>
           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: t.textSecondary, marginBottom: 6 }}>Status</label>
           <select value={form.status} onChange={e => setForm(p => ({ ...p, status: e.target.value }))} className="board-input" style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 13, outline: 'none', cursor: 'pointer' }}>
-            {columns.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+            {columns.map(c => <option key={c.id} value={c.id}>{c.title || c.id}</option>)}
           </select>
         </div>
       </div>
@@ -404,6 +439,11 @@ export default function Board({ projectId }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {boards.length > 0 && (
+              <select value={selectedBoardId} onChange={e => setSelectedBoardId(e.target.value)} className="board-input" style={{ padding: '8px 12px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 13, outline: 'none', cursor: 'pointer', maxWidth: 180 }}>
+                {boards.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
+              </select>
+            )}
             <button onClick={() => setShowFilters(!showFilters)} className="btn-hover-scale" style={{ height: 38, borderRadius: 10, padding: '0 14px', border: `1px solid ${showFilters || activeFilterCount > 0 ? t.accentPrimary + '50' : t.borderSecondary}`, background: activeFilterCount > 0 ? `${t.accentPrimary}10` : t.bgTertiary, color: activeFilterCount > 0 ? t.accentPrimary : t.textSecondary, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600 }}>
               <FiFilter size={14} />Filters
               {activeFilterCount > 0 && <span style={{ width: 18, height: 18, borderRadius: '50%', background: t.accentGradient, color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{activeFilterCount}</span>}

@@ -488,6 +488,7 @@ function WorkItemDetail({ item, onClose }) {
   const [linkType, setLinkType] = useState('Related');
   const [linkComment, setLinkComment] = useState('');
   const [allItems, setAllItems] = useState([]);
+  const [attachments, setAttachments] = useState(item.attachments || []);
 
   const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
@@ -531,6 +532,22 @@ function WorkItemDetail({ item, onClose }) {
   const handleDeleteLink = async (id) => {
     await api.deleteWorkItemLink(id);
     fetchLinks();
+  };
+
+  const handleUploadAttachment = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const res = await api.uploadWorkItemAttachment(item._id, file);
+      if (res.success) setAttachments(res.data.attachments || []);
+    } catch { /* ignore */ }
+  };
+
+  const handleDeleteAttachment = async (idx) => {
+    try {
+      const res = await api.deleteWorkItemAttachment(item._id, idx);
+      if (res.success) setAttachments(res.data.attachments || []);
+    } catch { /* ignore */ }
   };
 
   const history = item.stateHistory || [];
@@ -635,6 +652,37 @@ function WorkItemDetail({ item, onClose }) {
                 {(item.tags || []).length === 0 && <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>No tags</span>}
                 {(item.tags || []).map((t, i) => (
                   <span key={i} style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '5px', background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>{t}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Attachments ({attachments.length})</label>
+              <label style={{ ...btnPrimary, ...btnSmall, cursor: 'pointer' }}>
+                + Upload
+                <input type="file" onChange={handleUploadAttachment} style={{ display: 'none' }} />
+              </label>
+            </div>
+            {attachments.length === 0 ? (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>No attachments</div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {attachments.map((att, idx) => (
+                  <div key={idx} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px',
+                    background: 'var(--surface-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flex: 1 }}>
+                      <span style={{ fontSize: '14px' }}>📎</span>
+                      <a href={att.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: '#818cf8', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {att.originalName}
+                      </a>
+                      {att.size && <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>({(att.size / 1024).toFixed(1)} KB)</span>}
+                    </div>
+                    <button onClick={() => handleDeleteAttachment(idx)} style={{ ...btnIcon, color: '#ef4444', padding: '4px 6px' }}>×</button>
+                  </div>
                 ))}
               </div>
             )}

@@ -19,6 +19,7 @@ import {
   getAllSprints, getSprintById, createSprint, updateSprint, deleteSprint,
   getCapacitiesBySprint, upsertCapacity, deleteCapacity,
   generateBurndown, getBurndownBySprint, getVelocity,
+  generateCFD, getCfdBySprint,
   getQueriesByProject, createQuery, updateQuery, deleteQuery
 } from './database.js';
 import { generatePDFReport, generateWordReport } from './services/reportService.js';
@@ -328,6 +329,41 @@ router.put('/work-items/:id', async (req, res, next) => { try { res.json({ succe
 router.delete('/work-items/:id', async (req, res, next) => { try { await deleteWorkItem(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
 router.put('/work-items/batch/order', async (req, res, next) => { try { await updateWorkItemOrder(req.body.items); res.json({ success: true }); } catch (e) { next(e); } });
 
+router.post('/work-items/:id/attachments', upload.single('file'), async (req, res, next) => {
+  try {
+    const workItem = await getWorkItemById(req.params.id);
+    if (!workItem) return res.status(404).json({ success: false, error: 'Work item not found' });
+    if (!req.file) return res.status(400).json({ success: false, error: 'No file uploaded' });
+    const attachment = {
+      url: req.file.path,
+      originalName: req.file.originalname,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+      uploadedAt: new Date(),
+      uploadedBy: req.user?.firstName || 'Unknown',
+    };
+    const updated = await updateWorkItem(req.params.id, {
+      attachments: [...(workItem.attachments || []), attachment],
+    });
+    res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+});
+
+router.delete('/work-items/:id/attachments/:attIdx', async (req, res, next) => {
+  try {
+    const workItem = await getWorkItemById(req.params.id);
+    if (!workItem) return res.status(404).json({ success: false, error: 'Work item not found' });
+    const idx = parseInt(req.params.attIdx);
+    if (isNaN(idx) || idx < 0 || idx >= (workItem.attachments || []).length) {
+      return res.status(400).json({ success: false, error: 'Invalid attachment index' });
+    }
+    const newAttachments = [...workItem.attachments];
+    newAttachments.splice(idx, 1);
+    const updated = await updateWorkItem(req.params.id, { attachments: newAttachments });
+    res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+});
+
 router.get('/work-item-links/:workItemId', async (req, res, next) => { try { res.json({ success: true, data: await getLinksForWorkItem(req.params.workItemId) }); } catch (e) { next(e); } });
 router.post('/work-item-links', async (req, res, next) => { try { res.status(201).json({ success: true, data: await createWorkItemLink(req.body) }); } catch (e) { next(e); } });
 router.delete('/work-item-links/:id', async (req, res, next) => { try { await deleteWorkItemLink(req.params.id); res.json({ success: true }); } catch (e) { next(e); } });
@@ -343,6 +379,9 @@ router.delete('/sprint-capacity/:id', async (req, res, next) => { try { await de
 
 router.get('/burndown/:sprintId', async (req, res, next) => { try { res.json({ success: true, data: await getBurndownBySprint(req.params.sprintId) }); } catch (e) { next(e); } });
 router.post('/burndown/generate', async (req, res, next) => { try { const data = await generateBurndown(req.body.sprintId, req.body.projectId); res.json({ success: true, data }); } catch (e) { next(e); } });
+
+router.get('/cfd/:sprintId', async (req, res, next) => { try { res.json({ success: true, data: await getCfdBySprint(req.params.sprintId) }); } catch (e) { next(e); } });
+router.post('/cfd/generate', async (req, res, next) => { try { const data = await generateCFD(req.body.sprintId, req.body.projectId); res.json({ success: true, data }); } catch (e) { next(e); } });
 
 router.get('/velocity/:projectId', async (req, res, next) => { try { res.json({ success: true, data: await getVelocity(req.params.projectId) }); } catch (e) { next(e); } });
 

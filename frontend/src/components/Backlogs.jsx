@@ -249,6 +249,8 @@ export default function Backlogs({ projectId }) {
   const [priorityFilter, setPriorityFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
   const [themeVersion, setThemeVersion] = useState(0);
+  const [dragOverId, setDragOverId] = useState(null);
+  const [dragOverPosition, setDragOverPosition] = useState(null);
 
   useEffect(() => {
     const observer = new MutationObserver(() => setThemeVersion(v => v + 1));
@@ -290,6 +292,49 @@ export default function Backlogs({ projectId }) {
   }, [projectId]);
 
   useEffect(() => { fetchHierarchy(); fetchVelocity(); }, [fetchHierarchy, fetchVelocity]);
+
+  /* ─── Drag & Drop ─── */
+  const handleDragStart = (e, item) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', item._id || item.id);
+    e.currentTarget.style.opacity = '0.4';
+  };
+
+  const handleDragEnd = (e) => {
+    e.currentTarget.style.opacity = '1';
+    setDragOverId(null);
+    setDragOverPosition(null);
+  };
+
+  const handleRowDragOver = (e, itemId) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const h = rect.height;
+    let pos = 'inside';
+    if (y < h * 0.25) pos = 'before';
+    else if (y > h * 0.75) pos = 'after';
+    setDragOverId(itemId);
+    setDragOverPosition(pos);
+  };
+
+  const handleRowDrop = async (e, targetItem) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragOverId(null);
+    setDragOverPosition(null);
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (!draggedId || draggedId === (targetItem._id || targetItem.id)) return;
+    try {
+      if (dragOverPosition === 'inside') {
+        await api.updateWorkItem(draggedId, { parentId: targetItem._id || targetItem.id });
+      } else {
+        await api.updateWorkItem(draggedId, { parentId: targetItem.parentId || null });
+      }
+      fetchHierarchy();
+    } catch { toast.error('Failed to move item'); }
+  };
 
   /* ─── Filtering & Sorting ─── */
   const filteredHierarchy = useMemo(() => {
@@ -512,17 +557,25 @@ export default function Backlogs({ projectId }) {
       <div
         key={id}
         className="bl-row"
+        draggable="true"
+        onDragStart={e => handleDragStart(e, item)}
+        onDragEnd={handleDragEnd}
+        onDragOver={e => handleRowDragOver(e, id)}
+        onDrop={e => handleRowDrop(e, item)}
+        onDragLeave={() => { setDragOverId(null); setDragOverPosition(null); }}
         style={{
           display: 'flex',
           alignItems: 'center',
           padding: '10px 16px',
           borderRadius: 10,
-          background: index % 2 === 0 ? t.rowEven : t.rowOdd,
-          border: `1px solid transparent`,
+          background: dragOverId === id ? (dragOverPosition === 'inside' ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.06)') : index % 2 === 0 ? t.rowEven : t.rowOdd,
+          border: dragOverId === id ? `2px solid ${dragOverPosition === 'inside' ? '#6366f1' : 'rgba(99,102,241,0.4)'}` : '1px solid transparent',
           marginLeft: depth * 28,
           gap: 10,
           position: 'relative',
           minHeight: 48,
+          cursor: 'grab',
+          transition: 'all 0.15s ease',
         }}
       >
         {/* Left accent bar */}

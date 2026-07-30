@@ -101,6 +101,7 @@ const workItemSchema = new mongoose.Schema({
   order: { type: Number, default: 0 },
   customFields: { type: mongoose.Schema.Types.Mixed, default: {} },
   stateHistory: [{ status: String, changedAt: { type: Date, default: Date.now }, changedBy: String }],
+  attachments: [{ url: String, originalName: String, mimeType: String, size: Number, uploadedAt: { type: Date, default: Date.now }, uploadedBy: String }],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 }, { timestamps: true });
 
@@ -152,6 +153,17 @@ const burndownSnapshotSchema = new mongoose.Schema({
   idealRemaining: { type: Number, default: 0 }
 }, { timestamps: true });
 
+const cfdSnapshotSchema = new mongoose.Schema({
+  sprintId: { type: mongoose.Schema.Types.ObjectId, ref: 'Sprint', required: true },
+  projectId: { type: mongoose.Schema.Types.ObjectId, ref: 'Project', required: true },
+  date: { type: Date, required: true },
+  totalCount: { type: Number, default: 0 },
+  newCount: { type: Number, default: 0 },
+  activeCount: { type: Number, default: 0 },
+  resolvedCount: { type: Number, default: 0 },
+  closedCount: { type: Number, default: 0 },
+}, { timestamps: true });
+
 // ============================================
 // MODELS
 // ============================================
@@ -170,6 +182,7 @@ const Sprint = mongoose.model('Sprint', sprintSchema);
 const SprintCapacity = mongoose.model('SprintCapacity', sprintCapacitySchema);
 const SavedQuery = mongoose.model('SavedQuery', savedQuerySchema);
 const BurndownSnapshot = mongoose.model('BurndownSnapshot', burndownSnapshotSchema);
+const CfdSnapshot = mongoose.model('CfdSnapshot', cfdSnapshotSchema);
 const Setting = mongoose.model('Setting', settingsSchema);
 
 export async function initializeDatabase() {
@@ -390,6 +403,42 @@ export const generateBurndown = async (sprintId, projectId) => {
   }
   await BurndownSnapshot.deleteMany({ sprintId });
   if (snapshots.length > 0) await BurndownSnapshot.insertMany(snapshots);
+  return snapshots;
+};
+
+// ============================================
+// CUMULATIVE FLOW DIAGRAM
+// ============================================
+export const getCfdBySprint = (sprintId) => CfdSnapshot.find({ sprintId }).sort({ date: 1 });
+export const generateCFD = async (sprintId, projectId) => {
+  const sprint = await Sprint.findById(sprintId);
+  if (!sprint || !sprint.startDate || !sprint.endDate) return [];
+  const items = await WorkItem.find({ sprintId });
+  const start = new Date(sprint.startDate);
+  const end = new Date(sprint.endDate);
+  const totalDays = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+  const snapshots = [];
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  for (let d = 0; d <= totalDays; d++) {
+    const date = new Date(start.getTime() + d * dayMs);
+    let newCount = 0, activeCount = 0, resolvedCount = 0, closedCount = 0;
+    for (const item of items) {
+      const history = item.stateHistory || [];
+      let currentStatus = 'To Do';
+      for (const h of history) {
+        if (new Date(h.changedAt) <= date) currentStatus = h.status;
+      }
+      if (item.createdAt && new Date(item.createdAt) > date) continue;
+      if (currentStatus === 'Done') closedCount++;
+      else if (currentStatus === 'Review') resolvedCount++;
+      else if (currentStatus === 'In Progress') activeCount++;
+      else newCount++;
+    }
+    snapshots.push({ sprintId, projectId, date, totalCount: newCount + activeCount + resolvedCount + closedCount, newCount, activeCount, resolvedCount, closedCount });
+  }
+  await CfdSnapshot.deleteMany({ sprintId });
+  if (snapshots.length > 0) await CfdSnapshot.insertMany(snapshots);
   return snapshots;
 };
 

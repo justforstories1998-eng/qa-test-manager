@@ -11,7 +11,7 @@ const STATUS_STYLE = {
 
 const SPRINT_STATUS = ['Planned', 'Active', 'Completed'];
 
-const TABS = ['Task Breakdown', 'Capacity', 'Burndown', 'Velocity'];
+const TABS = ['Taskboard', 'Task Breakdown', 'Capacity', 'Burndown', 'Burnup', 'CFD', 'Velocity'];
 
 export default function Sprints({ projectId }) {
   const [sprints, setSprints] = useState([]);
@@ -23,6 +23,7 @@ export default function Sprints({ projectId }) {
   const [workItems, setWorkItems] = useState([]);
   const [capacityData, setCapacityData] = useState([]);
   const [burndownData, setBurndownData] = useState([]);
+  const [cfdData, setCfdData] = useState([]);
   const [velocityData, setVelocityData] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [newMember, setNewMember] = useState({ assignee: '', capacityPerDay: 8, activities: '' });
@@ -43,14 +44,16 @@ export default function Sprints({ projectId }) {
     setActiveSprintDetail(sprint);
     setActiveTab('Task Breakdown');
     try {
-      const [itemsRes, capRes, burndownRes] = await Promise.all([
+      const [itemsRes, capRes, burndownRes, cfdRes] = await Promise.all([
         api.getWorkItems(projectId, { sprintId: sprint._id }),
         api.getSprintCapacity(sprint._id),
         api.getBurndown(sprint._id),
+        api.getCfd(sprint._id),
       ]);
       if (itemsRes.success) setWorkItems(itemsRes.data);
       if (capRes.success) setCapacityData(capRes.data);
       if (burndownRes.success) setBurndownData(burndownRes.data);
+      if (cfdRes.success) setCfdData(cfdRes.data);
     } catch (err) {
       console.error('Failed to load sprint detail:', err);
     }
@@ -809,6 +812,77 @@ export default function Sprints({ projectId }) {
     );
   };
 
+  const TASKBOARD_COLUMNS = ['To Do', 'In Progress', 'Done'];
+
+  const renderTaskboard = () => {
+    if (workItems.length === 0) {
+      return (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>📋</div>
+          <p>No work items in this sprint yet.</p>
+        </div>
+      );
+    }
+    const handleDragStart = (e, item) => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', item._id);
+      e.currentTarget.style.opacity = '0.5';
+    };
+    const handleDragEnd = (e) => { e.currentTarget.style.opacity = '1'; };
+    const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; };
+    const handleDrop = async (e, newStatus) => {
+      e.preventDefault();
+      const itemId = e.dataTransfer.getData('text/plain');
+      if (!itemId) return;
+      try {
+        await api.updateWorkItem(itemId, { status: newStatus });
+        setWorkItems(prev => prev.map(i => i._id === itemId ? { ...i, status: newStatus } : i));
+      } catch { /* ignore */ }
+    };
+    const parents = [...new Set(workItems.filter(i => i.parentId).map(i => i.parentId))];
+    const parentItems = parents.map(id => workItems.find(i => i._id === id)).filter(Boolean);
+    const orphans = workItems.filter(i => !i.parentId);
+    const swimlanes = [...parentItems, ...orphans.filter(o => !parentItems.some(p => p._id !== o._id))];
+    const seen = new Set();
+    const uniqueSwimlanes = [];
+    for (const s of swimlanes) { if (!seen.has(s._id)) { seen.add(s._id); uniqueSwimlanes.push(s); } }
+
+    return (
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: 12, minWidth: 700 }}>
+          {TASKBOARD_COLUMNS.map(col => {
+            const colItems = workItems.filter(i => i.status === col);
+            return (
+              <div key={col} onDragOver={handleDragOver} onDrop={e => handleDrop(e, col)} style={{ flex: 1, minWidth: 200, background: 'var(--surface-secondary)', borderRadius: 12, border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{col}</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', background: 'var(--bg-card)', padding: '2px 8px', borderRadius: 6 }}>{colItems.length}</span>
+                </div>
+                <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 80 }}>
+                  {colItems.map(item => (
+                    <div key={item._id} draggable onDragStart={e => handleDragStart(e, item)} onDragEnd={handleDragEnd} style={{ padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-color)', background: 'var(--bg-card)', cursor: 'grab', transition: 'all 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)'}
+                      onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>{item.title}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: 'var(--text-muted)' }}>
+                        <span style={{ padding: '1px 6px', borderRadius: 4, background: item.type === 'Bug' ? 'rgba(239,68,68,0.1)' : item.type === 'Task' ? 'rgba(251,191,36,0.1)' : 'rgba(99,102,241,0.1)', color: item.type === 'Bug' ? '#ef4444' : item.type === 'Task' ? '#f59e0b' : '#6366f1', fontWeight: 600 }}>{item.type}</span>
+                        {item.storyPoints > 0 && <span>{item.storyPoints} SP</span>}
+                        {item.assignee && <span style={{ marginLeft: 'auto' }}>{item.assignee}</span>}
+                      </div>
+                    </div>
+                  ))}
+                  {colItems.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '20px 12px', color: 'var(--text-muted)', fontSize: 12, border: '2px dashed var(--border-color)', borderRadius: 8 }}>Drop items here</div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   const renderTaskBreakdown = () => {
     if (workItems.length === 0) {
       return (
@@ -1111,6 +1185,153 @@ export default function Sprints({ projectId }) {
     );
   };
 
+  const handleGenerateCFD = async () => {
+    if (!activeSprintDetail) return;
+    try {
+      const res = await api.generateCFD(activeSprintDetail._id, projectId);
+      if (res.success) setCfdData(res.data);
+    } catch { /* ignore */ }
+  };
+
+  const renderBurnup = () => {
+    if (burndownData.length === 0) {
+      return (
+        <div>
+          <div style={styles.chartActions}>
+            <button style={styles.addBtn} onClick={handleGenerateBurndown}>Generate Burnup</button>
+          </div>
+          <div style={styles.emptyState}>
+            <div style={styles.emptyIcon}>📈</div>
+            <p>No data. Click "Generate Burnup" to create it.</p>
+          </div>
+        </div>
+      );
+    }
+    const width = 700, height = 350;
+    const padding = { top: 30, right: 30, bottom: 50, left: 60 };
+    const chartW = width - padding.left - padding.right;
+    const chartH = height - padding.top - padding.bottom;
+    const maxY = Math.max(...burndownData.map(d => d.totalPoints), 1);
+    const maxX = burndownData.length - 1;
+    const xScale = (i) => padding.left + (i / Math.max(1, maxX)) * chartW;
+    const yScale = (v) => padding.top + chartH - (v / maxY) * chartH;
+    const scopePath = burndownData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.totalPoints)}`).join(' ');
+    const completedPath = burndownData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.completedPoints)}`).join(' ');
+    return (
+      <div>
+        <div style={styles.chartActions}>
+          <button style={styles.addBtn} onClick={handleGenerateBurndown}>Regenerate</button>
+        </div>
+        <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', maxWidth: width }}>
+          {[0, 0.25, 0.5, 0.75, 1].map(f => (
+            <g key={f}>
+              <line x1={padding.left} y1={yScale(maxY * f)} x2={width - padding.right} y2={yScale(maxY * f)} stroke="var(--border-color)" strokeDasharray="4 4" />
+              <text x={padding.left - 10} y={yScale(maxY * f) + 4} textAnchor="end" fill="var(--text-muted)" fontSize={10}>{Math.round(maxY * f)}</text>
+            </g>
+          ))}
+          <path d={scopePath} fill="none" stroke="#f59e0b" strokeWidth={2.5} />
+          <path d={completedPath} fill="none" stroke="#34d399" strokeWidth={2.5} />
+          {burndownData.map((d, i) => (
+            <g key={i}>
+              <circle cx={xScale(i)} cy={yScale(d.totalPoints)} r={4} fill="#f59e0b" />
+              <circle cx={xScale(i)} cy={yScale(d.completedPoints)} r={4} fill="#34d399" />
+            </g>
+          ))}
+          {burndownData.filter((_, i) => i % Math.max(1, Math.floor(maxX / 8)) === 0 || i === maxX).map((d, i) => (
+            <text key={i} x={xScale(burndownData.indexOf(d))} y={height - 10} textAnchor="middle" fill="var(--text-muted)" fontSize={9}>
+              {new Date(d.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+            </text>
+          ))}
+        </svg>
+        <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginTop: 12 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+            <span style={{ display: 'inline-block', width: 20, height: 3, background: '#f59e0b', marginRight: 6, verticalAlign: 'middle', borderRadius: 2 }} />
+            Scope (Total)
+          </span>
+          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+            <span style={{ display: 'inline-block', width: 20, height: 3, background: '#34d399', marginRight: 6, verticalAlign: 'middle', borderRadius: 2 }} />
+            Completed
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const renderCFD = () => {
+    if (cfdData.length === 0) {
+      return (
+        <div>
+          <div style={styles.chartActions}>
+            <button style={styles.addBtn} onClick={handleGenerateCFD}>Generate CFD</button>
+          </div>
+          <div style={styles.emptyState}>
+            <div style={styles.emptyIcon}>📊</div>
+            <p>No CFD data. Click "Generate CFD" to create it.</p>
+          </div>
+        </div>
+      );
+    }
+    const width = 700, height = 350;
+    const padding = { top: 30, right: 30, bottom: 50, left: 60 };
+    const chartW = width - padding.left - padding.right;
+    const chartH = height - padding.top - padding.bottom;
+    const maxY = Math.max(...cfdData.map(d => d.totalCount), 1);
+    const maxX = cfdData.length - 1;
+    const xScale = (i) => padding.left + (i / Math.max(1, maxX)) * chartW;
+    const yScale = (v) => padding.top + chartH - (v / maxY) * chartH;
+
+    const layers = [
+      { key: 'closedCount', color: '#34d399', label: 'Done' },
+      { key: 'resolvedCount', color: '#a78bfa', label: 'Review' },
+      { key: 'activeCount', color: '#fbbf24', label: 'In Progress' },
+      { key: 'newCount', color: '#60a5fa', label: 'To Do' },
+    ];
+
+    return (
+      <div>
+        <div style={styles.chartActions}>
+          <button style={styles.addBtn} onClick={handleGenerateCFD}>Regenerate</button>
+        </div>
+        <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', maxWidth: width }}>
+          {[0, 0.25, 0.5, 0.75, 1].map(f => (
+            <g key={f}>
+              <line x1={padding.left} y1={yScale(maxY * f)} x2={width - padding.right} y2={yScale(maxY * f)} stroke="var(--border-color)" strokeDasharray="4 4" />
+              <text x={padding.left - 10} y={yScale(maxY * f) + 4} textAnchor="end" fill="var(--text-muted)" fontSize={10}>{Math.round(maxY * f)}</text>
+            </g>
+          ))}
+          {layers.map((layer, li) => {
+            let cumulative = cfdData.map((d, i) => {
+              let sum = 0;
+              for (let j = li; j < layers.length; j++) sum += d[layers[j].key] || 0;
+              return sum;
+            });
+            const path = cumulative.map((v, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(v)}`).join(' ');
+            const areaPath = path + ` L ${xScale(maxX)} ${yScale(0)} L ${xScale(0)} ${yScale(0)} Z`;
+            return (
+              <g key={layer.key}>
+                <path d={areaPath} fill={layer.color} fillOpacity={0.25} />
+                <path d={path} fill="none" stroke={layer.color} strokeWidth={2} />
+              </g>
+            );
+          })}
+          {cfdData.filter((_, i) => i % Math.max(1, Math.floor(maxX / 8)) === 0 || i === maxX).map((d, i) => (
+            <text key={i} x={xScale(cfdData.indexOf(d))} y={height - 10} textAnchor="middle" fill="var(--text-muted)" fontSize={9}>
+              {new Date(d.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+            </text>
+          ))}
+        </svg>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', marginTop: 12, flexWrap: 'wrap' }}>
+          {layers.map(l => (
+            <span key={l.key} style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
+              <span style={{ display: 'inline-block', width: 20, height: 3, background: l.color, marginRight: 6, verticalAlign: 'middle', borderRadius: 2 }} />
+              {l.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   const renderVelocity = () => {
     const width = 700;
     const height = 300;
@@ -1325,9 +1546,12 @@ export default function Sprints({ projectId }) {
           ))}
         </div>
 
+        {activeTab === 'Taskboard' && renderTaskboard()}
         {activeTab === 'Task Breakdown' && renderTaskBreakdown()}
         {activeTab === 'Capacity' && renderCapacity()}
         {activeTab === 'Burndown' && renderBurndown()}
+        {activeTab === 'Burnup' && renderBurnup()}
+        {activeTab === 'CFD' && renderCFD()}
         {activeTab === 'Velocity' && renderVelocity()}
       </div>
     );

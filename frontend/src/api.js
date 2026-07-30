@@ -202,6 +202,12 @@ const api = {
   updateWorkItem: (id, data) => apiClient.put(`/work-items/${id}`, data),
   deleteWorkItem: (id) => apiClient.delete(`/work-items/${id}`),
   updateWorkItemsOrder: (items) => apiClient.put('/work-items/batch/order', { items }),
+  uploadWorkItemAttachment: (workItemId, file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    return uploadClient.post(`/work-items/${workItemId}/attachments`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+  },
+  deleteWorkItemAttachment: (workItemId, attIdx) => apiClient.delete(`/work-items/${workItemId}/attachments/${attIdx}`),
 
   getWorkItemLinks: (workItemId) => apiClient.get(`/work-item-links/${workItemId}`),
   createWorkItemLink: (data) => apiClient.post('/work-item-links', data),
@@ -218,6 +224,8 @@ const api = {
 
   getBurndown: (sprintId) => apiClient.get(`/burndown/${sprintId}`),
   generateBurndown: (sprintId, projectId) => apiClient.post('/burndown/generate', { sprintId, projectId }),
+  getCfd: (sprintId) => apiClient.get(`/cfd/${sprintId}`),
+  generateCFD: (sprintId, projectId) => apiClient.post('/cfd/generate', { sprintId, projectId }),
 
   getVelocity: (projectId) => apiClient.get(`/velocity/${projectId}`),
 
