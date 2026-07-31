@@ -6,19 +6,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/* ============================================================
+   BUTTON (Base)
+   ============================================================ */
+
 const buttonVariants = cva(
   "inline-flex items-center cursor-pointer justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-primary-foreground hover:bg-destructive/90",
+        destructive: "bg-destructive text-primary-foreground hover:bg-destructive/90",
         cool: "dark:inset-shadow-2xs dark:inset-shadow-white/10 bg-linear-to-t border border-b-2 border-zinc-950/40 from-primary to-primary/85 shadow-md shadow-primary/20 ring-1 ring-inset ring-white/25 transition-[filter] duration-200 hover:brightness-110 active:brightness-90 dark:border-x-0 text-primary-foreground dark:text-primary-foreground dark:border-t-0 dark:border-primary/50 dark:ring-white/5",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -56,33 +57,111 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
-export { Button, buttonVariants, liquidbuttonVariants, LiquidButton }
+/* ============================================================
+   LIQUID GLASS BUTTON
+   ============================================================ */
 
 const liquidbuttonVariants = cva(
-  "inline-flex items-center justify-center cursor-pointer gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2",
+  [
+    "inline-flex items-center justify-center cursor-pointer gap-2",
+    "whitespace-nowrap rounded-xl text-sm font-semibold",
+    "transition-all duration-200 ease-out",
+    "disabled:pointer-events-none disabled:opacity-40",
+    "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0",
+    "outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-400/50",
+    "relative overflow-hidden",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default:
-          "bg-gradient-to-b from-indigo-500 to-indigo-600 text-white shadow-[0_2px_8px_rgba(99,102,241,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:from-indigo-400 hover:to-indigo-500 hover:shadow-[0_4px_12px_rgba(99,102,241,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] active:from-indigo-600 active:to-indigo-700 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]",
-        destructive:
-          "bg-gradient-to-b from-red-500 to-red-600 text-white shadow-[0_2px_8px_rgba(239,68,68,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:from-red-400 hover:to-red-500 hover:shadow-[0_4px_12px_rgba(239,68,68,0.4),inset_0_1px_0_rgba(255,255,255,0.2)] active:from-red-600 active:to-red-700 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]",
-        outline:
-          "border-2 border-slate-200 bg-white/80 backdrop-blur-sm text-slate-700 shadow-[0_2px_4px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.8)] hover:bg-white hover:border-slate-300 hover:shadow-[0_4px_8px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.8)] active:bg-slate-50 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]",
-        secondary:
-          "bg-gradient-to-b from-slate-100 to-slate-200 text-slate-700 shadow-[0_2px_4px_rgba(0,0,0,0.08),inset_0_1px_0_rgba(255,255,255,0.9)] hover:from-slate-50 hover:to-slate-100 hover:shadow-[0_4px_8px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] active:from-slate-200 active:to-slate-300 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)]",
-        ghost:
-          "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200",
-        link:
-          "text-indigo-600 underline-offset-4 hover:underline hover:text-indigo-700",
+        default: [
+          "bg-gradient-to-br from-indigo-500 via-indigo-500 to-indigo-600",
+          "text-white",
+          "shadow-[0_2px_10px_rgba(99,102,241,0.35),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)]",
+          "border border-indigo-400/30",
+          "hover:shadow-[0_4px_16px_rgba(99,102,241,0.45),inset_0_1px_0_rgba(255,255,255,0.25)]",
+          "hover:from-indigo-400 hover:via-indigo-500 hover:to-indigo-500",
+          "active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),0_1px_4px_rgba(99,102,241,0.2)]",
+          "active:from-indigo-600 active:via-indigo-600 active:to-indigo-700",
+          "focus-visible:ring-indigo-400/50",
+        ].join(" "),
+        destructive: [
+          "bg-gradient-to-br from-red-500 via-red-500 to-red-600",
+          "text-white",
+          "shadow-[0_2px_10px_rgba(239,68,68,0.35),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)]",
+          "border border-red-400/30",
+          "hover:shadow-[0_4px_16px_rgba(239,68,68,0.45),inset_0_1px_0_rgba(255,255,255,0.25)]",
+          "hover:from-red-400 hover:via-red-500 hover:to-red-500",
+          "active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),0_1px_4px_rgba(239,68,68,0.2)]",
+          "active:from-red-600 active:via-red-600 active:to-red-700",
+          "focus-visible:ring-red-400/50",
+        ].join(" "),
+        success: [
+          "bg-gradient-to-br from-emerald-500 via-emerald-500 to-emerald-600",
+          "text-white",
+          "shadow-[0_2px_10px_rgba(16,185,129,0.35),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)]",
+          "border border-emerald-400/30",
+          "hover:shadow-[0_4px_16px_rgba(16,185,129,0.45),inset_0_1px_0_rgba(255,255,255,0.25)]",
+          "hover:from-emerald-400 hover:via-emerald-500 hover:to-emerald-500",
+          "active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),0_1px_4px_rgba(16,185,129,0.2)]",
+          "active:from-emerald-600 active:via-emerald-600 active:to-emerald-700",
+          "focus-visible:ring-emerald-400/50",
+        ].join(" "),
+        warning: [
+          "bg-gradient-to-br from-amber-500 via-amber-500 to-amber-600",
+          "text-white",
+          "shadow-[0_2px_10px_rgba(245,158,11,0.35),inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1)]",
+          "border border-amber-400/30",
+          "hover:shadow-[0_4px_16px_rgba(245,158,11,0.45),inset_0_1px_0_rgba(255,255,255,0.25)]",
+          "hover:from-amber-400 hover:via-amber-500 hover:to-amber-500",
+          "active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),0_1px_4px_rgba(245,158,11,0.2)]",
+          "active:from-amber-600 active:via-amber-600 active:to-amber-700",
+          "focus-visible:ring-amber-400/50",
+        ].join(" "),
+        outline: [
+          "bg-white/70 backdrop-blur-md",
+          "text-slate-700",
+          "border-2 border-slate-200/80",
+          "shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.9)]",
+          "hover:bg-white/90 hover:border-slate-300 hover:text-slate-800",
+          "hover:shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,0.9)]",
+          "active:bg-slate-50 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.08)]",
+          "focus-visible:ring-slate-400/50",
+        ].join(" "),
+        secondary: [
+          "bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200/80",
+          "text-slate-700",
+          "border border-slate-200/60",
+          "shadow-[0_2px_8px_rgba(0,0,0,0.06),inset_0_1px_0_rgba(255,255,255,0.95)]",
+          "hover:from-slate-50 hover:via-white hover:to-slate-100",
+          "hover:shadow-[0_4px_12px_rgba(0,0,0,0.1),inset_0_1px_0_rgba(255,255,255,1)]",
+          "hover:border-slate-300/80",
+          "active:from-slate-200 active:to-slate-200 active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.1)]",
+          "focus-visible:ring-slate-400/50",
+        ].join(" "),
+        ghost: [
+          "bg-transparent",
+          "text-slate-600",
+          "hover:bg-white/60 hover:text-slate-800",
+          "hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]",
+          "active:bg-white/40 active:shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)]",
+          "focus-visible:ring-slate-400/50",
+        ].join(" "),
+        link: [
+          "text-indigo-600 bg-transparent",
+          "underline-offset-4 hover:underline",
+          "hover:text-indigo-700",
+          "focus-visible:ring-indigo-400/50",
+        ].join(" "),
       },
       size: {
         default: "h-10 px-5 py-2.5 text-sm",
-        sm: "h-8 px-3 py-1.5 text-xs rounded-md",
-        lg: "h-11 px-6 py-2.5 text-base rounded-lg",
-        xl: "h-12 px-8 py-3 text-base rounded-lg",
-        xxl: "h-14 px-10 py-4 text-lg rounded-xl",
-        icon: "h-10 w-10 p-0 rounded-lg",
+        sm: "h-8 px-3.5 py-1.5 text-xs rounded-lg",
+        md: "h-10 px-5 py-2.5 text-sm rounded-xl",
+        lg: "h-11 px-6 py-2.5 text-base rounded-xl",
+        xl: "h-12 px-8 py-3 text-base rounded-xl",
+        xxl: "h-14 px-10 py-4 text-lg rounded-2xl",
+        icon: "h-10 w-10 p-0 rounded-xl",
       },
     },
     defaultVariants: {
@@ -92,6 +171,12 @@ const liquidbuttonVariants = cva(
   }
 )
 
+interface LiquidButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof liquidbuttonVariants> {
+  asChild?: boolean
+}
+
 function LiquidButton({
   className,
   variant,
@@ -99,10 +184,7 @@ function LiquidButton({
   asChild = false,
   children,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof liquidbuttonVariants> & {
-    asChild?: boolean
-  }) {
+}: LiquidButtonProps) {
   const Comp = asChild ? Slot : "button"
 
   return (
@@ -116,42 +198,9 @@ function LiquidButton({
   )
 }
 
-
-function GlassFilter() {
-  return (
-    <svg className="hidden">
-      <defs>
-        <filter
-          id="container-glass"
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          colorInterpolationFilters="sRGB"
-        >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.05 0.05"
-            numOctaves="1"
-            seed="1"
-            result="turbulence"
-          />
-          <feGaussianBlur in="turbulence" stdDeviation="2" result="blurredNoise" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="blurredNoise"
-            scale="70"
-            xChannelSelector="R"
-            yChannelSelector="B"
-            result="displaced"
-          />
-          <feGaussianBlur in="displaced" stdDeviation="4" result="finalBlur" />
-          <feComposite in="finalBlur" in2="finalBlur" operator="over" />
-        </filter>
-      </defs>
-    </svg>
-  );
-}
+/* ============================================================
+   METAL BUTTON
+   ============================================================ */
 
 type ColorVariant =
   | "default"
@@ -159,21 +208,21 @@ type ColorVariant =
   | "success"
   | "error"
   | "gold"
-  | "bronze";
+  | "bronze"
 
 interface MetalButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ColorVariant;
+  variant?: ColorVariant
 }
 
 const colorVariants: Record<
   ColorVariant,
   {
-    outer: string;
-    inner: string;
-    button: string;
-    textColor: string;
-    textShadow: string;
+    outer: string
+    inner: string
+    button: string
+    textColor: string
+    textShadow: string
   }
 > = {
   default: {
@@ -218,7 +267,7 @@ const colorVariants: Record<
     textColor: "text-[#FFF7F0]",
     textShadow: "[text-shadow:_0_-1px_0_rgb(124_45_18_/_100%)]",
   },
-};
+}
 
 const metalButtonVariants = (
   variant: ColorVariant = "default",
@@ -226,8 +275,8 @@ const metalButtonVariants = (
   isHovered: boolean,
   isTouchDevice: boolean,
 ) => {
-  const colors = colorVariants[variant];
-  const transitionStyle = "all 250ms cubic-bezier(0.1, 0.4, 0.2, 1)";
+  const colors = colorVariants[variant]
+  const transitionStyle = "all 250ms cubic-bezier(0.1, 0.4, 0.2, 1)"
 
   return {
     wrapper: cn(
@@ -269,8 +318,8 @@ const metalButtonVariants = (
       filter:
         isHovered && !isPressed && !isTouchDevice ? "brightness(1.02)" : "none",
     },
-  };
-};
+  }
+}
 
 const ShineEffect = ({ isPressed }: { isPressed: boolean }) => {
   return (
@@ -282,78 +331,67 @@ const ShineEffect = ({ isPressed }: { isPressed: boolean }) => {
     >
       <div className="absolute inset-0 rounded-md bg-gradient-to-r from-transparent via-neutral-100 to-transparent" />
     </div>
-  );
-};
+  )
+}
 
-export const MetalButton = React.forwardRef<
-  HTMLButtonElement,
-  MetalButtonProps
->(({ children, className, variant = "default", ...props }, ref) => {
-  const [isPressed, setIsPressed] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+const MetalButton = React.forwardRef<HTMLButtonElement, MetalButtonProps>(
+  ({ children, className, variant = "default", ...props }, ref) => {
+    const [isPressed, setIsPressed] = React.useState(false)
+    const [isHovered, setIsHovered] = React.useState(false)
+    const [isTouchDevice, setIsTouchDevice] = React.useState(false)
 
-  React.useEffect(() => {
-    setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
-  }, []);
+    React.useEffect(() => {
+      setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0)
+    }, [])
 
-  const buttonText = children || "Button";
-  const variants = metalButtonVariants(
-    variant,
-    isPressed,
-    isHovered,
-    isTouchDevice,
-  );
+    const buttonText = children || "Button"
+    const variants = metalButtonVariants(
+      variant,
+      isPressed,
+      isHovered,
+      isTouchDevice,
+    )
 
-  const handleInternalMouseDown = () => {
-    setIsPressed(true);
-  };
-  const handleInternalMouseUp = () => {
-    setIsPressed(false);
-  };
-  const handleInternalMouseLeave = () => {
-    setIsPressed(false);
-    setIsHovered(false);
-  };
-  const handleInternalMouseEnter = () => {
-    if (!isTouchDevice) {
-      setIsHovered(true);
+    const handleInternalMouseDown = () => setIsPressed(true)
+    const handleInternalMouseUp = () => setIsPressed(false)
+    const handleInternalMouseLeave = () => {
+      setIsPressed(false)
+      setIsHovered(false)
     }
-  };
-  const handleInternalTouchStart = () => {
-    setIsPressed(true);
-  };
-  const handleInternalTouchEnd = () => {
-    setIsPressed(false);
-  };
-  const handleInternalTouchCancel = () => {
-    setIsPressed(false);
-  };
+    const handleInternalMouseEnter = () => {
+      if (!isTouchDevice) setIsHovered(true)
+    }
+    const handleInternalTouchStart = () => setIsPressed(true)
+    const handleInternalTouchEnd = () => setIsPressed(false)
+    const handleInternalTouchCancel = () => setIsPressed(false)
 
-  return (
-    <div className={variants.wrapper} style={variants.wrapperStyle}>
-      <div className={variants.inner} style={variants.innerStyle}></div>
-      <button
-        ref={ref}
-        className={cn(variants.button, className)}
-        style={variants.buttonStyle}
-        {...props}
-        onMouseDown={handleInternalMouseDown}
-        onMouseUp={handleInternalMouseUp}
-        onMouseLeave={handleInternalMouseLeave}
-        onMouseEnter={handleInternalMouseEnter}
-        onTouchStart={handleInternalTouchStart}
-        onTouchEnd={handleInternalTouchEnd}
-        onTouchCancel={handleInternalTouchCancel}
-      >
-        <ShineEffect isPressed={isPressed} />
-        {buttonText}
-        {isHovered && !isPressed && !isTouchDevice && (
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t rounded-lg from-transparent to-white/5" />
-        )}
-      </button>
-    </div>
-  );
-});
+    return (
+      <div className={variants.wrapper} style={variants.wrapperStyle}>
+        <div className={variants.inner} style={variants.innerStyle}></div>
+        <button
+          ref={ref}
+          className={cn(variants.button, className)}
+          style={variants.buttonStyle}
+          {...props}
+          onMouseDown={handleInternalMouseDown}
+          onMouseUp={handleInternalMouseUp}
+          onMouseLeave={handleInternalMouseLeave}
+          onMouseEnter={handleInternalMouseEnter}
+          onTouchStart={handleInternalTouchStart}
+          onTouchEnd={handleInternalTouchEnd}
+          onTouchCancel={handleInternalTouchCancel}
+        >
+          <ShineEffect isPressed={isPressed} />
+          {buttonText}
+          {isHovered && !isPressed && !isTouchDevice && (
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t rounded-lg from-transparent to-white/5" />
+          )}
+        </button>
+      </div>
+    )
+  },
+)
 
-MetalButton.displayName = "MetalButton";
+MetalButton.displayName = "MetalButton"
+
+export { Button, buttonVariants, liquidbuttonVariants, LiquidButton, MetalButton }
