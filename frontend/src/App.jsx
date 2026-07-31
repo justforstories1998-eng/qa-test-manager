@@ -193,39 +193,17 @@ function App() {
           {activeProjectId ? (
             <Routes>
               <Route path="/dashboard" element={<Dashboard statistics={statistics} testSuites={testSuites} testRuns={testRuns} workItemStats={workItemStats} sprints={sprints} onRefresh={refreshData} />} />
-              {canAccessModule(user?.role, 'test-cases') && (
-                <Route path="/test-cases" element={<TestCases testSuites={testSuites} testCases={testCases} settings={settings} onDeleteTestCase={id => api.deleteTestCase(id).then(res => { refreshData(); return res; })} onUploadCSV={(f, n, p) => api.uploadCSV(f, n, p || activeProjectId).then(res => { refreshData(); return res; })} />} />
-              )}
-              {canAccessModule(user?.role, 'execution') && (
-                <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} settings={settings} onCreateTestRun={handleCreateRun} onDeleteTestRun={id => api.deleteTestRun(id).then(res => { refreshData(); return res; })} onUpdateExecutionResult={handleUpdateExecutionResult} onRefresh={refreshData} />} />
-              )}
-              {canAccessModule(user?.role, 'bugs') && (
-                <Route path="/bugs" element={<Bugs projectId={activeProjectId} user={user} />} />
-              )}
-              {canAccessModule(user?.role, 'reports') && (
-                <Route path="/reports" element={<Reports testRuns={testRuns} settings={settings} projectId={activeProjectId} onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)} />} />
-              )}
-              {canAccessModule(user?.role, 'settings') && (
-                <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
-              )}
-              {canAccessModule(user?.role, 'admin') && (
-                <Route path="/admin" element={<Admin projects={projects} />} />
-              )}
-              {canAccessModule(user?.role, 'board') && (
-                <Route path="/board" element={<Board projectId={activeProjectId} />} />
-              )}
-              {canAccessModule(user?.role, 'work-items') && (
-                <Route path="/work-items" element={<WorkItems projectId={activeProjectId} />} />
-              )}
-              {canAccessModule(user?.role, 'boards') && (
-                <Route path="/boards" element={<Boards projectId={activeProjectId} />} />
-              )}
-              {canAccessModule(user?.role, 'backlogs') && (
-                <Route path="/backlogs" element={<Backlogs projectId={activeProjectId} />} />
-              )}
-              {canAccessModule(user?.role, 'sprints') && (
-                <Route path="/sprints" element={<Sprints projectId={activeProjectId} />} />
-              )}
+              <Route path="/test-cases" element={<TestCases testSuites={testSuites} testCases={testCases} settings={settings} onDeleteTestCase={id => api.deleteTestCase(id).then(res => { refreshData(); return res; })} onUploadCSV={(f, n, p) => api.uploadCSV(f, n, p || activeProjectId).then(res => { refreshData(); return res; })} />} />
+              <Route path="/execution" element={<Execution testSuites={testSuites} testCases={testCases} testRuns={testRuns} settings={settings} onCreateTestRun={handleCreateRun} onDeleteTestRun={id => api.deleteTestRun(id).then(res => { refreshData(); return res; })} onUpdateExecutionResult={handleUpdateExecutionResult} onRefresh={refreshData} />} />
+              <Route path="/bugs" element={<Bugs projectId={activeProjectId} user={user} />} />
+              <Route path="/reports" element={<Reports testRuns={testRuns} settings={settings} projectId={activeProjectId} onGenerate={(runId, format) => api.generateReport(runId, format, activeProjectId)} />} />
+              <Route path="/settings" element={<Settings settings={settings} onUpdateSettings={handleUpdateSettings} />} />
+              <Route path="/admin" element={<Admin projects={projects} />} />
+              <Route path="/board" element={<Board projectId={activeProjectId} />} />
+              <Route path="/work-items" element={<WorkItems projectId={activeProjectId} />} />
+              <Route path="/boards" element={<Boards projectId={activeProjectId} />} />
+              <Route path="/backlogs" element={<Backlogs projectId={activeProjectId} />} />
+              <Route path="/sprints" element={<Sprints projectId={activeProjectId} />} />
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           ) : (
