@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import api from '../api';
 import { Modal, ConfirmDialog } from './shared/Modal';
 import Badge from './shared/Badge';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ─────────────── helpers / micro-components ─────────────── */
 
@@ -271,20 +272,9 @@ function Execution({
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setShowNewRunModal(true)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: 'var(--gradient-primary)',
-                border: 'none', color: '#fff', cursor: 'pointer',
-                boxShadow: '0 2px 12px rgba(99,102,241,0.3)', transition: 'all 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(99,102,241,0.45)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(99,102,241,0.3)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
+            <LiquidButton variant="default" size="md" onClick={() => setShowNewRunModal(true)}>
               <FiPlus size={15} /> New Test Run
-            </button>
+            </LiquidButton>
           </div>
         </div>
 
@@ -368,18 +358,9 @@ function Execution({
               <p style={{ color: 'var(--text-tertiary)', margin: '0 0 24px', fontSize: 14, maxWidth: 360, lineHeight: 1.6 }}>
                 Create your first test run to begin tracking execution progress across your test suites.
               </p>
-              <button
-                onClick={() => setShowNewRunModal(true)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 7,
-                  padding: '10px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                  background: 'var(--gradient-primary)',
-                  border: 'none', color: '#fff', cursor: 'pointer',
-                  boxShadow: '0 2px 12px rgba(99,102,241,0.3)',
-                }}
-              >
+              <LiquidButton variant="default" size="md" onClick={() => setShowNewRunModal(true)}>
                 <FiPlus size={15} /> Create Test Run
-              </button>
+              </LiquidButton>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
@@ -494,35 +475,19 @@ function Execution({
 
                       {/* Actions */}
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button
+                        <LiquidButton
+                          variant="default" size="md"
                           onClick={() => { setActiveRunId(runId); setCurrentTestIndex(0); setViewMode('execution'); }}
-                          style={{
-                            flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                            padding: '9px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                            background: 'var(--gradient-primary)',
-                            border: 'none', color: '#fff', cursor: 'pointer',
-                            boxShadow: '0 2px 10px rgba(99,102,241,0.25)', transition: 'all 0.15s',
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 4px 16px rgba(99,102,241,0.4)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 10px rgba(99,102,241,0.25)'; }}
                         >
                           <FiPlay size={13} /> {pct === 0 ? 'Start' : pct === 100 ? 'Review' : 'Continue'}
-                        </button>
-                        <button
+                        </LiquidButton>
+                        <LiquidButton
+                          variant="outline" size="sm"
                           onClick={() => setShowResultsModal(run)}
                           title="View results"
-                          style={{
-                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                            padding: '9px 12px', borderRadius: 8, fontSize: 13,
-                            background: 'var(--bg-card)',
-                            border: '1px solid var(--border-default)',
-                            color: 'var(--text-muted)', cursor: 'pointer', transition: 'all 0.15s',
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-card-hover)'; e.currentTarget.style.color = 'var(--text-primary)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-card)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
                         >
                           <FiBarChart2 size={15} />
-                        </button>
+                        </LiquidButton>
                       </div>
                     </div>
                   </div>
@@ -540,29 +505,19 @@ function Execution({
           size="lg"
           footer={
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
-              <button
+              <LiquidButton
+                variant="secondary" size="sm"
                 type="button"
                 onClick={() => setShowNewRunModal(false)}
-                style={{
-                  padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                  background: 'var(--bg-card)', border: '1px solid var(--border-default)',
-                  color: 'var(--text-secondary)', cursor: 'pointer',
-                }}
-              >Cancel</button>
-              <button
+              >Cancel</LiquidButton>
+              <LiquidButton
+                variant="default" size="md"
                 type="submit"
                 form="new-run-form"
                 disabled={isSaving}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                  background: isSaving ? 'rgba(99,102,241,0.5)' : 'var(--gradient-primary)',
-                  border: 'none', color: '#fff', cursor: isSaving ? 'not-allowed' : 'pointer',
-                  boxShadow: isSaving ? 'none' : '0 2px 12px rgba(99,102,241,0.3)',
-                }}
               >
                 <FiPlay size={14} /> {isSaving ? 'Creating...' : 'Create Run'}
-              </button>
+              </LiquidButton>
             </div>
           }
         >
@@ -1050,19 +1005,9 @@ function Execution({
                   </button>
                 );
               })}
-              <button
-                onClick={() => setShowBugModal(true)}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                  background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
-                  color: 'var(--color-danger)', cursor: 'pointer', transition: 'all 0.15s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.14)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-              >
+              <LiquidButton variant="default" size="md" onClick={() => setShowBugModal(true)}>
                 <FiFlag size={14} /> Report Bug
-              </button>
+              </LiquidButton>
             </div>
 
             {/* Navigator */}
@@ -1207,25 +1152,19 @@ function Execution({
         title={null}
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
-            <button
+            <LiquidButton
+              variant="secondary" size="sm"
               type="button"
               onClick={() => setShowBugModal(false)}
-              style={{ padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500, background: 'var(--bg-card)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-            >Cancel</button>
-            <button
+            >Cancel</LiquidButton>
+            <LiquidButton
+              variant="default" size="md"
               type="submit"
               form="bug-form"
               disabled={isSaving}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: isSaving ? 'rgba(239,68,68,0.5)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                border: 'none', color: '#fff', cursor: isSaving ? 'not-allowed' : 'pointer',
-                boxShadow: isSaving ? 'none' : '0 2px 10px rgba(239,68,68,0.3)',
-              }}
             >
               <FiFlag size={14} /> Submit Bug
-            </button>
+            </LiquidButton>
           </div>
         }
       >

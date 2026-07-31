@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ═══════════════════ Theme System ═══════════════════ */
 const getTheme = () => {
@@ -912,7 +913,7 @@ export default function Backlogs({ projectId }) {
             </div>
 
             {/* Create */}
-            <button onClick={openCreateRoot} className="bl-btn" style={{
+            <LiquidButton variant="default" size="sm" onClick={openCreateRoot} style={{
               display: 'flex', alignItems: 'center', gap: 7,
               padding: '9px 18px', borderRadius: 10,
               border: 'none', background: t.accentGradient,
@@ -920,7 +921,7 @@ export default function Backlogs({ projectId }) {
               cursor: 'pointer', boxShadow: `0 4px 14px ${t.accentGlow}`,
             }}>
               <FiPlus size={15} strokeWidth={2.5} /> New Item
-            </button>
+            </LiquidButton>
           </div>
         </div>
 
@@ -959,14 +960,14 @@ export default function Backlogs({ projectId }) {
               <option value="status">Sort: Status</option>
             </select>
             {activeFilterCount > 0 && (
-              <button onClick={clearAllFilters} className="bl-btn" style={{
+              <LiquidButton variant="default" size="sm" onClick={clearAllFilters} style={{
                 padding: '5px 12px', borderRadius: 8, border: 'none',
                 background: `${t.dangerColor}10`, color: t.dangerColor,
                 fontSize: 11, fontWeight: 600, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', gap: 4,
               }}>
                 <FiX size={11} /> Clear All
-              </button>
+              </LiquidButton>
             )}
           </div>
         )}
@@ -983,9 +984,9 @@ export default function Backlogs({ projectId }) {
         {forecastData && (
           <div style={{ marginTop: 12 }}>
             {!showForecast ? (
-              <button onClick={() => setShowForecast(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgTertiary, color: t.textSecondary, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+              <LiquidButton variant="default" size="sm" onClick={() => setShowForecast(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgTertiary, color: t.textSecondary, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
                 <FiTrendingUp size={13} /> Show Forecast ({forecastData.projectedSprints} sprints projected)
-              </button>
+              </LiquidButton>
             ) : ForecastPanel}
           </div>
         )}
@@ -1041,22 +1042,22 @@ export default function Backlogs({ projectId }) {
 
           {/* Expand/Collapse */}
           <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={expandAll} className="bl-btn" style={{
+            <LiquidButton variant="default" size="sm" onClick={expandAll} style={{
               padding: '5px 12px', borderRadius: 7,
               border: `1px solid ${t.borderSecondary}`, background: t.bgTertiary,
               color: t.textSecondary, fontSize: 11, fontWeight: 600,
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
             }}>
               <FiMaximize2 size={11} /> Expand
-            </button>
-            <button onClick={collapseAll} className="bl-btn" style={{
+            </LiquidButton>
+            <LiquidButton variant="default" size="sm" onClick={collapseAll} style={{
               padding: '5px 12px', borderRadius: 7,
               border: `1px solid ${t.borderSecondary}`, background: t.bgTertiary,
               color: t.textSecondary, fontSize: 11, fontWeight: 600,
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
             }}>
               <FiMinimize2 size={11} /> Collapse
-            </button>
+            </LiquidButton>
           </div>
         </div>
       </div>
@@ -1086,15 +1087,15 @@ export default function Backlogs({ projectId }) {
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20 }}>
               {(searchTerm || activeFilterCount > 0) && (
-                <button onClick={clearAllFilters} className="bl-btn" style={{
+                <LiquidButton variant="default" size="sm" onClick={clearAllFilters} style={{
                   padding: '10px 20px', borderRadius: 10,
                   border: `1px solid ${t.borderSecondary}`, background: 'transparent',
                   color: t.textSecondary, fontSize: 13, fontWeight: 600, cursor: 'pointer',
                 }}>
                   Clear Filters
-                </button>
+                </LiquidButton>
               )}
-              <button onClick={openCreateRoot} className="bl-btn" style={{
+              <LiquidButton variant="default" size="sm" onClick={openCreateRoot} style={{
                 display: 'flex', alignItems: 'center', gap: 7,
                 padding: '10px 22px', borderRadius: 10,
                 border: 'none', background: t.accentGradient,
@@ -1102,7 +1103,7 @@ export default function Backlogs({ projectId }) {
                 cursor: 'pointer', boxShadow: `0 4px 14px ${t.accentGlow}`,
               }}>
                 <FiPlus size={15} /> Create Item
-              </button>
+              </LiquidButton>
             </div>
           </div>
         ) : (
@@ -1418,21 +1419,21 @@ export default function Backlogs({ projectId }) {
                 display: 'flex', gap: 10, justifyContent: 'flex-end',
                 paddingTop: 12, borderTop: `1px solid ${t.borderPrimary}`, marginTop: 4,
               }}>
-                <button type="button" onClick={closeModal} className="bl-btn" style={{
+                <LiquidButton variant="default" size="sm" type="button" onClick={closeModal} style={{
                   padding: '10px 20px', borderRadius: 10,
                   border: `1px solid ${t.borderSecondary}`, background: 'transparent',
                   color: t.textSecondary, fontSize: 13, fontWeight: 600, cursor: 'pointer',
                 }}>
                   Cancel
-                </button>
-                <button type="submit" className="bl-btn" style={{
+                </LiquidButton>
+                <LiquidButton variant="default" size="sm" type="submit" style={{
                   padding: '10px 24px', borderRadius: 10,
                   border: 'none', background: t.accentGradient,
                   color: '#fff', fontSize: 13, fontWeight: 700,
                   cursor: 'pointer', boxShadow: `0 4px 14px ${t.accentGlow}`,
                 }}>
                   {editItem ? '✏️ Update Item' : parentForChild ? '🔗 Add Child' : '✨ Create Item'}
-                </button>
+                </LiquidButton>
               </div>
             </form>
           </div>

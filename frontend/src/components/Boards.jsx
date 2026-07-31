@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiLayers, FiPlus, FiEdit2, FiTrash2, FiX, FiSettings, FiArrowUp, FiArrowDown, FiHash, FiTarget, FiZap, FiSearch, FiCheckCircle, FiAlertTriangle } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 const DEFAULT_COLUMNS = [
   { id: 'Backlog', title: 'Backlog', color: '#94a3b8', wipLimit: 0 },
@@ -143,7 +144,7 @@ export default function Boards({ projectId }) {
               <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>{boards.length} boards</p>
             </div>
           </div>
-          <button onClick={() => { setEditBoard(null); setForm({ name: '', description: '' }); setShowModal(true); }} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}><FiPlus size={14} /> New Board</button>
+          <LiquidButton variant="default" size="md" onClick={() => { setEditBoard(null); setForm({ name: '', description: '' }); setShowModal(true); }}><FiPlus size={14} /> New Board</LiquidButton>
         </div>
       </div>
 
@@ -199,8 +200,8 @@ export default function Boards({ projectId }) {
                 <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} rows={3} placeholder="Optional description" style={{ width: '100%', padding: '9px 12px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 13, outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 4 }}>
-                <button type="button" onClick={() => setShowModal(false)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-                <button type="submit" style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>{editBoard ? 'Update' : 'Create'}</button>
+                <LiquidButton variant="secondary" size="sm" type="button" onClick={() => setShowModal(false)}>Cancel</LiquidButton>
+                <LiquidButton variant="default" size="sm" type="submit">{editBoard ? 'Update' : 'Create'}</LiquidButton>
               </div>
             </form>
           </div>
@@ -287,8 +288,8 @@ export default function Boards({ projectId }) {
             </div>
 
             <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-default)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
-              <button onClick={() => setConfigBoard(null)} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border-default)', background: 'transparent', color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={saveConfig} style={{ padding: '8px 16px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #6366f1, #7c3aed)', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Save Configuration</button>
+              <LiquidButton variant="secondary" size="sm" onClick={() => setConfigBoard(null)}>Cancel</LiquidButton>
+              <LiquidButton variant="default" size="sm" onClick={saveConfig}>Save Configuration</LiquidButton>
             </div>
           </div>
         </div>

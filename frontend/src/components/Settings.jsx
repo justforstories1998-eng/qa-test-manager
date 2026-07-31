@@ -5,6 +5,7 @@ import {
   FiCheckCircle, FiSun, FiMoon, FiSmartphone,
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ══════════════ theme detection ══════════════ */
 const useTheme = () => {
@@ -445,16 +446,18 @@ function Settings({ settings, onUpdateSettings }) {
               )}
             </div>
             <div className="qa-set-footer-actions">
-              <button
-                className="qa-set-btn qa-set-btn-secondary"
+              <LiquidButton
+                variant="secondary"
+                size="sm"
                 onClick={handleReset}
                 disabled={!hasChanges}
               >
                 <FiRefreshCw size={14} />
                 Reset
-              </button>
-              <button
-                className="qa-set-btn qa-set-btn-primary"
+              </LiquidButton>
+              <LiquidButton
+                variant="default"
+                size="sm"
                 onClick={handleSave}
                 disabled={isSaving || !hasChanges}
               >
@@ -463,7 +466,7 @@ function Settings({ settings, onUpdateSettings }) {
                 ) : (
                   <><FiSave size={14} /> Save Changes</>
                 )}
-              </button>
+              </LiquidButton>
             </div>
           </div>
         </main>

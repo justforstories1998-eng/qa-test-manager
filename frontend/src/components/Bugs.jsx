@@ -8,6 +8,7 @@ import {
 import api from '../api';
 import { toast } from 'react-toastify';
 import { Modal, ConfirmDialog } from './shared/Modal';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ══════════════ theme hook ══════════════ */
 const useTheme = () => {
@@ -214,16 +215,13 @@ function Bugs({ projectId, user }) {
             <p className="bug-subtitle">Track, assign, and resolve defects across your project</p>
           </div>
         </div>
-        <button
-          className="bug-btn bug-btn-primary"
-          onClick={() => {
-            setEditingBug(null); setSelectedFile(null);
-            setSelectedAssignee(''); setAssignedToQuery('');
-            setShowModal(true);
-          }}
-        >
+        <LiquidButton variant="default" size="sm" onClick={() => {
+          setEditingBug(null); setSelectedFile(null);
+          setSelectedAssignee(''); setAssignedToQuery('');
+          setShowModal(true);
+        }}>
           <FiPlus size={15} /> Report Bug
-        </button>
+        </LiquidButton>
       </div>
 
       <div className="bug-body">
@@ -394,16 +392,13 @@ function Bugs({ projectId, user }) {
             </p>
             <div className="bug-empty-actions">
               {(searchTerm || statusFilter !== 'All') && (
-                <button className="bug-btn bug-btn-secondary" onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}>
+                <LiquidButton variant="secondary" size="sm" onClick={() => { setSearchTerm(''); setStatusFilter('All'); }}>
                   <FiX size={14} /> Clear Filters
-                </button>
+                </LiquidButton>
               )}
-              <button
-                className="bug-btn bug-btn-primary"
-                onClick={() => { setEditingBug(null); setSelectedFile(null); setSelectedAssignee(''); setAssignedToQuery(''); setShowModal(true); }}
-              >
+              <LiquidButton variant="default" size="sm" onClick={() => { setEditingBug(null); setSelectedFile(null); setSelectedAssignee(''); setAssignedToQuery(''); setShowModal(true); }}>
                 <FiPlus size={14} /> Report Bug
-              </button>
+              </LiquidButton>
             </div>
           </div>
         )}
@@ -417,9 +412,9 @@ function Bugs({ projectId, user }) {
         size="lg"
         footer={
           <div className="bug-modal-footer">
-            <button className="bug-btn bug-btn-secondary" onClick={() => setShowViewModal(false)}>Close</button>
-            <button
-              className="bug-btn bug-btn-primary-purple"
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowViewModal(false)}>Close</LiquidButton>
+            <LiquidButton
+              variant="default" size="sm"
               onClick={() => {
                 setShowViewModal(false);
                 setEditingBug(viewingBug); setSelectedFile(null);
@@ -429,7 +424,7 @@ function Bugs({ projectId, user }) {
               }}
             >
               <FiEdit2 size={14} /> Edit
-            </button>
+            </LiquidButton>
           </div>
         }
       >
@@ -529,17 +524,17 @@ function Bugs({ projectId, user }) {
         size="lg"
         footer={
           <div className="bug-modal-footer">
-            <button className="bug-btn bug-btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
-            <button
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowModal(false)}>Cancel</LiquidButton>
+            <LiquidButton
+              variant="default" size="sm"
               type="submit" form="bug-form" disabled={isSaving}
-              className={`bug-btn bug-btn-primary ${isSaving ? 'bug-btn-disabled' : ''}`}
             >
               {isSaving ? (
                 <><span className="bug-spinner" /> Saving…</>
               ) : (
                 <><FiFlag size={14} /> {editingBug ? 'Update Bug' : 'Submit Bug'}</>
               )}
-            </button>
+            </LiquidButton>
           </div>
         }
       >

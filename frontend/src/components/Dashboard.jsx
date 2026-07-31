@@ -7,6 +7,7 @@ import {
   FiArrowUpRight, FiArrowDownRight, FiShield, FiLayers, FiBarChart2,
   FiPieChart, FiCalendar, FiChevronRight, FiInbox,
 } from 'react-icons/fi';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 const useTheme = () => {
   const [theme, setTheme] = useState(() => document.documentElement.getAttribute('data-theme') || 'dark');
@@ -171,10 +172,10 @@ function Dashboard({ statistics, testSuites, testRuns, workItemStats, sprints, o
             <FiCalendar size={13} />
             {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
-          <button className={`btn btn-secondary ${refreshing ? 'opacity-60' : ''}`} onClick={handleRefresh} disabled={refreshing}>
+          <LiquidButton variant="secondary" size="sm" onClick={handleRefresh} disabled={refreshing}>
             <FiRefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
             {refreshing ? 'Refreshing...' : 'Refresh'}
-          </button>
+          </LiquidButton>
         </div>
       </div>
 

@@ -8,6 +8,7 @@ import {
 import { toast } from 'react-toastify';
 import api from '../api';
 import { ConfirmDialog } from './shared/Modal';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ══════════════ theme detection ══════════════ */
 const useTheme = () => {
@@ -236,8 +237,9 @@ function Reports({ testRuns = [], settings, projectId }) {
                 </div>
 
                 {/* Generate button */}
-                <button
-                  className={`rep-btn rep-btn-primary rep-btn-full ${(isGenerating || !selectedRunId) ? 'rep-btn-disabled' : ''}`}
+                <LiquidButton
+                  variant="default"
+                  size="sm"
                   onClick={handleGenerate}
                   disabled={isGenerating || !selectedRunId}
                 >
@@ -246,7 +248,7 @@ function Reports({ testRuns = [], settings, projectId }) {
                   ) : (
                     <><FiZap size={14} /> Generate Report</>
                   )}
-                </button>
+                </LiquidButton>
               </div>
             </div>
 
@@ -329,9 +331,9 @@ function Reports({ testRuns = [], settings, projectId }) {
                   <option value="pdf">PDF only</option>
                   <option value="word">Word only</option>
                 </select>
-                <button className="rep-refresh-btn" onClick={loadReports} title="Refresh">
+                <LiquidButton variant="ghost" size="sm" onClick={loadReports} title="Refresh">
                   <FiRefreshCw size={13} />
-                </button>
+                </LiquidButton>
               </div>
             </div>
 
@@ -428,12 +430,13 @@ function Reports({ testRuns = [], settings, projectId }) {
                       : 'Generate your first report from the panel on the left.'}
                   </p>
                   {(searchTerm || filterFormat !== 'all') && (
-                    <button
-                      className="rep-btn rep-btn-secondary"
+                    <LiquidButton
+                      variant="secondary"
+                      size="sm"
                       onClick={() => { setSearchTerm(''); setFilterFormat('all'); }}
                     >
                       <FiX size={13} /> Clear Filters
-                    </button>
+                    </LiquidButton>
                   )}
                 </div>
               )}

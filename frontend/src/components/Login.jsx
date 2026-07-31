@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiUser, FiLock, FiEye, FiEyeOff, FiArrowRight, FiShield, FiCheckCircle } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');
@@ -246,7 +247,7 @@ function Login({ onLogin }) {
                 </div>
               </div>
 
-              <button type="submit" className="login-submit" disabled={isLoading}>
+              <LiquidButton variant="default" size="lg" type="submit" className="login-submit" disabled={isLoading}>
                 {isLoading ? (
                   <div className="login-submit-loading">
                     <div className="login-spinner" />
@@ -258,7 +259,7 @@ function Login({ onLogin }) {
                     <FiArrowRight size={16} />
                   </div>
                 )}
-              </button>
+              </LiquidButton>
             </form>
 
             <div className="login-form-footer">

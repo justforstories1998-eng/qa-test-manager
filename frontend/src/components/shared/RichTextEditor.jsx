@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { FiBold, FiItalic, FiUnderline, FiLink, FiList, FiCode } from 'react-icons/fi';
+import { LiquidButton } from '../ui/liquid-glass-button';
 
 const toolbarButtons = [
   { icon: FiBold, command: 'bold', title: 'Bold' },
@@ -68,16 +69,17 @@ const RichTextEditor = ({ value, onChange, placeholder = 'Type here...', minHeig
         {toolbarButtons.map((btn) => {
           const Icon = btn.icon;
           return (
-            <button
+            <LiquidButton
               key={btn.command}
               type="button"
               title={btn.title}
               onClick={() => execCommand(btn.command, btn.value)}
-              className="btn btn-ghost btn-icon"
+              variant="ghost"
+              size="icon"
               style={{ width: 28, height: 28, padding: 0 }}
             >
               <Icon size={14} />
-            </button>
+            </LiquidButton>
           );
         })}
       </div>

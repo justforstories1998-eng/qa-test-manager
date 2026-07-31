@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { FiX, FiAlertTriangle } from 'react-icons/fi';
+import { LiquidButton } from '../ui/liquid-glass-button';
 
 export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }) {
   useEffect(() => {
@@ -51,8 +52,8 @@ export function ConfirmDialog({
     <Modal isOpen={isOpen} onClose={onClose} size="sm"
       footer={
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
-          <button className="btn btn-secondary" onClick={onClose}>{cancelLabel}</button>
-          <button className={`btn ${danger ? 'btn-danger' : 'btn-primary'}`} onClick={onConfirm}>{confirmLabel}</button>
+          <LiquidButton variant="secondary" size="sm" onClick={onClose}>{cancelLabel}</LiquidButton>
+          <LiquidButton variant={danger ? 'destructive' : 'default'} size="sm" onClick={onConfirm}>{confirmLabel}</LiquidButton>
         </div>
       }
     >

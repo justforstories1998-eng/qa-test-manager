@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../api';
 import { toast } from 'react-toastify';
 import { FiClock, FiPlus, FiCalendar, FiCheckCircle, FiEdit2, FiTrash2, FiX, FiUsers, FiBarChart2, FiTarget, FiSearch, FiFilter } from 'react-icons/fi';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 const STATUS_STYLE = {
   Active: { color: '#34d399', bg: 'rgba(52,211,153,0.1)' },
@@ -91,14 +92,15 @@ function CreateSprintModal({ styles, onCancel, onSubmit }) {
           </div>
         </div>
         <div style={styles.modalActions}>
-          <button style={styles.cancelBtn} onClick={onCancel}>Cancel</button>
-          <button
-            style={styles.saveBtn}
+          <LiquidButton variant="secondary" size="sm" onClick={onCancel}>Cancel</LiquidButton>
+          <LiquidButton
+            variant="default"
+            size="sm"
             onClick={handleSubmit}
             disabled={!form.name || !form.startDate || !form.endDate}
           >
             Create Sprint
-          </button>
+          </LiquidButton>
         </div>
       </div>
     </div>
@@ -174,8 +176,8 @@ function EditSprintModal({ sprint, styles, onCancel, onSubmit }) {
           </div>
         </div>
         <div style={styles.modalActions}>
-          <button style={styles.cancelBtn} onClick={onCancel}>Cancel</button>
-          <button style={styles.saveBtn} onClick={handleSubmit}>Save Changes</button>
+          <LiquidButton variant="secondary" size="sm" onClick={onCancel}>Cancel</LiquidButton>
+          <LiquidButton variant="default" size="sm" onClick={handleSubmit}>Save Changes</LiquidButton>
         </div>
       </div>
     </div>
@@ -804,18 +806,20 @@ export default function Sprints({ projectId }) {
               Move to {next}
             </button>
           )}
-          <button
-            style={styles.actionBtn}
+          <LiquidButton
+            variant="outline"
+            size="sm"
             onClick={() => setEditingSprint(sprint)}
           >
             Edit
-          </button>
-          <button
-            style={styles.dangerBtn}
+          </LiquidButton>
+          <LiquidButton
+            variant="destructive"
+            size="sm"
             onClick={() => setConfirmDelete(sprint._id)}
           >
             Delete
-          </button>
+          </LiquidButton>
         </div>
       </div>
     );
@@ -1704,13 +1708,14 @@ export default function Sprints({ projectId }) {
             <div style={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
               <p style={styles.confirmText}>Are you sure you want to delete this sprint?</p>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button style={styles.cancelBtn} onClick={() => setConfirmDelete(null)}>Cancel</button>
-                <button
-                  style={{ ...styles.saveBtn, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+                <LiquidButton variant="secondary" size="sm" onClick={() => setConfirmDelete(null)}>Cancel</LiquidButton>
+                <LiquidButton
+                  variant="destructive"
+                  size="sm"
                   onClick={() => handleDeleteSprint(confirmDelete)}
                 >
                   Delete
-                </button>
+                </LiquidButton>
               </div>
             </div>
           </div>
@@ -1726,9 +1731,9 @@ export default function Sprints({ projectId }) {
           <h1 style={styles.title}>Sprints</h1>
           <p style={styles.subtitle}>{sprints.length} sprint{sprints.length !== 1 ? 's' : ''}</p>
         </div>
-        <button style={styles.createBtn} onClick={() => setShowCreateModal(true)}>
+        <LiquidButton variant="default" size="md" onClick={() => setShowCreateModal(true)}>
           + New Sprint
-        </button>
+        </LiquidButton>
       </div>
 
       {loading ? (
@@ -1755,13 +1760,14 @@ export default function Sprints({ projectId }) {
           <div style={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
             <p style={styles.confirmText}>Are you sure you want to delete this sprint?</p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <button style={styles.cancelBtn} onClick={() => setConfirmDelete(null)}>Cancel</button>
-              <button
-                style={{ ...styles.saveBtn, background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+              <LiquidButton variant="secondary" size="sm" onClick={() => setConfirmDelete(null)}>Cancel</LiquidButton>
+              <LiquidButton
+                variant="destructive"
+                size="sm"
                 onClick={() => handleDeleteSprint(confirmDelete)}
               >
                 Delete
-              </button>
+              </LiquidButton>
             </div>
           </div>
         </div>

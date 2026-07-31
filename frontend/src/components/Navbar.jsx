@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fi';
 import api from '../api';
 import { canAccessModule } from '../permissions';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobileOpen, onToggleMobile }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -274,15 +275,17 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
               )}
             </div>
             {/* Visible Logout Button */}
-            <button
+            <LiquidButton
               onClick={onLogout}
               className="sidebar-logout"
               style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
+              variant="destructive"
+              size="sm"
               title="Sign Out"
             >
               <FiLogOut size={17} />
               {!collapsed && <span>Sign Out</span>}
-            </button>
+            </LiquidButton>
             {/* Online Status */}
             <div className="sidebar-online" style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
               <div className="sidebar-online-dot" />

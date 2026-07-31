@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import api from '../api';
 import { Modal, ConfirmDialog } from './shared/Modal';
 import Badge from './shared/Badge';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ═══════════ micro-components ═══════════ */
 
@@ -370,23 +371,17 @@ function Admin({ projects = [] }) {
                 }}>
                   <span style={{ color: 'var(--accent-color)', fontWeight: 600 }}>{filteredUsers.length}</span> results
                 </span>
-                <button
+                <LiquidButton
+                  variant="default"
+                  size="sm"
                   onClick={() => {
                     setSelectedUser(null);
                     setUserForm({ firstName: '', lastName: '', email: '', role: 'user', isActive: true });
                     setShowUserModal(true);
                   }}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 7,
-                    padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                    background: 'var(--btn-primary-bg)', border: 'none', color: '#fff', cursor: 'pointer',
-                    boxShadow: 'var(--btn-primary-shadow)', transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = 'var(--btn-primary-hover-shadow)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--btn-primary-shadow)'; }}
                 >
                   <FiUserPlus size={15} /> Add User
-                </button>
+                </LiquidButton>
               </div>
             </div>
 
@@ -541,19 +536,13 @@ function Admin({ projects = [] }) {
                 />
               </div>
               <div style={{ marginLeft: 'auto' }}>
-                <button
+                <LiquidButton
+                  variant="default"
+                  size="sm"
                   onClick={() => { setAssignForm({ projectId: projects[0]?._id || '', userIds: [] }); setShowAssignModal(true); }}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 7,
-                    padding: '9px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                    background: 'var(--btn-primary-bg)', border: 'none', color: '#fff', cursor: 'pointer',
-                    boxShadow: 'var(--btn-primary-shadow)', transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
                   <FiBriefcase size={14} /> Assign Project
-                </button>
+                </LiquidButton>
               </div>
             </div>
 
@@ -717,31 +706,23 @@ function Admin({ projects = [] }) {
         size="md"
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
-            <button
+            <LiquidButton
+              variant="secondary"
+              size="sm"
               type="button"
               onClick={() => { setShowUserModal(false); setSelectedUser(null); }}
-              style={{
-                padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                background: 'var(--btn-ghost-bg)', border: '1px solid var(--btn-ghost-border)',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-              }}
-            >Cancel</button>
-            <button
+            >Cancel</LiquidButton>
+            <LiquidButton
+              variant="default"
+              size="sm"
               type="submit" form="user-form" disabled={isSaving}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: isSaving ? 'var(--btn-disabled-bg)' : 'var(--btn-primary-bg)',
-                border: 'none', color: '#fff', cursor: isSaving ? 'not-allowed' : 'pointer',
-                boxShadow: isSaving ? 'none' : 'var(--btn-primary-shadow)',
-              }}
             >
               {isSaving ? (
                 <><span className="admin-spinner" /> Saving…</>
               ) : (
                 <><FiCheck size={14} /> {selectedUser ? 'Update User' : 'Create User'}</>
               )}
-            </button>
+            </LiquidButton>
           </div>
         }
       >
@@ -876,30 +857,20 @@ function Admin({ projects = [] }) {
         size="lg"
         footer={
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', width: '100%' }}>
-            <button
+            <LiquidButton
+              variant="secondary"
+              size="sm"
               type="button"
               onClick={() => setShowAssignModal(false)}
-              style={{
-                padding: '9px 16px', borderRadius: 9, fontSize: 13, fontWeight: 500,
-                background: 'var(--btn-ghost-bg)', border: '1px solid var(--btn-ghost-border)',
-                color: 'var(--text-secondary)', cursor: 'pointer',
-              }}
-            >Cancel</button>
-            <button
+            >Cancel</LiquidButton>
+            <LiquidButton
+              variant="default"
+              size="sm"
               onClick={handleAssignProject}
               disabled={isSaving || !assignForm.projectId || assignForm.userIds.length === 0}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '9px 20px', borderRadius: 9, fontSize: 13, fontWeight: 600,
-                background: (!assignForm.projectId || assignForm.userIds.length === 0) ? 'var(--btn-disabled-bg)' : 'var(--btn-primary-bg)',
-                border: 'none', color: '#fff',
-                cursor: (!assignForm.projectId || assignForm.userIds.length === 0) ? 'not-allowed' : 'pointer',
-                opacity: (!assignForm.projectId || assignForm.userIds.length === 0) ? 0.5 : 1,
-                boxShadow: 'var(--btn-primary-shadow)',
-              }}
             >
               <FiCheck size={14} /> Assign {assignForm.userIds.length} User{assignForm.userIds.length !== 1 ? 's' : ''}
-            </button>
+            </LiquidButton>
           </div>
         }
       >

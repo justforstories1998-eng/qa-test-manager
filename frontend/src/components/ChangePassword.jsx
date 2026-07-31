@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import api from '../api';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 function ChangePassword({ user, onPasswordChanged }) {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -91,9 +92,9 @@ function ChangePassword({ user, onPasswordChanged }) {
                 />
               </div>
             </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.625rem' }} disabled={isLoading}>
+            <LiquidButton variant="default" size="lg" type="submit" disabled={isLoading} className="w-full">
               {isLoading ? <><span className="loading-spinner loading-spinner-sm" style={{ borderTopColor: 'white' }} /> Changing Password...</> : 'Change Password & Continue'}
-            </button>
+            </LiquidButton>
           </form>
         </div>
       </div>

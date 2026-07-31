@@ -7,6 +7,7 @@ import {
 } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { Modal, ConfirmDialog } from "./shared/Modal";
+import { LiquidButton } from './ui/liquid-glass-button';
 
 /* ═══════════════════ HELPERS & BADGES ═══════════════════ */
 
@@ -239,12 +240,12 @@ function TestCases({
           </div>
         </div>
         <div className="tc-header-actions">
-          <button className="tc-btn tc-btn-secondary" onClick={() => setShowUploadModal(true)}>
+          <LiquidButton variant="secondary" size="sm" onClick={() => setShowUploadModal(true)}>
             <FiUpload size={15} /> Import CSV
-          </button>
-          <button className="tc-btn tc-btn-primary" onClick={() => initTestCaseForm()}>
+          </LiquidButton>
+          <LiquidButton variant="default" size="sm" onClick={() => initTestCaseForm()}>
             <FiPlus size={15} /> New Test Case
-          </button>
+          </LiquidButton>
         </div>
       </div>
 
@@ -477,13 +478,13 @@ function TestCases({
                 <p>{searchTerm || priorityFilter !== "all" ? "Try adjusting your search or filters." : "Create your first test case or import from CSV."}</p>
                 <div className="tc-empty-actions">
                   {(searchTerm || priorityFilter !== "all") && (
-                    <button className="tc-btn tc-btn-secondary" onClick={() => { setSearchTerm(""); setPriorityFilter("all"); }}>
+                    <LiquidButton variant="secondary" size="sm" onClick={() => { setSearchTerm(""); setPriorityFilter("all"); }}>
                       <FiX size={14} /> Clear Filters
-                    </button>
+                    </LiquidButton>
                   )}
-                  <button className="tc-btn tc-btn-primary" onClick={() => initTestCaseForm()}>
+                  <LiquidButton variant="default" size="sm" onClick={() => initTestCaseForm()}>
                     <FiPlus size={14} /> Create Test Case
-                  </button>
+                  </LiquidButton>
                 </div>
               </div>
             )}
@@ -495,10 +496,10 @@ function TestCases({
       <Modal isOpen={showViewModal && !!viewingTestCase} onClose={() => setShowViewModal(false)} title={null} size="lg"
         footer={
           <div className="tc-modal-footer">
-            <button className="tc-btn tc-btn-secondary" onClick={() => setShowViewModal(false)}>Close</button>
-            <button className="tc-btn tc-btn-primary" onClick={() => { setShowViewModal(false); initTestCaseForm(viewingTestCase); }}>
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowViewModal(false)}>Close</LiquidButton>
+            <LiquidButton variant="default" size="sm" onClick={() => { setShowViewModal(false); initTestCaseForm(viewingTestCase); }}>
               <FiEdit2 size={14} /> Edit
-            </button>
+            </LiquidButton>
           </div>
         }
       >
@@ -558,10 +559,10 @@ function TestCases({
       <Modal isOpen={showTestCaseModal} onClose={() => setShowTestCaseModal(false)} title={null} size="lg"
         footer={
           <div className="tc-modal-footer">
-            <button className="tc-btn tc-btn-secondary" onClick={() => setShowTestCaseModal(false)}>Cancel</button>
-            <button type="submit" form="tc-form" disabled={isSaving} className={`tc-btn tc-btn-primary ${isSaving ? "tc-btn-disabled" : ""}`}>
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowTestCaseModal(false)}>Cancel</LiquidButton>
+            <LiquidButton type="submit" form="tc-form" disabled={isSaving} variant="default" size="sm">
               <FiCheck size={14} /> {isSaving ? "Saving…" : editingTestCase ? "Save Changes" : "Create Test Case"}
-            </button>
+            </LiquidButton>
           </div>
         }
       >
@@ -667,10 +668,10 @@ function TestCases({
       <Modal isOpen={showUploadModal} onClose={() => setShowUploadModal(false)} title={null}
         footer={
           <div className="tc-modal-footer">
-            <button className="tc-btn tc-btn-secondary" onClick={() => setShowUploadModal(false)}>Cancel</button>
-            <button type="submit" form="upload-form" disabled={isUploading} className={`tc-btn tc-btn-primary ${isUploading ? "tc-btn-disabled" : ""}`}>
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowUploadModal(false)}>Cancel</LiquidButton>
+            <LiquidButton type="submit" form="upload-form" disabled={isUploading} variant="default" size="sm">
               {isUploading ? (<><span className="tc-spinner" /> Importing…</>) : (<><FiUpload size={14} /> Import</>)}
-            </button>
+            </LiquidButton>
           </div>
         }
       >

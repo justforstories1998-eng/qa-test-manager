@@ -8,6 +8,7 @@ import {
 } from 'react-icons/fi';
 import api from '../api';
 import { toast } from 'react-toastify';
+import { LiquidButton } from './ui/liquid-glass-button';
 
 const getTheme = () => {
   const dark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -462,8 +463,8 @@ export default function Board({ projectId }) {
         <textarea value={form.acceptanceCriteria} onChange={e => setForm(p => ({ ...p, acceptanceCriteria: e.target.value }))} placeholder="Define acceptance criteria..." rows={3} className="board-input" style={{ width: '100%', padding: '10px 14px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 13, outline: 'none', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.5, fontFamily: 'inherit' }} />
       </div>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 8, borderTop: `1px solid ${t.borderPrimary}`, marginTop: 4 }}>
-        <button type="button" onClick={closeModal} className="btn-hover-scale" style={{ padding: '10px 20px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: 'transparent', color: t.textSecondary, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-        <button type="submit" className="btn-hover-scale" style={{ padding: '10px 24px', borderRadius: 10, border: 'none', background: t.accentGradient, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: `0 4px 12px ${t.accentGlow}` }}>{showEditModal ? '✏️ Update Item' : '✨ Create Item'}</button>
+        <LiquidButton variant="default" size="sm" type="button" onClick={closeModal}>Cancel</LiquidButton>
+        <LiquidButton variant="default" size="sm" type="submit">{showEditModal ? '✏️ Update Item' : '✨ Create Item'}</LiquidButton>
       </div>
     </form>
   );
@@ -496,9 +497,9 @@ export default function Board({ projectId }) {
               <input placeholder="Search items..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="board-input" style={{ padding: '9px 14px 9px 36px', borderRadius: 10, border: `1px solid ${t.borderSecondary}`, background: t.bgInput, color: t.textPrimary, fontSize: 13, outline: 'none', width: 220 }} />
               {searchTerm && <button onClick={() => setSearchTerm('')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 20, height: 20, borderRadius: '50%', border: 'none', background: t.bgCardHover, color: t.textMuted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={10} /></button>}
             </div>
-            <button onClick={openCreate} className="btn-hover-scale" style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 10, border: 'none', background: t.accentGradient, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: `0 4px 14px ${t.accentGlow}` }}>
+            <LiquidButton variant="default" size="sm" onClick={openCreate} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px' }}>
               <FiPlus size={15} strokeWidth={2.5} /> New Item
-            </button>
+            </LiquidButton>
           </div>
         </div>
         {showFilters && (

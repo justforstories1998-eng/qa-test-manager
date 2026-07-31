@@ -23,6 +23,7 @@ import Sprints from './components/Sprints';
 
 import api from './api';
 import { FiPlus, FiBriefcase, FiX } from 'react-icons/fi';
+import { LiquidButton } from './components/ui/liquid-glass-button';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -179,9 +180,9 @@ function App() {
                   <option key={p.id || p._id} value={p.id || p._id}>{p.name}</option>
                 ))}
               </select>
-              <button className="btn btn-ghost btn-icon btn-sm" onClick={() => setShowProjectModal(true)} title="Add Project">
+              <LiquidButton variant="ghost" size="icon" onClick={() => setShowProjectModal(true)} title="Add Project">
                 <FiPlus size={16} />
-              </button>
+              </LiquidButton>
             </div>
           </div>
           <div className="header-right">
@@ -230,10 +231,10 @@ function App() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowProjectModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={isCreatingProject}>
+                <LiquidButton variant="secondary" size="sm" type="button" onClick={() => setShowProjectModal(false)}>Cancel</LiquidButton>
+                <LiquidButton variant="default" size="sm" type="submit" disabled={isCreatingProject}>
                   {isCreatingProject ? 'Creating...' : 'Create'}
-                </button>
+                </LiquidButton>
               </div>
             </form>
           </div>

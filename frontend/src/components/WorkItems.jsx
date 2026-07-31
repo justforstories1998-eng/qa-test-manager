@@ -3,6 +3,7 @@ import api from '../api';
 import RichTextEditor from './shared/RichTextEditor';
 import './shared/chartSetup';
 import { Doughnut, Bar } from 'react-chartjs-2';
+import { LiquidButton } from './ui/liquid-glass-button';
 const PRIORITY_COLORS = { 1: '#ef4444', 2: '#f97316', 3: '#eab308', 4: '#6b7280' };
 const PRIORITY_LABELS = { 1: 'Critical', 2: 'High', 3: 'Medium', 4: 'Low' };
 const TYPE_COLORS = { Epic: '#8b5cf6', Feature: '#6366f1', 'User Story': '#3b82f6', Task: '#f59e0b', Bug: '#ef4444', Issue: '#f97316', 'Test Case': '#10b981' };
@@ -264,8 +265,8 @@ function WorkItemForm({ initial, onSubmit, onCancel, submitLabel, templates, pro
 
       {/* ── Actions ── */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', paddingTop: '8px' }}>
-        <button onClick={onCancel} style={btnSecondary}>Cancel</button>
-        <button onClick={handleSubmit} style={btnPrimary}>{submitLabel || 'Create'}</button>
+        <LiquidButton variant="secondary" size="sm" onClick={onCancel}>Cancel</LiquidButton>
+        <LiquidButton variant="default" size="sm" onClick={handleSubmit}>{submitLabel || 'Create'}</LiquidButton>
       </div>
     </div>
   );
@@ -472,13 +473,13 @@ export default function WorkItems({ projectId }) {
               <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontWeight: '500' }}>{selected.size} selected</span>
               <Select value="" onChange={v => { if (v) handleBulkStatus(v); }} options={[{ value: '', label: 'Status...' }, ...STATUSES.map(s => ({ value: s, label: s }))]} style={{ width: '120px', height: '34px', fontSize: '12px' }} />
               <Select value="" onChange={v => { if (v) handleBulkType(v); }} options={[{ value: '', label: 'Type...' }, ...TYPES.map(t => ({ value: t, label: t }))]} style={{ width: '120px', height: '34px', fontSize: '12px' }} />
-              <button onClick={handleBulkDelete} style={{ ...btnDanger, ...btnSmall }}>🗑 Delete</button>
+              <LiquidButton variant="destructive" size="sm" onClick={handleBulkDelete}>🗑 Delete</LiquidButton>
             </>
           )}
           {tab === 'queries' && (
-            <button onClick={() => setShowSaveQuery(true)} style={{ ...btnSecondary, ...btnSmall }}>💾 Save Current Query</button>
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowSaveQuery(true)}>💾 Save Current Query</LiquidButton>
           )}
-          <button onClick={() => setShowCreate(true)} style={{ ...btnPrimary }}>+ New Work Item</button>
+          <LiquidButton variant="default" size="sm" onClick={() => setShowCreate(true)}>+ New Work Item</LiquidButton>
         </div>
       </div>
 
@@ -544,7 +545,7 @@ export default function WorkItems({ projectId }) {
                 <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} style={{ ...inputStyle, height: '36px', width: '140px' }} />
               </div>
               {(filterPriority || filterAssignee || filterTag || filterDateFrom || filterDateTo) && (
-                <button onClick={() => { setFilterPriority(''); setFilterAssignee(''); setFilterTag(''); setFilterDateFrom(''); setFilterDateTo(''); }} style={{ ...btnDanger, height: '36px', fontSize: '11px', padding: '0 10px' }}>✕ Clear</button>
+                <LiquidButton variant="destructive" size="sm" onClick={() => { setFilterPriority(''); setFilterAssignee(''); setFilterTag(''); setFilterDateFrom(''); setFilterDateTo(''); }}>✕ Clear</LiquidButton>
               )}
             </div>
           )}
@@ -657,9 +658,9 @@ export default function WorkItems({ projectId }) {
       {tab === 'queries' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
-            <button onClick={() => setQueryChartVisible(v => !v)} style={{ ...btnSecondary, ...btnSmall }}>
+            <LiquidButton variant="secondary" size="sm" onClick={() => setQueryChartVisible(v => !v)}>
               {queryChartVisible ? '📊 Hide Charts' : '📊 Show Charts'}
-            </button>
+            </LiquidButton>
           </div>
           {queryChartVisible && queryChartData && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '20px' }}>
@@ -735,12 +736,12 @@ export default function WorkItems({ projectId }) {
       {tab === 'templates' && (
         <div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-            <button onClick={async () => {
+            <LiquidButton variant="default" size="sm" onClick={async () => {
               const name = prompt('Template name:');
               if (!name) return;
               await api.createTemplate({ projectId, name, type: 'Task', priority: 3, status: 'Backlog' });
               fetchTemplates();
-            }} style={{ ...btnPrimary, ...btnSmall }}>+ New Template</button>
+            }}>+ New Template</LiquidButton>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
             {templates.length === 0 && (
@@ -785,8 +786,8 @@ export default function WorkItems({ projectId }) {
                   WI-{d.data?.workItemId} · {d.data?.type} · Deleted {new Date(d.deletedAt).toLocaleDateString()}
                 </div>
                 <div style={{ display: 'flex', gap: '6px' }}>
-                  <button onClick={async () => { await api.restoreWorkItem(d._id); fetchDeleted(); fetchItems(); }} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>♻️ Restore</button>
-                  <button onClick={async () => { if (confirm('Permanently delete? This cannot be undone.')) { await api.permanentDeleteWorkItem(d._id); fetchDeleted(); } }} style={{ ...btnDanger, ...btnSmall, fontSize: '11px' }}>Delete Forever</button>
+                  <LiquidButton variant="default" size="sm" onClick={async () => { await api.restoreWorkItem(d._id); fetchDeleted(); fetchItems(); }}>♻️ Restore</LiquidButton>
+                  <LiquidButton variant="destructive" size="sm" onClick={async () => { if (confirm('Permanently delete? This cannot be undone.')) { await api.permanentDeleteWorkItem(d._id); fetchDeleted(); } }}>Delete Forever</LiquidButton>
                 </div>
               </div>
             ))}
@@ -811,14 +812,14 @@ export default function WorkItems({ projectId }) {
             {search && <div>Search: "{search}"</div>}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <button onClick={() => setShowSaveQuery(false)} style={btnSecondary}>Cancel</button>
-            <button onClick={async () => {
+            <LiquidButton variant="secondary" size="sm" onClick={() => setShowSaveQuery(false)}>Cancel</LiquidButton>
+            <LiquidButton variant="default" size="sm" onClick={async () => {
               if (!queryName.trim()) return;
               await api.createQuery({ projectId, name: queryName.trim(), filters: { type: filterType, status: filterStatus, priority: filterPriority, assignee: filterAssignee, tag: filterTag, dateFrom: filterDateFrom, dateTo: filterDateTo, search } });
               setQueryName('');
               setShowSaveQuery(false);
               fetchQueries();
-            }} style={btnPrimary}>Save Query</button>
+            }}>Save Query</LiquidButton>
           </div>
         </div>
       </Modal>
@@ -1045,16 +1046,16 @@ function WorkItemDetail({ item, onClose }) {
           <div style={{ display: 'flex', gap: '4px', marginTop: '14px', flexWrap: 'wrap' }}>
             {edit ? (
               <>
-                <button onClick={handleSave} style={{ ...btnPrimary, ...btnSmall }}>Save changes</button>
-                <button onClick={() => { setEdit(false); setForm({ ...item, tags: (item.tags || []).join(', ') }); }} style={{ ...btnSecondary, ...btnSmall }}>Cancel</button>
+                <LiquidButton variant="default" size="sm" onClick={handleSave}>Save changes</LiquidButton>
+                <LiquidButton variant="secondary" size="sm" onClick={() => { setEdit(false); setForm({ ...item, tags: (item.tags || []).join(', ') }); }}>Cancel</LiquidButton>
               </>
             ) : (
               <>
-                <button onClick={() => setEdit(true)} style={{ ...btnSecondary, ...btnSmall }}>✏ Edit</button>
-                <button onClick={handleSaveAsTemplate} style={{ ...btnSecondary, ...btnSmall }}>📋 Template</button>
-                <button onClick={async () => { const res = await api.cloneWorkItem(item._id); if (res.success) { fetchItems(); alert('Cloned!'); } }} style={{ ...btnSecondary, ...btnSmall }}>📄 Clone</button>
-                <button onClick={handleToggleFollow} style={{ ...btnSecondary, ...btnSmall, color: isFollowing ? '#6366f1' : undefined }}>{isFollowing ? '🔕 Following' : '🔔 Follow'}</button>
-                <button onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }} style={{ ...btnDanger, ...btnSmall }}>🗑 Delete</button>
+                <LiquidButton variant="secondary" size="sm" onClick={() => setEdit(true)}>✏ Edit</LiquidButton>
+                <LiquidButton variant="secondary" size="sm" onClick={handleSaveAsTemplate}>📋 Template</LiquidButton>
+                <LiquidButton variant="secondary" size="sm" onClick={async () => { const res = await api.cloneWorkItem(item._id); if (res.success) { fetchItems(); alert('Cloned!'); } }}>📄 Clone</LiquidButton>
+                <LiquidButton variant="secondary" size="sm" onClick={handleToggleFollow}>{isFollowing ? '🔕 Following' : '🔔 Follow'}</LiquidButton>
+                <LiquidButton variant="destructive" size="sm" onClick={async () => { if (confirm('Delete?')) { await api.deleteWorkItem(item._id); onClose(); } }}>🗑 Delete</LiquidButton>
               </>
             )}
           </div>
@@ -1145,7 +1146,7 @@ function WorkItemDetail({ item, onClose }) {
           <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
               <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Links ({links.length})</div>
-              <button onClick={() => { setShowLinkModal(true); loadAllItems(); }} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>+ Add Link</button>
+              <LiquidButton variant="default" size="sm" onClick={() => { setShowLinkModal(true); loadAllItems(); }}>+ Add Link</LiquidButton>
             </div>
             {links.length === 0 ? (
               <div style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '12px', background: 'var(--surface-secondary)', borderRadius: '8px', textAlign: 'center' }}>No linked items</div>
@@ -1198,7 +1199,7 @@ function WorkItemDetail({ item, onClose }) {
                     <div>
                       <textarea value={editCommentText} onChange={e => setEditCommentText(e.target.value)} style={{ ...inputStyle, minHeight: '60px', fontSize: '12px' }} />
                       <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
-                        <button onClick={() => handleEditComment(c._id)} style={{ ...btnPrimary, ...btnSmall, fontSize: '11px' }}>Save</button>
+                        <LiquidButton variant="default" size="sm" onClick={() => handleEditComment(c._id)}>Save</LiquidButton>
                         <button onClick={() => setEditingComment(null)} style={{ ...btnSmall, fontSize: '11px' }}>Cancel</button>
                       </div>
                     </div>
@@ -1223,7 +1224,7 @@ function WorkItemDetail({ item, onClose }) {
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
               <textarea value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Add a comment... Use @name to mention" style={{ ...inputStyle, minHeight: '56px', flex: 1, fontSize: '13px' }} />
-              <button onClick={handleAddComment} disabled={!newComment.trim()} style={{ ...btnPrimary, alignSelf: 'flex-end', opacity: !newComment.trim() ? 0.5 : 1 }}>Post</button>
+              <LiquidButton variant="default" size="sm" onClick={handleAddComment} disabled={!newComment.trim()} style={{ alignSelf: 'flex-end' }}>Post</LiquidButton>
             </div>
           </div>
 
@@ -1285,8 +1286,8 @@ function WorkItemDetail({ item, onClose }) {
             <label style={labelStyle}>Comment (optional)</label>
             <input value={linkComment} onChange={e => setLinkComment(e.target.value)} style={{ ...inputStyle, height: '38px', marginBottom: '16px' }} />
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button onClick={() => setShowLinkModal(false)} style={btnSecondary}>Cancel</button>
-              <button onClick={handleAddLink} style={btnPrimary}>Add Link</button>
+              <LiquidButton variant="secondary" size="sm" onClick={() => setShowLinkModal(false)}>Cancel</LiquidButton>
+              <LiquidButton variant="default" size="sm" onClick={handleAddLink}>Add Link</LiquidButton>
             </div>
           </div>
         </Modal>
