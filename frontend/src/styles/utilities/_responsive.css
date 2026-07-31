@@ -13,7 +13,10 @@
   .dashboard-bottom { grid-template-columns: 1fr; }
 }
 @media (max-width: 768px) {
-  .app-content { margin-left: 0 !important; }
+  .app-content {
+    margin-left: var(--space-4) !important;
+    margin-top: 56px !important;
+  }
   .main-content { padding: var(--space-4); }
   .page-header { flex-direction: column; align-items: flex-start; }
   .page-header-right { width: 100%; }

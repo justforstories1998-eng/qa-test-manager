@@ -115,29 +115,17 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
   return (
     <>
       {/* Mobile hamburger */}
-      <button className="navbar-mobile-btn" onClick={onToggleMobile} aria-label="Toggle menu"
-        style={{
-          position: 'fixed', top: 14, left: 14, zIndex: 1100,
-          width: 42, height: 42, borderRadius: 'var(--radius)',
-          border: 'none', background: 'var(--color-primary)', color: '#fff',
-          cursor: 'pointer', boxShadow: '0 4px 15px rgba(99,102,241,0.4)',
-          display: 'none', alignItems: 'center', justifyContent: 'center',
-        }}>
+      <button className="navbar-mobile-btn" onClick={onToggleMobile} aria-label="Toggle menu">
         {isMobileOpen ? <FiX size={18} /> : <FiMenu size={18} />}
       </button>
 
       {/* Overlay */}
-      <div onClick={onToggleMobile} style={{
-        position: 'fixed', inset: 0, zIndex: 1050,
-        background: 'var(--bg-overlay)', backdropFilter: 'blur(4px)',
-        opacity: isMobileOpen ? 1 : 0, visibility: isMobileOpen ? 'visible' : 'hidden',
-        transition: 'all 0.3s',
-      }} />
+      <div className={`sidebar-overlay ${isMobileOpen ? 'sidebar-overlay-visible' : ''}`} onClick={onToggleMobile} />
 
       {/* Sidebar */}
       <nav className={`sidebar ${isMobileOpen ? 'sidebar-mobile-open' : ''}`} style={{ width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)' }}>
         {/* Logo */}
-        <div className="sidebar-header" style={{ justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '20px 0' : undefined }}>
+        <div className="sidebar-header" style={{ justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '16px 0' : undefined }}>
           <img src="/logo.jpg" alt="QALogs" style={{ width: 32, height: 32, borderRadius: 'var(--radius)', objectFit: 'cover' }} />
           {!collapsed && (
             <div className="sidebar-brand">
@@ -148,7 +136,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
         </div>
 
         {/* Quick actions */}
-        <div style={{ padding: collapsed ? '8px 0' : '8px 12px', display: 'flex', gap: 6, justifyContent: 'center', borderBottom: '1px solid var(--sidebar-border)' }}>
+        <div className="sidebar-actions" style={{ justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '0 0 12px' : undefined }}>
           <div ref={notifRef} style={{ position: 'relative' }}>
             <button onClick={() => { setShowNotifications(p => !p); setShowUserMenu(false); }} title="Notifications"
               className="sidebar-link" style={{ padding: '0.375rem', width: 34, height: 34, justifyContent: 'center' }}>
@@ -156,29 +144,21 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
               {notifications.length > 0 && <span className="header-action-badge" />}
             </button>
             {showNotifications && (
-              <div style={{
-                position: 'absolute', left: collapsed ? 'calc(100% + 8px)' : 0,
-                bottom: collapsed ? 'auto' : '100%', top: collapsed ? 0 : 'auto',
-                marginBottom: collapsed ? 0 : 8, marginLeft: collapsed ? 0 : 0,
-                width: 300, maxHeight: 400, overflowY: 'auto',
-                background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-xl)',
-                zIndex: 1200,
-              }}>
-                <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)' }}>Notifications</span>
+              <div className="sidebar-dropdown" style={{ left: collapsed ? 'calc(100% + 8px)' : 0, bottom: '100%', marginBottom: 8 }}>
+                <div className="sidebar-dropdown-header">
+                  <span className="sidebar-dropdown-title">Notifications</span>
                   {notifications.length > 0 && <span className="badge badge-danger">{notifications.length}</span>}
                 </div>
                 {notifications.length === 0 ? (
-                  <div style={{ padding: '30px 14px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>No new notifications</div>
+                  <div className="sidebar-dropdown-empty">No new notifications</div>
                 ) : notifications.map((n, i) => (
-                  <div key={n.id || i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 14px', borderBottom: '1px solid var(--border-light)', cursor: 'pointer' }}>
+                  <div key={n.id || i} className="sidebar-dropdown-item">
                     <div className="activity-avatar" style={{ width: 28, height: 28, fontSize: '0.6875rem' }}>
                       <FiBell size={12} />
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{n.title}</div>
-                      <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div className="sidebar-dropdown-item-title">{n.title}</div>
+                      <div className="sidebar-dropdown-item-meta">
                         <span className="badge badge-neutral" style={{ fontSize: '0.625rem', padding: '1px 5px' }}>{n.status || 'Unknown'}</span>
                         {n.time}
                       </div>
@@ -200,7 +180,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
             <div>
               {!collapsed && <div className="sidebar-section-label">Board</div>}
               <div className={`sidebar-link ${isBoardActive ? 'active' : ''}`} onClick={() => { if (!collapsed) setBoardDropdownOpen(p => !p); }}
-                style={{ justifyContent: collapsed ? 'center' : 'flex-start', margin: collapsed ? '2px 8px' : undefined }}>
+                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
                 <FiTrello size={17} />
                 {!collapsed && (
                   <>
@@ -214,7 +194,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                   <NavLink key={item.path} to={item.path}
                     className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                     onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
-                    style={{ paddingLeft: collapsed ? undefined : 56, fontSize: '0.8125rem', justifyContent: collapsed ? 'center' : 'flex-start', margin: collapsed ? '1px 8px' : '1px 10px' }}>
+                    style={{ paddingLeft: collapsed ? undefined : 44, justifyContent: collapsed ? 'center' : 'flex-start' }}>
                     <item.icon size={14} />
                     {!collapsed && <span>{item.label}</span>}
                   </NavLink>
@@ -230,7 +210,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                 <NavLink key={item.path} to={item.path}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                   onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
-                  style={{ justifyContent: collapsed ? 'center' : 'flex-start', margin: collapsed ? '2px 8px' : undefined }}>
+                  style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
                   <item.icon size={17} />
                   {!collapsed && (
                     <>
@@ -248,16 +228,10 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
         {user && (
           <div className="sidebar-footer" ref={userMenuRef}>
             {showUserMenu && (
-              <div style={{
-                position: 'absolute', bottom: '100%', left: collapsed ? 'calc(100% + 8px)' : 12, right: collapsed ? 'auto' : 12,
-                marginBottom: 8, width: collapsed ? 220 : 'auto',
-                background: 'var(--bg-elevated)', borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--border-default)', boxShadow: 'var(--shadow-xl)',
-                overflow: 'hidden', zIndex: 1200,
-              }}>
-                <div style={{ padding: '14px 14px 10px', borderBottom: '1px solid var(--border-light)' }}>
-                  <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: 2 }}>Signed in as</div>
-                  <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>{user.firstName} {user.lastName}</div>
+              <div className="sidebar-dropdown" style={{ bottom: '100%', left: collapsed ? 'calc(100% + 8px)' : 0, marginBottom: 8, width: collapsed ? 220 : 'auto' }}>
+                <div className="sidebar-dropdown-header" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <div className="sidebar-dropdown-item-meta" style={{ marginBottom: 2 }}>Signed in as</div>
+                  <div className="sidebar-dropdown-item-title">{user.firstName} {user.lastName}</div>
                   {user.email && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{user.email}</div>}
                 </div>
               </div>
@@ -273,39 +247,134 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                   <div className="sidebar-user-role">{user.role === 'admin' ? 'Admin' : user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'}</div>
                 </div>
               )}
-              {!collapsed && <FiChevronDown size={13} style={{ color: 'var(--sidebar-text)', opacity: 0.5, transition: 'transform 0.2s', transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)' }} />}
+              {!collapsed && <FiChevronDown size={13} style={{ color: 'var(--text-tertiary)', opacity: 0.5, transition: 'transform 0.2s', transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)' }} />}
             </div>
             {/* Visible Logout Button */}
             <button
               onClick={onLogout}
               className="sidebar-logout"
-              style={{ justifyContent: collapsed ? 'center' : 'flex-start', margin: collapsed ? '4px 8px' : '4px 0' }}
+              style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
               title="Sign Out"
             >
               <FiLogOut size={17} />
               {!collapsed && <span>Sign Out</span>}
             </button>
+            {/* Online Status */}
+            <div className="sidebar-online" style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+              <div className="sidebar-online-dot" />
+              {!collapsed && <span className="sidebar-online-text">Online</span>}
+            </div>
           </div>
         )}
 
         {/* Collapse toggle */}
-        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--sidebar-border)' }}>
-          <button onClick={onToggleCollapse} className="sidebar-link" style={{ justifyContent: 'center', padding: '0.5rem', fontSize: '0.75rem' }}>
-            {collapsed ? <FiChevronRight size={15} /> : <><FiChevronLeft size={15} /><span>Collapse</span></>}
+        <div className="sidebar-collapse">
+          <button onClick={onToggleCollapse} className="sidebar-link" style={{ justifyContent: 'center', padding: '0.5rem' }}>
+            {collapsed ? <FiChevronRight size={15} /> : <><FiChevronLeft size={15} /><span style={{ marginLeft: 6, fontSize: '0.75rem' }}>Collapse</span></>}
           </button>
         </div>
       </nav>
 
       <style>{`
-        .navbar-mobile-btn { display: none !important; }
+        .navbar-mobile-btn {
+          display: none !important;
+          position: fixed;
+          top: 14px;
+          left: 14px;
+          z-index: 1100;
+          width: 42px;
+          height: 42px;
+          border-radius: var(--radius-lg);
+          border: none;
+          background: var(--bg-sidebar);
+          color: var(--text-primary);
+          cursor: pointer;
+          box-shadow: var(--neu-shadow-sm);
+          align-items: center;
+          justify-content: center;
+        }
+        .navbar-mobile-btn:active {
+          box-shadow: var(--neu-shadow-inset-xs);
+        }
+        .sidebar-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 1050;
+          background: var(--bg-overlay);
+          backdrop-filter: blur(4px);
+          opacity: 0;
+          visibility: hidden;
+          transition: all 0.3s;
+        }
+        .sidebar-overlay-visible {
+          opacity: 1;
+          visibility: visible;
+        }
+        .sidebar-dropdown {
+          position: absolute;
+          width: 300px;
+          max-height: 400px;
+          overflow-y: auto;
+          background: var(--bg-sidebar);
+          border-radius: var(--radius-lg);
+          box-shadow: var(--neu-shadow);
+          z-index: 1200;
+          padding: var(--space-2);
+        }
+        .sidebar-dropdown-header {
+          padding: 12px 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+        }
+        .sidebar-dropdown-title {
+          font-size: 0.8125rem;
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+        .sidebar-dropdown-empty {
+          padding: 30px 14px;
+          text-align: center;
+          color: var(--text-muted);
+          font-size: 0.75rem;
+        }
+        .sidebar-dropdown-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 10px 14px;
+          border-radius: var(--radius);
+          cursor: pointer;
+          transition: background var(--duration-fast) var(--ease);
+        }
+        .sidebar-dropdown-item:hover {
+          background: var(--color-primary-faint);
+        }
+        .sidebar-dropdown-item-title {
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: var(--text-primary);
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .sidebar-dropdown-item-meta {
+          font-size: 0.6875rem;
+          color: var(--text-muted);
+          margin-top: 2px;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
         @media (max-width: 768px) {
           .navbar-mobile-btn { display: flex !important; }
-          .sidebar { transform: translateX(-100%); width: 272px !important; }
+          .sidebar { transform: translateX(-100%); width: 272px !important; border-radius: 0 24px 24px 0; }
           .sidebar.sidebar-mobile-open { transform: translateX(0); }
         }
         .sidebar-nav::-webkit-scrollbar { width: 3px; }
         .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--sidebar-border); border-radius: 3px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border-default); border-radius: 3px; }
       `}</style>
     </>
   );

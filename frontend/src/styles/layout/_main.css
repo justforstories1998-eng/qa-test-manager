@@ -1,5 +1,5 @@
 /* ============================================
-   MAIN LAYOUT
+   MAIN LAYOUT — Neumorphism
    ============================================ */
 .app-layout {
   display: flex;
@@ -13,6 +13,12 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
+  /* Neumorphic inset well */
+  margin: var(--space-4);
+  margin-left: calc(var(--sidebar-width) + var(--space-4));
+  border-radius: var(--radius-3xl);
+  background: var(--bg-sidebar);
+  box-shadow: var(--neu-shadow-inset);
 }
 .main-content {
   flex: 1;

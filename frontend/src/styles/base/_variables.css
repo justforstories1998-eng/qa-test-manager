@@ -29,8 +29,6 @@
   --bg-elevated: #ffffff;
   --bg-input: #ffffff;
   --bg-inset: #f8f9fb;
-  --bg-sidebar: #0f172a;
-  --bg-sidebar-darker: #0b1120;
   --bg-overlay: rgba(0, 0, 0, 0.45);
 
   /* ── Text (Light) ── */
@@ -46,13 +44,15 @@
   --border-strong: #cbd5e1;
   --border-focus: var(--color-primary);
 
-  /* ── Sidebar ── */
-  --sidebar-text: #94a3b8;
-  --sidebar-text-hover: #e2e8f0;
-  --sidebar-text-active: #ffffff;
-  --sidebar-hover: rgba(255, 255, 255, 0.06);
-  --sidebar-active: rgba(99, 102, 241, 0.15);
-  --sidebar-border: rgba(255, 255, 255, 0.06);
+  /* ── Sidebar (Neumorphism) ── */
+  --bg-sidebar: #f4f5f7;
+  --bg-sidebar-darker: #e8eaed;
+  --sidebar-text: #475569;
+  --sidebar-text-hover: #6366f1;
+  --sidebar-text-active: #6366f1;
+  --sidebar-hover: transparent;
+  --sidebar-active: transparent;
+  --sidebar-border: rgba(0, 0, 0, 0.04);
   --sidebar-accent: #6366f1;
 
   /* ── Shadows ── */
@@ -103,6 +103,14 @@
 
   /* ── Focus ── */
   --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.2);
+
+  /* ── Neumorphic Shadows (Light) ── */
+  --neu-shadow: 15px 15px 30px #bebebe, -15px -15px 30px #ffffff;
+  --neu-shadow-sm: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff;
+  --neu-shadow-xs: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;
+  --neu-shadow-inset: inset 8px 8px 16px #bebebe, inset -8px -8px 16px #ffffff;
+  --neu-shadow-inset-sm: inset 4px 4px 8px #bebebe, inset -4px -4px 8px #ffffff;
+  --neu-shadow-inset-xs: inset 3px 3px 6px #bebebe, inset -3px -3px 6px #ffffff;
 }
 
 /* ============================================
@@ -117,6 +125,10 @@
   --bg-input: #1a1d27;
   --bg-inset: #14161e;
   --bg-overlay: rgba(0, 0, 0, 0.6);
+
+  /* ── Sidebar (Neumorphism Dark) ── */
+  --bg-sidebar: #111318;
+  --bg-sidebar-darker: #0d0f14;
 
   --text-primary: #f1f5f9;
   --text-secondary: #cbd5e1;
@@ -140,4 +152,20 @@
   --color-danger-faint: rgba(239, 68, 68, 0.12);
   --color-warning-faint: rgba(245, 158, 11, 0.12);
   --color-info-faint: rgba(6, 182, 212, 0.12);
+
+  /* ── Neumorphic Shadows (Dark) ── */
+  --neu-shadow: 15px 15px 30px #000000, -15px -15px 30px #1e2130;
+  --neu-shadow-sm: 6px 6px 12px #000000, -6px -6px 12px #1e2130;
+  --neu-shadow-xs: 3px 3px 6px #000000, -3px -3px 6px #1e2130;
+  --neu-shadow-inset: inset 8px 8px 16px #000000, inset -8px -8px 16px #1e2130;
+  --neu-shadow-inset-sm: inset 4px 4px 8px #000000, inset -4px -4px 8px #1e2130;
+  --neu-shadow-inset-xs: inset 3px 3px 6px #000000, inset -3px -3px 6px #1e2130;
+
+  /* ── Sidebar (Dark) ── */
+  --sidebar-text: #94a3b8;
+  --sidebar-text-hover: #818cf8;
+  --sidebar-text-active: #818cf8;
+  --sidebar-hover: transparent;
+  --sidebar-active: transparent;
+  --sidebar-border: rgba(255, 255, 255, 0.04);
 }

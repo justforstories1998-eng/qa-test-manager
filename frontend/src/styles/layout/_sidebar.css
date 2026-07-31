@@ -1,5 +1,5 @@
 /* ============================================
-   SIDEBAR
+   SIDEBAR — Neumorphism Design
    ============================================ */
 .sidebar {
   width: var(--sidebar-width);
@@ -13,14 +13,18 @@
   z-index: 100;
   transition: width var(--duration-slow) var(--ease);
   overflow: hidden;
+  /* Neumorphic raised panel */
+  border-radius: 0 24px 24px 0;
+  box-shadow: var(--neu-shadow);
+  padding: var(--space-4);
 }
+
 .sidebar-header {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-5) var(--space-5);
-  border-bottom: 1px solid var(--sidebar-border);
-  min-height: 60px;
+  padding: var(--space-3);
+  min-height: 52px;
 }
 .sidebar-logo {
   width: 32px;
@@ -44,38 +48,47 @@
 .sidebar-brand-name {
   font-size: 0.875rem;
   font-weight: 700;
-  color: var(--text-inverse);
+  color: var(--text-primary);
   white-space: nowrap;
   line-height: 1.2;
 }
 .sidebar-brand-sub {
   font-size: 0.6875rem;
-  color: var(--sidebar-text);
+  color: var(--text-tertiary);
   white-space: nowrap;
 }
+
+/* ── Quick Actions Row ── */
+.sidebar-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-1) var(--space-3);
+}
+
+/* ── Navigation ── */
 .sidebar-nav {
   flex: 1;
-  padding: var(--space-3) var(--space-3);
+  padding: 0 var(--space-1);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--space-1);
 }
 .sidebar-section-label {
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--sidebar-text);
+  color: var(--text-muted);
   padding: var(--space-4) var(--space-3) var(--space-2);
-  opacity: 0.6;
+  opacity: 0.7;
 }
 .sidebar-link {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-lg);
   color: var(--sidebar-text);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -83,16 +96,33 @@
   cursor: pointer;
   white-space: nowrap;
   position: relative;
+  /* Neumorphic raised button */
+  background: var(--bg-sidebar);
+  box-shadow: var(--neu-shadow-sm);
 }
-.sidebar-link svg { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.7; transition: opacity var(--duration-fast) var(--ease); }
-.sidebar-link:hover { background: var(--sidebar-hover); color: var(--sidebar-text-hover); }
-.sidebar-link:hover svg { opacity: 1; }
+.sidebar-link svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: all var(--duration-fast) var(--ease);
+}
+.sidebar-link:hover {
+  color: var(--sidebar-text-hover);
+  box-shadow: var(--neu-shadow);
+}
+.sidebar-link:hover svg {
+  opacity: 1;
+}
 .sidebar-link.active {
-  background: var(--sidebar-active);
   color: var(--sidebar-text-active);
   font-weight: 600;
+  /* Neumorphic inset (pressed in) */
+  box-shadow: var(--neu-shadow-inset-sm);
 }
-.sidebar-link.active svg { opacity: 1; }
+.sidebar-link.active svg {
+  opacity: 1;
+}
 .sidebar-link.active::before {
   content: '';
   position: absolute;
@@ -115,23 +145,34 @@
   min-width: 18px;
   text-align: center;
 }
+
+/* ── Footer ── */
 .sidebar-footer {
-  padding: var(--space-3) var(--space-3);
-  border-top: 1px solid var(--sidebar-border);
+  padding: var(--space-2) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
+
+/* ── User Profile (Inset) ── */
 .sidebar-user {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: background var(--duration-fast) var(--ease);
+  transition: all var(--duration-fast) var(--ease);
+  /* Neumorphic inset */
+  background: var(--bg-sidebar);
+  box-shadow: var(--neu-shadow-inset-sm);
 }
-.sidebar-user:hover { background: var(--sidebar-hover); }
+.sidebar-user:hover {
+  box-shadow: var(--neu-shadow-inset);
+}
 .sidebar-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-full);
   background: linear-gradient(135deg, var(--sidebar-accent), #a78bfa);
   display: flex;
@@ -141,26 +182,34 @@
   font-weight: 700;
   color: white;
   flex-shrink: 0;
+  position: relative;
+  /* Neumorphic raised avatar */
+  box-shadow: var(--neu-shadow-xs);
 }
-.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-info {
+  flex: 1;
+  min-width: 0;
+}
 .sidebar-user-name {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--text-inverse);
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .sidebar-user-role {
   font-size: 0.6875rem;
-  color: var(--sidebar-text);
+  color: var(--text-tertiary);
 }
+
+/* ── Logout Button ── */
 .sidebar-logout {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--radius);
+  padding: 0.625rem 0.875rem;
+  border-radius: var(--radius-lg);
   color: var(--color-danger);
   font-size: 0.8125rem;
   font-weight: 500;
@@ -169,14 +218,42 @@
   white-space: nowrap;
   width: 100%;
   border: none;
-  background: none;
+  background: var(--bg-sidebar);
   text-align: left;
+  box-shadow: var(--neu-shadow-sm);
 }
 .sidebar-logout:hover {
-  background: var(--color-danger-faint);
+  box-shadow: var(--neu-shadow-inset-sm);
 }
 .sidebar-logout svg {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+}
+
+/* ── Online Status (Inset) ── */
+.sidebar-online {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--bg-sidebar);
+  box-shadow: var(--neu-shadow-inset-xs);
+}
+.sidebar-online-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+}
+.sidebar-online-text {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+}
+
+/* ── Collapse Toggle ── */
+.sidebar-collapse {
+  padding: var(--space-2) 0 0;
 }
