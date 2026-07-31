@@ -90,14 +90,36 @@
   padding: 0;
   gap: var(--space-2);
 }
+
+/* ── Gap between nav links within a section ── */
+.sidebar-nav > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Gap between board sub-items dropdown */
+.sidebar-nav .board-sub-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  transition: max-height 0.3s ease;
+  overflow: hidden;
+}
+
 .sidebar-section-label {
   font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-muted);
-  padding: var(--space-4) var(--space-3) var(--space-1);
+  padding: var(--space-3) var(--space-3) var(--space-1);
   opacity: 0.7;
+}
+
+.sidebar-section-label + .sidebar-link,
+.sidebar-section-label + a.sidebar-link {
+  margin-top: var(--space-1);
 }
 .sidebar-link {
   display: flex;

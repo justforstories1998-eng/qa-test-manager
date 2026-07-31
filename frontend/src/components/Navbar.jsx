@@ -179,22 +179,44 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
           {hasBoardAccess && (
             <div>
               {!collapsed && <div className="sidebar-section-label">Board</div>}
-              <div className={`sidebar-link ${isBoardActive ? 'active' : ''}`} onClick={() => { if (!collapsed) setBoardDropdownOpen(p => !p); }}
-                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+              <div
+                className={`sidebar-link ${isBoardActive ? 'active' : ''}`}
+                onClick={() => { if (!collapsed) setBoardDropdownOpen(p => !p); }}
+                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
+              >
                 <FiTrello size={17} />
                 {!collapsed && (
                   <>
                     <span style={{ flex: 1 }}>Board</span>
-                    <FiChevronDown size={13} style={{ transition: 'transform 0.2s', transform: boardDropdownOpen ? 'rotate(180deg)' : 'rotate(0)', opacity: 0.5 }} />
+                    <FiChevronDown
+                      size={13}
+                      style={{
+                        transition: 'transform 0.2s',
+                        transform: boardDropdownOpen ? 'rotate(180deg)' : 'rotate(0)',
+                        opacity: 0.5
+                      }}
+                    />
                   </>
                 )}
               </div>
-              <div style={{ maxHeight: boardDropdownOpen || collapsed ? (boardSubItems.length * 40 + 8) : 0, overflow: 'hidden', transition: 'max-height 0.3s' }}>
+              <div
+                className="board-sub-wrapper"
+                style={{
+                  maxHeight: boardDropdownOpen || collapsed ? (boardSubItems.length * 48 + 16) : 0,
+                  marginTop: boardDropdownOpen || collapsed ? 'var(--space-2)' : 0,
+                }}
+              >
                 {boardSubItems.map((item) => (
-                  <NavLink key={item.path} to={item.path}
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
                     className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                     onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
-                    style={{ paddingLeft: collapsed ? undefined : 44, justifyContent: collapsed ? 'center' : 'flex-start' }}>
+                    style={{
+                      paddingLeft: collapsed ? undefined : 44,
+                      justifyContent: collapsed ? 'center' : 'flex-start'
+                    }}
+                  >
                     <item.icon size={14} />
                     {!collapsed && <span>{item.label}</span>}
                   </NavLink>
@@ -207,10 +229,13 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
             <div key={sIdx}>
               {!collapsed && <div className="sidebar-section-label">{section.title}</div>}
               {section.items.map((item) => (
-                <NavLink key={item.path} to={item.path}
+                <NavLink
+                  key={item.path}
+                  to={item.path}
                   className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
                   onClick={() => { if (window.innerWidth < 768 && onToggleMobile) onToggleMobile(); }}
-                  style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+                  style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
+                >
                   <item.icon size={17} />
                   {!collapsed && (
                     <>
