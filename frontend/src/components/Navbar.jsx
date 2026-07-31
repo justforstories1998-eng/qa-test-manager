@@ -247,7 +247,6 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
                   <div className="sidebar-user-role">{user.role === 'admin' ? 'Admin' : user.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Member'}</div>
                 </div>
               )}
-              {!collapsed && <FiChevronDown size={13} style={{ color: 'var(--text-tertiary)', opacity: 0.5, transition: 'transform 0.2s', transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0)' }} />}
             </div>
             {/* Visible Logout Button */}
             <button
