@@ -13,6 +13,175 @@ const SPRINT_STATUS = ['Planned', 'Active', 'Completed'];
 
 const TABS = ['Planning', 'Taskboard', 'Task Breakdown', 'Capacity', 'Burndown', 'Burnup', 'CFD', 'Velocity'];
 
+function CreateSprintModal({ styles, onCancel, onSubmit }) {
+  const [form, setForm] = useState({
+    name: '',
+    goal: '',
+    startDate: '',
+    endDate: '',
+    capacity: 40,
+    status: 'Planned',
+  });
+
+  const handleSubmit = () => onSubmit(form);
+
+  return (
+    <div style={styles.modalOverlay} onClick={onCancel}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <h2 style={styles.modalTitle}>Create Sprint</h2>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Sprint Name</label>
+          <input
+            style={styles.input}
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Sprint 1"
+          />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Goal</label>
+          <input
+            style={styles.input}
+            value={form.goal}
+            onChange={(e) => setForm({ ...form, goal: e.target.value })}
+            placeholder="What do you want to achieve?"
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>Start Date</label>
+            <input
+              style={styles.input}
+              type="date"
+              value={form.startDate}
+              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+            />
+          </div>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>End Date</label>
+            <input
+              style={styles.input}
+              type="date"
+              value={form.endDate}
+              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>Capacity (hours)</label>
+            <input
+              style={styles.input}
+              type="number"
+              value={form.capacity}
+              onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
+            />
+          </div>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>Status</label>
+            <select
+              style={styles.select}
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+            >
+              {SPRINT_STATUS.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div style={styles.modalActions}>
+          <button style={styles.cancelBtn} onClick={onCancel}>Cancel</button>
+          <button
+            style={styles.saveBtn}
+            onClick={handleSubmit}
+            disabled={!form.name || !form.startDate || !form.endDate}
+          >
+            Create Sprint
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EditSprintModal({ sprint, styles, onCancel, onSubmit }) {
+  const [form, setForm] = useState({ ...sprint });
+
+  const handleSubmit = () => onSubmit(sprint._id, form);
+
+  return (
+    <div style={styles.modalOverlay} onClick={onCancel}>
+      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <h2 style={styles.modalTitle}>Edit Sprint</h2>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Sprint Name</label>
+          <input
+            style={styles.input}
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+          />
+        </div>
+        <div style={styles.formGroup}>
+          <label style={styles.label}>Goal</label>
+          <input
+            style={styles.input}
+            value={form.goal || ''}
+            onChange={(e) => setForm({ ...form, goal: e.target.value })}
+          />
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>Start Date</label>
+            <input
+              style={styles.input}
+              type="date"
+              value={form.startDate ? form.startDate.substring(0, 10) : ''}
+              onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+            />
+          </div>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>End Date</label>
+            <input
+              style={styles.input}
+              type="date"
+              value={form.endDate ? form.endDate.substring(0, 10) : ''}
+              onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+            />
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>Capacity (hours)</label>
+            <input
+              style={styles.input}
+              type="number"
+              value={form.capacity}
+              onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
+            />
+          </div>
+          <div style={{ ...styles.formGroup, flex: 1 }}>
+            <label style={styles.label}>Status</label>
+            <select
+              style={styles.select}
+              value={form.status}
+              onChange={(e) => setForm({ ...form, status: e.target.value })}
+            >
+              {SPRINT_STATUS.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div style={styles.modalActions}>
+          <button style={styles.cancelBtn} onClick={onCancel}>Cancel</button>
+          <button style={styles.saveBtn} onClick={handleSubmit}>Save Changes</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Sprints({ projectId }) {
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -653,172 +822,24 @@ export default function Sprints({ projectId }) {
   };
 
   const renderCreateModal = () => {
-    const [form, setForm] = useState({
-      name: '',
-      goal: '',
-      startDate: '',
-      endDate: '',
-      capacity: 40,
-      status: 'Planned',
-    });
-
-    const handleSubmit = () => handleCreateSprint(form);
-
     return (
-      <div style={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-        <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <h2 style={styles.modalTitle}>Create Sprint</h2>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Sprint Name</label>
-            <input
-              style={styles.input}
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Sprint 1"
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Goal</label>
-            <input
-              style={styles.input}
-              value={form.goal}
-              onChange={(e) => setForm({ ...form, goal: e.target.value })}
-              placeholder="What do you want to achieve?"
-            />
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Start Date</label>
-              <input
-                style={styles.input}
-                type="date"
-                value={form.startDate}
-                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-              />
-            </div>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>End Date</label>
-              <input
-                style={styles.input}
-                type="date"
-                value={form.endDate}
-                onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Capacity (hours)</label>
-              <input
-                style={styles.input}
-                type="number"
-                value={form.capacity}
-                onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
-              />
-            </div>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Status</label>
-              <select
-                style={styles.select}
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-              >
-                {SPRINT_STATUS.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div style={styles.modalActions}>
-            <button style={styles.cancelBtn} onClick={() => setShowCreateModal(false)}>Cancel</button>
-            <button
-              style={styles.saveBtn}
-              onClick={handleSubmit}
-              disabled={!form.name || !form.startDate || !form.endDate}
-            >
-              Create Sprint
-            </button>
-          </div>
-        </div>
-      </div>
+      <CreateSprintModal
+        styles={styles}
+        onCancel={() => setShowCreateModal(false)}
+        onSubmit={(form) => handleCreateSprint(form)}
+      />
     );
   };
 
   const renderEditModal = () => {
     if (!editingSprint) return null;
-    const [form, setForm] = useState({ ...editingSprint });
-
-    const handleSubmit = () => handleUpdateSprint(editingSprint._id, form);
-
     return (
-      <div style={styles.modalOverlay} onClick={() => setEditingSprint(null)}>
-        <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <h2 style={styles.modalTitle}>Edit Sprint</h2>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Sprint Name</label>
-            <input
-              style={styles.input}
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-          </div>
-          <div style={styles.formGroup}>
-            <label style={styles.label}>Goal</label>
-            <input
-              style={styles.input}
-              value={form.goal || ''}
-              onChange={(e) => setForm({ ...form, goal: e.target.value })}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Start Date</label>
-              <input
-                style={styles.input}
-                type="date"
-                value={form.startDate ? form.startDate.substring(0, 10) : ''}
-                onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-              />
-            </div>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>End Date</label>
-              <input
-                style={styles.input}
-                type="date"
-                value={form.endDate ? form.endDate.substring(0, 10) : ''}
-                onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Capacity (hours)</label>
-              <input
-                style={styles.input}
-                type="number"
-                value={form.capacity}
-                onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
-              />
-            </div>
-            <div style={{ ...styles.formGroup, flex: 1 }}>
-              <label style={styles.label}>Status</label>
-              <select
-                style={styles.select}
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-              >
-                {SPRINT_STATUS.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div style={styles.modalActions}>
-            <button style={styles.cancelBtn} onClick={() => setEditingSprint(null)}>Cancel</button>
-            <button style={styles.saveBtn} onClick={handleSubmit}>Save Changes</button>
-          </div>
-        </div>
-      </div>
+      <EditSprintModal
+        sprint={editingSprint}
+        styles={styles}
+        onCancel={() => setEditingSprint(null)}
+        onSubmit={(id, form) => handleUpdateSprint(id, form)}
+      />
     );
   };
 
