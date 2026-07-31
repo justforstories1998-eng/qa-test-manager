@@ -19,6 +19,10 @@
   border-radius: var(--radius-3xl);
   background: var(--bg-sidebar);
   box-shadow: var(--neu-shadow-inset);
+  transition: margin-left var(--duration-slow) var(--ease);
+}
+.app-content-collapsed {
+  margin-left: calc(var(--sidebar-collapsed) + var(--space-4));
 }
 .main-content {
   flex: 1;

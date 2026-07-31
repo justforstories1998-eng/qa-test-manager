@@ -164,7 +164,7 @@ function App() {
         onToggleMobile={() => setMobileMenuOpen(!mobileMenuOpen)}
       />
 
-      <div className="app-content">
+      <div className={`app-content ${sidebarCollapsed ? 'app-content-collapsed' : ''}`}>
         <header className="header">
           <div className="header-left">
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>

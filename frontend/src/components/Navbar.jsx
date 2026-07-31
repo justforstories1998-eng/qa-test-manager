@@ -123,7 +123,7 @@ function Navbar({ collapsed, onToggleCollapse, user, onLogout, isAdmin, isMobile
       <div className={`sidebar-overlay ${isMobileOpen ? 'sidebar-overlay-visible' : ''}`} onClick={onToggleMobile} />
 
       {/* Sidebar */}
-      <nav className={`sidebar ${isMobileOpen ? 'sidebar-mobile-open' : ''}`} style={{ width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)' }}>
+      <nav className={`sidebar ${isMobileOpen ? 'sidebar-mobile-open' : ''} ${collapsed ? 'collapsed' : ''}`} style={{ width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)' }}>
         {/* Logo */}
         <div className="sidebar-header" style={{ justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '16px 0' : undefined }}>
           <img src="/logo.jpg" alt="QALogs" style={{ width: 32, height: 32, borderRadius: 'var(--radius)', objectFit: 'cover' }} />
